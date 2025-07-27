@@ -4,146 +4,159 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Słowny Impostor</title>
+
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet" />
+
+  <!-- Czcionka Pacifico -->
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+
   <style>
+    :root {
+      --color-primary: #8e44ad; /* fiolet */
+      --color-secondary: #e67e22; /* pomarańczowy */
+      --color-primary-light: #a569bd;
+      --color-secondary-light: #eb984e;
+      --color-text: #f5f5f5; /* jasny tekst */
+      --color-bg-container: #d35400; /* ciemniejszy pomarańcz dla kontenera */
+      --color-error: #e74c3c; /* czerwony do błędów */
+    }
+
     body {
-      background-color: #e67e22; /* pomarańczowe tło */
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      color: #fff;
-      font-size: 2rem;
+      background: var(--color-secondary);
       margin: 0;
-      padding: 2rem;
+      padding: 20px;
+      color: var(--color-text);
+      font-size: 1.8rem;
     }
 
     .container {
-      max-width: 800px;
-      margin: auto;
-      background: #d35400;
-      padding: 2rem;
-      border-radius: 1.5rem;
-      box-shadow: 0 0 20px rgba(0,0,0,0.3);
-      position: relative;
+      max-width: 700px;
+      margin: 0 auto;
+      background: var(--color-bg-container);
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 6px 10px rgba(142, 68, 173, 0.4);
     }
 
     h1 {
+      color: var(--color-primary-light);
       text-align: center;
+      margin-bottom: 30px;
+      font-size: 4.8rem;
       font-family: 'Pacifico', cursive;
-      font-size: 3.5rem;
-      color: #f5f5f5;
-      margin-bottom: 1rem;
     }
 
-    input, button {
-      font-size: 2rem;
-      padding: 1rem;
-      margin: 1rem 0;
-      border-radius: 0.8rem;
-      border: none;
-      width: 100%;
-      max-width: 400px;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
+    #loginScreen {
+      text-align: center;
     }
 
     input {
-      border: 2px solid #8e44ad;
-      color: #333;
-      background: #f9f3f0;
+      padding: 18px;
+      margin: 12px 0;
+      width: 80%;
+      max-width: 350px;
+      border: 3px solid var(--color-primary-light);
+      border-radius: 12px;
+      font-size: 2.4rem;
       transition: border-color 0.3s ease;
+      background: #f9f3f0;
+      color: #333;
     }
 
     input:focus {
-      border-color: #a569bd;
+      border-color: var(--color-primary);
       outline: none;
     }
 
+    .buttons {
+      margin-top: 35px;
+    }
+
     button {
-      background-color: #8e44ad;
-      color: white;
+      padding: 18px 36px;
+      background: var(--color-primary);
+      color: var(--color-text);
+      border: none;
+      border-radius: 12px;
       cursor: pointer;
-      transition: transform 0.2s ease, background-color 0.3s ease;
+      font-size: 2.4rem;
+      margin: 12px;
+      transition: background-color 0.3s ease, transform 0.2s ease;
       box-shadow: 0 4px 8px rgba(142, 68, 173, 0.6);
     }
 
     button:hover {
-      background-color: #9b59b6;
-      transform: scale(1.05);
-      box-shadow: 0 6px 12px rgba(155, 89, 182, 0.7);
+      background: var(--color-secondary-light);
+      transform: translateY(-4px) scale(1.05);
+      box-shadow: 0 6px 12px rgba(230, 126, 34, 0.7);
+    }
+
+    button:active {
+      transform: translateY(0) scale(1);
+    }
+
+    #statusMessage {
+      color: var(--color-error);
+      font-weight: 700;
+      margin-top: 10px;
+      min-height: 2rem;
+    }
+
+    #gameScreen {
+      margin-top: 40px;
+      animation: fadeIn 0.6s ease;
+      font-size: 2.4rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
 
     #playersList {
       list-style: none;
       padding: 0;
+      margin: 30px 0;
     }
 
     #playersList li {
-      padding: 1rem;
-      margin: 0.5rem 0;
-      border-radius: 1rem;
-      background-color: #f9f3f0;
-      color: #333;
+      padding: 16px;
+      margin: 10px 0;
+      background: #f3e8ff88;
+      border-radius: 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-weight: 500;
+      font-weight: 400;
+      color: var(--color-text);
     }
 
-    .host {
-      color: #3498db !important;
-      font-weight: bold;
+    #playersList li.host {
+      color: var(--color-primary-light);
+      font-weight: 700;
     }
 
-    .self {
-      color: black !important;
-      font-weight: bold;
+    #playersList li.self {
+      color: black;
+      font-weight: 700;
       background: #f9f3f0cc;
     }
 
     #startGame {
-      background-color: #eb984e;
-      margin-top: 1.5rem;
+      background: var(--color-secondary-light);
+      margin-top: 30px;
+      width: 100%;
       font-weight: 700;
       box-shadow: 0 5px 10px rgba(230, 126, 34, 0.6);
       color: #fff;
-      max-width: 100%;
-      width: auto;
-      padding: 1rem 2rem;
     }
 
     #startGame:hover {
-      background-color: #8e44ad;
+      background: var(--color-primary);
       box-shadow: 0 7px 14px rgba(142, 68, 173, 0.7);
-    }
-
-    #statusMessage {
-      text-align: center;
-      margin-top: 1rem;
-      font-weight: 600;
-      min-height: 2rem;
-    }
-
-    /* Loader styles */
-    #loader {
-      display: none;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      border: 8px solid #f3f3f3;
-      border-top: 8px solid #8e44ad;
-      border-radius: 50%;
-      width: 60px;
-      height: 60px;
-      animation: spin 1s linear infinite;
-      z-index: 10;
-    }
-
-    @keyframes spin {
-      0% { transform: translate(-50%, -50%) rotate(0deg); }
-      100% { transform: translate(-50%, -50%) rotate(360deg); }
     }
   </style>
 </head>
@@ -151,13 +164,13 @@
   <div class="container">
     <h1>Słowny Impostor</h1>
 
-    <div id="loader"></div>
-
     <div id="loginScreen">
-      <input type="text" id="playerName" placeholder="Podaj swój nick" autocomplete="off" />
-      <button id="createRoom">Stwórz pokój</button>
-      <input type="text" id="roomCodeInput" placeholder="Kod pokoju" maxlength="4" autocomplete="off" />
-      <button id="joinRoom">Dołącz do pokoju</button>
+      <input type="text" id="playerName" placeholder="Podaj swój nick" />
+      <div class="buttons">
+        <button id="createRoom">Stwórz pokój</button>
+        <input type="text" id="roomCodeInput" placeholder="Kod pokoju (4 znaki)" maxlength="4" style="width: 200px; display: inline-block; margin-left: 10px; vertical-align: middle;" />
+        <button id="joinRoom">Dołącz do pokoju</button>
+      </div>
       <p id="statusMessage"></p>
     </div>
 
@@ -171,7 +184,7 @@
   <script>
     // Wklej tutaj swoją konfigurację Firebase:
     const firebaseConfig = {
-      // ...
+      // ... Twoja konfiguracja Firebase ...
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -187,25 +200,14 @@
     const roomCodeDisplay = document.getElementById('roomCodeDisplay');
     const playersList = document.getElementById('playersList');
     const startGameBtn = document.getElementById('startGame');
-    const loader = document.getElementById('loader');
 
     let currentRoomCode = null;
     let currentPlayerId = null;
     let currentPlayerName = null;
     let isHost = false;
 
-    function showLoader() {
-      loader.style.display = 'block';
-      statusMessage.textContent = 'Ładowanie...';
-    }
-
-    function hideLoader() {
-      loader.style.display = 'none';
-      statusMessage.textContent = '';
-    }
-
     function generateRoomCode() {
-      return Math.random().toString(36).substr(2, 4).toUpperCase();
+      return Math.random().toString(36).substring(2, 6).toUpperCase();
     }
 
     function updatePlayersList(players) {
@@ -236,7 +238,6 @@
         if (!roomData) {
           statusMessage.textContent = 'Pokój został usunięty.';
           resetToLogin();
-          hideLoader();
           return;
         }
 
@@ -245,7 +246,6 @@
         } else {
           playersList.innerHTML = '';
         }
-        hideLoader();
       });
     }
 
@@ -257,6 +257,9 @@
       currentPlayerName = null;
       isHost = false;
       playersList.innerHTML = '';
+      statusMessage.textContent = '';
+      roomCodeInput.value = '';
+      playerNameInput.value = '';
     }
 
     createRoomBtn.addEventListener('click', () => {
@@ -266,29 +269,30 @@
         return;
       }
 
-      showLoader();
-
       currentPlayerName = name;
       isHost = true;
       currentRoomCode = generateRoomCode();
       currentPlayerId = db.ref().push().key;
 
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
-      roomRef.set({
-        players: {
-          [currentPlayerId]: { name: currentPlayerName, isHost: true }
-        }
-      }).then(() => {
-        loginScreen.style.display = 'none';
-        gameScreen.style.display = 'block';
-        roomCodeDisplay.textContent = currentRoomCode;
-        statusMessage.textContent = '';
 
-        listenToRoom(currentRoomCode);
-        hideLoader();
-      }).catch(() => {
-        statusMessage.textContent = 'Błąd przy tworzeniu pokoju.';
-        hideLoader();
+      roomRef.once('value').then(snapshot => {
+        if (snapshot.exists()) {
+          statusMessage.textContent = 'Wylosowany kod pokoju już istnieje, spróbuj ponownie.';
+          return;
+        }
+        // Tworzymy pokój z hostem:
+        roomRef.set({
+          players: {
+            [currentPlayerId]: { name: currentPlayerName, isHost: true }
+          }
+        }).then(() => {
+          statusMessage.textContent = '';
+          loginScreen.style.display = 'none';
+          gameScreen.style.display = 'block';
+          roomCodeDisplay.textContent = currentRoomCode;
+          listenToRoom(currentRoomCode);
+        });
       });
     });
 
@@ -301,8 +305,6 @@
         return;
       }
 
-      showLoader();
-
       currentPlayerName = name;
       currentRoomCode = roomCode;
       currentPlayerId = db.ref().push().key;
@@ -312,39 +314,52 @@
       roomRef.once('value').then(snapshot => {
         if (!snapshot.exists()) {
           statusMessage.textContent = 'Pokój nie istnieje.';
-          hideLoader();
           return;
         }
 
-        const players = snapshot.val().players || {};
+        const roomData = snapshot.val();
+        const players = roomData.players || {};
+
+        // Sprawdzamy, czy pokój jest pełny (np. max 10 graczy)
+        if (Object.keys(players).length >= 10) {
+          statusMessage.textContent = 'Pokój jest pełny.';
+          return;
+        }
+
+        // Dodajemy nowego gracza
         players[currentPlayerId] = { name: currentPlayerName, isHost: false };
 
         roomRef.child('players').set(players).then(() => {
+          statusMessage.textContent = '';
           loginScreen.style.display = 'none';
           gameScreen.style.display = 'block';
           roomCodeDisplay.textContent = currentRoomCode;
-          statusMessage.textContent = '';
-
           listenToRoom(currentRoomCode);
-          hideLoader();
         }).catch(() => {
           statusMessage.textContent = 'Błąd przy dołączaniu do pokoju.';
-          hideLoader();
         });
-      }).catch(() => {
-        statusMessage.textContent = 'Błąd przy sprawdzaniu pokoju.';
-        hideLoader();
       });
     });
 
-    startGameBtn.addEventListener('click', () => {
-      if (!isHost) {
-        statusMessage.textContent = 'Tylko host może rozpocząć grę.';
-        return;
-      }
+    // Czyszczenie pustych pokoi (opcjonalne, ale przydatne)
+    function cleanupEmptyRooms() {
+      const roomsRef = db.ref('rooms');
+      roomsRef.on('value', snapshot => {
+        const rooms = snapshot.val();
+        if (!rooms) return;
 
-      statusMessage.textContent = 'Gra startuje... (tu dodaj dalszą logikę)';
-      // Tutaj dodaj logikę startu gry np. zapisz stan gry w Firebase
+        for (const [code, room] of Object.entries(rooms)) {
+          if (!room.players || Object.keys(room.players).length === 0) {
+            db.ref(`rooms/${code}`).remove();
+          }
+        }
+      });
+    }
+
+    cleanupEmptyRooms();
+
+    startGameBtn.addEventListener('click', () => {
+      alert('Start gry! Tutaj możesz dodać dalszą logikę.');
     });
   </script>
 </body>
