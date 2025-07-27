@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="pl">
 <head>
   <meta charset="UTF-8" />
@@ -6,7 +6,7 @@
   <title>Słowny Oszust</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
   <style>
     body {
       background-color: #e67e22; /* pomarańczowe tło */
@@ -23,7 +23,7 @@
       background: #d35400;
       padding: 2rem;
       border-radius: 1.5rem;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
     }
 
     h1 {
@@ -32,8 +32,7 @@
       color: #f5f5f5;
     }
 
-    input,
-    button {
+    input, button {
       font-size: 2rem;
       padding: 1rem;
       margin: 1rem 0;
@@ -153,7 +152,7 @@
     }
 
     function listenToRoom(roomCode) {
-      const roomRef = db.ref(`rooms/${roomCode}`);
+      const roomRef = db.ref(rooms/${roomCode});
 
       roomRef.on('value', (snapshot) => {
         const roomData = snapshot.val();
@@ -169,17 +168,6 @@
         } else {
           playersList.innerHTML = '';
         }
-
-        if (roomData.gameStarted) {
-          if (currentPlayerId === roomData.impostorId) {
-            statusMessage.textContent = 'Jesteś impostorem!';
-          } else {
-            statusMessage.textContent = 'Nie jesteś impostorem.';
-          }
-          // Możesz tu też ukryć loginScreen i pokazać ekran gry, jeśli chcesz
-        } else {
-          statusMessage.textContent = '';
-        }
       });
     }
 
@@ -191,7 +179,6 @@
       currentPlayerName = null;
       isHost = false;
       playersList.innerHTML = '';
-      statusMessage.textContent = '';
     }
 
     createRoomBtn.addEventListener('click', () => {
@@ -206,12 +193,11 @@
       currentRoomCode = generateRoomCode();
       currentPlayerId = db.ref().push().key;
 
-      const roomRef = db.ref(`rooms/${currentRoomCode}`);
+      const roomRef = db.ref(rooms/${currentRoomCode});
       roomRef.set({
         players: {
-          [currentPlayerId]: { name: currentPlayerName, isHost: true },
-        },
-        gameStarted: false,
+          [currentPlayerId]: { name: currentPlayerName, isHost: true }
+        }
       }).then(() => {
         loginScreen.style.display = 'none';
         gameScreen.style.display = 'block';
@@ -234,9 +220,9 @@
       currentRoomCode = roomCode;
       currentPlayerId = db.ref().push().key;
 
-      const roomRef = db.ref(`rooms/${currentRoomCode}`);
+      const roomRef = db.ref(rooms/${currentRoomCode});
 
-      roomRef.once('value').then((snapshot) => {
+      roomRef.once('value').then(snapshot => {
         if (!snapshot.exists()) {
           statusMessage.textContent = 'Pokój nie istnieje.';
           return;
@@ -257,13 +243,13 @@
 
     function cleanupEmptyRooms() {
       const roomsRef = db.ref('rooms');
-      roomsRef.on('value', (snapshot) => {
+      roomsRef.on('value', snapshot => {
         const rooms = snapshot.val();
         if (!rooms) return;
 
         for (const [code, room] of Object.entries(rooms)) {
           if (!room.players || Object.keys(room.players).length === 0) {
-            db.ref(`rooms/${code}`).remove();
+            db.ref(rooms/${code}).remove();
           }
         }
       });
@@ -272,14 +258,8 @@
     cleanupEmptyRooms();
 
     startGameBtn.addEventListener('click', () => {
-      if (!isHost) {
-        statusMessage.textContent = 'Tylko host może rozpocząć grę.';
-        return;
-      }
-
-      const roomRef = db.ref(`rooms/${currentRoomCode}`);
-
-      roomRef.once('value').then((snapshot) => {
-        const roomData = snapshot.val();
-
-        if (!roomData || !roomData.players) {
+      alert("Start gry! Tutaj dodaj logikę startu gry.");
+    });
+  </script>
+</body>
+</html>
