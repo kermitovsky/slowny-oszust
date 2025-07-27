@@ -219,18 +219,18 @@
         const players = snapshot.val();
         updatePlayersList(players);
 
-        // Jeśli w pokoju nie ma już żadnego gracza, usuń pokój!
         if (!players || Object.keys(players).length === 0) {
-          db.ref(`rooms/${roomId}`).remove();
-          // Wyłącz nasłuchiwanie, bo pokój już nie istnieje
+          // usuwaj pokój, jeśli pusty
+          db.ref(`rooms/${roomId}`).remove().catch(console.error);
+          // wyłącz nasłuch (dla bezpieczeństwa)
           if (playersRef) playersRef.off();
           currentRoomId = null;
           currentPlayerId = null;
+          // wróć do ekranu logowania (opcjonalnie)
+          document.getElementById('gameScreen').style.display = 'none';
+          document.getElementById('loginScreen').style.display = 'block';
+          setStatus("Pokój został usunięty, ponieważ nie ma w nim graczy.");
         }
-      });
-
-      playersRef.once('value').then(snapshot => {
-        updatePlayersList(snapshot.val());
       });
     }
 
@@ -329,11 +329,12 @@
     document.getElementById('createRoom').addEventListener('click', createRoom);
     document.getElementById('joinRoom').addEventListener('click', joinRoom);
 
-    window.addEventListener('beforeunload', () => {
+    // Usuwaj gracza przy zamknięciu karty lub przeładowaniu strony
+    window.addEventListener('unload', () => {
       if (currentRoomId && currentPlayerId) {
+        // Usuwanie bez oczekiwania (async może nie wykonać się w unload)
         db.ref(`rooms/${currentRoomId}/players/${currentPlayerId}`).remove();
       }
-      if (playersRef) playersRef.off();
     });
   </script>
 </body>
