@@ -61,18 +61,27 @@ function updatePlayersList(players) {
   }
 }
 
-// Rozwiązanie alternatywne - wymuszona synchronizacja
-function syncPlayers() {
-  if (!currentRoomId) return;
+// Inicjalizacja nasłuchiwania graczy
+function initPlayersListener(roomId) {
+  if (playersRef) {
+    playersRef.off(); // Wyłącz poprzednie nasłuchiwanie
+  }
   
-  db.ref(`rooms/${currentRoomId}/players`).once('value')
-    .then(snapshot => {
-      const players = snapshot.val() || {};
-      updatePlayersList(players);
-    })
-    .catch(error => {
-      console.error("Błąd synchronizacji:", error);
-    });
+  playersRef = db.ref(`rooms/${roomId}/players`);
+  
+  // Nasłuchiwanie zmian
+  playersRef.on('value', (snapshot) => {
+    const players = snapshot.val() || {};
+    console.log("Odebrano aktualizację graczy:", players);
+    updatePlayersList(players);
+  });
+  
+  // Ręczne pobranie początkowego stanu
+  playersRef.once('value').then(snapshot => {
+    const initialPlayers = snapshot.val() || {};
+    console.log("Początkowy stan graczy:", initialPlayers);
+    updatePlayersList(initialPlayers);
+  });
 }
 
 // Tworzenie pokoju
@@ -105,15 +114,7 @@ document.getElementById('createRoom').addEventListener('click', async function()
     currentRoomId = roomId;
     currentPlayerId = playerId;
     showGameScreen(roomId);
-    
-    // Nasłuchiwanie zmian
-    playersRef = db.ref(`rooms/${roomId}/players`);
-    playersRef.on('value', (snapshot) => {
-      updatePlayersList(snapshot.val());
-    });
-    
-    // Wymuszona synchronizacja co 2 sekundy (tymczasowe rozwiązanie)
-    setInterval(syncPlayers, 2000);
+    initPlayersListener(roomId);
     
   } catch (error) {
     console.error("Błąd tworzenia pokoju:", error);
@@ -165,19 +166,8 @@ document.getElementById('joinRoom').addEventListener('click', async function() {
     currentPlayerId = playerId;
     showGameScreen(roomId);
     setStatus("");
+    initPlayersListener(roomId);
     
-    // Nasłuchiwanie zmian
-    playersRef = db.ref(`rooms/${roomId}/players`);
-    playersRef.on('value', (snapshot) => {
-      updatePlayersList(snapshot.val());
-    });
-    
-    // Wymuszona synchronizacja co 2 sekundy (tymczasowe rozwiązanie)
-    setInterval(syncPlayers, 2000);
-    
-    // Ręczna synchronizacja od razu
-    syncPlayers();
-
   } catch (error) {
     console.error("Błąd dołączania:", error);
     setStatus(error.message, true);
