@@ -46,7 +46,7 @@ function showGameScreen(roomId) {
   const loginScreen = document.getElementById('loginScreen');
   const gameScreen = document.getElementById('gameScreen');
   const roomCodeDisplay = document.getElementById('roomCodeDisplay');
-  
+
   if (loginScreen) loginScreen.style.display = 'none';
   if (gameScreen) gameScreen.style.display = 'block';
   if (roomCodeDisplay) roomCodeDisplay.textContent = roomId;
@@ -58,9 +58,9 @@ function updatePlayersList(players) {
     console.error("Element playersList nie istnieje!");
     return;
   }
-  
+
   playersList.innerHTML = '';
-  
+
   if (players) {
     console.log("Aktualizacja listy graczy:", players);
     Object.values(players).forEach(player => {
@@ -80,33 +80,28 @@ function initPlayersListener(roomId) {
   }
 
   playersRef = db.ref(`rooms/${roomId}/players`);
-  
+
+  // 🔁 Nasłuchiwanie zmian
   playersRef.on('value', (snapshot) => {
     console.log(`[${roomId}] Odebrano aktualizację graczy:`, snapshot.val());
-    updatePlayersList(snapshot.val());
-  });
-  
-  // Ręczne pobranie początkowego stanu
-  playersRef.once('value').then(snapshot => {
-    console.log(`[${roomId}] Początkowy stan graczy:`, snapshot.val());
     updatePlayersList(snapshot.val());
   });
 }
 
 // Tworzenie pokoju
-document.getElementById('createRoom').addEventListener('click', async function() {
+document.getElementById('createRoom').addEventListener('click', async function () {
   try {
     setLoading(true);
     const playerName = document.getElementById('playerName').value.trim();
-    
+
     if (playerName.length < 3) {
       setStatus("Nick musi mieć minimum 3 znaki!", true);
       return;
     }
-    
+
     const roomId = generateRoomCode();
     const playerId = generatePlayerId();
-    
+
     await db.ref(`rooms/${roomId}`).set({
       players: {
         [playerId]: {
@@ -122,9 +117,12 @@ document.getElementById('createRoom').addEventListener('click', async function()
 
     currentRoomId = roomId;
     currentPlayerId = playerId;
+
     showGameScreen(roomId);
+
+    // 🔁 Nasłuchiwanie od razu po utworzeniu
     initPlayersListener(roomId);
-    
+
   } catch (error) {
     console.error("Błąd tworzenia pokoju:", error);
     setStatus("Błąd: " + error.message, true);
@@ -133,12 +131,12 @@ document.getElementById('createRoom').addEventListener('click', async function()
   }
 });
 
-// Dołączanie do pokoju
-document.getElementById('joinRoom').addEventListener('click', async function() {
+// Dołączanie do pokoju (z poprawką!)
+document.getElementById('joinRoom').addEventListener('click', async function () {
   try {
     setLoading(true);
     setStatus("Łączenie...");
-    
+
     const roomId = document.getElementById('roomCodeInput').value.trim().toUpperCase();
     const playerName = document.getElementById('playerName').value.trim();
 
@@ -170,10 +168,17 @@ document.getElementById('joinRoom').addEventListener('click', async function() {
 
     currentRoomId = roomId;
     currentPlayerId = playerId;
+
+    // ✅ Ręczne pobranie listy graczy PRZED nasłuchiwaniem
+    const playersSnapshot = await db.ref(`rooms/${roomId}/players`).once('value');
+    updatePlayersList(playersSnapshot.val());
+
+    // 🔁 Dopiero teraz ustaw nasłuchiwanie
+    initPlayersListener(roomId);
+
     showGameScreen(roomId);
     setStatus("");
-    initPlayersListener(roomId);
-    
+
   } catch (error) {
     console.error("Błąd dołączania:", error);
     setStatus(error.message, true);
@@ -182,7 +187,7 @@ document.getElementById('joinRoom').addEventListener('click', async function() {
   }
 });
 
-// Czyszczenie danych przy zamknięciu
+// Czyszczenie danych przy zamknięciu strony
 window.addEventListener('beforeunload', () => {
   if (currentRoomId && currentPlayerId) {
     db.ref(`rooms/${currentRoomId}/players/${currentPlayerId}`).remove();
