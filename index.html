@@ -24,12 +24,15 @@
       padding: 2rem;
       border-radius: 1.5rem;
       box-shadow: 0 0 20px rgba(0,0,0,0.3);
+      display: none; /* ukryte do czasu załadowania */
     }
 
     h1 {
       text-align: center;
+      font-family: 'Pacifico', cursive;
       font-size: 3.5rem;
       color: #f5f5f5;
+      margin-bottom: 2rem;
     }
 
     input, button {
@@ -55,11 +58,13 @@
       color: white;
       cursor: pointer;
       transition: transform 0.2s ease, background-color 0.3s ease;
+      box-shadow: 0 4px 8px rgba(142, 68, 173, 0.6);
     }
 
     button:hover {
       background-color: #9b59b6;
       transform: scale(1.05);
+      box-shadow: 0 6px 12px rgba(155, 89, 182, 0.9);
     }
 
     #playersList {
@@ -73,6 +78,9 @@
       border-radius: 1rem;
       background-color: #f9f3f0;
       color: #333;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
 
     .host {
@@ -84,23 +92,60 @@
       color: black !important;
       font-weight: bold;
     }
+
+    /* Loader SVG animation */
+    #loader {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    @keyframes spin {
+      0% { stroke-dashoffset: 0; }
+      100% { stroke-dashoffset: 440; }
+    }
+    svg circle {
+      stroke-dasharray: 440;
+      stroke-dashoffset: 0;
+      animation: spin 1.5s linear infinite;
+      stroke: #8e44ad;
+      stroke-width: 10;
+      fill: none;
+      stroke-linecap: round;
+    }
+
+    /* Status message styling */
+    #statusMessage {
+      text-align: center;
+      margin-top: 1rem;
+      font-weight: 600;
+      color: #f1c40f;
+      min-height: 2rem;
+    }
   </style>
 </head>
 <body>
+  <!-- Loader -->
+  <div id="loader">
+    <svg width="50" height="50" viewBox="0 0 100 100" >
+      <circle cx="50" cy="50" r="35" />
+    </svg>
+  </div>
+
   <div class="container">
     <h1 class="fancy-title">Słowny Impostor</h1>
     <div id="loginScreen">
-      <input type="text" id="playerName" placeholder="Podaj swój nick" />
-      <button id="createRoom">Stwórz pokój</button>
-      <input type="text" id="roomCodeInput" placeholder="Kod pokoju" maxlength="4" />
-      <button id="joinRoom">Dołącz do pokoju</button>
+      <input type="text" id="playerName" placeholder="Podaj swój nick" autocomplete="off" />
+      <button id="createRoom">Stwórz pokój 🆕</button>
+      <input type="text" id="roomCodeInput" placeholder="Kod pokoju" maxlength="4" autocomplete="off" />
+      <button id="joinRoom">Dołącz do pokoju 🔑</button>
       <p id="statusMessage"></p>
     </div>
 
     <div id="gameScreen" style="display:none;">
       <p>Kod pokoju: <span id="roomCodeDisplay"></span></p>
       <ul id="playersList"></ul>
-      <button id="startGame">Start gry</button>
+      <button id="startGame">Start gry ▶️</button>
     </div>
   </div>
 
@@ -122,6 +167,7 @@
     const roomCodeDisplay = document.getElementById('roomCodeDisplay');
     const playersList = document.getElementById('playersList');
     const startGameBtn = document.getElementById('startGame');
+    const container = document.querySelector('.container');
 
     let currentRoomCode = null;
     let currentPlayerId = null;
@@ -199,6 +245,7 @@
           [currentPlayerId]: { name: currentPlayerName, isHost: true }
         }
       }).then(() => {
+        statusMessage.textContent = '';
         loginScreen.style.display = 'none';
         gameScreen.style.display = 'block';
         roomCodeDisplay.textContent = currentRoomCode;
@@ -232,6 +279,7 @@
         players[currentPlayerId] = { name: currentPlayerName, isHost: false };
 
         roomRef.child('players').set(players).then(() => {
+          statusMessage.textContent = '';
           loginScreen.style.display = 'none';
           gameScreen.style.display = 'block';
           roomCodeDisplay.textContent = currentRoomCode;
@@ -260,6 +308,12 @@
     startGameBtn.addEventListener('click', () => {
       alert("Start gry! Tutaj dodaj logikę startu gry.");
     });
+
+    // Ukryj loader i pokaż główny container gdy strona się załaduje
+    window.onload = () => {
+      document.getElementById('loader').style.display = 'none';
+      container.style.display = 'block';
+    };
   </script>
 </body>
 </html>
