@@ -23,6 +23,7 @@
         input, button {
             padding: 10px;
             margin: 5px 0;
+            font-size: 16px;
         }
         button {
             background: #4285f4;
@@ -30,16 +31,34 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #3367d6;
+        }
+        button:disabled {
+            background: #cccccc;
         }
         #playersList {
             list-style: none;
             padding: 0;
         }
         #playersList li {
-            padding: 8px;
+            padding: 10px;
             background: white;
             margin: 5px 0;
             border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+        #roomCodeDisplay {
+            font-weight: bold;
+            color: #4285f4;
+            font-size: 1.2em;
+        }
+        .status {
+            color: #666;
+            font-style: italic;
         }
     </style>
 </head>
@@ -47,19 +66,20 @@
     <h1>🕵️ Słowny Oszust</h1>
     
     <div id="loginScreen">
-        <input type="text" id="playerName" placeholder="Twój nick" required>
+        <input type="text" id="playerName" placeholder="Twój nick (min. 3 znaki)" required>
         <div>
             <button id="createRoom">Stwórz pokój</button>
         </div>
         <div style="margin-top: 15px;">
-            <input type="text" id="roomCodeInput" placeholder="Kod pokoju">
+            <input type="text" id="roomCodeInput" placeholder="Wpisz kod pokoju">
             <button id="joinRoom">Dołącz</button>
         </div>
+        <p id="statusMessage" class="status"></p>
     </div>
 
     <div id="gameScreen">
         <h2>Pokój: <span id="roomCodeDisplay"></span></h2>
-        <h3>Gracze:</h3>
+        <h3>Gracze online:</h3>
         <ul id="playersList"></ul>
     </div>
 
@@ -85,21 +105,40 @@
             console.log("Firebase zainicjalizowany");
         } catch (error) {
             console.error("Błąd inicjalizacji Firebase:", error);
+            document.getElementById('statusMessage').textContent = "Błąd połączenia z serwerem";
         }
 
         // Referencja do bazy danych
         const db = firebase.database();
         let currentRoomId = null;
+        let currentPlayerId = null;
 
         // Generowanie ID
         const generateRoomCode = () => Math.random().toString(36).substring(2, 6).toUpperCase();
         const generatePlayerId = () => 'p_' + Math.random().toString(36).substring(2, 9);
 
+        // Aktualizacja statusu
+        function setStatus(message, isError = false) {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.textContent = message;
+            statusEl.style.color = isError ? 'red' : '#666';
+        }
+
+        // Blokada przycisków podczas ładowania
+        function setLoading(isLoading) {
+            document.getElementById('createRoom').disabled = isLoading;
+            document.getElementById('joinRoom').disabled = isLoading;
+        }
+
         // Tworzenie pokoju
         document.getElementById('createRoom').addEventListener('click', async function() {
             try {
+                setLoading(true);
                 const playerName = document.getElementById('playerName').value.trim();
-                if (playerName.length < 3) throw new Error("Nick musi mieć minimum 3 znaki!");
+                if (playerName.length < 3) {
+                    setStatus("Nick musi mieć minimum 3 znaki!", true);
+                    return;
+                }
                 
                 const roomId = generateRoomCode();
                 const playerId = generatePlayerId();
@@ -109,7 +148,8 @@
                         [playerId]: {
                             name: playerName,
                             isImpostor: false,
-                            joinedAt: firebase.database.ServerValue.TIMESTAMP
+                            joinedAt: firebase.database.ServerValue.TIMESTAMP,
+                            isHost: true
                         }
                     },
                     status: "waiting",
@@ -117,6 +157,8 @@
                 });
 
                 currentRoomId = roomId;
+                currentPlayerId = playerId;
+                
                 document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('gameScreen').style.display = 'block';
                 document.getElementById('roomCodeDisplay').textContent = roomId;
@@ -128,9 +170,12 @@
                     playersList.innerHTML = '';
                     
                     if (players) {
-                        Object.values(players).forEach(player => {
+                        Object.entries(players).forEach(([id, player]) => {
                             const li = document.createElement('li');
                             li.textContent = player.name;
+                            if (player.isHost) {
+                                li.innerHTML += ' <span style="color:#4285f4">(host)</span>';
+                            }
                             playersList.appendChild(li);
                         });
                     }
@@ -138,47 +183,83 @@
                 
             } catch (error) {
                 console.error("Błąd tworzenia pokoju:", error);
-                alert("Błąd: " + error.message);
+                setStatus("Błąd podczas tworzenia pokoju: " + error.message, true);
+            } finally {
+                setLoading(false);
             }
         });
 
         // Dołączanie do pokoju
         document.getElementById('joinRoom').addEventListener('click', async function() {
             try {
+                setLoading(true);
                 const roomId = document.getElementById('roomCodeInput').value.trim().toUpperCase();
                 const playerName = document.getElementById('playerName').value.trim();
                 
-                if (!roomId || playerName.length < 3) throw new Error("Podaj poprawny kod pokoju i nick!");
+                if (!roomId || roomId.length !== 4) {
+                    setStatus("Podaj poprawny 4-znakowy kod pokoju", true);
+                    return;
+                }
                 
+                if (playerName.length < 3) {
+                    setStatus("Nick musi mieć minimum 3 znaki!", true);
+                    return;
+                }
+
+                // Sprawdź czy pokój istnieje
+                const roomSnapshot = await db.ref(`rooms/${roomId}`).once('value');
+                if (!roomSnapshot.exists()) {
+                    setStatus("Pokój nie istnieje!", true);
+                    return;
+                }
+
+                // Sprawdź czy nick jest już zajęty
+                const players = roomSnapshot.val().players || {};
+                const nickExists = Object.values(players).some(p => p.name === playerName);
+                if (nickExists) {
+                    setStatus("Ten nick jest już zajęty w tym pokoju!", true);
+                    return;
+                }
+
                 const playerId = generatePlayerId();
                 
                 await db.ref(`rooms/${roomId}/players/${playerId}`).set({
                     name: playerName,
                     isImpostor: false,
-                    joinedAt: firebase.database.ServerValue.TIMESTAMP
+                    joinedAt: firebase.database.ServerValue.TIMESTAMP,
+                    isHost: false
                 });
 
                 currentRoomId = roomId;
+                currentPlayerId = playerId;
+                
                 document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('gameScreen').style.display = 'block';
                 document.getElementById('roomCodeDisplay').textContent = roomId;
                 
+                setStatus("");
+                
             } catch (error) {
                 console.error("Błąd dołączania:", error);
-                alert("Błąd: " + error.message);
+                setStatus("Błąd podczas dołączania: " + error.message, true);
+            } finally {
+                setLoading(false);
             }
         });
 
         // Czyszczenie przy zamknięciu
         window.addEventListener('beforeunload', () => {
-            if (currentRoomId) {
-                db.ref(`rooms/${currentRoomId}`).once('value').then(snapshot => {
-                    const players = snapshot.val()?.players;
-                    if (players && Object.keys(players).length === 0) {
-                        db.ref(`rooms/${currentRoomId}`).remove();
-                    }
-                });
+            if (currentRoomId && currentPlayerId) {
+                db.ref(`rooms/${currentRoomId}/players/${currentPlayerId}`).remove();
             }
+        });
+
+        // Automatyczne ukrywanie komunikatu o błędzie
+        document.getElementById('playerName').addEventListener('input', () => {
+            setStatus("");
+        });
+        document.getElementById('roomCodeInput').addEventListener('input', () => {
+            setStatus("");
         });
     </script>
 </body>
