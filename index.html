@@ -9,13 +9,14 @@
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
   <style>
     body {
-      background-color: #e67e22;
+      background-color: #e67e22; /* pomarańczowe tło */
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       color: #fff;
       font-size: 2rem;
       margin: 0;
       padding: 2rem;
     }
+
     .container {
       max-width: 800px;
       margin: auto;
@@ -24,11 +25,13 @@
       border-radius: 1.5rem;
       box-shadow: 0 0 20px rgba(0,0,0,0.3);
     }
+
     h1 {
       text-align: center;
       font-size: 3.5rem;
       color: #f5f5f5;
     }
+
     input, button {
       font-size: 2rem;
       padding: 1rem;
@@ -41,24 +44,29 @@
       margin-left: auto;
       margin-right: auto;
     }
+
     input {
       border: 2px solid #8e44ad;
       color: #333;
     }
+
     button {
       background-color: #8e44ad;
       color: white;
       cursor: pointer;
       transition: transform 0.2s ease, background-color 0.3s ease;
     }
+
     button:hover {
       background-color: #9b59b6;
       transform: scale(1.05);
     }
+
     #playersList {
       list-style: none;
       padding: 0;
     }
+
     #playersList li {
       padding: 1rem;
       margin: 0.5rem 0;
@@ -66,18 +74,15 @@
       background-color: #f9f3f0;
       color: #333;
     }
+
     .host {
       color: #3498db !important;
       font-weight: bold;
     }
+
     .self {
       color: black !important;
       font-weight: bold;
-    }
-    #statusMessage {
-      text-align: center;
-      font-weight: bold;
-      margin-top: 1rem;
     }
   </style>
 </head>
@@ -101,13 +106,7 @@
 
   <script>
     const firebaseConfig = {
-      apiKey: "AIzaSyCyj5pbNgUHaV-_g__sTQmsUtYOhegYoSI",
-      authDomain: "slowny-oszust.firebaseapp.com",
-      databaseURL: "https://slowny-oszust-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "slowny-oszust",
-      storageBucket: "slowny-oszust.firebasestorage.app",
-      messagingSenderId: "679726628348",
-      appId: "1:679726628348:web:83f9c43fee9cf514784679"
+      // <-- tu wklej swoją konfigurację Firebase
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -153,14 +152,13 @@
     }
 
     function listenToRoom(roomCode) {
-      const roomRef = db.ref(`rooms/${roomCode}`);
+      const roomRef = db.ref(rooms/${roomCode});
 
       roomRef.on('value', (snapshot) => {
         const roomData = snapshot.val();
 
         if (!roomData) {
           statusMessage.textContent = 'Pokój został usunięty.';
-          statusMessage.style.color = 'red';
           resetToLogin();
           return;
         }
@@ -181,17 +179,12 @@
       currentPlayerName = null;
       isHost = false;
       playersList.innerHTML = '';
-      statusMessage.textContent = '';
-      statusMessage.style.color = 'black';
-      playerNameInput.value = '';
-      roomCodeInput.value = '';
     }
 
     createRoomBtn.addEventListener('click', () => {
       const name = playerNameInput.value.trim();
       if (!name) {
         statusMessage.textContent = 'Wpisz nick!';
-        statusMessage.style.color = 'red';
         return;
       }
 
@@ -200,7 +193,7 @@
       currentRoomCode = generateRoomCode();
       currentPlayerId = db.ref().push().key;
 
-      const roomRef = db.ref(`rooms/${currentRoomCode}`);
+      const roomRef = db.ref(rooms/${currentRoomCode});
       roomRef.set({
         players: {
           [currentPlayerId]: { name: currentPlayerName, isHost: true }
@@ -209,11 +202,8 @@
         loginScreen.style.display = 'none';
         gameScreen.style.display = 'block';
         roomCodeDisplay.textContent = currentRoomCode;
-        statusMessage.textContent = '';
+
         listenToRoom(currentRoomCode);
-      }).catch(error => {
-        statusMessage.textContent = 'Błąd podczas tworzenia pokoju: ' + error.message;
-        statusMessage.style.color = 'red';
       });
     });
 
@@ -223,7 +213,6 @@
 
       if (!name || !roomCode) {
         statusMessage.textContent = 'Wpisz nick i kod pokoju!';
-        statusMessage.style.color = 'red';
         return;
       }
 
@@ -231,12 +220,11 @@
       currentRoomCode = roomCode;
       currentPlayerId = db.ref().push().key;
 
-      const roomRef = db.ref(`rooms/${currentRoomCode}`);
+      const roomRef = db.ref(rooms/${currentRoomCode});
 
       roomRef.once('value').then(snapshot => {
         if (!snapshot.exists()) {
           statusMessage.textContent = 'Pokój nie istnieje.';
-          statusMessage.style.color = 'red';
           return;
         }
 
@@ -247,15 +235,9 @@
           loginScreen.style.display = 'none';
           gameScreen.style.display = 'block';
           roomCodeDisplay.textContent = currentRoomCode;
-          statusMessage.textContent = '';
+
           listenToRoom(currentRoomCode);
-        }).catch(error => {
-          statusMessage.textContent = 'Błąd podczas dołączania do pokoju: ' + error.message;
-          statusMessage.style.color = 'red';
         });
-      }).catch(error => {
-        statusMessage.textContent = 'Błąd podczas sprawdzania pokoju: ' + error.message;
-        statusMessage.style.color = 'red';
       });
     });
 
@@ -267,7 +249,7 @@
 
         for (const [code, room] of Object.entries(rooms)) {
           if (!room.players || Object.keys(room.players).length === 0) {
-            db.ref(`rooms/${code}`).remove();
+            db.ref(rooms/${code}).remove();
           }
         }
       });
