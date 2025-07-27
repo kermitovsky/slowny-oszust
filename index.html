@@ -260,6 +260,75 @@
     startGameBtn.addEventListener('click', () => {
       alert("Start gry! Tutaj dodaj logikę startu gry.");
     });
+
+    startGameBtn.addEventListener('click', () => {
+  if (!isHost) {
+    statusMessage.textContent = 'Tylko host może rozpocząć grę.';
+    return;
+  }
+
+  const roomRef = db.ref(`rooms/${currentRoomCode}`);
+
+  roomRef.once('value').then(snapshot => {
+    const roomData = snapshot.val();
+
+    if (!roomData || !roomData.players) {
+      statusMessage.textContent = 'Nie można rozpocząć gry – brak graczy.';
+      return;
+    }
+
+    const playersIds = Object.keys(roomData.players);
+    if (playersIds.length < 2) {
+      statusMessage.textContent = 'Potrzeba co najmniej 2 graczy, aby rozpocząć grę.';
+      return;
+    }
+
+    // Losowanie impostora
+    const impostorId = playersIds[Math.floor(Math.random() * playersIds.length)];
+
+    // Zapisujemy info o starcie gry i impostorze w bazie
+    roomRef.update({
+      gameStarted: true,
+      impostorId: impostorId,
+    }).then(() => {
+      statusMessage.textContent = 'Gra rozpoczęta!';
+    });
+  });
+});
+
+// Słuchamy zmian w pokoju, żeby wyświetlić kto jest impostorem (tylko dla siebie)
+function listenToRoom(roomCode) {
+  const roomRef = db.ref(`rooms/${roomCode}`);
+
+  roomRef.on('value', (snapshot) => {
+    const roomData = snapshot.val();
+
+    if (!roomData) {
+      statusMessage.textContent = 'Pokój został usunięty.';
+      resetToLogin();
+      return;
+    }
+
+    if (roomData.players) {
+      updatePlayersList(roomData.players);
+    } else {
+      playersList.innerHTML = '';
+    }
+
+    // Jeżeli gra wystartowała - pokazujemy kto jest impostorem
+    if (roomData.gameStarted) {
+      if (currentPlayerId === roomData.impostorId) {
+        statusMessage.textContent = 'Jesteś impostorem!';
+      } else {
+        statusMessage.textContent = 'Nie jesteś impostorem.';
+      }
+      // Możesz też ukryć przyciski logowania itd. lub wyświetlić ekran gry
+    } else {
+      statusMessage.textContent = '';
+    }
+  });
+}
+
   </script>
 </body>
 </html>
