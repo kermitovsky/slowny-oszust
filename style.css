@@ -3,32 +3,33 @@
   --color-secondary: #e67e22; /* pomarańczowy */
   --color-primary-light: #a569bd;
   --color-secondary-light: #eb984e;
-  --color-text: #1c1c1c;
+  --color-text: #f5f5f5; /* jasny tekst */
+  --color-bg-container: #d35400; /* ciemniejszy pomarańcz dla kontenera */
 }
 
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #f9f7fa;
+  background: var(--color-secondary); /* pomarańczowe tło */
   margin: 0;
   padding: 20px;
   color: var(--color-text);
-  font-size: 1.8rem; /* ok. 2 razy większe */
+  font-size: 1.8rem;
 }
 
 .container {
   max-width: 700px;
   margin: 0 auto;
-  background: white;
+  background: var(--color-bg-container);
   padding: 40px;
   border-radius: 15px;
-  box-shadow: 0 6px 10px rgba(142, 68, 173, 0.15);
+  box-shadow: 0 6px 10px rgba(142, 68, 173, 0.4);
 }
 
 h1 {
-  color: var(--color-primary);
+  color: var(--color-primary-light);
   text-align: center;
   margin-bottom: 30px;
-  font-size: 4.8rem; /* ok 3 razy większe */
+  font-size: 4.8rem;
 }
 
 #loginScreen {
@@ -44,10 +45,12 @@ input {
   border-radius: 12px;
   font-size: 2.4rem;
   transition: border-color 0.3s ease;
+  background: #f9f3f0;
+  color: #333;
 }
 
 input:focus {
-  border-color: var(--color-secondary);
+  border-color: var(--color-primary);
   outline: none;
 }
 
@@ -58,20 +61,20 @@ input:focus {
 button {
   padding: 18px 36px;
   background: var(--color-primary);
-  color: white;
+  color: var(--color-text);
   border: none;
   border-radius: 12px;
   cursor: pointer;
   font-size: 2.4rem;
   margin: 12px;
   transition: background-color 0.3s ease, transform 0.2s ease;
-  box-shadow: 0 4px 8px rgba(142, 68, 173, 0.3);
+  box-shadow: 0 4px 8px rgba(142, 68, 173, 0.6);
 }
 
 button:hover {
-  background: var(--color-secondary);
+  background: var(--color-secondary-light);
   transform: translateY(-4px) scale(1.05);
-  box-shadow: 0 6px 12px rgba(230, 126, 34, 0.5);
+  box-shadow: 0 6px 12px rgba(230, 126, 34, 0.7);
 }
 
 button:active {
@@ -102,7 +105,7 @@ button:active {
 #playersList li {
   padding: 16px;
   margin: 10px 0;
-  background: #f3e8ff;
+  background: #f3e8ff88; /* lekko transparentne jasne fioletowe tło */
   border-radius: 12px;
   display: flex;
   justify-content: space-between;
@@ -112,24 +115,26 @@ button:active {
 }
 
 #playersList li.host {
-  color: var(--color-primary);
+  color: var(--color-primary-light);
   font-weight: 700;
 }
 
 #playersList li.self {
   color: black;
   font-weight: 700;
+  background: #f9f3f0cc; /* jasne tło dla wyróżnienia */
 }
 
 #startGame {
-  background: var(--color-secondary);
+  background: var(--color-secondary-light);
   margin-top: 30px;
   width: 100%;
   font-weight: 700;
-  box-shadow: 0 5px 10px rgba(230, 126, 34, 0.4);
+  box-shadow: 0 5px 10px rgba(230, 126, 34, 0.6);
+  color: #fff;
 }
 
 #startGame:hover {
   background: var(--color-primary);
-  box-shadow: 0 7px 14px rgba(142, 68, 173, 0.5);
+  box-shadow: 0 7px 14px rgba(142, 68, 173, 0.7);
 }
