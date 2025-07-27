@@ -3,191 +3,97 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Słowny Impostor</title>
+  <title>Słowny Oszust</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --color-primary: #8e44ad; /* fiolet */
-      --color-secondary: #e67e22; /* pomarańczowy */
-      --color-primary-light: #a569bd;
-      --color-secondary-light: #eb984e;
-      --color-text: #f5f5f5; /* jasny tekst */
-      --color-bg-container: #d35400; /* ciemniejszy pomarańcz dla kontenera */
-      --color-error: #e74c3c; /* czerwony */
-    }
-
     body {
+      background-color: #e67e22; /* pomarańczowe tło */
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: var(--color-secondary);
+      color: #fff;
+      font-size: 2rem;
       margin: 0;
-      padding: 20px;
-      color: var(--color-text);
-      font-size: 1.8rem;
+      padding: 2rem;
     }
 
     .container {
-      max-width: 700px;
-      margin: 0 auto;
-      background: var(--color-bg-container);
-      padding: 40px;
-      border-radius: 15px;
-      box-shadow: 0 6px 10px rgba(142, 68, 173, 0.4);
+      max-width: 800px;
+      margin: auto;
+      background: #d35400;
+      padding: 2rem;
+      border-radius: 1.5rem;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
     }
 
     h1 {
-      color: var(--color-primary-light);
       text-align: center;
-      margin-bottom: 30px;
-      font-size: 4.8rem;
-      font-family: 'Pacifico', cursive;
-      user-select: none;
+      font-size: 3.5rem;
+      color: #f5f5f5;
     }
 
-    #loginScreen {
-      text-align: center;
+    input, button {
+      font-size: 2rem;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 0.8rem;
+      border: none;
+      width: 100%;
+      max-width: 400px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     input {
-      padding: 18px;
-      margin: 12px 0;
-      width: 80%;
-      max-width: 350px;
-      border: 3px solid var(--color-primary-light);
-      border-radius: 12px;
-      font-size: 2.4rem;
-      transition: border-color 0.3s ease;
-      background: #f9f3f0;
+      border: 2px solid #8e44ad;
       color: #333;
-      outline-offset: 2px;
-    }
-
-    input:focus {
-      border-color: var(--color-primary);
-      outline: none;
-    }
-
-    .buttons {
-      margin-top: 35px;
     }
 
     button {
-      padding: 18px 36px;
-      background: var(--color-primary);
-      color: var(--color-text);
-      border: none;
-      border-radius: 12px;
+      background-color: #8e44ad;
+      color: white;
       cursor: pointer;
-      font-size: 2.4rem;
-      margin: 12px;
-      transition: background-color 0.3s ease, transform 0.2s ease;
-      box-shadow: 0 4px 8px rgba(142, 68, 173, 0.6);
-      user-select: none;
+      transition: transform 0.2s ease, background-color 0.3s ease;
     }
 
     button:hover {
-      background: var(--color-secondary-light);
-      transform: translateY(-4px) scale(1.05);
-      box-shadow: 0 6px 12px rgba(230, 126, 34, 0.7);
-    }
-
-    button:active {
-      transform: translateY(0) scale(1);
+      background-color: #9b59b6;
+      transform: scale(1.05);
     }
 
     #playersList {
       list-style: none;
       padding: 0;
-      margin: 30px 0;
     }
 
     #playersList li {
-      padding: 16px;
-      margin: 10px 0;
-      background: #f3e8ff88;
-      border-radius: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-weight: 400;
-      color: var(--color-text);
+      padding: 1rem;
+      margin: 0.5rem 0;
+      border-radius: 1rem;
+      background-color: #f9f3f0;
+      color: #333;
     }
 
-    #playersList li.host {
-      color: var(--color-primary-light);
-      font-weight: 700;
+    .host {
+      color: #3498db !important;
+      font-weight: bold;
     }
 
-    #playersList li.self {
-      color: black;
-      font-weight: 700;
-      background: #f9f3f0cc;
-    }
-
-    #startGame {
-      background: var(--color-secondary-light);
-      margin-top: 30px;
-      width: 100%;
-      font-weight: 700;
-      box-shadow: 0 5px 10px rgba(230, 126, 34, 0.6);
-      color: #fff;
-      user-select: none;
-    }
-
-    #startGame:hover {
-      background: var(--color-primary);
-      box-shadow: 0 7px 14px rgba(142, 68, 173, 0.7);
-    }
-
-    #statusMessage {
-      margin-top: 20px;
-      font-weight: 700;
-      color: var(--color-error);
-      min-height: 2.2rem;
-      user-select: none;
-    }
-
-    /* Animacja ładowania */
-    #loading {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 3rem;
-      color: var(--color-text);
-      font-family: 'Pacifico', cursive;
-      user-select: none;
-      z-index: 9999;
-      display: none;
-    }
-
-    #loading.show {
-      display: flex;
-      animation: pulse 1.5s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
+    .self {
+      color: black !important;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <div id="loading">Ładowanie...</div>
   <div class="container">
     <h1 class="fancy-title">Słowny Impostor</h1>
     <div id="loginScreen">
-      <input type="text" id="playerName" placeholder="Podaj swój nick" autocomplete="off" />
-      <div class="buttons">
-        <button id="createRoom">Stwórz pokój</button>
-      </div>
-      <input type="text" id="roomCodeInput" placeholder="Kod pokoju" maxlength="4" autocomplete="off" />
-      <div class="buttons">
-        <button id="joinRoom">Dołącz do pokoju</button>
-      </div>
+      <input type="text" id="playerName" placeholder="Podaj swój nick" />
+      <button id="createRoom">Stwórz pokój</button>
+      <input type="text" id="roomCodeInput" placeholder="Kod pokoju" maxlength="4" />
+      <button id="joinRoom">Dołącz do pokoju</button>
       <p id="statusMessage"></p>
     </div>
 
@@ -200,13 +106,7 @@
 
   <script>
     const firebaseConfig = {
-      apiKey: "AIzaSyCyj5pbNgUHaV-_g__sTQmsUtYOhegYoSI",
-      authDomain: "slowny-oszust.firebaseapp.com",
-      databaseURL: "https://slowny-oszust-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "slowny-oszust",
-      storageBucket: "slowny-oszust.firebasestorage.app",
-      messagingSenderId: "679726628348",
-      appId: "1:679726628348:web:83f9c43fee9cf514784679"
+      // <-- tu wklej swoją konfigurację Firebase
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -222,17 +122,11 @@
     const roomCodeDisplay = document.getElementById('roomCodeDisplay');
     const playersList = document.getElementById('playersList');
     const startGameBtn = document.getElementById('startGame');
-    const loading = document.getElementById('loading');
 
     let currentRoomCode = null;
     let currentPlayerId = null;
     let currentPlayerName = null;
     let isHost = false;
-
-    function showLoading(show) {
-      if (show) loading.classList.add('show');
-      else loading.classList.remove('show');
-    }
 
     function generateRoomCode() {
       return Math.random().toString(36).substr(2, 4).toUpperCase();
@@ -258,13 +152,13 @@
     }
 
     function listenToRoom(roomCode) {
-      const roomRef = db.ref(`rooms/${roomCode}`);
+      const roomRef = db.ref(rooms/${roomCode});
 
       roomRef.on('value', (snapshot) => {
         const roomData = snapshot.val();
 
         if (!roomData) {
-          statusMessage.textContent = 'Pokój został usunięty lub nie istnieje.';
+          statusMessage.textContent = 'Pokój został usunięty.';
           resetToLogin();
           return;
         }
@@ -285,25 +179,21 @@
       currentPlayerName = null;
       isHost = false;
       playersList.innerHTML = '';
-      statusMessage.textContent = '';
-      showLoading(false);
     }
 
     createRoomBtn.addEventListener('click', () => {
-      statusMessage.textContent = '';
       const name = playerNameInput.value.trim();
       if (!name) {
-        statusMessage.textContent = 'Wpisz swój nick!';
+        statusMessage.textContent = 'Wpisz nick!';
         return;
       }
 
-      showLoading(true);
       currentPlayerName = name;
       isHost = true;
       currentRoomCode = generateRoomCode();
       currentPlayerId = db.ref().push().key;
 
-      const roomRef = db.ref(`rooms/${currentRoomCode}`);
+      const roomRef = db.ref(rooms/${currentRoomCode});
       roomRef.set({
         players: {
           [currentPlayerId]: { name: currentPlayerName, isHost: true }
@@ -312,16 +202,12 @@
         loginScreen.style.display = 'none';
         gameScreen.style.display = 'block';
         roomCodeDisplay.textContent = currentRoomCode;
-        showLoading(false);
+
         listenToRoom(currentRoomCode);
-      }).catch((err) => {
-        showLoading(false);
-        statusMessage.textContent = 'Błąd tworzenia pokoju: ' + err.message;
       });
     });
 
     joinRoomBtn.addEventListener('click', () => {
-      statusMessage.textContent = '';
       const name = playerNameInput.value.trim();
       const roomCode = roomCodeInput.value.trim().toUpperCase();
 
@@ -330,16 +216,14 @@
         return;
       }
 
-      showLoading(true);
       currentPlayerName = name;
       currentRoomCode = roomCode;
       currentPlayerId = db.ref().push().key;
 
-      const roomRef = db.ref(`rooms/${currentRoomCode}`);
+      const roomRef = db.ref(rooms/${currentRoomCode});
 
       roomRef.once('value').then(snapshot => {
         if (!snapshot.exists()) {
-          showLoading(false);
           statusMessage.textContent = 'Pokój nie istnieje.';
           return;
         }
@@ -351,19 +235,12 @@
           loginScreen.style.display = 'none';
           gameScreen.style.display = 'block';
           roomCodeDisplay.textContent = currentRoomCode;
-          showLoading(false);
+
           listenToRoom(currentRoomCode);
-        }).catch((err) => {
-          showLoading(false);
-          statusMessage.textContent = 'Błąd dołączania: ' + err.message;
         });
-      }).catch(err => {
-        showLoading(false);
-        statusMessage.textContent = 'Błąd połączenia: ' + err.message;
       });
     });
 
-    // Clean up rooms without players
     function cleanupEmptyRooms() {
       const roomsRef = db.ref('rooms');
       roomsRef.on('value', snapshot => {
@@ -372,15 +249,16 @@
 
         for (const [code, room] of Object.entries(rooms)) {
           if (!room.players || Object.keys(room.players).length === 0) {
-            db.ref(`rooms/${code}`).remove();
+            db.ref(rooms/${code}).remove();
           }
         }
       });
     }
+
     cleanupEmptyRooms();
 
     startGameBtn.addEventListener('click', () => {
-      alert('Start gry! Tutaj możesz dodać dalszą logikę.');
+      alert("Start gry! Tutaj dodaj logikę startu gry.");
     });
   </script>
 </body>
