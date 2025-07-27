@@ -25,12 +25,26 @@ body {
   box-shadow: 0 6px 10px rgba(142, 68, 173, 0.4);
 }
 
-h1 {
-  color: var(--color-primary-light);
-  text-align: center;
-  margin-bottom: 30px;
-  font-size: 4.8rem;
+.fancy-title {
+  font-family: 'Pacifico', cursive;
+  font-size: 5.2rem;
+  color: #fffbea;
+  text-shadow: 2px 2px 6px rgba(0,0,0,0.4);
+  animation: titlePop 0.8s ease-out;
+  letter-spacing: 1.5px;
 }
+
+@keyframes titlePop {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
 
 #loginScreen {
   text-align: center;
