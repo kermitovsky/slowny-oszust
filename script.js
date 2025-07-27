@@ -8,15 +8,9 @@ const firebaseConfig = {
   appId: "1:679726628348:web:83f9c43fee9cf514784679"
 };
 
-try {
-  firebase.initializeApp(firebaseConfig);
-  console.log("✅ Firebase zainicjalizowany");
-} catch (error) {
-  console.error("❌ Błąd inicjalizacji Firebase:", error);
-  alert("Błąd połączenia z bazą danych!");
-}
-
+firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
+
 let currentRoomId = null;
 let currentPlayerId = null;
 let playersRef = null;
@@ -24,12 +18,10 @@ let playersRef = null;
 const generateRoomCode = () => Math.random().toString(36).substring(2, 6).toUpperCase();
 const generatePlayerId = () => 'p_' + Math.random().toString(36).substring(2, 9);
 
-function setStatus(message, isError = false) {
+function setStatus(msg, isError = false) {
   const el = document.getElementById('statusMessage');
-  if (el) {
-    el.textContent = message;
-    el.style.color = isError ? 'red' : '#666';
-  }
+  el.textContent = msg;
+  el.style.color = isError ? 'red' : '#666';
 }
 
 function setLoading(isLoading) {
@@ -58,16 +50,20 @@ function updatePlayersList(players) {
   }
 }
 
-function listenForPlayers(roomId) {
+async function preloadAndListenPlayers(roomId) {
+  // Najpierw pobieramy dane raz
+  const snap = await db.ref(`rooms/${roomId}/players`).once('value');
+  updatePlayersList(snap.val());
+
+  // Następnie ustawiamy listener
   if (playersRef) playersRef.off();
   playersRef = db.ref(`rooms/${roomId}/players`);
   playersRef.on('value', (snapshot) => {
-    const players = snapshot.val();
-    updatePlayersList(players);
+    updatePlayersList(snapshot.val());
   });
 }
 
-// 🔵 TWORZENIE POKOJU
+// 🔵 Tworzenie pokoju
 document.getElementById('createRoom').addEventListener('click', async () => {
   try {
     setLoading(true);
@@ -94,17 +90,17 @@ document.getElementById('createRoom').addEventListener('click', async () => {
     currentPlayerId = playerId;
 
     showGameScreen(roomId);
-    listenForPlayers(roomId);
+    await preloadAndListenPlayers(roomId);
 
   } catch (e) {
-    console.error("Błąd tworzenia pokoju:", e);
+    console.error(e);
     setStatus("Błąd tworzenia pokoju", true);
   } finally {
     setLoading(false);
   }
 });
 
-// 🟢 DOŁĄCZANIE DO POKOJU
+// 🟢 Dołączanie do pokoju
 document.getElementById('joinRoom').addEventListener('click', async () => {
   try {
     setLoading(true);
@@ -121,8 +117,9 @@ document.getElementById('joinRoom').addEventListener('click', async () => {
     if (!snapshot.exists()) throw new Error("Pokój nie istnieje");
 
     const players = snapshot.val().players || {};
-    const nameTaken = Object.values(players).some(p => p.name === name);
-    if (nameTaken) throw new Error("Ten nick jest już zajęty");
+    if (Object.values(players).some(p => p.name === name)) {
+      throw new Error("Ten nick jest już zajęty");
+    }
 
     const playerId = generatePlayerId();
     await db.ref(`rooms/${roomId}/players/${playerId}`).set({
@@ -136,23 +133,18 @@ document.getElementById('joinRoom').addEventListener('click', async () => {
     currentPlayerId = playerId;
 
     showGameScreen(roomId);
-
-    // 📥 Ręczne pobranie przed nasłuchiwaniem
-    const playersSnap = await db.ref(`rooms/${roomId}/players`).once('value');
-    updatePlayersList(playersSnap.val());
-
-    listenForPlayers(roomId);
+    await preloadAndListenPlayers(roomId);
     setStatus("");
 
   } catch (e) {
-    console.error("Błąd dołączenia:", e);
+    console.error("Błąd dołączania:", e);
     setStatus(e.message, true);
   } finally {
     setLoading(false);
   }
 });
 
-// 🔁 CZYSZCZENIE PRZY WYJŚCIU
+// ❌ Usuwanie gracza przy wyjściu
 window.addEventListener('beforeunload', () => {
   if (currentRoomId && currentPlayerId) {
     db.ref(`rooms/${currentRoomId}/players/${currentPlayerId}`).remove();
@@ -160,6 +152,6 @@ window.addEventListener('beforeunload', () => {
   if (playersRef) playersRef.off();
 });
 
-// 🧼 Czyść status na inputach
+// 🧼 Reset statusu na inputach
 document.getElementById('playerName').addEventListener('input', () => setStatus(""));
 document.getElementById('roomCodeInput').addEventListener('input', () => setStatus(""));
