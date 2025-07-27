@@ -1,108 +1,122 @@
-// Inicjalizacja Firebase
-const firebaseConfig = {
-  apiKey: "AIzaSyCyj5pbNgUHaV-_g__sTQmsUtYOhegYoSI",
-  authDomain: "slowny-oszust.firebaseapp.com",
-  databaseURL: "https://slowny-oszust-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "slowny-oszust",
-  storageBucket: "slowny-oszust.firebasestorage.app",
-  messagingSenderId: "679726628348",
-  appId: "1:679726628348:web:83f9c43fee9cf514784679"
-};
-firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// Test połączenia (możesz później usunąć)
-db.ref('connectionTest').set({
-  status: "active",
-  lastTest: new Date().toISOString()
-}).then(() => {
-  console.log("Połączenie z Firebase działa!");
-});
-
-// Zmienne globalne
-let currentRoomId = null;
-let currentPlayerId = null;
-
 // Elementy DOM
-const createRoomBtn = document.getElementById('createRoom');
-const joinRoomBtn = document.getElementById('joinRoom');
-const playerNameInput = document.getElementById('playerName');
-const roomCodeInput = document.getElementById('roomCodeInput');
-const gameScreen = document.getElementById('gameScreen');
-const roomCodeDisplay = document.getElementById('roomCodeDisplay');
-const playersList = document.getElementById('playersList');
+const elements = {
+    playerName: document.getElementById('playerName'),
+    createRoom: document.getElementById('createRoom'),
+    joinRoom: document.getElementById('joinRoom'),
+    roomCodeInput: document.getElementById('roomCodeInput'),
+    gameScreen: document.getElementById('gameScreen'),
+    loginScreen: document.getElementById('loginScreen'),
+    roomCodeDisplay: document.getElementById('roomCodeDisplay'),
+    playersList: document.getElementById('playersList'),
+    startGame: document.getElementById('startGame')
+};
 
-// Aktualizacja listy graczy
-function updatePlayersList(players) {
-  playersList.innerHTML = '';
-  
-  Object.entries(players).forEach(([id, player]) => {
-    const li = document.createElement('li');
-    li.textContent = player.name;
-    if (player.isImpostor) li.classList.add('impostor');
-    playersList.appendChild(li);
-  });
+// Zmienne stanu gry
+let gameState = {
+    roomId: null,
+    playerId: null,
+    isHost: false
+};
+
+// Generatory
+const generateId = () => Date.now().toString();
+const generateRoomCode = () => Math.random().toString(36).substring(2, 6).toUpperCase();
+
+// Aktualizacja UI
+function updateUI() {
+    if (gameState.roomId) {
+        elements.loginScreen.style.display = 'none';
+        elements.gameScreen.style.display = 'block';
+        elements.roomCodeDisplay.textContent = gameState.roomId;
+        elements.startGame.style.display = gameState.isHost ? 'block' : 'none';
+    }
 }
 
-// Tworzenie pokoju
-createRoomBtn.addEventListener('click', () => {
-  const playerName = playerNameInput.value.trim();
-  if (!playerName) return alert("Podaj nick!");
+// Obsługa pokoju
+function setupRoom() {
+    db.ref(`rooms/${gameState.roomId}`).on('value', (snapshot) => {
+        const room = snapshot.val();
+        
+        if (!room) {
+            alert("Pokój został zamknięty!");
+            window.location.reload();
+            return;
+        }
+        
+        updatePlayersList(room.players);
+        updateUI();
+    });
+}
 
-  currentRoomId = Math.random().toString(36).substring(2, 6).toUpperCase();
-  currentPlayerId = Date.now().toString();
+// Lista graczy
+function updatePlayersList(players) {
+    elements.playersList.innerHTML = '';
+    
+    if (!players) return;
+    
+    Object.entries(players).forEach(([id, player]) => {
+        const li = document.createElement('li');
+        li.textContent = player.name + (player.isImpostor ? " 👿" : "");
+        if (player.isImpostor) li.classList.add('impostor');
+        elements.playersList.appendChild(li);
+    });
+}
 
-  db.ref(`rooms/${currentRoomId}`).set({
-    players: {
-      [currentPlayerId]: {
+// Event listeners
+elements.createRoom.addEventListener('click', () => {
+    const playerName = elements.playerName.value.trim();
+    if (!playerName) return alert("Podaj nick!");
+    
+    gameState = {
+        roomId: generateRoomCode(),
+        playerId: generateId(),
+        isHost: true
+    };
+    
+    db.ref(`rooms/${gameState.roomId}`).set({
+        players: {
+            [gameState.playerId]: {
+                name: playerName,
+                isImpostor: false
+            }
+        },
+        status: "waiting",
+        createdAt: firebase.database.ServerValue.TIMESTAMP
+    });
+    
+    setupRoom();
+});
+
+elements.joinRoom.addEventListener('click', () => {
+    const playerName = elements.playerName.value.trim();
+    const roomId = elements.roomCodeInput.value.trim().toUpperCase();
+    
+    if (!playerName || !roomId) return alert("Podaj nick i kod pokoju!");
+    
+    gameState = {
+        roomId: roomId,
+        playerId: generateId(),
+        isHost: false
+    };
+    
+    db.ref(`rooms/${roomId}/players/${gameState.playerId}`).set({
         name: playerName,
         isImpostor: false
-      }
-    },
-    status: "waiting",
-    createdAt: firebase.database.ServerValue.TIMESTAMP
-  });
-
-  // Nasłuchiwanie zmian w pokoju
-  db.ref(`rooms/${currentRoomId}`).on('value', (snapshot) => {
-    const room = snapshot.val();
-    if (!room) return;
+    });
     
-    roomCodeDisplay.textContent = currentRoomId;
-    updatePlayersList(room.players);
-    gameScreen.style.display = 'block';
-  });
+    setupRoom();
 });
 
-// Dołączanie do pokoju
-joinRoomBtn.addEventListener('click', () => {
-  const playerName = playerNameInput.value.trim();
-  const roomId = roomCodeInput.value.trim().toUpperCase();
-  
-  if (!playerName || !roomId) return alert("Podaj nick i kod pokoju!");
-
-  currentRoomId = roomId;
-  currentPlayerId = Date.now().toString();
-
-  db.ref(`rooms/${roomId}/players/${currentPlayerId}`).set({
-    name: playerName,
-    isImpostor: false
-  });
-
-  // Nasłuchiwanie zmian w pokoju
-  db.ref(`rooms/${roomId}`).on('value', (snapshot) => {
-    if (!snapshot.exists()) return alert("Pokój nie istnieje!");
-    const room = snapshot.val();
-    
-    roomCodeDisplay.textContent = roomId;
-    updatePlayersList(room.players);
-    gameScreen.style.display = 'block';
-  });
+elements.startGame.addEventListener('click', () => {
+    // Tu dodamy logikę rozpoczęcia gry w następnym kroku
+    alert("Rozpoczynamy grę! (Ta funkcja będzie działać w następnej wersji)");
 });
 
-// Czyszczenie danych przy zamknięciu strony
+// Czyszczenie danych
 window.addEventListener('beforeunload', () => {
-  if (currentRoomId && currentPlayerId) {
-    db.ref(`rooms/${currentRoomId}/players/${currentPlayerId}`).remove();
-  }
+    if (gameState.roomId && gameState.playerId) {
+        db.ref(`rooms/${gameState.roomId}/players/${gameState.playerId}`).remove();
+    }
 });
