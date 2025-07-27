@@ -9,41 +9,44 @@
 <body>
     <div class="container">
         <h1>🕵️‍♂️ Słowny Oszust</h1>
-        <p>Polska gra w wykrywanie oszusta!</p>
         
-        <div class="buttons">
-            <button id="createRoom">Stwórz pokój</button>
-            <input type="text" id="roomCodeInput" placeholder="Kod pokoju">
-            <button id="joinRoom">Dołącz</button>
+        <div id="loginScreen">
+            <input type="text" id="playerName" placeholder="Twój nick" required>
+            <div class="buttons">
+                <button id="createRoom">Stwórz pokój</button>
+                <div class="join-section">
+                    <input type="text" id="roomCodeInput" placeholder="Kod pokoju">
+                    <button id="joinRoom">Dołącz</button>
+                </div>
+            </div>
         </div>
-        
+
         <div id="gameScreen" style="display: none;">
-            <h2>Gra się rozpoczęła!</h2>
-            <p id="playerRole">Twój status: <span>Ładowanie...</span></p>
+            <h2>Pokój: <span id="roomCodeDisplay"></span></h2>
+            <h3>Gracze online:</h3>
+            <ul id="playersList"></ul>
+            <button id="startGame" style="display: none;">Rozpocznij grę</button>
         </div>
     </div>
 
-    <script src="script.js"></script>
-
     <!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
-
-<script>
-  // Konfiguracja Firebase (skopiuj z Firebase Console)
- const firebaseConfig = {
-  apiKey: "AIzaSyCyj5pbNgUHaV-_g__sTQmsUtYOhegYoSI",
-  authDomain: "slowny-oszust.firebaseapp.com",
-  databaseURL: "https://slowny-oszust-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "slowny-oszust",
-  storageBucket: "slowny-oszust.firebasestorage.app",
-  messagingSenderId: "679726628348",
-  appId: "1:679726628348:web:83f9c43fee9cf514784679"
-  };
-  firebase.initializeApp(firebaseConfig);
-
-  // Referencja do bazy danych
-  const db = firebase.database();
-</script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+    
+    <!-- Twoja konfiguracja Firebase -->
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyCyj5pbNgUHaV-_g__sTQmsUtYOhegYoSI",
+        authDomain: "slowny-oszust.firebaseapp.com",
+        databaseURL: "https://slowny-oszust-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "slowny-oszust",
+        storageBucket: "slowny-oszust.firebasestorage.app",
+        messagingSenderId: "679726628348",
+        appId: "1:679726628348:web:83f9c43fee9cf514784679"
+      };
+      firebase.initializeApp(firebaseConfig);
+    </script>
+    
+    <script src="script.js"></script>
 </body>
 </html>
