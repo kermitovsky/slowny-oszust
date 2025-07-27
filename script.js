@@ -20,6 +20,7 @@ try {
 const db = firebase.database();
 let currentRoomId = null;
 let currentPlayerId = null;
+let playersRef = null;
 
 // Generowanie ID
 const generateRoomCode = () => Math.random().toString(36).substring(2, 6).toUpperCase();
@@ -48,7 +49,8 @@ function updatePlayersList(players) {
   playersList.innerHTML = '';
   
   if (players) {
-    Object.entries(players).forEach(([id, player]) => {
+    console.log("Aktualizacja listy graczy:", players);
+    Object.values(players).forEach(player => {
       const li = document.createElement('li');
       li.textContent = player.name;
       if (player.isHost) {
@@ -57,6 +59,20 @@ function updatePlayersList(players) {
       playersList.appendChild(li);
     });
   }
+}
+
+// Rozwiązanie alternatywne - wymuszona synchronizacja
+function syncPlayers() {
+  if (!currentRoomId) return;
+  
+  db.ref(`rooms/${currentRoomId}/players`).once('value')
+    .then(snapshot => {
+      const players = snapshot.val() || {};
+      updatePlayersList(players);
+    })
+    .catch(error => {
+      console.error("Błąd synchronizacji:", error);
+    });
 }
 
 // Tworzenie pokoju
@@ -90,9 +106,14 @@ document.getElementById('createRoom').addEventListener('click', async function()
     currentPlayerId = playerId;
     showGameScreen(roomId);
     
-    db.ref(`rooms/${roomId}/players`).on('value', (snapshot) => {
+    // Nasłuchiwanie zmian
+    playersRef = db.ref(`rooms/${roomId}/players`);
+    playersRef.on('value', (snapshot) => {
       updatePlayersList(snapshot.val());
     });
+    
+    // Wymuszona synchronizacja co 2 sekundy (tymczasowe rozwiązanie)
+    setInterval(syncPlayers, 2000);
     
   } catch (error) {
     console.error("Błąd tworzenia pokoju:", error);
@@ -102,7 +123,7 @@ document.getElementById('createRoom').addEventListener('click', async function()
   }
 });
 
-// Funkcja dołączania do pokoju - ZAKTUALIZOWANA
+// Dołączanie do pokoju
 document.getElementById('joinRoom').addEventListener('click', async function() {
   try {
     setLoading(true);
@@ -111,7 +132,6 @@ document.getElementById('joinRoom').addEventListener('click', async function() {
     const roomId = document.getElementById('roomCodeInput').value.trim().toUpperCase();
     const playerName = document.getElementById('playerName').value.trim();
 
-    // Walidacja danych
     if (!roomId || roomId.length !== 4) {
       throw new Error("Podaj poprawny 4-znakowy kod pokoju");
     }
@@ -146,62 +166,21 @@ document.getElementById('joinRoom').addEventListener('click', async function() {
     showGameScreen(roomId);
     setStatus("");
     
-    // NIEZBĘDNA ZMIANA - inicjalizacja nasłuchiwania PRZED aktualizacją UI
-    const playersRef = db.ref(`rooms/${roomId}/players`);
-    
-    // Nasłuchiwanie zmian - ZAKTUALIZOWANE
-    playersRef.on('value', (snapshot) => {
-      const playersData = snapshot.val() || {};
-      console.log("Odebrano dane graczy:", playersData);
-      updatePlayersList(playersData);
-    });
-
-    // Ręczne pobranie aktualnego stanu
-    const initialPlayers = (await playersRef.once('value')).val() || {};
-    updatePlayersList(initialPlayers);
-
-  } catch (error) {
-    console.error("Błąd dołączania:", error);
-    setStatus(error.message, true);
-  } finally {
-    setLoading(false);
-  }
-});
-
-// Funkcja aktualizacji listy graczy - ZAKTUALIZOWANA
-function updatePlayersList(players) {
-  const playersList = document.getElementById('playersList');
-  playersList.innerHTML = '';
-  
-  if (players) {
-    console.log("Aktualizacja listy graczy:", players);
-    Object.values(players).forEach(player => {
-      const li = document.createElement('li');
-      li.textContent = player.name;
-      if (player.isHost) {
-        li.innerHTML += ' <span style="color:#4285f4">(host)</span>';
-      }
-      playersList.appendChild(li);
-    });
-  } else {
-    console.log("Brak danych graczy do wyświetlenia");
-  }
-}
-    
     // Nasłuchiwanie zmian
-    db.ref(`rooms/${roomId}/players`).on('value', (snapshot) => {
+    playersRef = db.ref(`rooms/${roomId}/players`);
+    playersRef.on('value', (snapshot) => {
       updatePlayersList(snapshot.val());
     });
+    
+    // Wymuszona synchronizacja co 2 sekundy (tymczasowe rozwiązanie)
+    setInterval(syncPlayers, 2000);
+    
+    // Ręczna synchronizacja od razu
+    syncPlayers();
 
   } catch (error) {
     console.error("Błąd dołączania:", error);
     setStatus(error.message, true);
-    
-    // Dodatkowe logowanie błędu
-    if (error.message.includes('PERMISSION_DENIED')) {
-      console.error("Błąd dostępu - sprawdź reguły bezpieczeństwa Firebase");
-      setStatus("Błąd dostępu do bazy danych. Spróbuj ponownie za chwilę.", true);
-    }
   } finally {
     setLoading(false);
   }
@@ -211,6 +190,9 @@ function updatePlayersList(players) {
 window.addEventListener('beforeunload', () => {
   if (currentRoomId && currentPlayerId) {
     db.ref(`rooms/${currentRoomId}/players/${currentPlayerId}`).remove();
+  }
+  if (playersRef) {
+    playersRef.off();
   }
 });
 
