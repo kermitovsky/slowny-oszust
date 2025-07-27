@@ -1,122 +1,102 @@
+// Użyj istniejącej inicjalizacji Firebase
 const db = firebase.database();
 
-// Elementy DOM
-const elements = {
-    playerName: document.getElementById('playerName'),
-    createRoom: document.getElementById('createRoom'),
-    joinRoom: document.getElementById('joinRoom'),
-    roomCodeInput: document.getElementById('roomCodeInput'),
-    gameScreen: document.getElementById('gameScreen'),
-    loginScreen: document.getElementById('loginScreen'),
-    roomCodeDisplay: document.getElementById('roomCodeDisplay'),
-    playersList: document.getElementById('playersList'),
-    startGame: document.getElementById('startGame')
-};
-
-// Zmienne stanu gry
-let gameState = {
-    roomId: null,
-    playerId: null,
-    isHost: false
-};
-
-// Generatory
-const generateId = () => Date.now().toString();
-const generateRoomCode = () => Math.random().toString(36).substring(2, 6).toUpperCase();
-
-// Aktualizacja UI
-function updateUI() {
-    if (gameState.roomId) {
-        elements.loginScreen.style.display = 'none';
-        elements.gameScreen.style.display = 'block';
-        elements.roomCodeDisplay.textContent = gameState.roomId;
-        elements.startGame.style.display = gameState.isHost ? 'block' : 'none';
+// Test połączenia
+db.ref('.info/connected').on('value', (snapshot) => {
+    if (snapshot.val() === true) {
+        console.log("Połączenie z Firebase działa!");
+    } else {
+        console.log("Brak połączenia z Firebase");
     }
-}
+});
 
-// Obsługa pokoju
-function setupRoom() {
-    db.ref(`rooms/${gameState.roomId}`).on('value', (snapshot) => {
-        const room = snapshot.val();
-        
-        if (!room) {
-            alert("Pokój został zamknięty!");
-            window.location.reload();
-            return;
-        }
-        
-        updatePlayersList(room.players);
-        updateUI();
-    });
-}
+// Zmienne gry
+let currentRoomId = null;
+let currentPlayerId = null;
 
-// Lista graczy
-function updatePlayersList(players) {
-    elements.playersList.innerHTML = '';
-    
-    if (!players) return;
-    
-    Object.entries(players).forEach(([id, player]) => {
-        const li = document.createElement('li');
-        li.textContent = player.name + (player.isImpostor ? " 👿" : "");
-        if (player.isImpostor) li.classList.add('impostor');
-        elements.playersList.appendChild(li);
-    });
-}
+// Referencje do elementów DOM
+const playerNameInput = document.getElementById('playerName');
+const createRoomBtn = document.getElementById('createRoom');
+const joinRoomBtn = document.getElementById('joinRoom');
+const roomCodeInput = document.getElementById('roomCodeInput');
+const gameScreen = document.getElementById('gameScreen');
+const roomCodeDisplay = document.getElementById('roomCodeDisplay');
+const playersList = document.getElementById('playersList');
 
-// Event listeners
-elements.createRoom.addEventListener('click', () => {
-    const playerName = elements.playerName.value.trim();
+// Tworzenie pokoju
+createRoomBtn.addEventListener('click', () => {
+    const playerName = playerNameInput.value.trim();
     if (!playerName) return alert("Podaj nick!");
     
-    gameState = {
-        roomId: generateRoomCode(),
-        playerId: generateId(),
-        isHost: true
-    };
+    currentRoomId = Math.random().toString(36).substring(2, 6).toUpperCase();
+    currentPlayerId = 'player_' + Date.now();
     
-    db.ref(`rooms/${gameState.roomId}`).set({
+    db.ref(`rooms/${currentRoomId}`).set({
         players: {
-            [gameState.playerId]: {
+            [currentPlayerId]: {
                 name: playerName,
                 isImpostor: false
             }
         },
         status: "waiting",
         createdAt: firebase.database.ServerValue.TIMESTAMP
+    }).then(() => {
+        setupRoomListeners();
+        gameScreen.style.display = 'block';
+        roomCodeDisplay.textContent = currentRoomId;
+    }).catch(error => {
+        console.error("Błąd tworzenia pokoju:", error);
     });
-    
-    setupRoom();
 });
 
-elements.joinRoom.addEventListener('click', () => {
-    const playerName = elements.playerName.value.trim();
-    const roomId = elements.roomCodeInput.value.trim().toUpperCase();
+// Dołączanie do pokoju
+joinRoomBtn.addEventListener('click', () => {
+    const playerName = playerNameInput.value.trim();
+    const roomId = roomCodeInput.value.trim().toUpperCase();
     
     if (!playerName || !roomId) return alert("Podaj nick i kod pokoju!");
     
-    gameState = {
-        roomId: roomId,
-        playerId: generateId(),
-        isHost: false
-    };
+    currentRoomId = roomId;
+    currentPlayerId = 'player_' + Date.now();
     
-    db.ref(`rooms/${roomId}/players/${gameState.playerId}`).set({
+    db.ref(`rooms/${roomId}/players/${currentPlayerId}`).set({
         name: playerName,
         isImpostor: false
+    }).then(() => {
+        setupRoomListeners();
+        gameScreen.style.display = 'block';
+        roomCodeDisplay.textContent = roomId;
+    }).catch(error => {
+        console.error("Błąd dołączania:", error);
     });
-    
-    setupRoom();
 });
 
-elements.startGame.addEventListener('click', () => {
-    // Tu dodamy logikę rozpoczęcia gry w następnym kroku
-    alert("Rozpoczynamy grę! (Ta funkcja będzie działać w następnej wersji)");
-});
+// Nasłuchiwanie zmian w pokoju
+function setupRoomListeners() {
+    db.ref(`rooms/${currentRoomId}`).on('value', (snapshot) => {
+        const room = snapshot.val();
+        if (!room) {
+            alert("Pokój został zamknięty!");
+            return;
+        }
+        updatePlayersList(room.players);
+    });
+}
 
-// Czyszczenie danych
+// Aktualizacja listy graczy
+function updatePlayersList(players) {
+    playersList.innerHTML = '';
+    Object.entries(players).forEach(([id, player]) => {
+        const li = document.createElement('li');
+        li.textContent = player.name;
+        if (player.isImpostor) li.classList.add('impostor');
+        playersList.appendChild(li);
+    });
+}
+
+// Czyszczenie przy zamknięciu
 window.addEventListener('beforeunload', () => {
-    if (gameState.roomId && gameState.playerId) {
-        db.ref(`rooms/${gameState.roomId}/players/${gameState.playerId}`).remove();
+    if (currentRoomId && currentPlayerId) {
+        db.ref(`rooms/${currentRoomId}/players/${currentPlayerId}`).remove();
     }
 });
