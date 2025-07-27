@@ -53,7 +53,8 @@ function showGameScreen(roomId) {
 }
 
 function updatePlayersList(players, myPlayerId) {
-  console.log("updatePlayersList, myPlayerId:", myPlayerId);
+  console.log("updatePlayersList called");
+  console.log("currentPlayerId:", myPlayerId);
   const playersList = document.getElementById('playersList');
   if (!playersList) {
     console.error("Element playersList nie istnieje!");
@@ -92,7 +93,6 @@ function initPlayersListener(roomId) {
     updatePlayersList(snapshot.val(), currentPlayerId);
   });
   
-  // Ręczne pobranie początkowego stanu
   playersRef.once('value').then(snapshot => {
     console.log(`[${roomId}] Początkowy stan graczy:`, snapshot.val());
     updatePlayersList(snapshot.val(), currentPlayerId);
@@ -128,7 +128,9 @@ document.getElementById('createRoom').addEventListener('click', async function()
 
     currentRoomId = roomId;
     currentPlayerId = playerId;
-    console.log("Ustawiono currentPlayerId:", currentPlayerId);
+
+    console.log("Ustawiono currentPlayerId (create):", currentPlayerId);
+
     showGameScreen(roomId);
     initPlayersListener(roomId);
     
@@ -177,7 +179,9 @@ document.getElementById('joinRoom').addEventListener('click', async function() {
 
     currentRoomId = roomId;
     currentPlayerId = playerId;
-    console.log("Ustawiono currentPlayerId:", currentPlayerId);
+
+    console.log("Ustawiono currentPlayerId (join):", currentPlayerId);
+
     showGameScreen(roomId);
     setStatus("");
     initPlayersListener(roomId);
