@@ -216,7 +216,17 @@
       playersRef = db.ref(`rooms/${roomId}/players`);
 
       playersRef.on('value', (snapshot) => {
-        updatePlayersList(snapshot.val());
+        const players = snapshot.val();
+        updatePlayersList(players);
+
+        // Jeśli w pokoju nie ma już żadnego gracza, usuń pokój!
+        if (!players || Object.keys(players).length === 0) {
+          db.ref(`rooms/${roomId}`).remove();
+          // Wyłącz nasłuchiwanie, bo pokój już nie istnieje
+          if (playersRef) playersRef.off();
+          currentRoomId = null;
+          currentPlayerId = null;
+        }
       });
 
       playersRef.once('value').then(snapshot => {
