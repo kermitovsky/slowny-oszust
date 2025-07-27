@@ -1,113 +1,135 @@
+:root {
+  --color-primary: #8e44ad; /* fiolet */
+  --color-secondary: #e67e22; /* pomarańczowy */
+  --color-primary-light: #a569bd;
+  --color-secondary-light: #eb984e;
+  --color-text: #1c1c1c;
+}
+
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #f5f7fa;
-    margin: 0;
-    padding: 20px;
-    color: #2c3e50;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f9f7fa;
+  margin: 0;
+  padding: 20px;
+  color: var(--color-text);
+  font-size: 1.8rem; /* ok. 2 razy większe */
 }
 
 .container {
-    max-width: 600px;
-    margin: 0 auto;
-    background: white;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 700px;
+  margin: 0 auto;
+  background: white;
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0 6px 10px rgba(142, 68, 173, 0.15);
 }
 
 h1 {
-    color: #3498db;
-    text-align: center;
-    margin-bottom: 25px;
+  color: var(--color-primary);
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 4.8rem; /* ok 3 razy większe */
 }
 
 #loginScreen {
-    text-align: center;
+  text-align: center;
 }
 
 input {
-    padding: 12px;
-    margin: 8px 0;
-    width: 80%;
-    max-width: 300px;
-    border: 2px solid #dfe6e9;
-    border-radius: 8px;
-    font-size: 16px;
-    transition: border 0.3s;
+  padding: 18px;
+  margin: 12px 0;
+  width: 80%;
+  max-width: 350px;
+  border: 3px solid var(--color-primary-light);
+  border-radius: 12px;
+  font-size: 2.4rem;
+  transition: border-color 0.3s ease;
 }
 
 input:focus {
-    border-color: #3498db;
-    outline: none;
+  border-color: var(--color-secondary);
+  outline: none;
 }
 
 .buttons {
-    margin-top: 25px;
+  margin-top: 35px;
 }
 
 button {
-    padding: 12px 24px;
-    background: #3498db;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
-    margin: 8px;
-    transition: all 0.3s;
+  padding: 18px 36px;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 2.4rem;
+  margin: 12px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 4px 8px rgba(142, 68, 173, 0.3);
 }
 
 button:hover {
-    background: #2980b9;
-    transform: translateY(-2px);
+  background: var(--color-secondary);
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 6px 12px rgba(230, 126, 34, 0.5);
 }
 
 button:active {
-    transform: translateY(0);
+  transform: translateY(0) scale(1);
 }
 
 .join-section {
-    margin-top: 20px;
+  margin-top: 20px;
 }
 
 #gameScreen {
-    margin-top: 30px;
-    animation: fadeIn 0.5s;
+  margin-top: 40px;
+  animation: fadeIn 0.6s ease;
+  font-size: 2.4rem;
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 #playersList {
-    list-style: none;
-    padding: 0;
-    margin: 20px 0;
+  list-style: none;
+  padding: 0;
+  margin: 30px 0;
 }
 
 #playersList li {
-    padding: 12px;
-    margin: 8px 0;
-    background: #ecf0f1;
-    border-radius: 8px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  padding: 16px;
+  margin: 10px 0;
+  background: #f3e8ff;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 400;
+  color: var(--color-text);
 }
 
-#playersList li.impostor {
-    background: #ffebee;
-    color: #e74c3c;
-    font-weight: bold;
+#playersList li.host {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+#playersList li.self {
+  color: black;
+  font-weight: 700;
 }
 
 #startGame {
-    background: #2ecc71;
-    margin-top: 20px;
-    width: 100%;
+  background: var(--color-secondary);
+  margin-top: 30px;
+  width: 100%;
+  font-weight: 700;
+  box-shadow: 0 5px 10px rgba(230, 126, 34, 0.4);
 }
 
 #startGame:hover {
-    background: #27ae60;
+  background: var(--color-primary);
+  box-shadow: 0 7px 14px rgba(142, 68, 173, 0.5);
 }
