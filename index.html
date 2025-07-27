@@ -24,5 +24,26 @@
     </div>
 
     <script src="script.js"></script>
+
+    <!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+
+<script>
+  // Konfiguracja Firebase (skopiuj z Firebase Console)
+ const firebaseConfig = {
+  apiKey: "AIzaSyCyj5pbNgUHaV-_g__sTQmsUtYOhegYoSI",
+  authDomain: "slowny-oszust.firebaseapp.com",
+  databaseURL: "https://slowny-oszust-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "slowny-oszust",
+  storageBucket: "slowny-oszust.firebasestorage.app",
+  messagingSenderId: "679726628348",
+  appId: "1:679726628348:web:83f9c43fee9cf514784679"
+  };
+  firebase.initializeApp(firebaseConfig);
+
+  // Referencja do bazy danych
+  const db = firebase.database();
+</script>
 </body>
 </html>
