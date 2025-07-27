@@ -4,25 +4,95 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Słowny Oszust</title>
-  <link rel="stylesheet" href="style.css" />
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <style>
+    body {
+      background-color: #e67e22; /* pomarańczowe tło */
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #fff;
+      font-size: 2rem;
+      margin: 0;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: #d35400;
+      padding: 2rem;
+      border-radius: 1.5rem;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 3.5rem;
+      color: #f5f5f5;
+    }
+
+    input, button {
+      font-size: 2rem;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 0.8rem;
+      border: none;
+      width: 100%;
+      max-width: 400px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    input {
+      border: 2px solid #8e44ad;
+      color: #333;
+    }
+
+    button {
+      background-color: #8e44ad;
+      color: white;
+      cursor: pointer;
+      transition: transform 0.2s ease, background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #9b59b6;
+      transform: scale(1.05);
+    }
+
+    #playersList {
+      list-style: none;
+      padding: 0;
+    }
+
+    #playersList li {
+      padding: 1rem;
+      margin: 0.5rem 0;
+      border-radius: 1rem;
+      background-color: #f9f3f0;
+      color: #333;
+    }
+
+    .host {
+      color: #3498db !important;
+      font-weight: bold;
+    }
+
+    .self {
+      color: black !important;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
     <h1>Słowny Oszust</h1>
-
     <div id="loginScreen">
       <input type="text" id="playerName" placeholder="Podaj swój nick" />
-      <br />
       <button id="createRoom">Stwórz pokój</button>
-
-      <div class="join-section">
-        <input type="text" id="roomCodeInput" placeholder="Kod pokoju" maxlength="4" />
-        <br />
-        <button id="joinRoom">Dołącz do pokoju</button>
-      </div>
-
+      <input type="text" id="roomCodeInput" placeholder="Kod pokoju" maxlength="4" />
+      <button id="joinRoom">Dołącz do pokoju</button>
       <p id="statusMessage"></p>
     </div>
 
@@ -34,15 +104,13 @@
   </div>
 
   <script>
-    // Firebase init
     const firebaseConfig = {
-      // Twoja konfiguracja Firebase
+      // <-- tu wklej swoją konfigurację Firebase
     };
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Elementy DOM
     const playerNameInput = document.getElementById('playerName');
     const createRoomBtn = document.getElementById('createRoom');
     const joinRoomBtn = document.getElementById('joinRoom');
@@ -60,7 +128,7 @@
     let isHost = false;
 
     function generateRoomCode() {
-      return Math.random().toString(36).substring(2, 6).toUpperCase();
+      return Math.random().toString(36).substr(2, 4).toUpperCase();
     }
 
     function updatePlayersList(players) {
@@ -71,7 +139,7 @@
 
         if (player.isHost) {
           li.classList.add('host');
-          li.innerHTML += ' <span>(host)</span>';
+          li.textContent += ' (host)';
         }
 
         if (id === currentPlayerId) {
@@ -89,7 +157,7 @@
         const roomData = snapshot.val();
 
         if (!roomData) {
-          statusMessage.textContent = 'Pokój został zamknięty lub nie istnieje.';
+          statusMessage.textContent = 'Pokój został usunięty.';
           resetToLogin();
           return;
         }
@@ -109,14 +177,13 @@
       currentPlayerId = null;
       currentPlayerName = null;
       isHost = false;
-      roomCodeDisplay.textContent = '';
       playersList.innerHTML = '';
     }
 
     createRoomBtn.addEventListener('click', () => {
       const name = playerNameInput.value.trim();
       if (!name) {
-        statusMessage.textContent = 'Wpisz swój nick!';
+        statusMessage.textContent = 'Wpisz nick!';
         return;
       }
 
@@ -126,13 +193,11 @@
       currentPlayerId = db.ref().push().key;
 
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
-
       roomRef.set({
         players: {
           [currentPlayerId]: { name: currentPlayerName, isHost: true }
         }
       }).then(() => {
-        statusMessage.textContent = 'Pokój stworzony!';
         loginScreen.style.display = 'none';
         gameScreen.style.display = 'block';
         roomCodeDisplay.textContent = currentRoomCode;
@@ -153,7 +218,6 @@
       currentPlayerName = name;
       currentRoomCode = roomCode;
       currentPlayerId = db.ref().push().key;
-      isHost = false;
 
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
 
@@ -167,7 +231,6 @@
         players[currentPlayerId] = { name: currentPlayerName, isHost: false };
 
         roomRef.child('players').set(players).then(() => {
-          statusMessage.textContent = 'Dołączono do pokoju!';
           loginScreen.style.display = 'none';
           gameScreen.style.display = 'block';
           roomCodeDisplay.textContent = currentRoomCode;
@@ -177,28 +240,25 @@
       });
     });
 
-    // Usuwanie pustych pokojów na bieżąco
-    function cleanupRooms() {
+    function cleanupEmptyRooms() {
       const roomsRef = db.ref('rooms');
       roomsRef.on('value', snapshot => {
         const rooms = snapshot.val();
         if (!rooms) return;
 
-        Object.entries(rooms).forEach(([roomCode, roomData]) => {
-          if (!roomData.players || Object.keys(roomData.players).length === 0) {
-            db.ref(`rooms/${roomCode}`).remove();
+        for (const [code, room] of Object.entries(rooms)) {
+          if (!room.players || Object.keys(room.players).length === 0) {
+            db.ref(`rooms/${code}`).remove();
           }
-        });
+        }
       });
     }
 
-    cleanupRooms();
+    cleanupEmptyRooms();
 
-    // Opcjonalnie: obsługa przycisku start (przykład)
     startGameBtn.addEventListener('click', () => {
-      alert('Gra rozpoczęta! (tu możesz dodać swoją logikę)');
+      alert("Start gry! Tutaj dodaj logikę startu gry.");
     });
-
   </script>
 </body>
 </html>
