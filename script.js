@@ -52,7 +52,8 @@ function showGameScreen(roomId) {
   if (roomCodeDisplay) roomCodeDisplay.textContent = roomId;
 }
 
-function updatePlayersList(players) {
+function updatePlayersList(players, myPlayerId) {
+  console.log("updatePlayersList, myPlayerId:", myPlayerId);
   const playersList = document.getElementById('playersList');
   if (!playersList) {
     console.error("Element playersList nie istnieje!");
@@ -67,8 +68,7 @@ function updatePlayersList(players) {
       const li = document.createElement('li');
       li.textContent = player.name;
 
-      // Pogrub nick jeśli to aktualny gracz
-      if (id === currentPlayerId) {
+      if (id === myPlayerId) {
         li.style.fontWeight = 'bold';
       }
 
@@ -89,13 +89,13 @@ function initPlayersListener(roomId) {
   
   playersRef.on('value', (snapshot) => {
     console.log(`[${roomId}] Odebrano aktualizację graczy:`, snapshot.val());
-    updatePlayersList(snapshot.val());
+    updatePlayersList(snapshot.val(), currentPlayerId);
   });
   
   // Ręczne pobranie początkowego stanu
   playersRef.once('value').then(snapshot => {
     console.log(`[${roomId}] Początkowy stan graczy:`, snapshot.val());
-    updatePlayersList(snapshot.val());
+    updatePlayersList(snapshot.val(), currentPlayerId);
   });
 }
 
@@ -128,6 +128,7 @@ document.getElementById('createRoom').addEventListener('click', async function()
 
     currentRoomId = roomId;
     currentPlayerId = playerId;
+    console.log("Ustawiono currentPlayerId:", currentPlayerId);
     showGameScreen(roomId);
     initPlayersListener(roomId);
     
@@ -176,6 +177,7 @@ document.getElementById('joinRoom').addEventListener('click', async function() {
 
     currentRoomId = roomId;
     currentPlayerId = playerId;
+    console.log("Ustawiono currentPlayerId:", currentPlayerId);
     showGameScreen(roomId);
     setStatus("");
     initPlayersListener(roomId);
