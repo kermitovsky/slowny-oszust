@@ -9,8 +9,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script>
-        // Konfiguracja Firebase - TWOJE DANE
-        const firebaseConfig = {
+        // Inicjalizacja Firebase TYLKO TUTAJ
+        const firebaseApp = firebase.initializeApp({
             apiKey: "AIzaSyCyj5pbNgUHaV-_g__sTQmsUtYOhegYoSI",
             authDomain: "slowny-oszust.firebaseapp.com",
             databaseURL: "https://slowny-oszust-default-rtdb.europe-west1.firebasedatabase.app",
@@ -18,9 +18,7 @@
             storageBucket: "slowny-oszust.firebasestorage.app",
             messagingSenderId: "679726628348",
             appId: "1:679726628348:web:83f9c43fee9cf514784679"
-        };
-        // Inicjalizacja Firebase
-        firebase.initializeApp(firebaseConfig);
+        });
     </script>
 </head>
 <body>
@@ -42,25 +40,9 @@
             <h2>Pokój: <span id="roomCodeDisplay"></span></h2>
             <h3>Gracze online:</h3>
             <ul id="playersList"></ul>
-            <button id="startGame" style="display: none;">Rozpocznij grę</button>
         </div>
     </div>
 
-    <!-- Główny skrypt -->
     <script src="script.js"></script>
-
-    <!-- Skrypt diagnostyczny (możesz usunąć po testach) -->
-    <script>
-        // Test połączenia z Firebase
-        console.log("Weryfikacja połączenia z Firebase...");
-        firebase.database().ref('connectionTest').set({
-            test: "success",
-            timestamp: new Date().toISOString()
-        }).then(() => {
-            console.log("Połączenie z Firebase działa poprawnie!");
-        }).catch(error => {
-            console.error("Błąd połączenia z Firebase:", error);
-        });
-    </script>
 </body>
 </html>
