@@ -102,7 +102,7 @@ document.getElementById('createRoom').addEventListener('click', async function()
   }
 });
 
-// Dołączanie do pokoju (ZMODYFIKOWANE - pełna obsługa błędów)
+// Funkcja dołączania do pokoju - ZAKTUALIZOWANA
 document.getElementById('joinRoom').addEventListener('click', async function() {
   try {
     setLoading(true);
@@ -145,6 +145,48 @@ document.getElementById('joinRoom').addEventListener('click', async function() {
     currentPlayerId = playerId;
     showGameScreen(roomId);
     setStatus("");
+    
+    // NIEZBĘDNA ZMIANA - inicjalizacja nasłuchiwania PRZED aktualizacją UI
+    const playersRef = db.ref(`rooms/${roomId}/players`);
+    
+    // Nasłuchiwanie zmian - ZAKTUALIZOWANE
+    playersRef.on('value', (snapshot) => {
+      const playersData = snapshot.val() || {};
+      console.log("Odebrano dane graczy:", playersData);
+      updatePlayersList(playersData);
+    });
+
+    // Ręczne pobranie aktualnego stanu
+    const initialPlayers = (await playersRef.once('value')).val() || {};
+    updatePlayersList(initialPlayers);
+
+  } catch (error) {
+    console.error("Błąd dołączania:", error);
+    setStatus(error.message, true);
+  } finally {
+    setLoading(false);
+  }
+});
+
+// Funkcja aktualizacji listy graczy - ZAKTUALIZOWANA
+function updatePlayersList(players) {
+  const playersList = document.getElementById('playersList');
+  playersList.innerHTML = '';
+  
+  if (players) {
+    console.log("Aktualizacja listy graczy:", players);
+    Object.values(players).forEach(player => {
+      const li = document.createElement('li');
+      li.textContent = player.name;
+      if (player.isHost) {
+        li.innerHTML += ' <span style="color:#4285f4">(host)</span>';
+      }
+      playersList.appendChild(li);
+    });
+  } else {
+    console.log("Brak danych graczy do wyświetlenia");
+  }
+}
     
     // Nasłuchiwanie zmian
     db.ref(`rooms/${roomId}/players`).on('value', (snapshot) => {
