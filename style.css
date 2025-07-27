@@ -25,6 +25,12 @@ body {
   box-shadow: 0 6px 10px rgba(142, 68, 173, 0.4);
 }
 
+h1 {
+  font-family: 'Pacifico', cursive;
+  ...
+}
+
+
 .fancy-title {
   font-family: 'Pacifico', cursive;
   font-size: 5.2rem;
