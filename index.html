@@ -3,155 +3,235 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Słowny Oszust</title>
+  <title>Słowny Impostor</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+
+  <!-- Czcionka Pacifico -->
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet" />
+  
+  <!-- Ikonki Font Awesome -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    integrity="sha512-p6tKe2B0Z9Ui/7aRfvfDb5TpRZqQG9Vdz+VBWzOYP7jvRwtZ+qzUyXPupzN+LtUjQ9P8uYbKfUFi56Kz9++bRQ=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
+
   <style>
+    :root {
+      --color-primary: #8e44ad; /* fiolet */
+      --color-secondary: #e67e22; /* pomarańczowy */
+      --color-primary-light: #a569bd;
+      --color-secondary-light: #eb984e;
+      --color-text: #f5f5f5; /* jasny tekst */
+      --color-bg-container: #d35400; /* ciemniejszy pomarańcz dla kontenera */
+    }
+
     body {
-      background-color: #e67e22; /* pomarańczowe tło */
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      color: #fff;
-      font-size: 2rem;
+      background: var(--color-secondary);
       margin: 0;
-      padding: 2rem;
+      padding: 20px;
+      color: var(--color-text);
+      font-size: 1.8rem;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
     .container {
-      max-width: 800px;
-      margin: auto;
-      background: #d35400;
-      padding: 2rem;
-      border-radius: 1.5rem;
-      box-shadow: 0 0 20px rgba(0,0,0,0.3);
-      display: none; /* ukryte do czasu załadowania */
+      max-width: 700px;
+      width: 100%;
+      background: var(--color-bg-container);
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 6px 10px rgba(142, 68, 173, 0.4);
+      position: relative;
     }
 
     h1 {
+      color: var(--color-primary-light);
       text-align: center;
+      margin-bottom: 30px;
+      font-size: 4.8rem;
       font-family: 'Pacifico', cursive;
-      font-size: 3.5rem;
-      color: #f5f5f5;
-      margin-bottom: 2rem;
     }
 
-    input, button {
-      font-size: 2rem;
-      padding: 1rem;
-      margin: 1rem 0;
-      border-radius: 0.8rem;
-      border: none;
-      width: 100%;
-      max-width: 400px;
+    #loginScreen {
+      text-align: center;
+    }
+
+    input {
+      padding: 18px;
+      margin: 12px 0;
+      width: 80%;
+      max-width: 350px;
+      border: 3px solid var(--color-primary-light);
+      border-radius: 12px;
+      font-size: 2.4rem;
+      transition: border-color 0.3s ease;
+      background: #f9f3f0;
+      color: #333;
       display: block;
       margin-left: auto;
       margin-right: auto;
     }
 
-    input {
-      border: 2px solid #8e44ad;
-      color: #333;
+    input:focus {
+      border-color: var(--color-primary);
+      outline: none;
+    }
+
+    .buttons {
+      margin-top: 35px;
     }
 
     button {
-      background-color: #8e44ad;
-      color: white;
+      padding: 18px 36px;
+      background: var(--color-primary);
+      color: var(--color-text);
+      border: none;
+      border-radius: 12px;
       cursor: pointer;
-      transition: transform 0.2s ease, background-color 0.3s ease;
+      font-size: 2.4rem;
+      margin: 12px;
+      transition: background-color 0.3s ease, transform 0.2s ease;
       box-shadow: 0 4px 8px rgba(142, 68, 173, 0.6);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
     }
 
     button:hover {
-      background-color: #9b59b6;
-      transform: scale(1.05);
-      box-shadow: 0 6px 12px rgba(155, 89, 182, 0.9);
+      background: var(--color-secondary-light);
+      transform: translateY(-4px) scale(1.05);
+      box-shadow: 0 6px 12px rgba(230, 126, 34, 0.7);
+    }
+
+    button:active {
+      transform: translateY(0) scale(1);
+    }
+
+    .join-section {
+      margin-top: 20px;
+    }
+
+    #gameScreen {
+      margin-top: 40px;
+      animation: fadeIn 0.6s ease;
+      font-size: 2.4rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
 
     #playersList {
       list-style: none;
       padding: 0;
+      margin: 30px 0;
     }
 
     #playersList li {
-      padding: 1rem;
-      margin: 0.5rem 0;
-      border-radius: 1rem;
-      background-color: #f9f3f0;
-      color: #333;
+      padding: 16px;
+      margin: 10px 0;
+      background: #f3e8ff88;
+      border-radius: 12px;
       display: flex;
-      align-items: center;
       justify-content: space-between;
+      align-items: center;
+      font-weight: 400;
+      color: var(--color-text);
     }
 
-    .host {
-      color: #3498db !important;
-      font-weight: bold;
+    #playersList li.host {
+      color: var(--color-primary-light);
+      font-weight: 700;
     }
 
-    .self {
-      color: black !important;
-      font-weight: bold;
+    #playersList li.self {
+      color: black;
+      font-weight: 700;
+      background: #f9f3f0cc;
     }
 
-    /* Loader SVG animation */
+    #startGame {
+      background: var(--color-secondary-light);
+      margin-top: 30px;
+      width: 100%;
+      font-weight: 700;
+      box-shadow: 0 5px 10px rgba(230, 126, 34, 0.6);
+      color: #fff;
+    }
+
+    #startGame:hover {
+      background: var(--color-primary);
+      box-shadow: 0 7px 14px rgba(142, 68, 173, 0.7);
+    }
+
+    /* Loader styles */
     #loader {
-      position: fixed;
+      position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-    }
-    @keyframes spin {
-      0% { stroke-dashoffset: 0; }
-      100% { stroke-dashoffset: 440; }
-    }
-    svg circle {
-      stroke-dasharray: 440;
-      stroke-dashoffset: 0;
-      animation: spin 1.5s linear infinite;
-      stroke: #8e44ad;
-      stroke-width: 10;
-      fill: none;
-      stroke-linecap: round;
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid var(--color-primary);
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      display: none; /* hidden by default */
+      z-index: 100;
     }
 
-    /* Status message styling */
-    #statusMessage {
-      text-align: center;
-      margin-top: 1rem;
-      font-weight: 600;
-      color: #f1c40f;
-      min-height: 2rem;
+    @keyframes spin {
+      0% { transform: translate(-50%, -50%) rotate(0deg); }
+      100% { transform: translate(-50%, -50%) rotate(360deg); }
     }
+
+    /* Status message */
+    #statusMessage {
+      margin-top: 15px;
+      color: #f8d7da;
+      font-weight: 600;
+      min-height: 24px;
+    }
+
   </style>
 </head>
 <body>
-  <!-- Loader -->
-  <div id="loader">
-    <svg width="50" height="50" viewBox="0 0 100 100" >
-      <circle cx="50" cy="50" r="35" />
-    </svg>
-  </div>
-
   <div class="container">
-    <h1 class="fancy-title">Słowny Impostor</h1>
+    <h1>Słowny Impostor</h1>
+
+    <div id="loader"></div>
+
     <div id="loginScreen">
       <input type="text" id="playerName" placeholder="Podaj swój nick" autocomplete="off" />
-      <button id="createRoom">Stwórz pokój 🆕</button>
+      <div class="buttons">
+        <button id="createRoom"><i class="fa fa-plus"></i> Stwórz pokój</button>
+      </div>
       <input type="text" id="roomCodeInput" placeholder="Kod pokoju" maxlength="4" autocomplete="off" />
-      <button id="joinRoom">Dołącz do pokoju 🔑</button>
+      <div class="buttons">
+        <button id="joinRoom"><i class="fa fa-sign-in-alt"></i> Dołącz do pokoju</button>
+      </div>
       <p id="statusMessage"></p>
     </div>
 
     <div id="gameScreen" style="display:none;">
       <p>Kod pokoju: <span id="roomCodeDisplay"></span></p>
       <ul id="playersList"></ul>
-      <button id="startGame">Start gry ▶️</button>
+      <button id="startGame"><i class="fa fa-play"></i> Start gry</button>
     </div>
   </div>
 
   <script>
     const firebaseConfig = {
-      // <-- tu wklej swoją konfigurację Firebase
+      // <-- Wklej tutaj konfigurację Firebase
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -167,7 +247,7 @@
     const roomCodeDisplay = document.getElementById('roomCodeDisplay');
     const playersList = document.getElementById('playersList');
     const startGameBtn = document.getElementById('startGame');
-    const container = document.querySelector('.container');
+    const loader = document.getElementById('loader');
 
     let currentRoomCode = null;
     let currentPlayerId = null;
@@ -214,6 +294,7 @@
         } else {
           playersList.innerHTML = '';
         }
+        loader.style.display = 'none'; // schowaj loader po odebraniu danych
       });
     }
 
@@ -225,6 +306,13 @@
       currentPlayerName = null;
       isHost = false;
       playersList.innerHTML = '';
+      loader.style.display = 'none';
+      statusMessage.textContent = '';
+    }
+
+    function showLoader() {
+      loader.style.display = 'block';
+      statusMessage.textContent = 'Ładowanie...';
     }
 
     createRoomBtn.addEventListener('click', () => {
@@ -233,6 +321,8 @@
         statusMessage.textContent = 'Wpisz nick!';
         return;
       }
+
+      showLoader();
 
       currentPlayerName = name;
       isHost = true;
@@ -245,12 +335,15 @@
           [currentPlayerId]: { name: currentPlayerName, isHost: true }
         }
       }).then(() => {
-        statusMessage.textContent = '';
         loginScreen.style.display = 'none';
         gameScreen.style.display = 'block';
         roomCodeDisplay.textContent = currentRoomCode;
+        statusMessage.textContent = '';
 
         listenToRoom(currentRoomCode);
+      }).catch(() => {
+        statusMessage.textContent = 'Błąd przy tworzeniu pokoju.';
+        loader.style.display = 'none';
       });
     });
 
@@ -263,6 +356,8 @@
         return;
       }
 
+      showLoader();
+
       currentPlayerName = name;
       currentRoomCode = roomCode;
       currentPlayerId = db.ref().push().key;
@@ -272,6 +367,7 @@
       roomRef.once('value').then(snapshot => {
         if (!snapshot.exists()) {
           statusMessage.textContent = 'Pokój nie istnieje.';
+          loader.style.display = 'none';
           return;
         }
 
@@ -279,13 +375,19 @@
         players[currentPlayerId] = { name: currentPlayerName, isHost: false };
 
         roomRef.child('players').set(players).then(() => {
-          statusMessage.textContent = '';
           loginScreen.style.display = 'none';
           gameScreen.style.display = 'block';
           roomCodeDisplay.textContent = currentRoomCode;
+          statusMessage.textContent = '';
 
           listenToRoom(currentRoomCode);
+        }).catch(() => {
+          statusMessage.textContent = 'Błąd przy dołączaniu do pokoju.';
+          loader.style.display = 'none';
         });
+      }).catch(() => {
+        statusMessage.textContent = 'Błąd przy sprawdzaniu pokoju.';
+        loader.style.display = 'none';
       });
     });
 
@@ -308,12 +410,6 @@
     startGameBtn.addEventListener('click', () => {
       alert("Start gry! Tutaj dodaj logikę startu gry.");
     });
-
-    // Ukryj loader i pokaż główny container gdy strona się załaduje
-    window.onload = () => {
-      document.getElementById('loader').style.display = 'none';
-      container.style.display = 'block';
-    };
   </script>
 </body>
 </html>
