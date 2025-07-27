@@ -9,7 +9,7 @@
 
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: var(--color-secondary); /* pomarańczowe tło */
+  background: var(--color-secondary);
   margin: 0;
   padding: 20px;
   color: var(--color-text);
@@ -105,7 +105,7 @@ button:active {
 #playersList li {
   padding: 16px;
   margin: 10px 0;
-  background: #f3e8ff88; /* lekko transparentne jasne fioletowe tło */
+  background: #f3e8ff88;
   border-radius: 12px;
   display: flex;
   justify-content: space-between;
@@ -122,7 +122,7 @@ button:active {
 #playersList li.self {
   color: black;
   font-weight: 700;
-  background: #f9f3f0cc; /* jasne tło dla wyróżnienia */
+  background: #f9f3f0cc;
 }
 
 #startGame {
