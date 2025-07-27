@@ -34,3 +34,16 @@ input {
     border: 1px solid #ddd;
     border-radius: 5px;
 }
+
+#playersList li.impostor {
+  color: red;
+  font-weight: bold;
+}
+
+#gameScreen {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin-top: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
