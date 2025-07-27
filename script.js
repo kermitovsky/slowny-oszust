@@ -1,4 +1,3 @@
-// Inicjalizacja Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyCyj5pbNgUHaV-_g__sTQmsUtYOhegYoSI",
   authDomain: "slowny-oszust.firebaseapp.com",
@@ -11,9 +10,9 @@ const firebaseConfig = {
 
 try {
   firebase.initializeApp(firebaseConfig);
-  console.log("Firebase zainicjalizowany");
+  console.log("✅ Firebase zainicjalizowany");
 } catch (error) {
-  console.error("Błąd inicjalizacji Firebase:", error);
+  console.error("❌ Błąd inicjalizacji Firebase:", error);
   alert("Błąd połączenia z bazą danych!");
 }
 
@@ -22,82 +21,58 @@ let currentRoomId = null;
 let currentPlayerId = null;
 let playersRef = null;
 
-// Generowanie ID
 const generateRoomCode = () => Math.random().toString(36).substring(2, 6).toUpperCase();
 const generatePlayerId = () => 'p_' + Math.random().toString(36).substring(2, 9);
 
-// UI Helpers
 function setStatus(message, isError = false) {
-  const statusEl = document.getElementById('statusMessage');
-  if (statusEl) {
-    statusEl.textContent = message;
-    statusEl.style.color = isError ? 'red' : '#666';
+  const el = document.getElementById('statusMessage');
+  if (el) {
+    el.textContent = message;
+    el.style.color = isError ? 'red' : '#666';
   }
 }
 
 function setLoading(isLoading) {
-  const createBtn = document.getElementById('createRoom');
-  const joinBtn = document.getElementById('joinRoom');
-  if (createBtn) createBtn.disabled = isLoading;
-  if (joinBtn) joinBtn.disabled = isLoading;
+  document.getElementById('createRoom').disabled = isLoading;
+  document.getElementById('joinRoom').disabled = isLoading;
 }
 
 function showGameScreen(roomId) {
-  const loginScreen = document.getElementById('loginScreen');
-  const gameScreen = document.getElementById('gameScreen');
-  const roomCodeDisplay = document.getElementById('roomCodeDisplay');
-
-  if (loginScreen) loginScreen.style.display = 'none';
-  if (gameScreen) gameScreen.style.display = 'block';
-  if (roomCodeDisplay) roomCodeDisplay.textContent = roomId;
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('gameScreen').style.display = 'block';
+  document.getElementById('roomCodeDisplay').textContent = roomId;
 }
 
 function updatePlayersList(players) {
-  const playersList = document.getElementById('playersList');
-  if (!playersList) {
-    console.error("Element playersList nie istnieje!");
-    return;
-  }
-
-  playersList.innerHTML = '';
-
+  const list = document.getElementById('playersList');
+  list.innerHTML = '';
   if (players) {
-    console.log("Aktualizacja listy graczy:", players);
     Object.values(players).forEach(player => {
       const li = document.createElement('li');
       li.textContent = player.name;
       if (player.isHost) {
         li.innerHTML += ' <span style="color:#4285f4">(host)</span>';
       }
-      playersList.appendChild(li);
+      list.appendChild(li);
     });
   }
 }
 
-function initPlayersListener(roomId) {
-  if (playersRef) {
-    playersRef.off();
-  }
-
+function listenForPlayers(roomId) {
+  if (playersRef) playersRef.off();
   playersRef = db.ref(`rooms/${roomId}/players`);
-
-  // 🔁 Nasłuchiwanie zmian
   playersRef.on('value', (snapshot) => {
-    console.log(`[${roomId}] Odebrano aktualizację graczy:`, snapshot.val());
-    updatePlayersList(snapshot.val());
+    const players = snapshot.val();
+    updatePlayersList(players);
   });
 }
 
-// Tworzenie pokoju
-document.getElementById('createRoom').addEventListener('click', async function () {
+// 🔵 TWORZENIE POKOJU
+document.getElementById('createRoom').addEventListener('click', async () => {
   try {
     setLoading(true);
-    const playerName = document.getElementById('playerName').value.trim();
-
-    if (playerName.length < 3) {
-      setStatus("Nick musi mieć minimum 3 znaki!", true);
-      return;
-    }
+    const name = document.getElementById('playerName').value.trim();
+    if (name.length < 3) return setStatus("Nick musi mieć min. 3 znaki", true);
 
     const roomId = generateRoomCode();
     const playerId = generatePlayerId();
@@ -105,10 +80,10 @@ document.getElementById('createRoom').addEventListener('click', async function (
     await db.ref(`rooms/${roomId}`).set({
       players: {
         [playerId]: {
-          name: playerName,
+          name: name,
           isImpostor: false,
-          joinedAt: firebase.database.ServerValue.TIMESTAMP,
-          isHost: true
+          isHost: true,
+          joinedAt: firebase.database.ServerValue.TIMESTAMP
         }
       },
       status: "waiting",
@@ -119,91 +94,72 @@ document.getElementById('createRoom').addEventListener('click', async function (
     currentPlayerId = playerId;
 
     showGameScreen(roomId);
+    listenForPlayers(roomId);
 
-    // 🔁 Nasłuchiwanie od razu po utworzeniu
-    initPlayersListener(roomId);
-
-  } catch (error) {
-    console.error("Błąd tworzenia pokoju:", error);
-    setStatus("Błąd: " + error.message, true);
+  } catch (e) {
+    console.error("Błąd tworzenia pokoju:", e);
+    setStatus("Błąd tworzenia pokoju", true);
   } finally {
     setLoading(false);
   }
 });
 
-// Dołączanie do pokoju (z poprawką!)
-document.getElementById('joinRoom').addEventListener('click', async function () {
+// 🟢 DOŁĄCZANIE DO POKOJU
+document.getElementById('joinRoom').addEventListener('click', async () => {
   try {
     setLoading(true);
     setStatus("Łączenie...");
 
+    const name = document.getElementById('playerName').value.trim();
     const roomId = document.getElementById('roomCodeInput').value.trim().toUpperCase();
-    const playerName = document.getElementById('playerName').value.trim();
 
-    if (!roomId || roomId.length !== 4) {
-      throw new Error("Podaj poprawny 4-znakowy kod pokoju");
-    }
-    if (!playerName || playerName.length < 3) {
-      throw new Error("Nick musi mieć minimum 3 znaki");
-    }
+    if (name.length < 3) throw new Error("Nick musi mieć min. 3 znaki");
+    if (roomId.length !== 4) throw new Error("Kod pokoju musi mieć 4 znaki");
 
-    const roomSnapshot = await db.ref(`rooms/${roomId}`).once('value');
-    if (!roomSnapshot.exists()) {
-      throw new Error("Pokój nie istnieje!");
-    }
+    const roomRef = db.ref(`rooms/${roomId}`);
+    const snapshot = await roomRef.once('value');
+    if (!snapshot.exists()) throw new Error("Pokój nie istnieje");
 
-    const players = roomSnapshot.val().players || {};
-    const nickExists = Object.values(players).some(p => p.name === playerName);
-    if (nickExists) {
-      throw new Error("Ten nick jest już zajęty!");
-    }
+    const players = snapshot.val().players || {};
+    const nameTaken = Object.values(players).some(p => p.name === name);
+    if (nameTaken) throw new Error("Ten nick jest już zajęty");
 
     const playerId = generatePlayerId();
     await db.ref(`rooms/${roomId}/players/${playerId}`).set({
-      name: playerName,
+      name: name,
       isImpostor: false,
-      joinedAt: firebase.database.ServerValue.TIMESTAMP,
-      isHost: false
+      isHost: false,
+      joinedAt: firebase.database.ServerValue.TIMESTAMP
     });
 
     currentRoomId = roomId;
     currentPlayerId = playerId;
 
-    // ✅ Ręczne pobranie listy graczy PRZED nasłuchiwaniem
-    const playersSnapshot = await db.ref(`rooms/${roomId}/players`).once('value');
-    updatePlayersList(playersSnapshot.val());
-
-    // 🔁 Dopiero teraz ustaw nasłuchiwanie
-    initPlayersListener(roomId);
-
     showGameScreen(roomId);
+
+    // 📥 Ręczne pobranie przed nasłuchiwaniem
+    const playersSnap = await db.ref(`rooms/${roomId}/players`).once('value');
+    updatePlayersList(playersSnap.val());
+
+    listenForPlayers(roomId);
     setStatus("");
 
-  } catch (error) {
-    console.error("Błąd dołączania:", error);
-    setStatus(error.message, true);
+  } catch (e) {
+    console.error("Błąd dołączenia:", e);
+    setStatus(e.message, true);
   } finally {
     setLoading(false);
   }
 });
 
-// Czyszczenie danych przy zamknięciu strony
+// 🔁 CZYSZCZENIE PRZY WYJŚCIU
 window.addEventListener('beforeunload', () => {
   if (currentRoomId && currentPlayerId) {
     db.ref(`rooms/${currentRoomId}/players/${currentPlayerId}`).remove();
   }
-  if (playersRef) {
-    playersRef.off();
-  }
+  if (playersRef) playersRef.off();
 });
 
-// Automatyczne ukrywanie komunikatów
-const playerNameInput = document.getElementById('playerName');
-const roomCodeInput = document.getElementById('roomCodeInput');
-
-if (playerNameInput) {
-  playerNameInput.addEventListener('input', () => setStatus(""));
-}
-if (roomCodeInput) {
-  roomCodeInput.addEventListener('input', () => setStatus(""));
-}
+// 🧼 Czyść status na inputach
+document.getElementById('playerName').addEventListener('input', () => setStatus(""));
+document.getElementById('roomCodeInput').addEventListener('input', () => setStatus(""));
