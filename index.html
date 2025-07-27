@@ -6,202 +6,145 @@
   <title>Słowny Impostor</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-
-  <!-- Czcionka Pacifico -->
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet" />
-  
-  <!-- Ikonki Font Awesome -->
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    integrity="sha512-p6tKe2B0Z9Ui/7aRfvfDb5TpRZqQG9Vdz+VBWzOYP7jvRwtZ+qzUyXPupzN+LtUjQ9P8uYbKfUFi56Kz9++bRQ=="
-    crossorigin="anonymous"
-    referrerpolicy="no-referrer"
-  />
-
   <style>
-    :root {
-      --color-primary: #8e44ad; /* fiolet */
-      --color-secondary: #e67e22; /* pomarańczowy */
-      --color-primary-light: #a569bd;
-      --color-secondary-light: #eb984e;
-      --color-text: #f5f5f5; /* jasny tekst */
-      --color-bg-container: #d35400; /* ciemniejszy pomarańcz dla kontenera */
-    }
-
     body {
+      background-color: #e67e22; /* pomarańczowe tło */
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: var(--color-secondary);
+      color: #fff;
+      font-size: 2rem;
       margin: 0;
-      padding: 20px;
-      color: var(--color-text);
-      font-size: 1.8rem;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      padding: 2rem;
     }
 
     .container {
-      max-width: 700px;
-      width: 100%;
-      background: var(--color-bg-container);
-      padding: 40px;
-      border-radius: 15px;
-      box-shadow: 0 6px 10px rgba(142, 68, 173, 0.4);
+      max-width: 800px;
+      margin: auto;
+      background: #d35400;
+      padding: 2rem;
+      border-radius: 1.5rem;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
       position: relative;
     }
 
     h1 {
-      color: var(--color-primary-light);
       text-align: center;
-      margin-bottom: 30px;
-      font-size: 4.8rem;
       font-family: 'Pacifico', cursive;
+      font-size: 3.5rem;
+      color: #f5f5f5;
+      margin-bottom: 1rem;
     }
 
-    #loginScreen {
-      text-align: center;
-    }
-
-    input {
-      padding: 18px;
-      margin: 12px 0;
-      width: 80%;
-      max-width: 350px;
-      border: 3px solid var(--color-primary-light);
-      border-radius: 12px;
-      font-size: 2.4rem;
-      transition: border-color 0.3s ease;
-      background: #f9f3f0;
-      color: #333;
+    input, button {
+      font-size: 2rem;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 0.8rem;
+      border: none;
+      width: 100%;
+      max-width: 400px;
       display: block;
       margin-left: auto;
       margin-right: auto;
     }
 
+    input {
+      border: 2px solid #8e44ad;
+      color: #333;
+      background: #f9f3f0;
+      transition: border-color 0.3s ease;
+    }
+
     input:focus {
-      border-color: var(--color-primary);
+      border-color: #a569bd;
       outline: none;
     }
 
-    .buttons {
-      margin-top: 35px;
-    }
-
     button {
-      padding: 18px 36px;
-      background: var(--color-primary);
-      color: var(--color-text);
-      border: none;
-      border-radius: 12px;
+      background-color: #8e44ad;
+      color: white;
       cursor: pointer;
-      font-size: 2.4rem;
-      margin: 12px;
-      transition: background-color 0.3s ease, transform 0.2s ease;
+      transition: transform 0.2s ease, background-color 0.3s ease;
       box-shadow: 0 4px 8px rgba(142, 68, 173, 0.6);
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
     }
 
     button:hover {
-      background: var(--color-secondary-light);
-      transform: translateY(-4px) scale(1.05);
-      box-shadow: 0 6px 12px rgba(230, 126, 34, 0.7);
-    }
-
-    button:active {
-      transform: translateY(0) scale(1);
-    }
-
-    .join-section {
-      margin-top: 20px;
-    }
-
-    #gameScreen {
-      margin-top: 40px;
-      animation: fadeIn 0.6s ease;
-      font-size: 2.4rem;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+      background-color: #9b59b6;
+      transform: scale(1.05);
+      box-shadow: 0 6px 12px rgba(155, 89, 182, 0.7);
     }
 
     #playersList {
       list-style: none;
       padding: 0;
-      margin: 30px 0;
     }
 
     #playersList li {
-      padding: 16px;
-      margin: 10px 0;
-      background: #f3e8ff88;
-      border-radius: 12px;
+      padding: 1rem;
+      margin: 0.5rem 0;
+      border-radius: 1rem;
+      background-color: #f9f3f0;
+      color: #333;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-weight: 400;
-      color: var(--color-text);
+      font-weight: 500;
     }
 
-    #playersList li.host {
-      color: var(--color-primary-light);
-      font-weight: 700;
+    .host {
+      color: #3498db !important;
+      font-weight: bold;
     }
 
-    #playersList li.self {
-      color: black;
-      font-weight: 700;
+    .self {
+      color: black !important;
+      font-weight: bold;
       background: #f9f3f0cc;
     }
 
     #startGame {
-      background: var(--color-secondary-light);
-      margin-top: 30px;
-      width: 100%;
+      background-color: #eb984e;
+      margin-top: 1.5rem;
       font-weight: 700;
       box-shadow: 0 5px 10px rgba(230, 126, 34, 0.6);
       color: #fff;
+      max-width: 100%;
+      width: auto;
+      padding: 1rem 2rem;
     }
 
     #startGame:hover {
-      background: var(--color-primary);
+      background-color: #8e44ad;
       box-shadow: 0 7px 14px rgba(142, 68, 173, 0.7);
+    }
+
+    #statusMessage {
+      text-align: center;
+      margin-top: 1rem;
+      font-weight: 600;
+      min-height: 2rem;
     }
 
     /* Loader styles */
     #loader {
+      display: none;
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      border: 6px solid #f3f3f3;
-      border-top: 6px solid var(--color-primary);
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid #8e44ad;
       border-radius: 50%;
-      width: 50px;
-      height: 50px;
+      width: 60px;
+      height: 60px;
       animation: spin 1s linear infinite;
-      display: none; /* hidden by default */
-      z-index: 100;
+      z-index: 10;
     }
 
     @keyframes spin {
       0% { transform: translate(-50%, -50%) rotate(0deg); }
       100% { transform: translate(-50%, -50%) rotate(360deg); }
     }
-
-    /* Status message */
-    #statusMessage {
-      margin-top: 15px;
-      color: #f8d7da;
-      font-weight: 600;
-      min-height: 24px;
-    }
-
   </style>
 </head>
 <body>
@@ -212,26 +155,23 @@
 
     <div id="loginScreen">
       <input type="text" id="playerName" placeholder="Podaj swój nick" autocomplete="off" />
-      <div class="buttons">
-        <button id="createRoom"><i class="fa fa-plus"></i> Stwórz pokój</button>
-      </div>
+      <button id="createRoom">Stwórz pokój</button>
       <input type="text" id="roomCodeInput" placeholder="Kod pokoju" maxlength="4" autocomplete="off" />
-      <div class="buttons">
-        <button id="joinRoom"><i class="fa fa-sign-in-alt"></i> Dołącz do pokoju</button>
-      </div>
+      <button id="joinRoom">Dołącz do pokoju</button>
       <p id="statusMessage"></p>
     </div>
 
     <div id="gameScreen" style="display:none;">
       <p>Kod pokoju: <span id="roomCodeDisplay"></span></p>
       <ul id="playersList"></ul>
-      <button id="startGame"><i class="fa fa-play"></i> Start gry</button>
+      <button id="startGame">Start gry</button>
     </div>
   </div>
 
   <script>
+    // Wklej tutaj swoją konfigurację Firebase:
     const firebaseConfig = {
-      // <-- Wklej tutaj konfigurację Firebase
+      // ...
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -253,6 +193,16 @@
     let currentPlayerId = null;
     let currentPlayerName = null;
     let isHost = false;
+
+    function showLoader() {
+      loader.style.display = 'block';
+      statusMessage.textContent = 'Ładowanie...';
+    }
+
+    function hideLoader() {
+      loader.style.display = 'none';
+      statusMessage.textContent = '';
+    }
 
     function generateRoomCode() {
       return Math.random().toString(36).substr(2, 4).toUpperCase();
@@ -286,6 +236,7 @@
         if (!roomData) {
           statusMessage.textContent = 'Pokój został usunięty.';
           resetToLogin();
+          hideLoader();
           return;
         }
 
@@ -294,7 +245,7 @@
         } else {
           playersList.innerHTML = '';
         }
-        loader.style.display = 'none'; // schowaj loader po odebraniu danych
+        hideLoader();
       });
     }
 
@@ -306,13 +257,6 @@
       currentPlayerName = null;
       isHost = false;
       playersList.innerHTML = '';
-      loader.style.display = 'none';
-      statusMessage.textContent = '';
-    }
-
-    function showLoader() {
-      loader.style.display = 'block';
-      statusMessage.textContent = 'Ładowanie...';
     }
 
     createRoomBtn.addEventListener('click', () => {
@@ -341,9 +285,10 @@
         statusMessage.textContent = '';
 
         listenToRoom(currentRoomCode);
+        hideLoader();
       }).catch(() => {
         statusMessage.textContent = 'Błąd przy tworzeniu pokoju.';
-        loader.style.display = 'none';
+        hideLoader();
       });
     });
 
@@ -367,7 +312,7 @@
       roomRef.once('value').then(snapshot => {
         if (!snapshot.exists()) {
           statusMessage.textContent = 'Pokój nie istnieje.';
-          loader.style.display = 'none';
+          hideLoader();
           return;
         }
 
@@ -381,34 +326,25 @@
           statusMessage.textContent = '';
 
           listenToRoom(currentRoomCode);
+          hideLoader();
         }).catch(() => {
           statusMessage.textContent = 'Błąd przy dołączaniu do pokoju.';
-          loader.style.display = 'none';
+          hideLoader();
         });
       }).catch(() => {
         statusMessage.textContent = 'Błąd przy sprawdzaniu pokoju.';
-        loader.style.display = 'none';
+        hideLoader();
       });
     });
 
-    function cleanupEmptyRooms() {
-      const roomsRef = db.ref('rooms');
-      roomsRef.on('value', snapshot => {
-        const rooms = snapshot.val();
-        if (!rooms) return;
-
-        for (const [code, room] of Object.entries(rooms)) {
-          if (!room.players || Object.keys(room.players).length === 0) {
-            db.ref(`rooms/${code}`).remove();
-          }
-        }
-      });
-    }
-
-    cleanupEmptyRooms();
-
     startGameBtn.addEventListener('click', () => {
-      alert("Start gry! Tutaj dodaj logikę startu gry.");
+      if (!isHost) {
+        statusMessage.textContent = 'Tylko host może rozpocząć grę.';
+        return;
+      }
+
+      statusMessage.textContent = 'Gra startuje... (tu dodaj dalszą logikę)';
+      // Tutaj dodaj logikę startu gry np. zapisz stan gry w Firebase
     });
   </script>
 </body>
