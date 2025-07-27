@@ -3,8 +3,8 @@
   --color-secondary: #e67e22; /* pomarańczowy */
   --color-primary-light: #a569bd;
   --color-secondary-light: #eb984e;
-  --color-text: #f5f5f5; /* jasny tekst */
-  --color-bg-container: #d35400; /* ciemniejszy pomarańcz dla kontenera */
+  --color-text: #ffffff; /* biały tekst dla lepszego kontrastu */
+  --color-bg-container: #d35400; /* ciemniejszy pomarańcz */
 }
 
 body {
@@ -105,7 +105,7 @@ button:active {
 #playersList li {
   padding: 16px;
   margin: 10px 0;
-  background: #f3e8ff88;
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   display: flex;
   justify-content: space-between;
