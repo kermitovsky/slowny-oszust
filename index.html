@@ -203,7 +203,6 @@
       document.getElementById('roomCodeDisplay').textContent = roomId;
     }
 
-    // teraz przekazujemy currentPlayerId, żeby wiedzieć kogo pogrubić
     function updatePlayersList(players, currentPlayerId) {
       const playersList = document.getElementById('playersList');
       playersList.innerHTML = '';
@@ -215,12 +214,12 @@
         li.textContent = player.name;
 
         if (player.isHost) {
-          li.classList.add('host'); // pogrub i kolor hosta
+          li.classList.add('host');
           li.textContent = player.name + ' (host)';
         }
 
         if (id === currentPlayerId) {
-          li.classList.add('currentPlayer'); // pogrub i kolor twojego nicku
+          li.classList.add('currentPlayer');  // tutaj pogrubiamy własny nick
         }
 
         if (player.isImpostor) {
@@ -242,7 +241,6 @@
         console.log("Aktualizacja graczy:", players);
         updatePlayersList(players, currentPlayerId);
 
-        // Usuwamy pokój, jeśli nie ma graczy
         if (!players || Object.keys(players).length === 0) {
           console.log(`Pokój ${roomId} pusty - usuwam z bazy.`);
           db.ref(`rooms/${roomId}`).remove().catch(console.error);
