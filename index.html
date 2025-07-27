@@ -151,7 +151,6 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   <script>
-    // Konfiguracja Firebase - podmień na swoją jeśli trzeba
     const firebaseConfig = {
       apiKey: "AIzaSyCyj5pbNgUHaV-_g__sTQmsUtYOhegYoSI",
       authDomain: "slowny-oszust.firebaseapp.com",
@@ -162,15 +161,9 @@
       appId: "1:679726628348:web:83f9c43fee9cf514784679"
     };
 
-    try {
-      firebase.initializeApp(firebaseConfig);
-      console.log("Firebase zainicjalizowany");
-    } catch (error) {
-      console.error("Błąd inicjalizacji Firebase:", error);
-      alert("Błąd połączenia z bazą danych!");
-    }
-
+    firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+
     let currentRoomId = null;
     let currentPlayerId = null;
     let playersRef = null;
@@ -223,7 +216,6 @@
       playersRef = db.ref(`rooms/${roomId}/players`);
 
       playersRef.on('value', (snapshot) => {
-        console.log(`[${roomId}] Aktualizacja graczy:`, snapshot.val());
         updatePlayersList(snapshot.val());
       });
 
@@ -244,7 +236,6 @@
         let roomId;
         let exists = true;
 
-        // Sprawdzamy czy pokój o tym ID już istnieje, jeśli tak, generujemy nowy
         while (exists) {
           roomId = generateRoomCode();
           const roomSnap = await db.ref(`rooms/${roomId}`).once('value');
@@ -253,7 +244,6 @@
 
         const playerId = generatePlayerId();
 
-        // Tworzymy pokój z graczem-hostem
         await db.ref(`rooms/${roomId}`).set({
           players: {
             [playerId]: {
@@ -273,7 +263,6 @@
         showGameScreen(roomId);
         initPlayersListener(roomId);
       } catch (error) {
-        console.error("Błąd podczas tworzenia pokoju:", error);
         setStatus(error.message, true);
       } finally {
         setLoading(false);
@@ -321,7 +310,6 @@
         setStatus("");
         initPlayersListener(roomId);
       } catch (error) {
-        console.error("Błąd dołączania:", error);
         setStatus(error.message, true);
       } finally {
         setLoading(false);
@@ -331,7 +319,6 @@
     document.getElementById('createRoom').addEventListener('click', createRoom);
     document.getElementById('joinRoom').addEventListener('click', joinRoom);
 
-    // Usuwamy gracza z pokoju przy zamknięciu strony
     window.addEventListener('beforeunload', () => {
       if (currentRoomId && currentPlayerId) {
         db.ref(`rooms/${currentRoomId}/players/${currentPlayerId}`).remove();
