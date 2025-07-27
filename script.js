@@ -6,8 +6,7 @@ const gameState = {
     currentRoomId: null,
     currentPlayerId: null,
     currentPlayerName: '',
-    isHost: false,
-    isConnected: false
+    isHost: false
 };
 
 // Referencje do elementów DOM
@@ -22,6 +21,10 @@ const elements = {
     playersList: document.getElementById('playersList')
 };
 
+// Generatory ID
+const generateId = () => 'player_' + Date.now();
+const generateRoomCode = () => Math.random().toString(36).substring(2, 6).toUpperCase();
+
 // Blokada interfejsu
 function setUIState(loading) {
     elements.joinRoom.disabled = loading;
@@ -30,74 +33,93 @@ function setUIState(loading) {
     elements.createRoom.textContent = loading ? "Tworzenie..." : "Stwórz pokój";
 }
 
-// Sprawdź unikalność nicku w pokoju (zapis w Firebase)
-async function isNameAvailable(roomId, playerName) {
-    const snapshot = await db.ref(`rooms/${roomId}/players`)
-        .orderByChild('name')
-        .equalTo(playerName)
-        .once('value');
-    
-    return !snapshot.exists();
+// Aktualizacja listy graczy
+function updatePlayersList(players) {
+    elements.playersList.innerHTML = '';
+    if (!players) return;
+
+    Object.entries(players).forEach(([id, player]) => {
+        const li = document.createElement('li');
+        li.textContent = player.name + (player.isImpostor ? " 👿" : "");
+        if (player.isImpostor) li.classList.add('impostor');
+        elements.playersList.appendChild(li);
+    });
 }
 
-// Dołączanie do pokoju (pełna wersja z zabezpieczeniami)
+// Nasłuchiwanie zmian w pokoju
+function setupRoomListeners() {
+    db.ref(`rooms/${gameState.currentRoomId}/players`).on('value', (snapshot) => {
+        const players = snapshot.val();
+        updatePlayersList(players);
+    });
+}
+
+// Tworzenie pokoju
+elements.createRoom.addEventListener('click', async () => {
+    const playerName = elements.playerName.value.trim();
+    if (playerName.length < 3) return alert("Nick musi mieć minimum 3 znaki!");
+
+    setUIState(true);
+    
+    try {
+        gameState.currentRoomId = generateRoomCode();
+        gameState.currentPlayerId = generateId();
+        gameState.currentPlayerName = playerName;
+        gameState.isHost = true;
+
+        await db.ref(`rooms/${gameState.currentRoomId}`).set({
+            players: {
+                [gameState.currentPlayerId]: {
+                    name: playerName,
+                    isImpostor: false,
+                    joinedAt: firebase.database.ServerValue.TIMESTAMP
+                }
+            },
+            status: "waiting",
+            createdAt: firebase.database.ServerValue.TIMESTAMP
+        });
+
+        setupRoomListeners();
+        elements.loginScreen.style.display = 'none';
+        elements.gameScreen.style.display = 'block';
+        elements.roomCodeDisplay.textContent = gameState.currentRoomId;
+    } catch (error) {
+        console.error("Błąd tworzenia pokoju:", error);
+        alert("Wystąpił błąd podczas tworzenia pokoju!");
+    } finally {
+        setUIState(false);
+    }
+});
+
+// Dołączanie do pokoju
 elements.joinRoom.addEventListener('click', async () => {
     const playerName = elements.playerName.value.trim();
     const roomId = elements.roomCodeInput.value.trim().toUpperCase();
     
-    if (!playerName || !roomId) {
-        return alert("Podaj nick i kod pokoju!");
-    }
+    if (playerName.length < 3) return alert("Nick musi mieć minimum 3 znaki!");
+    if (!roomId) return alert("Podaj kod pokoju!");
 
     setUIState(true);
     
     try {
         // Sprawdź czy pokój istnieje
-        const roomSnapshot = await db.ref(`rooms/${roomId}`).once('value');
-        if (!roomSnapshot.exists()) {
-            throw new Error("Pokój nie istnieje!");
-        }
+        const snapshot = await db.ref(`rooms/${roomId}`).once('value');
+        if (!snapshot.exists()) throw new Error("Pokój nie istnieje!");
 
-        // Sprawdź czy nick jest wolny (zapytanie do bazy)
-        const nameAvailable = await isNameAvailable(roomId, playerName);
-        if (!nameAvailable) {
-            throw new Error("Ten nick jest już zajęty!");
-        }
-
-        // Sprawdź czy gracz już próbował dołączyć (local storage)
-        const joinAttemptKey = `joinAttempt_${roomId}_${playerName}`;
-        const lastAttempt = localStorage.getItem(joinAttemptKey);
-        
-        if (lastAttempt && Date.now() - lastAttempt < 30000) {
-            throw new Error("Musisz poczekać 30 sekund przed ponownym dołączeniem!");
-        }
-
-        // Zarejestruj próbę dołączenia
-        localStorage.setItem(joinAttemptKey, Date.now());
-
-        // Dołącz gracza
         gameState.currentRoomId = roomId;
-        gameState.currentPlayerId = `player_${Date.now()}_${Math.random().toString(36).substr(2, 8)}`;
+        gameState.currentPlayerId = generateId();
         gameState.currentPlayerName = playerName;
-        
+
         await db.ref(`rooms/${roomId}/players/${gameState.currentPlayerId}`).set({
             name: playerName,
             isImpostor: false,
-            joinedAt: firebase.database.ServerValue.TIMESTAMP,
-            connectionId: gameState.currentPlayerId
+            joinedAt: firebase.database.ServerValue.TIMESTAMP
         });
 
-        // Ustaw nasłuchiwanie
         setupRoomListeners();
-        
-        // Aktualizuj UI
         elements.loginScreen.style.display = 'none';
         elements.gameScreen.style.display = 'block';
         elements.roomCodeDisplay.textContent = roomId;
-        
-        // Oznacz jako połączonego
-        gameState.isConnected = true;
-        
     } catch (error) {
         console.error("Błąd dołączania:", error);
         alert(error.message);
@@ -106,21 +128,14 @@ elements.joinRoom.addEventListener('click', async () => {
     }
 });
 
-// Automatyczne czyszczenie
-window.addEventListener('beforeunload', async () => {
-    if (!gameState.currentRoomId || !gameState.currentPlayerId) return;
-    
-    try {
-        // Usuń gracza z bazy
-        await db.ref(`rooms/${gameState.currentRoomId}/players/${gameState.currentPlayerId}`).remove();
-        
-        // Wyczyść local storage po poprawnym rozłączeniu
-        if (gameState.isConnected) {
-            const joinAttemptKey = `joinAttempt_${gameState.currentRoomId}_${gameState.currentPlayerName}`;
-            localStorage.removeItem(joinAttemptKey);
-        }
-    } catch (error) {
-        console.error("Błąd czyszczenia:", error);
+// Czyszczenie przy zamknięciu
+window.addEventListener('beforeunload', () => {
+    if (gameState.currentRoomId && gameState.currentPlayerId) {
+        db.ref(`rooms/${gameState.currentRoomId}/players/${gameState.currentPlayerId}`).remove();
     }
 });
 
+// Test połączenia
+db.ref('.info/connected').on('value', (snapshot) => {
+    console.log("Status połączenia Firebase:", snapshot.val() ? "Aktywne" : "Nieaktywne");
+});
