@@ -4,14 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Słowny Impostor</title>
-
-  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-
-  <!-- Czcionka Pacifico -->
-  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
-
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet" />
   <style>
     :root {
       --color-primary: #8e44ad; /* fiolet */
@@ -20,7 +15,7 @@
       --color-secondary-light: #eb984e;
       --color-text: #f5f5f5; /* jasny tekst */
       --color-bg-container: #d35400; /* ciemniejszy pomarańcz dla kontenera */
-      --color-error: #e74c3c; /* czerwony do błędów */
+      --color-error: #e74c3c; /* czerwony */
     }
 
     body {
@@ -47,6 +42,7 @@
       margin-bottom: 30px;
       font-size: 4.8rem;
       font-family: 'Pacifico', cursive;
+      user-select: none;
     }
 
     #loginScreen {
@@ -64,6 +60,7 @@
       transition: border-color 0.3s ease;
       background: #f9f3f0;
       color: #333;
+      outline-offset: 2px;
     }
 
     input:focus {
@@ -86,6 +83,7 @@
       margin: 12px;
       transition: background-color 0.3s ease, transform 0.2s ease;
       box-shadow: 0 4px 8px rgba(142, 68, 173, 0.6);
+      user-select: none;
     }
 
     button:hover {
@@ -96,24 +94,6 @@
 
     button:active {
       transform: translateY(0) scale(1);
-    }
-
-    #statusMessage {
-      color: var(--color-error);
-      font-weight: 700;
-      margin-top: 10px;
-      min-height: 2rem;
-    }
-
-    #gameScreen {
-      margin-top: 40px;
-      animation: fadeIn 0.6s ease;
-      font-size: 2.4rem;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
     }
 
     #playersList {
@@ -152,23 +132,60 @@
       font-weight: 700;
       box-shadow: 0 5px 10px rgba(230, 126, 34, 0.6);
       color: #fff;
+      user-select: none;
     }
 
     #startGame:hover {
       background: var(--color-primary);
       box-shadow: 0 7px 14px rgba(142, 68, 173, 0.7);
     }
+
+    #statusMessage {
+      margin-top: 20px;
+      font-weight: 700;
+      color: var(--color-error);
+      min-height: 2.2rem;
+      user-select: none;
+    }
+
+    /* Animacja ładowania */
+    #loading {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      color: var(--color-text);
+      font-family: 'Pacifico', cursive;
+      user-select: none;
+      z-index: 9999;
+      display: none;
+    }
+
+    #loading.show {
+      display: flex;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
   </style>
 </head>
 <body>
+  <div id="loading">Ładowanie...</div>
   <div class="container">
-    <h1>Słowny Impostor</h1>
-
+    <h1 class="fancy-title">Słowny Impostor</h1>
     <div id="loginScreen">
-      <input type="text" id="playerName" placeholder="Podaj swój nick" />
+      <input type="text" id="playerName" placeholder="Podaj swój nick" autocomplete="off" />
       <div class="buttons">
         <button id="createRoom">Stwórz pokój</button>
-        <input type="text" id="roomCodeInput" placeholder="Kod pokoju (4 znaki)" maxlength="4" style="width: 200px; display: inline-block; margin-left: 10px; vertical-align: middle;" />
+      </div>
+      <input type="text" id="roomCodeInput" placeholder="Kod pokoju" maxlength="4" autocomplete="off" />
+      <div class="buttons">
         <button id="joinRoom">Dołącz do pokoju</button>
       </div>
       <p id="statusMessage"></p>
@@ -182,9 +199,14 @@
   </div>
 
   <script>
-    // Wklej tutaj swoją konfigurację Firebase:
     const firebaseConfig = {
-      // ... Twoja konfiguracja Firebase ...
+      apiKey: "AIzaSyCyj5pbNgUHaV-_g__sTQmsUtYOhegYoSI",
+      authDomain: "slowny-oszust.firebaseapp.com",
+      databaseURL: "https://slowny-oszust-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "slowny-oszust",
+      storageBucket: "slowny-oszust.firebasestorage.app",
+      messagingSenderId: "679726628348",
+      appId: "1:679726628348:web:83f9c43fee9cf514784679"
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -200,14 +222,20 @@
     const roomCodeDisplay = document.getElementById('roomCodeDisplay');
     const playersList = document.getElementById('playersList');
     const startGameBtn = document.getElementById('startGame');
+    const loading = document.getElementById('loading');
 
     let currentRoomCode = null;
     let currentPlayerId = null;
     let currentPlayerName = null;
     let isHost = false;
 
+    function showLoading(show) {
+      if (show) loading.classList.add('show');
+      else loading.classList.remove('show');
+    }
+
     function generateRoomCode() {
-      return Math.random().toString(36).substring(2, 6).toUpperCase();
+      return Math.random().toString(36).substr(2, 4).toUpperCase();
     }
 
     function updatePlayersList(players) {
@@ -236,7 +264,7 @@
         const roomData = snapshot.val();
 
         if (!roomData) {
-          statusMessage.textContent = 'Pokój został usunięty.';
+          statusMessage.textContent = 'Pokój został usunięty lub nie istnieje.';
           resetToLogin();
           return;
         }
@@ -258,45 +286,42 @@
       isHost = false;
       playersList.innerHTML = '';
       statusMessage.textContent = '';
-      roomCodeInput.value = '';
-      playerNameInput.value = '';
+      showLoading(false);
     }
 
     createRoomBtn.addEventListener('click', () => {
+      statusMessage.textContent = '';
       const name = playerNameInput.value.trim();
       if (!name) {
-        statusMessage.textContent = 'Wpisz nick!';
+        statusMessage.textContent = 'Wpisz swój nick!';
         return;
       }
 
+      showLoading(true);
       currentPlayerName = name;
       isHost = true;
       currentRoomCode = generateRoomCode();
       currentPlayerId = db.ref().push().key;
 
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
-
-      roomRef.once('value').then(snapshot => {
-        if (snapshot.exists()) {
-          statusMessage.textContent = 'Wylosowany kod pokoju już istnieje, spróbuj ponownie.';
-          return;
+      roomRef.set({
+        players: {
+          [currentPlayerId]: { name: currentPlayerName, isHost: true }
         }
-        // Tworzymy pokój z hostem:
-        roomRef.set({
-          players: {
-            [currentPlayerId]: { name: currentPlayerName, isHost: true }
-          }
-        }).then(() => {
-          statusMessage.textContent = '';
-          loginScreen.style.display = 'none';
-          gameScreen.style.display = 'block';
-          roomCodeDisplay.textContent = currentRoomCode;
-          listenToRoom(currentRoomCode);
-        });
+      }).then(() => {
+        loginScreen.style.display = 'none';
+        gameScreen.style.display = 'block';
+        roomCodeDisplay.textContent = currentRoomCode;
+        showLoading(false);
+        listenToRoom(currentRoomCode);
+      }).catch((err) => {
+        showLoading(false);
+        statusMessage.textContent = 'Błąd tworzenia pokoju: ' + err.message;
       });
     });
 
     joinRoomBtn.addEventListener('click', () => {
+      statusMessage.textContent = '';
       const name = playerNameInput.value.trim();
       const roomCode = roomCodeInput.value.trim().toUpperCase();
 
@@ -305,6 +330,7 @@
         return;
       }
 
+      showLoading(true);
       currentPlayerName = name;
       currentRoomCode = roomCode;
       currentPlayerId = db.ref().push().key;
@@ -313,35 +339,31 @@
 
       roomRef.once('value').then(snapshot => {
         if (!snapshot.exists()) {
+          showLoading(false);
           statusMessage.textContent = 'Pokój nie istnieje.';
           return;
         }
 
-        const roomData = snapshot.val();
-        const players = roomData.players || {};
-
-        // Sprawdzamy, czy pokój jest pełny (np. max 10 graczy)
-        if (Object.keys(players).length >= 10) {
-          statusMessage.textContent = 'Pokój jest pełny.';
-          return;
-        }
-
-        // Dodajemy nowego gracza
+        const players = snapshot.val().players || {};
         players[currentPlayerId] = { name: currentPlayerName, isHost: false };
 
         roomRef.child('players').set(players).then(() => {
-          statusMessage.textContent = '';
           loginScreen.style.display = 'none';
           gameScreen.style.display = 'block';
           roomCodeDisplay.textContent = currentRoomCode;
+          showLoading(false);
           listenToRoom(currentRoomCode);
-        }).catch(() => {
-          statusMessage.textContent = 'Błąd przy dołączaniu do pokoju.';
+        }).catch((err) => {
+          showLoading(false);
+          statusMessage.textContent = 'Błąd dołączania: ' + err.message;
         });
+      }).catch(err => {
+        showLoading(false);
+        statusMessage.textContent = 'Błąd połączenia: ' + err.message;
       });
     });
 
-    // Czyszczenie pustych pokoi (opcjonalne, ale przydatne)
+    // Clean up rooms without players
     function cleanupEmptyRooms() {
       const roomsRef = db.ref('rooms');
       roomsRef.on('value', snapshot => {
@@ -355,7 +377,6 @@
         }
       });
     }
-
     cleanupEmptyRooms();
 
     startGameBtn.addEventListener('click', () => {
