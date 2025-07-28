@@ -6,7 +6,7 @@
   <title>Słowny Oszust</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
   <style>
     body {
       background-color: #e67e22;
@@ -28,9 +28,9 @@
 
     h1 {
       text-align: center;
+      font-family: 'Pacifico', cursive;
       font-size: 3.5rem;
       color: #f5f5f5;
-      font-family: 'Pacifico', cursive;
     }
 
     input, button {
@@ -86,31 +86,43 @@
       font-weight: bold;
     }
 
-    #messageBox, #roleMessageBox {
+    /* Komunikaty */
+    #messageOverlay {
       position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background-color: rgba(0,0,0,0.85);
-      color: white;
+      background: rgba(46, 204, 113, 0.9);
+      color: #fff;
+      font-size: 2.5rem;
+      font-weight: bold;
       padding: 2rem 3rem;
       border-radius: 1.5rem;
       text-align: center;
-      z-index: 1000;
+      z-index: 9999;
       display: none;
-      max-width: 90vw;
-      word-wrap: break-word;
       white-space: pre-line;
+      user-select: none;
+      max-width: 90vw;
     }
 
-    #messageBox {
-      font-size: 3rem;
-    }
-
-    #roleMessageBox {
+    #roleOverlay {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(52, 152, 219, 0.95);
+      color: #fff;
       font-size: 4rem;
       font-weight: bold;
-      font-family: 'Segoe UI Black', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 3rem 4rem;
+      border-radius: 2rem;
+      text-align: center;
+      z-index: 99999;
+      display: none;
+      white-space: pre-line;
+      user-select: none;
+      max-width: 90vw;
     }
   </style>
 </head>
@@ -129,12 +141,11 @@
       <p>Kod pokoju: <span id="roomCodeDisplay"></span></p>
       <ul id="playersList"></ul>
       <button id="startGame">Start gry</button>
-      <button id="endRound" style="display:none; margin-top: 1rem; background-color: #c0392b;">Zakończ rundę</button>
     </div>
   </div>
 
-  <div id="messageBox"></div>
-  <div id="roleMessageBox"></div>
+  <div id="messageOverlay"></div>
+  <div id="roleOverlay"></div>
 
   <script>
     const firebaseConfig = {
@@ -160,61 +171,60 @@
     const roomCodeDisplay = document.getElementById('roomCodeDisplay');
     const playersList = document.getElementById('playersList');
     const startGameBtn = document.getElementById('startGame');
-    const endRoundBtn = document.getElementById('endRound');
-    const messageBox = document.getElementById('messageBox');
-    const roleMessageBox = document.getElementById('roleMessageBox');
+
+    const messageOverlay = document.getElementById('messageOverlay');
+    const roleOverlay = document.getElementById('roleOverlay');
 
     let currentRoomCode = null;
     let currentPlayerId = null;
     let currentPlayerName = null;
     let isHost = false;
-    let words = [];
 
-    // Załaduj słowa z words.json
-    fetch('words.json')
-      .then(response => response.json())
-      .then(data => {
-        words = data;
-        console.log('Załadowano słowa:', words.length);
-      })
-      .catch(error => {
-        console.error('Błąd ładowania words.json:', error);
-      });
+    let players = {};
+    let words = [];
 
     function generateRoomCode() {
       return Math.random().toString(36).substr(2, 4).toUpperCase();
     }
 
-    function updatePlayersList(players) {
+    function updatePlayersList(playersData) {
       playersList.innerHTML = '';
+      players = playersData || {};
       for (const [id, player] of Object.entries(players)) {
         const li = document.createElement('li');
         li.textContent = player.name;
+
         if (player.isHost) {
           li.classList.add('host');
           li.textContent += ' (host)';
         }
+
         if (id === currentPlayerId) {
           li.classList.add('self');
         }
+
         playersList.appendChild(li);
       }
     }
 
-    function showMessage(text, duration = 3500) {
-      messageBox.textContent = text;
-      messageBox.style.display = 'block';
-      setTimeout(() => {
-        messageBox.style.display = 'none';
-      }, duration);
-    }
+    function listenToRoom(roomCode) {
+      const roomRef = db.ref(`rooms/${roomCode}`);
 
-    function showRoleMessage(text, duration = 7000) {
-      roleMessageBox.textContent = text;
-      roleMessageBox.style.display = 'block';
-      setTimeout(() => {
-        roleMessageBox.style.display = 'none';
-      }, duration);
+      roomRef.on('value', (snapshot) => {
+        const roomData = snapshot.val();
+
+        if (!roomData) {
+          statusMessage.textContent = 'Pokój został usunięty.';
+          resetToLogin();
+          return;
+        }
+
+        if (roomData.players) {
+          updatePlayersList(roomData.players);
+        } else {
+          playersList.innerHTML = '';
+        }
+      });
     }
 
     function resetToLogin() {
@@ -225,16 +235,17 @@
       currentPlayerName = null;
       isHost = false;
       playersList.innerHTML = '';
-      startGameBtn.style.display = 'block';
-      endRoundBtn.style.display = 'none';
+      clearMessage();
+      clearRole();
     }
 
     createRoomBtn.addEventListener('click', () => {
       const name = playerNameInput.value.trim();
       if (!name) {
-        showMessage('Wpisz nick!');
+        statusMessage.textContent = 'Wpisz nick!';
         return;
       }
+
       currentPlayerName = name;
       isHost = true;
       currentRoomCode = generateRoomCode();
@@ -243,13 +254,13 @@
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
       roomRef.set({
         players: {
-          [currentPlayerId]: { name: currentPlayerName, isHost: true, role: null }
-        },
-        gameStarted: false
+          [currentPlayerId]: { name: currentPlayerName, isHost: true }
+        }
       }).then(() => {
         loginScreen.style.display = 'none';
         gameScreen.style.display = 'block';
         roomCodeDisplay.textContent = currentRoomCode;
+
         listenToRoom(currentRoomCode);
       });
     });
@@ -259,7 +270,7 @@
       const roomCode = roomCodeInput.value.trim().toUpperCase();
 
       if (!name || !roomCode) {
-        showMessage('Wpisz nick i kod pokoju!');
+        statusMessage.textContent = 'Wpisz nick i kod pokoju!';
         return;
       }
 
@@ -268,120 +279,106 @@
       currentPlayerId = db.ref().push().key;
 
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
+
       roomRef.once('value').then(snapshot => {
         if (!snapshot.exists()) {
-          showMessage('Pokój nie istnieje!');
+          statusMessage.textContent = 'Pokój nie istnieje.';
           return;
         }
 
-        roomRef.child('players').update({
-          [currentPlayerId]: { name: currentPlayerName, isHost: false, role: null }
-        }).then(() => {
+        const roomData = snapshot.val();
+        if (!roomData.players) roomData.players = {};
+
+        roomData.players[currentPlayerId] = { name: currentPlayerName, isHost: false };
+
+        roomRef.update({ players: roomData.players }).then(() => {
           loginScreen.style.display = 'none';
           gameScreen.style.display = 'block';
           roomCodeDisplay.textContent = currentRoomCode;
+
           listenToRoom(currentRoomCode);
         });
       });
     });
 
+    // Komunikaty
+    function showMessage(text, duration = 3500) {
+      messageOverlay.textContent = text;
+      messageOverlay.style.display = 'block';
+
+      setTimeout(() => {
+        messageOverlay.style.display = 'none';
+      }, duration);
+    }
+
+    function clearMessage() {
+      messageOverlay.style.display = 'none';
+      messageOverlay.textContent = '';
+    }
+
+    // Komunikaty roli
+    function showRoleMessage(text, duration = 6000) {
+      roleOverlay.textContent = text;
+      roleOverlay.style.display = 'block';
+
+      setTimeout(() => {
+        roleOverlay.style.display = 'none';
+      }, duration);
+    }
+
+    function clearRole() {
+      roleOverlay.style.display = 'none';
+      roleOverlay.textContent = '';
+    }
+
+    // Ładujemy słowa z pliku words.json
+    fetch('words.json')
+      .then(response => response.json())
+      .then(data => {
+        words = data;
+        console.log('Załadowano słowa:', words.length, words);
+      })
+      .catch(error => {
+        console.error('Błąd ładowania words.json:', error);
+      });
+
+    // Start gry - losujemy impostora i pokazujemy role
     startGameBtn.addEventListener('click', () => {
-      if (!currentRoomCode) return;
+      if (!players || Object.keys(players).length < 2) {
+        showMessage('Potrzeba co najmniej 2 graczy, aby zacząć grę.', 4000);
+        return;
+      }
 
-      const roomRef = db.ref(`rooms/${currentRoomCode}`);
+      // Losowanie impostora
+      const playerIds = Object.keys(players);
+      const impostorId = playerIds[Math.floor(Math.random() * playerIds.length)];
 
-      roomRef.child('players').once('value').then(snapshot => {
-        const players = snapshot.val();
-        if (!players || Object.keys(players).length < 2) {
-          showMessage("Potrzeba minimum 2 graczy, aby zacząć grę.");
-          return;
-        }
-
-        const playerIds = Object.keys(players);
-        const impostorIndex = Math.floor(Math.random() * playerIds.length);
-        const impostorId = playerIds[impostorIndex];
-
-        const updatedPlayers = {};
-        playerIds.forEach(id => {
-          updatedPlayers[id] = {
-            name: players[id].name,
-            isHost: players[id].isHost,
-            role: id === impostorId ? 'impostor' : 'innocent'
-          };
-        });
-
-        roomRef.update({
-          players: updatedPlayers,
-          gameStarted: true
-        }).then(() => {
-          startGameBtn.style.display = 'none';
-          if (isHost) endRoundBtn.style.display = 'block';
-        });
+      // Zapisywanie ról do bazy
+      const roles = {};
+      playerIds.forEach(id => {
+        roles[id] = (id === impostorId) ? 'impostor' : 'innocent';
       });
-    });
 
-    endRoundBtn.addEventListener('click', () => {
-      if (!currentRoomCode) return;
-      const roomRef = db.ref(`rooms/${currentRoomCode}`);
-
-      roomRef.once('value').then(snapshot => {
-        if (!snapshot.exists()) return;
-
-        const roomData = snapshot.val();
-        if (!roomData.players) return;
-
-        const resetPlayers = {};
-        for (const [id, player] of Object.entries(roomData.players)) {
-          resetPlayers[id] = {
-            name: player.name,
-            isHost: player.isHost,
-            role: null
-          };
-        }
-
-        roomRef.update({
-          players: resetPlayers,
-          gameStarted: false
-        }).then(() => {
-          showMessage("Runda zakończona. Wrócono do lobby.");
-          startGameBtn.style.display = isHost ? 'block' : 'none';
-          endRoundBtn.style.display = 'none';
-        });
-      });
-    });
-
-    // Nasłuchiwanie zmian w pokoju i wyświetlanie roli
-    function listenToRoom(roomCode) {
-      const roomRef = db.ref(`rooms/${roomCode}`);
-      roomRef.on('value', snapshot => {
-        const room = snapshot.val();
-
-        if (!room) {
-          showMessage("Pokój został usunięty.");
-          resetToLogin();
-          return;
-        }
-
-        if (room.players) {
-          updatePlayersList(room.players);
-
-          // Wyświetl rolę aktualnego gracza, jeśli gra trwa
-          if (room.gameStarted && room.players[currentPlayerId]) {
-            const playerRole = room.players[currentPlayerId].role;
-            if (playerRole === 'impostor') {
-              showRoleMessage("Impostor");
-            } else if (playerRole === 'innocent') {
+      db.ref(`rooms/${currentRoomCode}/roles`).set(roles).then(() => {
+        // Wyświetlanie ról każdemu graczowi indywidualnie
+        for (const [id, role] of Object.entries(roles)) {
+          if (id === currentPlayerId) {
+            if (role === 'impostor') {
+              showRoleMessage('Impostor');
+            } else {
+              // Losujemy słowo dla niewinnego
+              if (words.length === 0) {
+                console.warn('Lista słów jest pusta!');
+              }
               const word = words.length > 0 ? words[Math.floor(Math.random() * words.length)] : '';
+              console.log('Słowo dla niewinnego:', word);
               showRoleMessage(`Niewinny\nTwoje słowo: ${word}`);
             }
-          } else {
-            roleMessageBox.style.display = 'none';
           }
         }
-        startGameBtn.style.display = (isHost && !room.gameStarted) ? 'block' : 'none';
-        endRoundBtn.style.display = (isHost && room.gameStarted) ? 'block' : 'none';
       });
-    }
+    });
+
   </script>
 </body>
 </html>
