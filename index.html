@@ -407,9 +407,9 @@
           if (!currentPlayer) return;
 
           if (currentPlayer.role === 'impostor') {
-            showRoleMessage(`Twoja rola: Oszust\nSłowo: ${data.currentWord}`);
+            showRoleMessage(`Jesteś oszustem!`);
           } else if (currentPlayer.role === 'innocent') {
-            showRoleMessage(`Twoja rola: Niewinny\nSłowo: ${data.currentWord}`);
+            showRoleMessage(`Słowo: ${data.currentWord}`);
           }
         } else {
           resetToLobby();
