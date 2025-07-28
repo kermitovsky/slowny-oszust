@@ -16,7 +16,6 @@
       margin: 0;
       padding: 2rem;
     }
-
     .container {
       max-width: 800px;
       margin: auto;
@@ -25,14 +24,12 @@
       border-radius: 1.5rem;
       box-shadow: 0 0 20px rgba(0,0,0,0.3);
     }
-
     h1 {
       text-align: center;
       font-size: 3.5rem;
       color: #f5f5f5;
       font-family: 'Pacifico', cursive;
     }
-
     input, button {
       font-size: 2rem;
       padding: 1rem;
@@ -45,29 +42,24 @@
       margin-left: auto;
       margin-right: auto;
     }
-
     input {
       border: 2px solid #8e44ad;
       color: #333;
     }
-
     button {
       background-color: #8e44ad;
       color: white;
       cursor: pointer;
       transition: transform 0.2s ease, background-color 0.3s ease;
     }
-
     button:hover {
       background-color: #9b59b6;
       transform: scale(1.05);
     }
-
     #playersList {
       list-style: none;
       padding: 0;
     }
-
     #playersList li {
       padding: 1rem;
       margin: 0.5rem 0;
@@ -75,17 +67,14 @@
       background-color: #f9f3f0;
       color: #333;
     }
-
     .host {
       color: #3498db !important;
       font-weight: bold;
     }
-
     .self {
       color: black !important;
       font-weight: bold;
     }
-
     #messageBox, #roleMessageBox {
       position: fixed;
       top: 50%;
@@ -102,11 +91,9 @@
       word-wrap: break-word;
       white-space: pre-line;
     }
-
     #messageBox {
       font-size: 3rem;
     }
-
     #roleMessageBox {
       font-size: 4rem;
       font-weight: bold;
@@ -128,7 +115,7 @@
     <div id="gameScreen" style="display:none;">
       <p>Kod pokoju: <span id="roomCodeDisplay"></span></p>
       <ul id="playersList"></ul>
-      <button id="startGame">Start gry</button>
+      <button id="startGame" style="display:none;">Start gry</button>
       <button id="endRound" style="display:none; margin-top: 1rem; background-color: #c0392b;">Zakończ rundę</button>
     </div>
   </div>
@@ -217,17 +204,14 @@
       }, duration);
     }
 
-    function resetToLogin() {
-      loginScreen.style.display = 'block';
-      gameScreen.style.display = 'none';
-      currentRoomCode = null;
-      currentPlayerId = null;
-      currentPlayerName = null;
-      isHost = false;
-      playersList.innerHTML = '';
-      startGameBtn.style.display = 'block';
-      endRoundBtn.style.display = 'none';
+    function resetToLobby() {
+      // Ukryj role i wiadomości
       roleMessageBox.style.display = 'none';
+      // pokaż ekran gry i listę graczy - już jesteśmy w grze
+      gameScreen.style.display = 'block';
+      loginScreen.style.display = 'none';
+      startGameBtn.style.display = isHost ? 'block' : 'none';
+      endRoundBtn.style.display = 'none';
     }
 
     createRoomBtn.addEventListener('click', () => {
@@ -251,6 +235,8 @@
         loginScreen.style.display = 'none';
         gameScreen.style.display = 'block';
         roomCodeDisplay.textContent = currentRoomCode;
+        startGameBtn.style.display = 'block';
+        endRoundBtn.style.display = 'none';
         listenToRoom(currentRoomCode);
       });
     });
@@ -281,6 +267,8 @@
           loginScreen.style.display = 'none';
           gameScreen.style.display = 'block';
           roomCodeDisplay.textContent = currentRoomCode;
+          startGameBtn.style.display = 'none'; // tylko host widzi start
+          endRoundBtn.style.display = 'none';
           listenToRoom(currentRoomCode);
         });
       });
@@ -317,7 +305,7 @@
           gameStarted: true
         }).then(() => {
           startGameBtn.style.display = 'none';
-          if (isHost) endRoundBtn.style.display = 'block';
+          endRoundBtn.style.display = 'block';
         });
       });
     });
@@ -327,11 +315,27 @@
 
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
 
-      roomRef.update({
-        gameStarted: false,
-        players: null
-      }).then(() => {
-        resetToLogin();
+      // Resetujemy role i słowa na null i ustawiamy gameStarted na false, ale nie usuwamy graczy
+      roomRef.child('players').once('value').then(snapshot => {
+        const players = snapshot.val();
+        if (!players) return;
+
+        const resetPlayers = {};
+        Object.entries(players).forEach(([id, player]) => {
+          resetPlayers[id] = {
+            name: player.name,
+            isHost: player.isHost,
+            role: null,
+            word: null
+          };
+        });
+
+        roomRef.update({
+          players: resetPlayers,
+          gameStarted: false
+        }).then(() => {
+          resetToLobby();
+        });
       });
     });
 
@@ -353,6 +357,19 @@
           playersList.innerHTML = '';
         }
 
+        // Kontrola widoczności przycisków
+        if (isHost && room.gameStarted === false) {
+          startGameBtn.style.display = 'block';
+          endRoundBtn.style.display = 'none';
+        } else if (isHost && room.gameStarted === true) {
+          startGameBtn.style.display = 'none';
+          endRoundBtn.style.display = 'block';
+        } else {
+          startGameBtn.style.display = 'none';
+          endRoundBtn.style.display = 'none';
+        }
+
+        // Pokazanie roli i słowa tylko jeśli gra trwa i jest rola przypisana
         if (room.gameStarted && room.players && room.players[currentPlayerId]) {
           const playerRole = room.players[currentPlayerId].role;
 
@@ -366,6 +383,19 @@
           roleMessageBox.style.display = 'none';
         }
       });
+    }
+
+    function resetToLogin() {
+      loginScreen.style.display = 'block';
+      gameScreen.style.display = 'none';
+      currentRoomCode = null;
+      currentPlayerId = null;
+      currentPlayerName = null;
+      isHost = false;
+      playersList.innerHTML = '';
+      startGameBtn.style.display = 'none';
+      endRoundBtn.style.display = 'none';
+      roleMessageBox.style.display = 'none';
     }
   </script>
 </body>
