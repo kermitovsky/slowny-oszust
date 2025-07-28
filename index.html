@@ -205,7 +205,6 @@
     }
 
     function resetToLobby() {
-      // Reset do lobby (nie do logowania)
       startGameBtn.style.display = isHost ? 'block' : 'none';
       endRoundBtn.style.display = 'none';
       roleMessageBox.style.display = 'none';
@@ -283,21 +282,13 @@
         const impostorIndex = Math.floor(Math.random() * playerIds.length);
         const impostorId = playerIds[impostorIndex];
 
-        const updatedPlayers = {};
-        playerIds.forEach(id => {
-          updatedPlayers[id] = {
-            name: players[id].name,
-            isHost: players[id].isHost,
-            role: id === impostorId ? 'impostor' : 'innocent'
-          };
-        });
+        for (const id of playerIds) {
+          players[id].role = (id === impostorId) ? 'impostor' : 'innocent';
+        }
 
         roomRef.update({
-          players: updatedPlayers,
+          players: players,
           gameStarted: true
-        }).then(() => {
-          startGameBtn.style.display = 'none';
-          if (isHost) endRoundBtn.style.display = 'block';
         });
       });
     });
@@ -306,25 +297,8 @@
       if (!currentRoomCode) return;
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
 
-      roomRef.once('value').then(snapshot => {
-        if (!snapshot.exists()) return;
-
-        const roomData = snapshot.val();
-        if (!roomData.players) return;
-
-        const resetPlayers = {};
-        for (const [id, player] of Object.entries(roomData.players)) {
-          resetPlayers[id] = {
-            name: player.name,
-            isHost: player.isHost,
-            role: null
-          };
-        }
-
-        roomRef.update({
-          players: resetPlayers,
-          gameStarted: false
-        });
+      roomRef.update({
+        gameStarted: false
       });
     });
 
@@ -332,6 +306,7 @@
       const roomRef = db.ref(`rooms/${roomCode}`);
 
       let lastGameStarted = null;
+      let hasShownLobbyMessage = false;
 
       roomRef.on('value', snapshot => {
         if (!snapshot.exists()) {
@@ -345,11 +320,9 @@
         const players = roomData.players || {};
         updatePlayersList(players);
 
-        // Ustaw widoczność przycisku start gry tylko dla hosta i gdy gra nie trwa
         startGameBtn.style.display = isHost && !roomData.gameStarted ? 'block' : 'none';
         endRoundBtn.style.display = isHost && roomData.gameStarted ? 'block' : 'none';
 
-        // Jeśli gra zaczęta, pokaż role
         if (roomData.gameStarted && players[currentPlayerId]) {
           const playerRole = players[currentPlayerId].role;
           if (!playerRole) {
@@ -364,7 +337,6 @@
               console.error('Words array jest puste przy pokazywaniu roli niewinnego');
               return;
             }
-            // Wybierz słowo losowo i pokaż
             const randomWord = words[Math.floor(Math.random() * words.length)];
             showRoleMessage(`Twoje słowo: ${randomWord}`, 7000);
           }
@@ -372,11 +344,16 @@
           roleMessageBox.style.display = 'none';
         }
 
-        // Tu dodajemy warunek do wyświetlania komunikatu wszystkim, gdy gra się zakończyła
-        if (lastGameStarted === true && roomData.gameStarted === false) {
+        if (lastGameStarted === true && roomData.gameStarted === false && !hasShownLobbyMessage) {
           showMessage("Wrócono do lobby.", 3000);
           resetToLobby();
+          hasShownLobbyMessage = true;
         }
+
+        if (roomData.gameStarted === true) {
+          hasShownLobbyMessage = false;
+        }
+
         lastGameStarted = roomData.gameStarted;
       });
     }
