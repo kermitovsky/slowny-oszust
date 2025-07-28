@@ -101,7 +101,7 @@
       color: black !important;
       font-weight: bold;
     }
-    #messageBox, #roleMessageBox {
+    #messageBox, #roleMessageBox, #kickMessageBox {
       position: fixed;
       top: 50%;
       left: 50%;
@@ -124,6 +124,12 @@
       font-size: 4rem;
       font-weight: bold;
       font-family: 'Segoe UI Black', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    #kickMessageBox {
+      font-size: 2.5rem;
+      font-weight: bold;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #c0392b;
     }
   </style>
 </head>
@@ -149,6 +155,7 @@
 
   <div id="messageBox"></div>
   <div id="roleMessageBox"></div>
+  <div id="kickMessageBox"></div>
 
   <script>
     const firebaseConfig = {
@@ -178,12 +185,14 @@
     const leaveRoomBtn = document.getElementById('leaveRoom');
     const messageBox = document.getElementById('messageBox');
     const roleMessageBox = document.getElementById('roleMessageBox');
+    const kickMessageBox = document.getElementById('kickMessageBox');
 
     let currentRoomCode = null;
     let currentPlayerId = null;
     let currentPlayerName = null;
     let isHost = false;
     let words = [];
+    let kicked = false; // czy gracz został wyrzucony
 
     // Załaduj słowa z words.json
     fetch('words.json')
@@ -230,25 +239,50 @@
     }
 
     function showMessage(text, duration = 3500) {
-      messageBox.textContent = text;
       messageBox.style.display = 'block';
-      setTimeout(() => {
-        messageBox.style.display = 'none';
-      }, duration);
+      messageBox.textContent = text;
+      // Ukryj pozostałe komunikaty, żeby się nie nakładały
+      roleMessageBox.style.display = 'none';
+      kickMessageBox.style.display = 'none';
+      if (duration > 0) {
+        setTimeout(() => {
+          messageBox.style.display = 'none';
+        }, duration);
+      }
     }
 
     function showRoleMessage(text, duration = 7000) {
-      roleMessageBox.textContent = text;
       roleMessageBox.style.display = 'block';
-      setTimeout(() => {
-        roleMessageBox.style.display = 'none';
-      }, duration);
+      roleMessageBox.textContent = text;
+      // Ukryj inne komunikaty
+      messageBox.style.display = 'none';
+      kickMessageBox.style.display = 'none';
+      if (duration > 0) {
+        setTimeout(() => {
+          roleMessageBox.style.display = 'none';
+        }, duration);
+      }
+    }
+
+    function showKickMessage(text, duration = 5000) {
+      kickMessageBox.style.display = 'block';
+      kickMessageBox.textContent = text;
+      // Ukryj inne komunikaty
+      messageBox.style.display = 'none';
+      roleMessageBox.style.display = 'none';
+      if (duration > 0) {
+        setTimeout(() => {
+          kickMessageBox.style.display = 'none';
+        }, duration);
+      }
     }
 
     function resetToLobby() {
       startGameBtn.style.display = isHost ? 'block' : 'none';
       endRoundBtn.style.display = 'none';
       roleMessageBox.style.display = 'none';
+      messageBox.style.display = 'none';
+      kickMessageBox.style.display = 'none';
     }
 
     createRoomBtn.addEventListener('click', () => {
@@ -290,6 +324,7 @@
       currentPlayerName = name;
       currentRoomCode = roomCode;
       currentPlayerId = db.ref().push().key;
+      kicked = false;
 
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
       roomRef.once('value').then(snapshot => {
@@ -298,14 +333,27 @@
           return;
         }
 
-        roomRef.child('players').update({
-          [currentPlayerId]: { name: currentPlayerName, isHost: false, role: null }
-        }).then(() => {
-          loginScreen.style.display = 'none';
-          gameScreen.style.display = 'block';
-          roomCodeDisplay.textContent = currentRoomCode;
-          listenToRoom(currentRoomCode);
-          // Nie pokazujemy komunikatu przy dołączeniu
+        roomRef.child('players').once('value').then(playersSnap => {
+          const players = playersSnap.val() || {};
+          if (Object.keys(players).length >= 8) {
+            showMessage('Pokój jest pełny!');
+            return;
+          }
+
+          // Dodaj gracza do pokoju
+          const updates = {};
+          updates[`players/${currentPlayerId}`] = { name: currentPlayerName, isHost: false, role: null };
+          roomRef.update(updates).then(() => {
+            loginScreen.style.display = 'none';
+            gameScreen.style.display = 'block';
+            roomCodeDisplay.textContent = currentRoomCode;
+            // Sprawdź, czy jesteśmy hostem
+            roomRef.child('players').once('value').then(playersSnap2 => {
+              const players2 = playersSnap2.val();
+              isHost = Object.values(players2).some(p => p.isHost && p.name === currentPlayerName);
+              listenToRoom(currentRoomCode);
+            });
+          });
         });
       });
     });
@@ -326,30 +374,54 @@
       const roomRef = db.ref(`rooms/${roomCode}`);
       roomRef.on('value', snapshot => {
         const roomData = snapshot.val();
+
         if (!roomData) {
           showMessage('Pokój został zamknięty.');
           resetUI();
           return;
         }
+
         if (roomData.players) {
           updatePlayersList(roomData.players);
+          // Sprawdź, czy zostałeś wyrzucony
+          if (!roomData.players[currentPlayerId]) {
+            if (!kicked) {
+              kicked = true;
+              showKickMessage('Zostałeś wyrzucony z pokoju!', 4000);
+              // Po kilku sekundach wyloguj i wróć do ekranu logowania
+              setTimeout(() => {
+                resetUI();
+              }, 4000);
+              return;
+            }
+          }
         }
 
-        // Sprawdź czy gramy
         if (roomData.gameStarted) {
           startGameBtn.style.display = 'none';
           endRoundBtn.style.display = isHost ? 'block' : 'none';
+
+          // Pokaż rolę i słowo osobno od komunikatu kto zaczyna mówić
+          const playerRole = roomData.players?.[currentPlayerId]?.role;
+
+          // Najpierw ukryj role i message
+          roleMessageBox.style.display = 'none';
+          messageBox.style.display = 'none';
+
           if (roomData.currentWord) {
-            // Pokaż rolę i słowo
-            const playerRole = roomData.players?.[currentPlayerId]?.role;
             if (playerRole === 'impostor') {
               showRoleMessage('Jesteś oszustem!\nNie znasz słowa!');
             } else {
               showRoleMessage(`Słowo: ${roomData.currentWord}`);
             }
           }
+
+          // Komunikat kto zaczyna mówić - wyświetl **osobno** z 4 sekundy
           if (roomData.starterId && roomData.players?.[roomData.starterId]) {
-            showMessage(`Zaczyna mówić: ${roomData.players[roomData.starterId].name}`, 4000);
+            // Opóźnij wyświetlenie komunikatu, aby nie nakładał się z rolą
+            setTimeout(() => {
+              showMessage(`Zaczyna mówić: ${roomData.players[roomData.starterId].name}`, 4000);
+            }, 2000);
           }
         } else {
           resetToLobby();
@@ -369,15 +441,11 @@
           return;
         }
 
-        // Losuj słowo
         const word = words[Math.floor(Math.random() * words.length)];
-
-        // Losuj oszusta
         const playerIds = Object.keys(players);
         const impostorIndex = Math.floor(Math.random() * playerIds.length);
         const impostorId = playerIds[impostorIndex];
 
-        // Losowanie kto zaczyna mówić (45% impostor, 55% inny gracz)
         let starterId;
         if (Math.random() < 0.45) {
           starterId = impostorId;
@@ -386,7 +454,6 @@
           starterId = nonImpostors[Math.floor(Math.random() * nonImpostors.length)];
         }
 
-        // Ustaw role i startera
         const updates = {};
         for (const id of playerIds) {
           updates[`players/${id}/role`] = id === impostorId ? 'impostor' : 'normal';
@@ -399,11 +466,7 @@
           starterId: starterId,
           ...updates
         }).then(() => {
-          // Po aktualizacji pokaż kto zaczyna mówić
-          roomRef.child(`players/${starterId}/name`).once('value').then(snap => {
-            const starterName = snap.val();
-            showMessage(`Zaczyna mówić: ${starterName}`, 4000);
-          });
+          // Nie pokazujemy komunikatu tutaj, bo jest w listenToRoom z opóźnieniem
         });
       });
     }
@@ -418,7 +481,6 @@
         currentWord: null,
         starterId: null
       }).then(() => {
-        // Wyzeruj role
         roomRef.child('players').once('value').then(snapshot => {
           const players = snapshot.val();
           if (!players) return;
@@ -437,15 +499,12 @@
       const roomRef = db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`);
 
       roomRef.remove().then(() => {
-        // Sprawdź czy host opuścił pokój i wybierz nowego hosta
         const playersRef = db.ref(`rooms/${currentRoomCode}/players`);
         playersRef.once('value').then(snapshot => {
           const players = snapshot.val();
           if (!players || Object.keys(players).length === 0) {
-            // Usuń cały pokój
             db.ref(`rooms/${currentRoomCode}`).remove();
           } else {
-            // Jeśli był hostem, przypisz nowego hosta (pierwszego gracza)
             if (isHost) {
               const firstPlayerId = Object.keys(players)[0];
               const updateHost = {};
@@ -473,14 +532,19 @@
       currentPlayerId = null;
       currentPlayerName = null;
       isHost = false;
+      kicked = false;
       loginScreen.style.display = 'block';
       gameScreen.style.display = 'none';
       startGameBtn.style.display = 'none';
       endRoundBtn.style.display = 'none';
       roomCodeDisplay.textContent = '';
       playersList.innerHTML = '';
-      showMessage(''); // schowaj komunikaty
+      messageBox.style.display = 'none';
       roleMessageBox.style.display = 'none';
+      kickMessageBox.style.display = 'none';
+      statusMessage.textContent = '';
+      playerNameInput.value = '';
+      roomCodeInput.value = '';
     }
   </script>
 </body>
