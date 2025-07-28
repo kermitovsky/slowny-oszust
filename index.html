@@ -410,14 +410,15 @@
         startGameBtn.style.display = isHost && !room.gameStarted ? 'block' : 'none';
         endRoundBtn.style.display = isHost && room.gameStarted ? 'block' : 'none';
 
-        if (room.gameStarted && players[currentPlayerId]) {
-          const role = players[currentPlayerId].role;
-          if (role) {
-            showRoleMessage(role === 'impostor' ? 'Jesteś oszustem!' : 'Jesteś zwykłym graczem.');
-          }
-        } else {
-          roleMessageBox.style.display = 'none';
-        }
+       if (room.gameStarted && players[currentPlayerId]) {
+  const role = players[currentPlayerId].role;
+  if (role) {
+    showRoleMessage(role === 'impostor' ? 'Jesteś oszustem!' : `Twoje słowo: ${room.currentWord}`);
+  }
+} else {
+  roleMessageBox.style.display = 'none';
+}
+
 
         // Pokazuj resetMessage jeśli jest
         if (room.resetMessage) {
