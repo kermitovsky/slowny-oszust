@@ -1,344 +1,212 @@
-const firebaseConfig = {
-  apiKey: "AIzaSyCyj5pbNgUHaV-_g__sTQmsUtYOhegYoSI",
-  authDomain: "slowny-oszust.firebaseapp.com",
-  databaseURL: "https://slowny-oszust-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "slowny-oszust",
-  storageBucket: "slowny-oszust.appspot.com",
-  messagingSenderId: "679726628348",
-  appId: "1:679726628348:web:83f9c43fee9cf514784679"
-};
+document.addEventListener('DOMContentLoaded', () => {
+  // Inicjalizacja Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyCyj5pbNgUHaV-_g__sTQmsUtYOhegYoSI",
+    authDomain: "slowny-oszust.firebaseapp.com",
+    databaseURL: "https://slowny-oszust-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "slowny-oszust",
+    storageBucket: "slowny-oszust.firebasestorage.app",
+    messagingSenderId: "679726628348",
+    appId: "1:679726628348:web:83f9c43fee9cf514784679"
+  };
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+  try {
+    firebase.initializeApp(firebaseConfig);
+    console.log("Firebase zainicjalizowany");
+  } catch (error) {
+    console.error("Błąd inicjalizacji Firebase:", error);
+    alert("Błąd połączenia z bazą danych!");
+  }
 
-const playerNameInput = document.getElementById('playerName');
-const createRoomBtn = document.getElementById('createRoom');
-const joinRoomBtn = document.getElementById('joinRoom');
-const roomCodeInput = document.getElementById('roomCodeInput');
-const statusMessage = document.getElementById('statusMessage');
-const loginScreen = document.getElementById('loginScreen');
-const gameScreen = document.getElementById('gameScreen');
-const roomCodeDisplay = document.getElementById('roomCodeDisplay');
-const playersList = document.getElementById('playersList');
-const startGameBtn = document.getElementById('startGame');
-const endRoundBtn = document.getElementById('endRound');
-const leaveRoomBtn = document.getElementById('leaveRoom');
-const messageBox = document.getElementById('messageBox');
-const roleMessageBox = document.getElementById('roleMessageBox');
+  const db = firebase.database();
+  let currentRoomId = null;
+  let currentPlayerId = null;
+  let playersRef = null;
 
-let currentRoomCode = null;
-let currentPlayerId = null;
-let currentPlayerName = null;
-let isHost = false;
-let words = [];
+  // Generowanie ID
+  const generateRoomCode = () => Math.random().toString(36).substring(2, 6).toUpperCase();
+  const generatePlayerId = () => 'p_' + Math.random().toString(36).substring(2, 9);
 
-// Załaduj słowa z words.json
-fetch('words.json')
-  .then(response => response.json())
-  .then(data => {
-    words = data;
-    console.log('Załadowano słowa:', words.length);
-  })
-  .catch(error => {
-    console.error('Błąd ładowania words.json:', error);
-  });
-
-function generateRoomCode() {
-  return Math.random().toString(36).substr(2, 4).toUpperCase();
-}
-
-function updatePlayersList(players) {
-  playersList.innerHTML = '';
-  for (const [id, player] of Object.entries(players)) {
-    const li = document.createElement('li');
-    li.textContent = player.name;
-    if (player.isHost) {
-      li.classList.add('host');
-      li.textContent += ' (host)';
+  // UI Helpers
+  function setStatus(message, isError = false) {
+    const statusEl = document.getElementById('statusMessage');
+    if (statusEl) {
+      statusEl.textContent = message;
+      statusEl.style.color = isError ? 'red' : '#666';
     }
-    if (id === currentPlayerId) {
-      li.classList.add('self');
-    }
+  }
 
-    // Dodaj przycisk wyrzucania tylko dla hosta i innych graczy niż siebie
-    if (isHost && id !== currentPlayerId) {
-      const kickBtn = document.createElement('button');
-      kickBtn.textContent = '×';
-      kickBtn.title = 'Wyrzuć gracza';
-      kickBtn.classList.add('kickBtn');
-      kickBtn.addEventListener('click', () => {
-        kickPlayer(id);
+  function setLoading(isLoading) {
+    const createBtn = document.getElementById('createRoom');
+    const joinBtn = document.getElementById('joinRoom');
+    if (createBtn) createBtn.disabled = isLoading;
+    if (joinBtn) joinBtn.disabled = isLoading;
+  }
+
+  function showGameScreen(roomId) {
+    const loginScreen = document.getElementById('loginScreen');
+    const gameScreen = document.getElementById('gameScreen');
+    const roomCodeDisplay = document.getElementById('roomCodeDisplay');
+    
+    if (loginScreen) loginScreen.style.display = 'none';
+    if (gameScreen) gameScreen.style.display = 'block';
+    if (roomCodeDisplay) roomCodeDisplay.textContent = roomId;
+  }
+
+  function updatePlayersList(players, myPlayerId) {
+    const playersList = document.getElementById('playersList');
+    if (!playersList) {
+      console.error("Element playersList nie istnieje!");
+      return;
+    }
+    
+    playersList.innerHTML = '';
+    
+    if (players) {
+      Object.entries(players).forEach(([id, player]) => {
+        const li = document.createElement('li');
+        li.textContent = player.name;
+
+        // Pogrub nick aktualnego gracza
+        if (id === myPlayerId) {
+          li.style.fontWeight = 'bold';
+        }
+
+        if (player.isHost) {
+          li.innerHTML += ' <span style="color:#4285f4">(host)</span>';
+        }
+        playersList.appendChild(li);
       });
-      li.appendChild(kickBtn);
+    }
+  }
+
+  function initPlayersListener(roomId) {
+    if (playersRef) {
+      playersRef.off();
     }
 
-    playersList.appendChild(li);
+    playersRef = db.ref(`rooms/${roomId}/players`);
+    
+    playersRef.on('value', (snapshot) => {
+      updatePlayersList(snapshot.val(), currentPlayerId);
+    });
+    
+    playersRef.once('value').then(snapshot => {
+      updatePlayersList(snapshot.val(), currentPlayerId);
+    });
   }
-}
 
-function showMessage(text, duration = 3500) {
-  messageBox.textContent = text;
-  messageBox.style.display = 'block';
-  setTimeout(() => {
-    messageBox.style.display = 'none';
-  }, duration);
-}
-
-function showRoleMessage(text, duration = 7000) {
-  roleMessageBox.textContent = text;
-  roleMessageBox.style.display = 'block';
-  setTimeout(() => {
-    roleMessageBox.style.display = 'none';
-  }, duration);
-}
-
-function resetToLobby() {
-  startGameBtn.style.display = isHost ? 'block' : 'none';
-  endRoundBtn.style.display = 'none';
-  roleMessageBox.style.display = 'none';
-}
-
-createRoomBtn.addEventListener('click', () => {
-  const name = playerNameInput.value.trim();
-  if (!name) {
-    showMessage('Wpisz nick!');
-    return;
-  }
-  currentPlayerName = name;
-  isHost = true;
-  currentRoomCode = generateRoomCode();
-  currentPlayerId = db.ref().push().key;
-
-  const roomRef = db.ref(`rooms/${currentRoomCode}`);
-  roomRef.set({
-    players: {
-      [currentPlayerId]: { name: currentPlayerName, isHost: true, role: null }
-    },
-    gameStarted: false,
-    currentWord: null,
-    resetMessage: null,
-    startingPlayer: null
-  }).then(() => {
-    loginScreen.style.display = 'none';
-    gameScreen.style.display = 'block';
-    roomCodeDisplay.textContent = currentRoomCode;
-    listenToRoom(currentRoomCode);
-  });
-});
-
-joinRoomBtn.addEventListener('click', () => {
-  const name = playerNameInput.value.trim();
-  const code = roomCodeInput.value.trim().toUpperCase();
-  if (!name) {
-    showMessage('Wpisz nick!');
-    return;
-  }
-  if (!code || code.length !== 4) {
-    showMessage('Wpisz poprawny kod pokoju!');
-    return;
-  }
-  currentPlayerName = name;
-  currentRoomCode = code;
-  currentPlayerId = db.ref().push().key;
-  isHost = false;
-
-  const roomRef = db.ref(`rooms/${currentRoomCode}`);
-
-  roomRef.once('value').then(snapshot => {
-    if (!snapshot.exists()) {
-      showMessage('Pokój nie istnieje!');
-      return;
-    }
-    const roomData = snapshot.val();
-    if (roomData.gameStarted) {
-      showMessage('Gra już trwa!');
-      return;
-    }
-    // Dodaj gracza
-    const players = roomData.players || {};
-    for (const p of Object.values(players)) {
-      if (p.name === currentPlayerName) {
-        showMessage('Ten nick jest już zajęty w pokoju!');
+  // Tworzenie pokoju
+  document.getElementById('createRoom').addEventListener('click', async function() {
+    try {
+      setLoading(true);
+      const playerName = document.getElementById('playerName').value.trim();
+      
+      if (playerName.length < 3) {
+        setStatus("Nick musi mieć minimum 3 znaki!", true);
+        setLoading(false);
         return;
       }
-    }
-    roomRef.child('players').child(currentPlayerId).set({ name: currentPlayerName, isHost: false, role: null }).then(() => {
-      loginScreen.style.display = 'none';
-      gameScreen.style.display = 'block';
-      roomCodeDisplay.textContent = currentRoomCode;
-      listenToRoom(currentRoomCode);
-    });
-  });
-});
+      
+      const roomId = generateRoomCode();
+      const playerId = generatePlayerId();
+      
+      await db.ref(`rooms/${roomId}`).set({
+        players: {
+          [playerId]: {
+            name: playerName,
+            isImpostor: false,
+            joinedAt: firebase.database.ServerValue.TIMESTAMP,
+            isHost: true
+          }
+        },
+        status: "waiting",
+        createdAt: firebase.database.ServerValue.TIMESTAMP
+      });
 
-function listenToRoom(roomCode) {
-  const roomRef = db.ref(`rooms/${roomCode}`);
+      currentRoomId = roomId;
+      currentPlayerId = playerId;
 
-  roomRef.on('value', snapshot => {
-    const roomData = snapshot.val();
-    if (!roomData) {
-      // Pokój usunięty lub zakończony
-      showMessage('Pokój został zamknięty.');
-      location.reload();
-      return;
-    }
-    const players = roomData.players || {};
-
-    updatePlayersList(players);
-
-    startGameBtn.style.display = (isHost && !roomData.gameStarted && Object.keys(players).length >= 2) ? 'block' : 'none';
-
-    if (roomData.gameStarted) {
-      endRoundBtn.style.display = 'block';
-      startGameBtn.style.display = 'none';
-
-      if (roomData.currentWord) {
-        showMessage(`Słowo: ${roomData.currentWord}`, 6000);
-      }
-      if (roomData.startingPlayer && players[roomData.startingPlayer]) {
-        showMessage(`Pierwszy mówi: ${players[roomData.startingPlayer].name}`, 4000);
-      }
-      if (players[currentPlayerId] && players[currentPlayerId].role) {
-        showRoleMessage(`Twoja rola: ${players[currentPlayerId].role}`, 7000);
-      }
-    } else {
-      resetToLobby();
+      showGameScreen(roomId);
+      initPlayersListener(roomId);
+      setStatus("");
+      
+    } catch (error) {
+      console.error("Błąd tworzenia pokoju:", error);
+      setStatus("Błąd: " + error.message, true);
+    } finally {
+      setLoading(false);
     }
   });
-}
 
-startGameBtn.addEventListener('click', () => {
-  const roomRef = db.ref(`rooms/${currentRoomCode}`);
-  roomRef.once('value').then(snapshot => {
-    const roomData = snapshot.val();
-    if (!roomData) return;
+  // Dołączanie do pokoju
+  document.getElementById('joinRoom').addEventListener('click', async function() {
+    try {
+      setLoading(true);
+      setStatus("Łączenie...");
+      
+      const roomId = document.getElementById('roomCodeInput').value.trim().toUpperCase();
+      const playerName = document.getElementById('playerName').value.trim();
 
-    const players = roomData.players || {};
-    const playerIds = Object.keys(players);
-
-    if (playerIds.length < 2) {
-      showMessage('Za mało graczy, aby zacząć grę!');
-      return;
-    }
-
-    // Wylosuj impostora z prawdopodobieństwem ok. 20% (1 z 5)
-    // Implementacja: spośród graczy jeden jest impostorem, ale z ~20% szansą faktycznie ktoś jest impostorem
-    // Znaczy w 80% może być brak impostora? Albo zawsze jest impostor, ale przy losowaniu faworyzujemy aby nie był pierwszy?
-
-    // Propozycja: zawsze jest impostor, ale prawdopodobieństwo bycia impostorem ma 20% dla pierwszego mówiącego,
-    // reszta ma normalne prawdopodobieństwo (równo podzielone).
-
-    // Czyli pierwszy mówi ma 20% szans być impostorem,
-    // reszta graczy ma 80% szans podzielone równo na siebie.
-
-    // Najpierw losujemy pierwszy mówiącego - losowo spośród graczy.
-
-    // Następnie przypisujemy impostora z uwzględnieniem obniżonego prawdopodobieństwa dla pierwszego mówiącego.
-
-    // Wylosuj pierwszego mówiącego:
-    const firstSpeakerId = playerIds[Math.floor(Math.random() * playerIds.length)];
-
-    // Oblicz prawdopodobieństwa impostora dla każdego gracza:
-    // Dla pierwszego mówiącego: 20%
-    // Dla reszty: 80% / (liczba graczy - 1)
-
-    const impostorProbabilities = {};
-    const numPlayers = playerIds.length;
-    const firstSpeakerProb = 0.20;
-    const othersProb = (1 - firstSpeakerProb) / (numPlayers - 1);
-
-    for (const id of playerIds) {
-      impostorProbabilities[id] = (id === firstSpeakerId) ? firstSpeakerProb : othersProb;
-    }
-
-    // Losuj impostora według tych prawdopodobieństw:
-    const rand = Math.random();
-    let acc = 0;
-    let impostorId = null;
-    for (const id of playerIds) {
-      acc += impostorProbabilities[id];
-      if (rand <= acc) {
-        impostorId = id;
-        break;
+      if (!roomId || roomId.length !== 4) {
+        throw new Error("Podaj poprawny 4-znakowy kod pokoju");
       }
-    }
-    if (!impostorId) impostorId = playerIds[playerIds.length - 1]; // zabezpieczenie
-
-    // Wylosuj słowo z words.json (zakładamy, że już załadowane)
-    const chosenWord = words.length > 0 ? words[Math.floor(Math.random() * words.length)] : 'SŁOWO';
-
-    // Przypisz role graczom
-    const updatedPlayers = {};
-    for (const id of playerIds) {
-      updatedPlayers[id] = {
-        ...players[id],
-        role: (id === impostorId) ? 'Impostor' : 'Członek załogi'
-      };
-    }
-
-    roomRef.update({
-      players: updatedPlayers,
-      gameStarted: true,
-      currentWord: chosenWord,
-      startingPlayer: firstSpeakerId,
-      resetMessage: null
-    });
-  });
-});
-
-endRoundBtn.addEventListener('click', () => {
-  const roomRef = db.ref(`rooms/${currentRoomCode}`);
-  roomRef.once('value').then(snapshot => {
-    const roomData = snapshot.val();
-    if (!roomData) return;
-
-    const players = roomData.players || {};
-
-    // Wyzeruj role i słowo, zakończ rundę
-    const resetPlayers = {};
-    for (const id in players) {
-      resetPlayers[id] = { ...players[id], role: null };
-    }
-
-    roomRef.update({
-      players: resetPlayers,
-      gameStarted: false,
-      currentWord: null,
-      startingPlayer: null,
-      resetMessage: 'Runda zakończona. Możesz rozpocząć nową grę.'
-    });
-    showMessage('Runda zakończona!');
-  });
-});
-
-leaveRoomBtn.addEventListener('click', () => {
-  if (!currentRoomCode || !currentPlayerId) return;
-  const playerRef = db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`);
-
-  playerRef.remove().then(() => {
-    const roomRef = db.ref(`rooms/${currentRoomCode}/players`);
-    roomRef.once('value').then(snapshot => {
-      const players = snapshot.val() || {};
-      if (Object.keys(players).length === 0) {
-        // Usuń pokój jeśli pusty
-        db.ref(`rooms/${currentRoomCode}`).remove();
-      } else if (isHost) {
-        // Przekaż hostowanie nowemu graczowi (pierwszemu na liście)
-        const newHostId = Object.keys(players)[0];
-        db.ref(`rooms/${currentRoomCode}/players/${newHostId}`).update({ isHost: true });
+      if (!playerName || playerName.length < 3) {
+        throw new Error("Nick musi mieć minimum 3 znaki");
       }
-    });
+
+      const roomSnapshot = await db.ref(`rooms/${roomId}`).once('value');
+      if (!roomSnapshot.exists()) {
+        throw new Error("Pokój nie istnieje!");
+      }
+
+      const players = roomSnapshot.val().players || {};
+      const nickExists = Object.values(players).some(p => p.name === playerName);
+      if (nickExists) {
+        throw new Error("Ten nick jest już zajęty!");
+      }
+
+      const playerId = generatePlayerId();
+      await db.ref(`rooms/${roomId}/players/${playerId}`).set({
+        name: playerName,
+        isImpostor: false,
+        joinedAt: firebase.database.ServerValue.TIMESTAMP,
+        isHost: false
+      });
+
+      currentRoomId = roomId;
+      currentPlayerId = playerId;
+
+      showGameScreen(roomId);
+      setStatus("");
+      initPlayersListener(roomId);
+      
+    } catch (error) {
+      console.error("Błąd dołączania:", error);
+      setStatus(error.message, true);
+    } finally {
+      setLoading(false);
+    }
   });
-  location.reload();
-});
 
-function kickPlayer(playerId) {
-  if (!currentRoomCode || !isHost) return;
-  db.ref(`rooms/${currentRoomCode}/players/${playerId}`).remove();
-}
+  // Czyszczenie danych przy zamknięciu
+  window.addEventListener('beforeunload', () => {
+    if (currentRoomId && currentPlayerId) {
+      db.ref(`rooms/${currentRoomId}/players/${currentPlayerId}`).remove();
+    }
+    if (playersRef) {
+      playersRef.off();
+    }
+  });
 
-window.addEventListener('beforeunload', () => {
-  if (currentRoomCode && currentPlayerId) {
-    db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).remove();
+  // Automatyczne ukrywanie komunikatów
+  const playerNameInput = document.getElementById('playerName');
+  const roomCodeInput = document.getElementById('roomCodeInput');
+
+  if (playerNameInput) {
+    playerNameInput.addEventListener('input', () => setStatus(""));
+  }
+  if (roomCodeInput) {
+    roomCodeInput.addEventListener('input', () => setStatus(""));
   }
 });
