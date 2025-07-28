@@ -226,7 +226,7 @@
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
       roomRef.set({
         players: {
-          [currentPlayerId]: { name: currentPlayerName, isHost: true, role: null }
+          [currentPlayerId]: { name: currentPlayerName, isHost: true, role: null, word: null }
         },
         gameStarted: false
       }).then(() => {
@@ -258,7 +258,7 @@
         }
 
         roomRef.child('players').update({
-          [currentPlayerId]: { name: currentPlayerName, isHost: false, role: null }
+          [currentPlayerId]: { name: currentPlayerName, isHost: false, role: null, word: null }
         }).then(() => {
           loginScreen.style.display = 'none';
           gameScreen.style.display = 'block';
@@ -284,12 +284,15 @@
         const impostorIndex = Math.floor(Math.random() * playerIds.length);
         const impostorId = playerIds[impostorIndex];
 
+        const chosenWord = words.length > 0 ? words[Math.floor(Math.random() * words.length)] : "BRAK";
+
         const updatedPlayers = {};
         playerIds.forEach(id => {
           updatedPlayers[id] = {
             name: players[id].name,
             isHost: players[id].isHost,
-            role: id === impostorId ? 'impostor' : 'innocent'
+            role: id === impostorId ? 'impostor' : 'innocent',
+            word: id === impostorId ? null : chosenWord
           };
         });
 
@@ -318,7 +321,8 @@
           resetPlayers[id] = {
             name: player.name,
             isHost: player.isHost,
-            role: null
+            role: null,
+            word: null
           };
         }
 
@@ -335,42 +339,35 @@
       const roomRef = db.ref(`rooms/${roomCode}`);
 
       roomRef.on('value', snapshot => {
-        if (!snapshot.exists()) {
-          showMessage('Pokój został zamknięty.');
-          loginScreen.style.display = 'block';
-          gameScreen.style.display = 'none';
-          return;
-        }
+        if (!snapshot.exists()) return;
 
         const roomData = snapshot.val();
-        const players = roomData.players || {};
-        updatePlayersList(players);
+        if (!roomData.players) return;
 
-        // Ustaw widoczność przycisku start gry tylko dla hosta i gdy gra nie trwa
-        startGameBtn.style.display = isHost && !roomData.gameStarted ? 'block' : 'none';
-        endRoundBtn.style.display = isHost && roomData.gameStarted ? 'block' : 'none';
+        updatePlayersList(roomData.players);
 
-        // Jeśli gra zaczęta, pokaż role
-        if (roomData.gameStarted && players[currentPlayerId]) {
-          const playerRole = players[currentPlayerId].role;
+        if (roomData.gameStarted && roomData.players[currentPlayerId]) {
+          const playerRole = roomData.players[currentPlayerId].role;
           if (!playerRole) {
             console.warn('Brak roli dla gracza!');
+            roleMessageBox.style.display = 'none';
             return;
           }
           if (playerRole === 'impostor') {
             showRoleMessage("Jesteś OSZUSTEM!", 7000);
           } else if (playerRole === 'innocent') {
-            if (words.length === 0) {
-              showRoleMessage("Słowa nie załadowane! Odśwież stronę.", 7000);
-              console.error('Words array jest puste przy pokazywaniu roli niewinnego');
+            const playerWord = roomData.players[currentPlayerId].word;
+            if (!playerWord) {
+              showRoleMessage("Słowo nie zostało przypisane!", 7000);
+              console.error('Brak słowa dla niewinnego gracza!');
               return;
             }
-            // Wybierz słowo losowo i pokaż
-            const randomWord = words[Math.floor(Math.random() * words.length)];
-            showRoleMessage(`Twoje słowo: ${randomWord}`, 7000);
+            showRoleMessage(`Twoje słowo:\n${playerWord}`, 7000);
           }
         } else {
           roleMessageBox.style.display = 'none';
+          startGameBtn.style.display = isHost ? 'block' : 'none';
+          endRoundBtn.style.display = 'none';
         }
       });
     }
