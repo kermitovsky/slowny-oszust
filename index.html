@@ -1,189 +1,300 @@
-// Wstaw do <script> w HTML
-
-// Twoja konfiguracja
-const firebaseConfig = {
-  apiKey: "AIzaSyCyj5pbNgUHaV-_g__sTQmsUtYOhegYoSI",
-  authDomain: "slowny-oszust.firebaseapp.com",
-  databaseURL: "https://slowny-oszust-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "slowny-oszust",
-  storageBucket: "slowny-oszust.appspot.com",
-  messagingSenderId: "679726628348",
-  appId: "1:679726628348:web:83f9c43fee9cf514784679"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-const playerNameInput = document.getElementById('playerName');
-const createRoomBtn = document.getElementById('createRoom');
-const joinRoomBtn = document.getElementById('joinRoom');
-const roomCodeInput = document.getElementById('roomCodeInput');
-const statusMessage = document.getElementById('statusMessage');
-const loginScreen = document.getElementById('loginScreen');
-const gameScreen = document.getElementById('gameScreen');
-const roomCodeDisplay = document.getElementById('roomCodeDisplay');
-const playersList = document.getElementById('playersList');
-const startGameBtn = document.getElementById('startGame');
-
-let currentRoomCode = null;
-let currentPlayerId = null;
-let currentPlayerName = null;
-let isHost = false;
-
-function generateRoomCode() {
-  return Math.random().toString(36).substr(2, 4).toUpperCase();
-}
-
-function updatePlayersList(players) {
-  playersList.innerHTML = '';
-  for (const [id, player] of Object.entries(players)) {
-    const li = document.createElement('li');
-    li.textContent = player.name;
-
-    if (player.isHost) {
-      li.classList.add('host');
-      li.textContent += ' (host)';
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Słowny Oszust</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #e67e22;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #fff;
+      font-size: 2rem;
+      margin: 0;
+      padding: 2rem;
     }
 
-    if (id === currentPlayerId) {
-      li.classList.add('self');
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: #d35400;
+      padding: 2rem;
+      border-radius: 1.5rem;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
     }
 
-    playersList.appendChild(li);
-  }
-}
-
-function listenToRoom(roomCode) {
-  const roomRef = db.ref(`rooms/${roomCode}`);
-
-  roomRef.on('value', (snapshot) => {
-    const roomData = snapshot.val();
-
-    if (!roomData) {
-      statusMessage.textContent = 'Pokój został usunięty.';
-      resetToLogin();
-      return;
+    h1 {
+      text-align: center;
+      font-size: 3.5rem;
+      color: #f5f5f5;
+      font-family: 'Pacifico', cursive;
     }
 
-    if (roomData.players) {
-      updatePlayersList(roomData.players);
-    } else {
+    input, button {
+      font-size: 2rem;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 0.8rem;
+      border: none;
+      width: 100%;
+      max-width: 400px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    input {
+      border: 2px solid #8e44ad;
+      color: #333;
+    }
+
+    button {
+      background-color: #8e44ad;
+      color: white;
+      cursor: pointer;
+      transition: transform 0.2s ease, background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #9b59b6;
+      transform: scale(1.05);
+    }
+
+    #playersList {
+      list-style: none;
+      padding: 0;
+    }
+
+    #playersList li {
+      padding: 1rem;
+      margin: 0.5rem 0;
+      border-radius: 1rem;
+      background-color: #f9f3f0;
+      color: #333;
+    }
+
+    .host {
+      color: #3498db !important;
+      font-weight: bold;
+    }
+
+    .self {
+      color: black !important;
+      font-weight: bold;
+    }
+
+    #statusMessage {
+      color: #ffdddd;
+      text-align: center;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="fancy-title">Słowny Impostor</h1>
+    <div id="loginScreen">
+      <input type="text" id="playerName" placeholder="Podaj swój nick" />
+      <button id="createRoom">Stwórz pokój</button>
+      <input type="text" id="roomCodeInput" placeholder="Kod pokoju" maxlength="4" />
+      <button id="joinRoom">Dołącz do pokoju</button>
+      <p id="statusMessage"></p>
+    </div>
+
+    <div id="gameScreen" style="display:none;">
+      <p>Kod pokoju: <span id="roomCodeDisplay"></span></p>
+      <ul id="playersList"></ul>
+      <button id="startGame">Start gry</button>
+    </div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCyj5pbNgUHaV-_g__sTQmsUtYOhegYoSI",
+      authDomain: "slowny-oszust.firebaseapp.com",
+      databaseURL: "https://slowny-oszust-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "slowny-oszust",
+      storageBucket: "slowny-oszust.appspot.com",
+      messagingSenderId: "679726628348",
+      appId: "1:679726628348:web:83f9c43fee9cf514784679"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const playerNameInput = document.getElementById('playerName');
+    const createRoomBtn = document.getElementById('createRoom');
+    const joinRoomBtn = document.getElementById('joinRoom');
+    const roomCodeInput = document.getElementById('roomCodeInput');
+    const statusMessage = document.getElementById('statusMessage');
+    const loginScreen = document.getElementById('loginScreen');
+    const gameScreen = document.getElementById('gameScreen');
+    const roomCodeDisplay = document.getElementById('roomCodeDisplay');
+    const playersList = document.getElementById('playersList');
+    const startGameBtn = document.getElementById('startGame');
+
+    let currentRoomCode = null;
+    let currentPlayerId = null;
+    let currentPlayerName = null;
+    let isHost = false;
+
+    function generateRoomCode() {
+      return Math.random().toString(36).substr(2, 4).toUpperCase();
+    }
+
+    function updatePlayersList(players) {
+      playersList.innerHTML = '';
+      for (const [id, player] of Object.entries(players)) {
+        const li = document.createElement('li');
+        li.textContent = player.name;
+
+        if (player.isHost) {
+          li.classList.add('host');
+          li.textContent += ' (host)';
+        }
+
+        if (id === currentPlayerId) {
+          li.classList.add('self');
+        }
+
+        playersList.appendChild(li);
+      }
+    }
+
+    function listenToRoom(roomCode) {
+      const roomRef = db.ref(`rooms/${roomCode}`);
+
+      roomRef.on('value', (snapshot) => {
+        const roomData = snapshot.val();
+
+        if (!roomData) {
+          statusMessage.textContent = 'Pokój został usunięty.';
+          resetToLogin();
+          return;
+        }
+
+        if (roomData.players) {
+          updatePlayersList(roomData.players);
+        } else {
+          playersList.innerHTML = '';
+        }
+
+        if (roomData.gameStarted && roomData.players[currentPlayerId]?.role) {
+          const role = roomData.players[currentPlayerId].role;
+          alert(`Twoja rola: ${role.toUpperCase()}`);
+        }
+      });
+    }
+
+    function resetToLogin() {
+      loginScreen.style.display = 'block';
+      gameScreen.style.display = 'none';
+      currentRoomCode = null;
+      currentPlayerId = null;
+      currentPlayerName = null;
+      isHost = false;
       playersList.innerHTML = '';
     }
 
-    // Jeśli gra wystartowała i gracz ma przypisaną rolę
-    if (roomData.gameStarted && roomData.players[currentPlayerId]?.role) {
-      const role = roomData.players[currentPlayerId].role;
-      alert(`Twoja rola: ${role.toUpperCase()}`);
-    }
-  });
-}
-
-function resetToLogin() {
-  loginScreen.style.display = 'block';
-  gameScreen.style.display = 'none';
-  currentRoomCode = null;
-  currentPlayerId = null;
-  currentPlayerName = null;
-  isHost = false;
-  playersList.innerHTML = '';
-}
-
-createRoomBtn.addEventListener('click', () => {
-  const name = playerNameInput.value.trim();
-  if (!name) {
-    statusMessage.textContent = 'Wpisz nick!';
-    return;
-  }
-
-  currentPlayerName = name;
-  isHost = true;
-  currentRoomCode = generateRoomCode();
-  currentPlayerId = db.ref().push().key;
-
-  const roomRef = db.ref(`rooms/${currentRoomCode}`);
-  roomRef.set({
-    players: {
-      [currentPlayerId]: { name: currentPlayerName, isHost: true }
-    }
-  }).then(() => {
-    loginScreen.style.display = 'none';
-    gameScreen.style.display = 'block';
-    roomCodeDisplay.textContent = currentRoomCode;
-
-    listenToRoom(currentRoomCode);
-  });
-});
-
-joinRoomBtn.addEventListener('click', () => {
-  const name = playerNameInput.value.trim();
-  const roomCode = roomCodeInput.value.trim().toUpperCase();
-
-  if (!name || !roomCode) {
-    statusMessage.textContent = 'Wpisz nick i kod pokoju!';
-    return;
-  }
-
-  currentPlayerName = name;
-  currentRoomCode = roomCode;
-  currentPlayerId = db.ref().push().key;
-
-  const roomRef = db.ref(`rooms/${currentRoomCode}`);
-
-  roomRef.once('value').then(snapshot => {
-    if (!snapshot.exists()) {
-      statusMessage.textContent = 'Pokój nie istnieje.';
-      return;
-    }
-
-    const players = snapshot.val().players || {};
-    players[currentPlayerId] = { name: currentPlayerName, isHost: false };
-
-    roomRef.child('players').set(players).then(() => {
-      loginScreen.style.display = 'none';
-      gameScreen.style.display = 'block';
-      roomCodeDisplay.textContent = currentRoomCode;
-
-      listenToRoom(currentRoomCode);
-    });
-  });
-});
-
-function cleanupEmptyRooms() {
-  const roomsRef = db.ref('rooms');
-  roomsRef.on('value', snapshot => {
-    const rooms = snapshot.val();
-    if (!rooms) return;
-
-    for (const [code, room] of Object.entries(rooms)) {
-      if (!room.players || Object.keys(room.players).length === 0) {
-        db.ref(`rooms/${code}`).remove();
+    createRoomBtn.addEventListener('click', () => {
+      const name = playerNameInput.value.trim();
+      if (!name) {
+        statusMessage.textContent = 'Wpisz nick!';
+        return;
       }
-    }
-  });
-}
 
-cleanupEmptyRooms();
+      currentPlayerName = name;
+      isHost = true;
+      currentRoomCode = generateRoomCode();
+      currentPlayerId = db.ref().push().key;
 
-startGameBtn.addEventListener('click', () => {
-  if (!isHost) {
-    alert('Tylko host może rozpocząć grę!');
-    return;
-  }
-
-  const roomRef = db.ref(`rooms/${currentRoomCode}/players`);
-  roomRef.once('value').then(snapshot => {
-    const players = snapshot.val();
-    const ids = Object.keys(players);
-    const impostorIndex = Math.floor(Math.random() * ids.length);
-    const impostorId = ids[impostorIndex];
-
-    const updates = {};
-    ids.forEach(id => {
-      updates[`${id}/role`] = (id === impostorId) ? 'impostor' : 'villager';
+      const roomRef = db.ref(`rooms/${currentRoomCode}`);
+      roomRef.set({
+        players: {
+          [currentPlayerId]: { name: currentPlayerName, isHost: true }
+        }
+      }).then(() => {
+        loginScreen.style.display = 'none';
+        gameScreen.style.display = 'block';
+        roomCodeDisplay.textContent = currentRoomCode;
+        listenToRoom(currentRoomCode);
+      });
     });
 
-    db.ref(`rooms/${currentRoomCode}/players`).update(updates);
-    db.ref(`rooms/${currentRoomCode}`).update({ gameStarted: true });
-  });
-});
+    joinRoomBtn.addEventListener('click', () => {
+      const name = playerNameInput.value.trim();
+      const roomCode = roomCodeInput.value.trim().toUpperCase();
+
+      if (!name || !roomCode) {
+        statusMessage.textContent = 'Wpisz nick i kod pokoju!';
+        return;
+      }
+
+      currentPlayerName = name;
+      currentRoomCode = roomCode;
+      currentPlayerId = db.ref().push().key;
+
+      const roomRef = db.ref(`rooms/${currentRoomCode}`);
+
+      roomRef.once('value').then(snapshot => {
+        if (!snapshot.exists()) {
+          statusMessage.textContent = 'Pokój nie istnieje.';
+          return;
+        }
+
+        const players = snapshot.val().players || {};
+        players[currentPlayerId] = { name: currentPlayerName, isHost: false };
+
+        roomRef.child('players').set(players).then(() => {
+          loginScreen.style.display = 'none';
+          gameScreen.style.display = 'block';
+          roomCodeDisplay.textContent = currentRoomCode;
+          listenToRoom(currentRoomCode);
+        });
+      });
+    });
+
+    function cleanupEmptyRooms() {
+      const roomsRef = db.ref('rooms');
+      roomsRef.on('value', snapshot => {
+        const rooms = snapshot.val();
+        if (!rooms) return;
+
+        for (const [code, room] of Object.entries(rooms)) {
+          if (!room.players || Object.keys(room.players).length === 0) {
+            db.ref(`rooms/${code}`).remove();
+          }
+        }
+      });
+    }
+
+    cleanupEmptyRooms();
+
+    startGameBtn.addEventListener('click', () => {
+      if (!isHost) {
+        alert('Tylko host może rozpocząć grę!');
+        return;
+      }
+
+      const roomRef = db.ref(`rooms/${currentRoomCode}/players`);
+      roomRef.once('value').then(snapshot => {
+        const players = snapshot.val();
+        const ids = Object.keys(players);
+        const impostorIndex = Math.floor(Math.random() * ids.length);
+        const impostorId = ids[impostorIndex];
+
+        const updates = {};
+        ids.forEach(id => {
+          updates[`${id}/role`] = (id === impostorId) ? 'impostor' : 'villager';
+        });
+
+        db.ref(`rooms/${currentRoomCode}/players`).update(updates);
+        db.ref(`rooms/${currentRoomCode}`).update({ gameStarted: true });
+      });
+    });
+  </script>
+</body>
+</html>
