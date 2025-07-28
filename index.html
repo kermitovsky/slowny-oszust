@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Słowny Oszust</title>
+  <title>Słowny Impostor</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
@@ -30,7 +30,6 @@
       text-align: center;
       font-size: 3.5rem;
       color: #f5f5f5;
-      font-family: 'Pacifico', cursive;
     }
 
     input, button {
@@ -86,10 +85,28 @@
       font-weight: bold;
     }
 
-    #statusMessage {
-      color: #ffdddd;
-      text-align: center;
-      font-weight: bold;
+    #messageModal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #2c3e50;
+      color: #ecf0f1;
+      padding: 2rem 3rem;
+      border-radius: 1rem;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      font-size: 1.8rem;
+      z-index: 9999;
+      display: none;
+    }
+
+    #endRound {
+      display: none;
+      background-color: #c0392b;
+    }
+
+    #endRound:hover {
+      background-color: #e74c3c;
     }
   </style>
 </head>
@@ -108,7 +125,10 @@
       <p>Kod pokoju: <span id="roomCodeDisplay"></span></p>
       <ul id="playersList"></ul>
       <button id="startGame">Start gry</button>
+      <button id="endRound">Zakończ rundę</button>
     </div>
+
+    <div id="messageModal"></div>
   </div>
 
   <script>
@@ -135,11 +155,21 @@
     const roomCodeDisplay = document.getElementById('roomCodeDisplay');
     const playersList = document.getElementById('playersList');
     const startGameBtn = document.getElementById('startGame');
+    const endRoundBtn = document.getElementById('endRound');
+    const messageModal = document.getElementById('messageModal');
 
     let currentRoomCode = null;
     let currentPlayerId = null;
     let currentPlayerName = null;
     let isHost = false;
+
+    function showMessage(message, duration = 2500) {
+      messageModal.textContent = message;
+      messageModal.style.display = 'block';
+      setTimeout(() => {
+        messageModal.style.display = 'none';
+      }, duration);
+    }
 
     function generateRoomCode() {
       return Math.random().toString(36).substr(2, 4).toUpperCase();
@@ -171,7 +201,7 @@
         const roomData = snapshot.val();
 
         if (!roomData) {
-          statusMessage.textContent = 'Pokój został usunięty.';
+          showMessage('Pokój został usunięty.');
           resetToLogin();
           return;
         }
@@ -182,9 +212,13 @@
           playersList.innerHTML = '';
         }
 
-        if (roomData.gameStarted && roomData.players[currentPlayerId]?.role) {
-          const role = roomData.players[currentPlayerId].role;
-          alert(`Twoja rola: ${role.toUpperCase()}`);
+        if (roomData.gameState === 'inProgress') {
+          showMessage('Gra się rozpoczęła!');
+          startGameBtn.style.display = 'none';
+          if (isHost) endRoundBtn.style.display = 'block';
+        } else {
+          startGameBtn.style.display = isHost ? 'block' : 'none';
+          endRoundBtn.style.display = 'none';
         }
       });
     }
@@ -202,7 +236,7 @@
     createRoomBtn.addEventListener('click', () => {
       const name = playerNameInput.value.trim();
       if (!name) {
-        statusMessage.textContent = 'Wpisz nick!';
+        showMessage('Wpisz nick!');
         return;
       }
 
@@ -215,7 +249,8 @@
       roomRef.set({
         players: {
           [currentPlayerId]: { name: currentPlayerName, isHost: true }
-        }
+        },
+        gameState: 'lobby'
       }).then(() => {
         loginScreen.style.display = 'none';
         gameScreen.style.display = 'block';
@@ -229,7 +264,7 @@
       const roomCode = roomCodeInput.value.trim().toUpperCase();
 
       if (!name || !roomCode) {
-        statusMessage.textContent = 'Wpisz nick i kod pokoju!';
+        showMessage('Wpisz nick i kod pokoju!');
         return;
       }
 
@@ -241,7 +276,7 @@
 
       roomRef.once('value').then(snapshot => {
         if (!snapshot.exists()) {
-          statusMessage.textContent = 'Pokój nie istnieje.';
+          showMessage('Pokój nie istnieje.');
           return;
         }
 
@@ -274,26 +309,14 @@
     cleanupEmptyRooms();
 
     startGameBtn.addEventListener('click', () => {
-      if (!isHost) {
-        alert('Tylko host może rozpocząć grę!');
-        return;
-      }
+      if (!isHost || !currentRoomCode) return;
+      db.ref(`rooms/${currentRoomCode}/gameState`).set('inProgress');
+    });
 
-      const roomRef = db.ref(`rooms/${currentRoomCode}/players`);
-      roomRef.once('value').then(snapshot => {
-        const players = snapshot.val();
-        const ids = Object.keys(players);
-        const impostorIndex = Math.floor(Math.random() * ids.length);
-        const impostorId = ids[impostorIndex];
-
-        const updates = {};
-        ids.forEach(id => {
-          updates[`${id}/role`] = (id === impostorId) ? 'impostor' : 'villager';
-        });
-
-        db.ref(`rooms/${currentRoomCode}/players`).update(updates);
-        db.ref(`rooms/${currentRoomCode}`).update({ gameStarted: true });
-      });
+    endRoundBtn.addEventListener('click', () => {
+      if (!isHost || !currentRoomCode) return;
+      db.ref(`rooms/${currentRoomCode}/gameState`).set('lobby');
+      showMessage('Runda zakończona. Powrót do lobby.');
     });
   </script>
 </body>
