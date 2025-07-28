@@ -8,7 +8,97 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet" />
   <style>
-    /* ... (stylizacja bez zmian, możesz przekopiować z poprzedniego) ... */
+    body {
+      background-color: #e67e22;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #fff;
+      font-size: 2rem;
+      margin: 0;
+      padding: 2rem;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: #d35400;
+      padding: 2rem;
+      border-radius: 1.5rem;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    }
+    h1 {
+      text-align: center;
+      font-size: 3.5rem;
+      color: #f5f5f5;
+      font-family: 'Pacifico', cursive;
+    }
+    input, button {
+      font-size: 2rem;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 0.8rem;
+      border: none;
+      width: 100%;
+      max-width: 400px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    input {
+      border: 2px solid #8e44ad;
+      color: #333;
+    }
+    button {
+      background-color: #8e44ad;
+      color: white;
+      cursor: pointer;
+      transition: transform 0.2s ease, background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #9b59b6;
+      transform: scale(1.05);
+    }
+    #playersList {
+      list-style: none;
+      padding: 0;
+    }
+    #playersList li {
+      padding: 1rem;
+      margin: 0.5rem 0;
+      border-radius: 1rem;
+      background-color: #f9f3f0;
+      color: #333;
+    }
+    .host {
+      color: #3498db !important;
+      font-weight: bold;
+    }
+    .self {
+      color: black !important;
+      font-weight: bold;
+    }
+    #messageBox, #roleMessageBox {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: rgba(0,0,0,0.85);
+      color: white;
+      padding: 2rem 3rem;
+      border-radius: 1.5rem;
+      text-align: center;
+      z-index: 1000;
+      display: none;
+      max-width: 90vw;
+      word-wrap: break-word;
+      white-space: pre-line;
+    }
+    #messageBox {
+      font-size: 3rem;
+    }
+    #roleMessageBox {
+      font-size: 4rem;
+      font-weight: bold;
+      font-family: 'Segoe UI Black', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
   </style>
 </head>
 <body>
@@ -115,9 +205,11 @@
     }
 
     function resetToLobby() {
+      // Reset do lobby (nie do logowania)
       startGameBtn.style.display = isHost ? 'block' : 'none';
       endRoundBtn.style.display = 'none';
       roleMessageBox.style.display = 'none';
+      showMessage("Wrócono do lobby.", 3000);
     }
 
     createRoomBtn.addEventListener('click', () => {
@@ -137,7 +229,8 @@
           [currentPlayerId]: { name: currentPlayerName, isHost: true, role: null }
         },
         gameStarted: false,
-        currentWord: null
+        currentWord: null,
+        resetMessage: null
       }).then(() => {
         loginScreen.style.display = 'none';
         gameScreen.style.display = 'block';
@@ -193,21 +286,26 @@
         const impostorIndex = Math.floor(Math.random() * playerIds.length);
         const impostorId = playerIds[impostorIndex];
 
-        // Wybieramy słowo tylko raz i zapisujemy je w bazie
-        const randomWord = words.length > 0 ? words[Math.floor(Math.random() * words.length)] : null;
-        if (!randomWord) {
-          showMessage("Brak słów do gry, odśwież stronę.");
-          return;
-        }
+        // Losuj słowo i zapisz je w bazie, aby wszyscy mieli takie samo
+        const randomWord = words[Math.floor(Math.random() * words.length)];
 
-        for (const id of playerIds) {
-          players[id].role = (id === impostorId) ? 'impostor' : 'innocent';
-        }
+        const updatedPlayers = {};
+        playerIds.forEach(id => {
+          updatedPlayers[id] = {
+            name: players[id].name,
+            isHost: players[id].isHost,
+            role: id === impostorId ? 'impostor' : 'innocent'
+          };
+        });
 
         roomRef.update({
-          players: players,
+          players: updatedPlayers,
           gameStarted: true,
-          currentWord: randomWord
+          currentWord: randomWord,
+          resetMessage: null
+        }).then(() => {
+          startGameBtn.style.display = 'none';
+          if (isHost) endRoundBtn.style.display = 'block';
         });
       });
     });
@@ -216,17 +314,32 @@
       if (!currentRoomCode) return;
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
 
-      roomRef.update({
-        gameStarted: false,
-        currentWord: null
+      roomRef.once('value').then(snapshot => {
+        if (!snapshot.exists()) return;
+
+        const roomData = snapshot.val();
+        if (!roomData.players) return;
+
+        const resetPlayers = {};
+        for (const [id, player] of Object.entries(roomData.players)) {
+          resetPlayers[id] = {
+            name: player.name,
+            isHost: player.isHost,
+            role: null
+          };
+        }
+
+        roomRef.update({
+          players: resetPlayers,
+          gameStarted: false,
+          currentWord: null,
+          resetMessage: "Wrócono do lobby."
+        });
       });
     });
 
     function listenToRoom(roomCode) {
       const roomRef = db.ref(`rooms/${roomCode}`);
-
-      let lastGameStarted = null;
-      let hasShownLobbyMessage = false;
 
       roomRef.on('value', snapshot => {
         if (!snapshot.exists()) {
@@ -240,40 +353,38 @@
         const players = roomData.players || {};
         updatePlayersList(players);
 
+        // Ustaw widoczność przycisku start gry tylko dla hosta i gdy gra nie trwa
         startGameBtn.style.display = isHost && !roomData.gameStarted ? 'block' : 'none';
         endRoundBtn.style.display = isHost && roomData.gameStarted ? 'block' : 'none';
 
-        if (roomData.gameStarted && players[currentPlayerId]) {
-          const playerRole = players[currentPlayerId].role;
-          if (!playerRole) {
-            console.warn('Brak roli dla gracza!');
-            return;
+        // Komunikat resetu dla wszystkich (gdy host zakończy rundę)
+        if (roomData.resetMessage) {
+          showMessage(roomData.resetMessage, 3000);
+          // Po pokazaniu komunikatu wyczyść resetMessage aby nie pokazywał się stale
+          if (isHost) {
+            // Host nie musi czyścić, bo update robi on sam, ale dla bezpieczeństwa można
+            db.ref(`rooms/${currentRoomCode}/resetMessage`).set(null);
           }
-          if (playerRole === 'impostor') {
-            showRoleMessage("Jesteś OSZUSTEM!", 7000);
-          } else if (playerRole === 'innocent') {
-            // Używamy słowa z bazy, a nie losowego na kliencie
-            if (!roomData.currentWord) {
-              showRoleMessage("Słowo nie zostało jeszcze wybrane.", 7000);
-              return;
-            }
-            showRoleMessage(`Twoje słowo: ${roomData.currentWord}`, 7000);
+        }
+
+        // Jeśli gra zaczęta, pokaż role i słowo
+        if (roomData.gameStarted) {
+          const playerData = players[currentPlayerId];
+          if (!playerData) return;
+
+          const role = playerData.role;
+          const word = roomData.currentWord;
+
+          if (role === 'impostor') {
+            showRoleMessage(`Jesteś OSZUSTEM!\nSłowo niewinnych: ${word}`);
+          } else if (role === 'innocent') {
+            showRoleMessage(`Jesteś NIEWINNYM!\nTwoje słowo to: ${word}`);
+          } else {
+            roleMessageBox.style.display = 'none';
           }
         } else {
           roleMessageBox.style.display = 'none';
         }
-
-        if (lastGameStarted === true && roomData.gameStarted === false && !hasShownLobbyMessage) {
-          showMessage("Wrócono do lobby.", 3000);
-          resetToLobby();
-          hasShownLobbyMessage = true;
-        }
-
-        if (roomData.gameStarted === true) {
-          hasShownLobbyMessage = false;
-        }
-
-        lastGameStarted = roomData.gameStarted;
       });
     }
   </script>
