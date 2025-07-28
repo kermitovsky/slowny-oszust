@@ -205,7 +205,6 @@
     }
 
     function resetToLobby() {
-      // Reset do lobby (nie do logowania)
       startGameBtn.style.display = isHost ? 'block' : 'none';
       endRoundBtn.style.display = 'none';
       roleMessageBox.style.display = 'none';
@@ -286,7 +285,6 @@
         const impostorIndex = Math.floor(Math.random() * playerIds.length);
         const impostorId = playerIds[impostorIndex];
 
-        // Losuj słowo i zapisz je w bazie, aby wszyscy mieli takie samo
         const randomWord = words[Math.floor(Math.random() * words.length)];
 
         const updatedPlayers = {};
@@ -353,21 +351,16 @@
         const players = roomData.players || {};
         updatePlayersList(players);
 
-        // Ustaw widoczność przycisku start gry tylko dla hosta i gdy gra nie trwa
         startGameBtn.style.display = isHost && !roomData.gameStarted ? 'block' : 'none';
         endRoundBtn.style.display = isHost && roomData.gameStarted ? 'block' : 'none';
 
-        // Komunikat resetu dla wszystkich (gdy host zakończy rundę)
         if (roomData.resetMessage) {
           showMessage(roomData.resetMessage, 3000);
-          // Po pokazaniu komunikatu wyczyść resetMessage aby nie pokazywał się stale
           if (isHost) {
-            // Host nie musi czyścić, bo update robi on sam, ale dla bezpieczeństwa można
             db.ref(`rooms/${currentRoomCode}/resetMessage`).set(null);
           }
         }
 
-        // Jeśli gra zaczęta, pokaż role i słowo
         if (roomData.gameStarted) {
           const playerData = players[currentPlayerId];
           if (!playerData) return;
@@ -376,9 +369,9 @@
           const word = roomData.currentWord;
 
           if (role === 'impostor') {
-            showRoleMessage(`Jesteś OSZUSTEM!\nSłowo niewinnych: ${word}`);
+            showRoleMessage(`Jesteś oszustem!`);
           } else if (role === 'innocent') {
-            showRoleMessage(`Jesteś NIEWINNYM!\nTwoje słowo to: ${word}`);
+            showRoleMessage(`${word}`);
           } else {
             roleMessageBox.style.display = 'none';
           }
