@@ -256,13 +256,14 @@
       }
       currentPlayerName = name;
       currentRoomCode = code;
+      currentPlayerId = db.ref().push().key;
+
       const roomRef = db.ref(`rooms/${currentRoomCode}/players`);
       roomRef.once('value').then(snapshot => {
         if (!snapshot.exists()) {
           showMessage('Pokój nie istnieje.');
           return;
         }
-        currentPlayerId = db.ref().push().key;
         const updates = {};
         updates[`rooms/${currentRoomCode}/players/${currentPlayerId}`] = { name: currentPlayerName, isHost: false, role: null };
         db.ref().update(updates).then(() => {
@@ -280,7 +281,6 @@
       if (!currentRoomCode) return;
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
 
-      // Przygotuj role i słowa
       roomRef.child('players').once('value').then(snapshot => {
         const players = snapshot.val();
         if (!players) return;
@@ -291,11 +291,9 @@
           return;
         }
 
-        // Wylosuj impostora
         const impostorIndex = Math.floor(Math.random() * playerIds.length);
         const impostorId = playerIds[impostorIndex];
 
-        // Wylosuj słowa dla niewinnych i impostora
         const wordIndex = Math.floor(Math.random() * words.length);
         const innocentWord = words[wordIndex].innocent;
         const impostorWord = words[wordIndex].impostor;
@@ -306,6 +304,7 @@
           updates[`rooms/${currentRoomCode}/players/${id}/word`] = (id === impostorId) ? impostorWord : innocentWord;
         }
         updates[`rooms/${currentRoomCode}/gameStarted`] = true;
+
         roomRef.update(updates);
       });
     });
@@ -314,7 +313,6 @@
       if (!currentRoomCode) return;
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
 
-      // Zakończ rundę - ustaw gameStarted na false i wyczyść role/słowa
       roomRef.child('players').once('value').then(snapshot => {
         const players = snapshot.val();
         if (!players) return;
@@ -325,63 +323,54 @@
           updates[`rooms/${currentRoomCode}/players/${id}/word`] = null;
         }
         updates[`rooms/${currentRoomCode}/gameStarted`] = false;
+
         roomRef.update(updates).then(() => {
-          // Wyświetl komunikat wszystkim graczom
-          showMessage("Wrócono do lobby.", 3000);
-          startGameBtn.style.display = isHost ? 'block' : 'none';
-          endRoundBtn.style.display = 'none';
-          roleMessageBox.style.display = 'none';
+          resetToLobby();
         });
       });
     });
 
     leaveRoomBtn.addEventListener('click', leaveRoom);
 
-    function leaveRoom() {
+    async function leaveRoom() {
       if (!currentRoomCode || !currentPlayerId) return;
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
 
-      roomRef.once('value').then(snapshot => {
-        if (!snapshot.exists()) return;
+      const snapshot = await roomRef.once('value');
+      if (!snapshot.exists()) return;
 
-        const roomData = snapshot.val();
-        if (!roomData.players) return;
+      const roomData = snapshot.val();
+      if (!roomData.players) return;
 
-        const players = roomData.players;
+      const players = {...roomData.players}; // kopia
 
-        const leavingIsHost = players[currentPlayerId]?.isHost === true;
+      const leavingIsHost = players[currentPlayerId]?.isHost === true;
 
-        delete players[currentPlayerId];
+      delete players[currentPlayerId];
 
-        if (Object.keys(players).length === 0) {
-          // Pokój pusty - usuń cały
-          roomRef.remove();
-          resetAfterLeaving();
-          return;
+      if (Object.keys(players).length === 0) {
+        await roomRef.remove();
+        resetAfterLeaving();
+        return;
+      }
+
+      if (leavingIsHost) {
+        const playerIdsSorted = Object.keys(players).sort();
+        const newHostId = playerIdsSorted[0];
+
+        // Ustaw host=false dla wszystkich
+        for (const id of Object.keys(players)) {
+          players[id].isHost = false;
         }
+        // Nowy host
+        players[newHostId].isHost = true;
+      }
 
-        if (leavingIsHost) {
-          // Przypisz hosta pierwszemu dołączonemu graczowi (wg sortowania kluczy)
-          const playerIdsSorted = Object.keys(players).sort();
-          const newHostId = playerIdsSorted[0];
-
-          // Ustaw host=false dla wszystkich
-          for (const id of Object.keys(players)) {
-            players[id].isHost = false;
-          }
-          // Przypisz nowego hosta
-          players[newHostId].isHost = true;
-        }
-
-        // Zaktualizuj graczy w bazie
-        roomRef.child('players').set(players).then(() => {
-          resetAfterLeaving();
-        });
-      });
+      await roomRef.child('players').set(players);
+      resetAfterLeaving();
     }
 
     function resetAfterLeaving() {
-      // Reset lokalnych zmiennych i UI po opuszczeniu pokoju
       loginScreen.style.display = 'block';
       gameScreen.style.display = 'none';
       statusMessage.textContent = '';
@@ -408,20 +397,24 @@
         const roomData = snapshot.val();
         if (!roomData.players) return;
 
-        // Aktualizuj listę graczy
         updatePlayersList(roomData.players);
 
-        // Sprawdź, kto jest hostem
         const players = roomData.players;
+        // Sprawdź kto jest hostem i czy to ja
+        let foundHost = false;
         for (const [id, player] of Object.entries(players)) {
           if (player.isHost) {
+            foundHost = true;
             isHost = (id === currentPlayerId);
             startGameBtn.style.display = isHost && !roomData.gameStarted ? 'block' : 'none';
             break;
           }
         }
+        if (!foundHost) {
+          isHost = false;
+          startGameBtn.style.display = 'none';
+        }
 
-        // Obsługa rozpoczętej gry
         if (roomData.gameStarted) {
           startGameBtn.style.display = 'none';
           endRoundBtn.style.display = isHost ? 'block' : 'none';
@@ -429,20 +422,32 @@
           const me = players[currentPlayerId];
           if (!me) return;
 
-          // Wyświetl komunikat z rolą i słowem
           if (me.role === 'impostor') {
             showRoleMessage("Jesteś oszustem!", 7000);
           } else if (me.role === 'innocent') {
             showRoleMessage(`Twoje słowo to: ${me.word}`, 7000);
           }
         } else {
-          // Gra nie jest aktywna
           endRoundBtn.style.display = 'none';
           roleMessageBox.style.display = 'none';
           startGameBtn.style.display = isHost ? 'block' : 'none';
         }
       });
     }
+
+    // Obsługa automatycznego opuszczania pokoju przy zamknięciu/odświeżeniu strony
+    window.addEventListener('beforeunload', (event) => {
+      if (currentRoomCode && currentPlayerId) {
+        // Synchronous blocking is not reliable, ale wykonamy funkcję w miarę możliwości
+        // Użyj fetch API do usunięcia gracza synchronously (wyzwane przedunload jest trudne!)
+        // Firebase niestety nie oferuje sync API, więc użyjemy funkcji asynchronicznej bez gwarancji wykonania
+
+        // Alternatywnie, można ustawić wartość "online" w bazie i przy monitoringu usuwać offline
+
+        // Na razie wywołamy leaveRoom, ale może nie zdąży się wykonać przy szybkim odświeżeniu
+        leaveRoom();
+      }
+    });
   </script>
 </body>
 </html>
