@@ -227,6 +227,7 @@
       playersList.innerHTML = '';
       startGameBtn.style.display = 'block';
       endRoundBtn.style.display = 'none';
+      roleMessageBox.style.display = 'none';
     }
 
     createRoomBtn.addEventListener('click', () => {
@@ -243,7 +244,7 @@
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
       roomRef.set({
         players: {
-          [currentPlayerId]: { name: currentPlayerName, isHost: true, role: null }
+          [currentPlayerId]: { name: currentPlayerName, isHost: true, role: null, word: null }
         },
         gameStarted: false
       }).then(() => {
@@ -275,7 +276,7 @@
         }
 
         roomRef.child('players').update({
-          [currentPlayerId]: { name: currentPlayerName, isHost: false, role: null }
+          [currentPlayerId]: { name: currentPlayerName, isHost: false, role: null, word: null }
         }).then(() => {
           loginScreen.style.display = 'none';
           gameScreen.style.display = 'block';
@@ -306,7 +307,8 @@
           updatedPlayers[id] = {
             name: players[id].name,
             isHost: players[id].isHost,
-            role: id === impostorId ? 'impostor' : 'innocent'
+            role: id === impostorId ? 'impostor' : 'innocent',
+            word: id === impostorId ? null : (words.length > 0 ? words[Math.floor(Math.random() * words.length)] : null)
           };
         });
 
@@ -322,64 +324,47 @@
 
     endRoundBtn.addEventListener('click', () => {
       if (!currentRoomCode) return;
+
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
 
-      roomRef.once('value').then(snapshot => {
-        if (!snapshot.exists()) return;
-
-        const roomData = snapshot.val();
-        if (!roomData.players) return;
-
-        const resetPlayers = {};
-        for (const [id, player] of Object.entries(roomData.players)) {
-          resetPlayers[id] = {
-            name: player.name,
-            isHost: player.isHost,
-            role: null
-          };
-        }
-
-        roomRef.update({
-          players: resetPlayers,
-          gameStarted: false
-        }).then(() => {
-          showMessage("Runda zakończona. Wrócono do lobby.");
-          startGameBtn.style.display = isHost ? 'block' : 'none';
-          endRoundBtn.style.display = 'none';
-        });
+      roomRef.update({
+        gameStarted: false,
+        players: null
+      }).then(() => {
+        resetToLogin();
       });
     });
 
-    // Nasłuchiwanie zmian w pokoju i wyświetlanie roli
     function listenToRoom(roomCode) {
       const roomRef = db.ref(`rooms/${roomCode}`);
+
       roomRef.on('value', snapshot => {
         const room = snapshot.val();
 
         if (!room) {
-          showMessage("Pokój został usunięty.");
+          showMessage('Pokój został zamknięty');
           resetToLogin();
           return;
         }
 
         if (room.players) {
           updatePlayersList(room.players);
-
-          // Wyświetl rolę aktualnego gracza, jeśli gra trwa
-          if (room.gameStarted && room.players[currentPlayerId]) {
-            const playerRole = room.players[currentPlayerId].role;
-            if (playerRole === 'impostor') {
-              showRoleMessage("Impostor");
-            } else if (playerRole === 'innocent') {
-              const word = words.length > 0 ? words[Math.floor(Math.random() * words.length)] : '';
-              showRoleMessage(`Niewinny\nTwoje słowo: ${word}`);
-            }
-          } else {
-            roleMessageBox.style.display = 'none';
-          }
+        } else {
+          playersList.innerHTML = '';
         }
-        startGameBtn.style.display = (isHost && !room.gameStarted) ? 'block' : 'none';
-        endRoundBtn.style.display = (isHost && room.gameStarted) ? 'block' : 'none';
+
+        if (room.gameStarted && room.players && room.players[currentPlayerId]) {
+          const playerRole = room.players[currentPlayerId].role;
+
+          if (playerRole === 'impostor') {
+            showRoleMessage("IMPOSTOR");
+          } else if (playerRole === 'innocent') {
+            const word = room.players[currentPlayerId].word || '';
+            showRoleMessage(`NIEWINNY\nTwoje słowo:\n${word}`);
+          }
+        } else {
+          roleMessageBox.style.display = 'none';
+        }
       });
     }
   </script>
