@@ -409,20 +409,20 @@
           messageBox.style.display = 'none';
 
           if (roomData.currentWord) {
-            if (playerRole === 'impostor') {
-              showRoleMessage('Jesteś oszustem!\nNie znasz słowa!');
-            } else {
-              showRoleMessage(`Słowo: ${roomData.currentWord}`);
-            }
-          }
+  if (playerRole === 'impostor') {
+    showRoleMessage('Jesteś oszustem!', 6000);
+  } else {
+    showRoleMessage(`Słowo: ${roomData.currentWord}`, 6000);
+  }
+}
 
-          // Komunikat kto zaczyna mówić - wyświetl **osobno** z 4 sekundy
-          if (roomData.starterId && roomData.players?.[roomData.starterId]) {
-            // Opóźnij wyświetlenie komunikatu, aby nie nakładał się z rolą
-            setTimeout(() => {
-              showMessage(`Zaczyna mówić: ${roomData.players[roomData.starterId].name}`, 4000);
-            }, 2000);
-          }
+// Komunikat kto zaczyna mówić - wyświetl osobno, po 6 sekundach
+if (roomData.starterId && roomData.players?.[roomData.starterId]) {
+  setTimeout(() => {
+    showMessage(`Zaczyna mówić: ${roomData.players[roomData.starterId].name}`, 10000);
+  }, 6000);
+}
+
         } else {
           resetToLobby();
         }
