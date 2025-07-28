@@ -3,451 +3,510 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Słowny Oszust</title>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet" />
+  <title>Gra wieloosobowa</title>
   <style>
+    :root {
+      --color-primary: #8e44ad; /* fiolet */
+      --color-secondary: #e67e22; /* pomarańczowy */
+      --color-primary-light: #a569bd;
+      --color-secondary-light: #eb984e;
+      --color-text: #ffffff; /* biały tekst dla lepszego kontrastu */
+      --color-bg-container: #d35400; /* ciemniejszy pomarańcz */
+    }
+
     body {
-      background-color: #e67e22;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      color: #fff;
-      font-size: 2rem;
+      background: var(--color-secondary);
       margin: 0;
-      padding: 2rem;
+      padding: 20px;
+      color: var(--color-text);
+      font-size: 1.8rem;
     }
+
     .container {
-      max-width: 800px;
-      margin: auto;
-      background: #d35400;
-      padding: 2rem;
-      border-radius: 1.5rem;
-      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+      max-width: 700px;
+      margin: 0 auto;
+      background: var(--color-bg-container);
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 6px 10px rgba(142, 68, 173, 0.4);
     }
+
     h1 {
-      text-align: center;
-      font-size: 3.5rem;
-      color: #f5f5f5;
       font-family: 'Pacifico', cursive;
     }
-    input, button {
-      font-size: 2rem;
-      padding: 1rem;
-      margin: 1rem 0;
-      border-radius: 0.8rem;
-      border: none;
-      width: 100%;
-      max-width: 400px;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
+
+    .fancy-title {
+      font-family: 'Pacifico', cursive;
+      font-size: 5.2rem;
+      color: #fffbea;
+      text-shadow: 2px 2px 6px rgba(0,0,0,0.4);
+      animation: titlePop 0.8s ease-out;
+      letter-spacing: 1.5px;
     }
+
+    @keyframes titlePop {
+      0% {
+        transform: scale(0.8);
+        opacity: 0;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    #loginScreen {
+      text-align: center;
+    }
+
     input {
-      border: 2px solid #8e44ad;
+      padding: 18px;
+      margin: 12px 0;
+      width: 80%;
+      max-width: 350px;
+      border: 3px solid var(--color-primary-light);
+      border-radius: 12px;
+      font-size: 2.4rem;
+      transition: border-color 0.3s ease;
+      background: #f9f3f0;
       color: #333;
     }
+
+    input:focus {
+      border-color: var(--color-primary);
+      outline: none;
+    }
+
+    .buttons {
+      margin-top: 35px;
+    }
+
     button {
-      background-color: #8e44ad;
-      color: white;
+      padding: 18px 36px;
+      background: var(--color-primary);
+      color: var(--color-text);
+      border: none;
+      border-radius: 12px;
       cursor: pointer;
-      transition: transform 0.2s ease, background-color 0.3s ease;
+      font-size: 2.4rem;
+      margin: 12px;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      box-shadow: 0 4px 8px rgba(142, 68, 173, 0.6);
     }
+
     button:hover {
-      background-color: #9b59b6;
-      transform: scale(1.05);
+      background: var(--color-secondary-light);
+      transform: translateY(-4px) scale(1.05);
+      box-shadow: 0 6px 12px rgba(230, 126, 34, 0.7);
     }
+
+    button:active {
+      transform: translateY(0) scale(1);
+    }
+
+    .join-section {
+      margin-top: 20px;
+    }
+
+    #gameScreen {
+      margin-top: 40px;
+      animation: fadeIn 0.6s ease;
+      font-size: 2.4rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
     #playersList {
       list-style: none;
       padding: 0;
+      margin: 30px 0;
     }
+
     #playersList li {
-      padding: 1rem;
-      margin: 0.5rem 0;
-      border-radius: 1rem;
-      background-color: #f9f3f0;
-      color: #333;
+      padding: 16px;
+      margin: 10px 0;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 400;
+      color: var(--color-text);
     }
-    .host {
-      color: #3498db !important;
-      font-weight: bold;
+
+    #playersList li.host {
+      color: var(--color-primary-light);
+      font-weight: 700;
     }
-    .self {
-      color: black !important;
-      font-weight: bold;
+
+    #playersList li.self {
+      color: black;
+      font-weight: 700;
+      background: #f9f3f0cc;
     }
-    #messageBox, #roleMessageBox {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background-color: rgba(0,0,0,0.85);
-      color: white;
-      padding: 2rem 3rem;
-      border-radius: 1.5rem;
-      text-align: center;
-      z-index: 1000;
-      display: none;
-      max-width: 90vw;
-      word-wrap: break-word;
-      white-space: pre-line;
+
+    #startGame {
+      background: var(--color-secondary-light);
+      margin-top: 30px;
+      width: 100%;
+      font-weight: 700;
+      box-shadow: 0 5px 10px rgba(230, 126, 34, 0.6);
+      color: #fff;
     }
-    #messageBox {
-      font-size: 3rem;
+
+    #startGame:hover {
+      background: var(--color-primary);
+      box-shadow: 0 7px 14px rgba(142, 68, 173, 0.7);
     }
-    #roleMessageBox {
-      font-size: 4rem;
-      font-weight: bold;
-      font-family: 'Segoe UI Black', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+    #endRoundBtn {
+      background: #c0392b;
+      margin-top: 30px;
+      width: 100%;
+      font-weight: 700;
+      box-shadow: 0 5px 10px rgba(192, 57, 43, 0.6);
+      color: #fff;
+      border-radius: 12px;
+    }
+
+    #endRoundBtn:hover {
+      background: #e74c3c;
+      box-shadow: 0 7px 14px rgba(231, 76, 60, 0.7);
+      cursor: pointer;
     }
   </style>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
   <div class="container">
-    <h1 class="fancy-title">Słowny Impostor</h1>
+    <h1 class="fancy-title">Słowny Oszust</h1>
     <div id="loginScreen">
-      <input type="text" id="playerName" placeholder="Podaj swój nick" />
-      <button id="createRoom">Stwórz pokój</button>
-      <input type="text" id="roomCodeInput" placeholder="Kod pokoju" maxlength="4" />
-      <button id="joinRoom">Dołącz do pokoju</button>
+      <input type="text" id="playerName" placeholder="Twój nick" />
+      <div class="join-section">
+        <input type="text" id="roomCodeInput" placeholder="Kod pokoju (4 znaki)" maxlength="4" />
+      </div>
+      <div class="buttons">
+        <button id="createRoom">Stwórz pokój</button>
+        <button id="joinRoom">Dołącz do pokoju</button>
+      </div>
       <p id="statusMessage"></p>
     </div>
 
     <div id="gameScreen" style="display:none;">
-      <p>Kod pokoju: <span id="roomCodeDisplay"></span></p>
+      <p>Jesteś w pokoju: <span id="roomCodeDisplay"></span></p>
       <ul id="playersList"></ul>
-      <button id="startGame" style="display:none;">Start gry</button>
-      <button id="endRound" style="display:none; margin-top: 1rem; background-color: #c0392b;">Zakończ rundę</button>
-      <button id="leaveRoom" style="margin-top: 1rem; background-color: #7f8c8d;">Opuść pokój</button>
+      <button id="endRoundBtn" style="display:none;">Zakończ rundę</button>
+      <p id="gameStatusMessage" style="margin-top:20px; font-weight: 700;"></p>
     </div>
   </div>
 
-  <div id="messageBox"></div>
-  <div id="roleMessageBox"></div>
-
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyCyj5pbNgUHaV-_g__sTQmsUtYOhegYoSI",
-      authDomain: "slowny-oszust.firebaseapp.com",
-      databaseURL: "https://slowny-oszust-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "slowny-oszust",
-      storageBucket: "slowny-oszust.appspot.com",
-      messagingSenderId: "679726628348",
-      appId: "1:679726628348:web:83f9c43fee9cf514784679"
-    };
+    document.addEventListener('DOMContentLoaded', () => {
+      // Firebase config
+      const firebaseConfig = {
+        apiKey: "AIzaSyCyj5pbNgUHaV-_g__sTQmsUtYOhegYoSI",
+        authDomain: "slowny-oszust.firebaseapp.com",
+        databaseURL: "https://slowny-oszust-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "slowny-oszust",
+        storageBucket: "slowny-oszust.firebasestorage.app",
+        messagingSenderId: "679726628348",
+        appId: "1:679726628348:web:83f9c43fee9cf514784679"
+      };
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+      try {
+        firebase.initializeApp(firebaseConfig);
+        console.log("Firebase zainicjalizowany");
+      } catch (error) {
+        console.error("Błąd inicjalizacji Firebase:", error);
+        alert("Błąd połączenia z bazą danych!");
+      }
 
-    const playerNameInput = document.getElementById('playerName');
-    const createRoomBtn = document.getElementById('createRoom');
-    const joinRoomBtn = document.getElementById('joinRoom');
-    const roomCodeInput = document.getElementById('roomCodeInput');
-    const statusMessage = document.getElementById('statusMessage');
-    const loginScreen = document.getElementById('loginScreen');
-    const gameScreen = document.getElementById('gameScreen');
-    const roomCodeDisplay = document.getElementById('roomCodeDisplay');
-    const playersList = document.getElementById('playersList');
-    const startGameBtn = document.getElementById('startGame');
-    const endRoundBtn = document.getElementById('endRound');
-    const leaveRoomBtn = document.getElementById('leaveRoom');
-    const messageBox = document.getElementById('messageBox');
-    const roleMessageBox = document.getElementById('roleMessageBox');
+      const db = firebase.database();
+      let currentRoomId = null;
+      let currentPlayerId = null;
+      let playersRef = null;
+      let statusRef = null;
 
-    let currentRoomCode = null;
-    let currentPlayerId = null;
-    let currentPlayerName = null;
-    let isHost = false;
-    let words = [];
+      // Generatory kodów i id
+      const generateRoomCode = () => Math.random().toString(36).substring(2, 6).toUpperCase();
+      const generatePlayerId = () => 'p_' + Math.random().toString(36).substring(2, 9);
 
-    // Załaduj słowa z words.json
-    fetch('words.json')
-      .then(response => response.json())
-      .then(data => {
-        words = data;
-        console.log('Załadowano słowa:', words.length);
-      })
-      .catch(error => {
-        console.error('Błąd ładowania words.json:', error);
-      });
-
-    function generateRoomCode() {
-      return Math.random().toString(36).substr(2, 4).toUpperCase();
-    }
-
-    function updatePlayersList(players) {
-      playersList.innerHTML = '';
-      for (const [id, player] of Object.entries(players)) {
-        const li = document.createElement('li');
-        li.textContent = player.name;
-        if (player.isHost) {
-          li.classList.add('host');
-          li.textContent += ' (host)';
+      // UI helpers
+      function setStatus(message, isError = false) {
+        const statusEl = document.getElementById('statusMessage');
+        if (statusEl) {
+          statusEl.textContent = message;
+          statusEl.style.color = isError ? 'red' : '#666';
         }
-        if (id === currentPlayerId) {
-          li.classList.add('self');
+      }
+
+      function setGameStatus(message, isError = false) {
+        const gameStatusEl = document.getElementById('gameStatusMessage');
+        if (gameStatusEl) {
+          gameStatusEl.textContent = message;
+          gameStatusEl.style.color = isError ? 'red' : '#fff';
         }
-        playersList.appendChild(li);
-      }
-    }
-
-    function showMessage(text, duration = 3500) {
-      messageBox.textContent = text;
-      messageBox.style.display = 'block';
-      setTimeout(() => {
-        messageBox.style.display = 'none';
-      }, duration);
-    }
-
-    function showRoleMessage(text, duration = 7000) {
-      roleMessageBox.textContent = text;
-      roleMessageBox.style.display = 'block';
-      setTimeout(() => {
-        roleMessageBox.style.display = 'none';
-      }, duration);
-    }
-
-    function resetToLobby() {
-      startGameBtn.style.display = isHost ? 'block' : 'none';
-      endRoundBtn.style.display = 'none';
-      roleMessageBox.style.display = 'none';
-      showMessage("Wrócono do lobby.", 3000);
-    }
-
-    createRoomBtn.addEventListener('click', () => {
-      const name = playerNameInput.value.trim();
-      if (!name) {
-        showMessage('Wpisz nick!');
-        return;
-      }
-      currentPlayerName = name;
-      isHost = true;
-      currentRoomCode = generateRoomCode();
-      currentPlayerId = db.ref().push().key;
-
-      const roomRef = db.ref(`rooms/${currentRoomCode}`);
-      roomRef.set({
-        players: {
-          [currentPlayerId]: { name: currentPlayerName, isHost: true, role: null }
-        },
-        gameStarted: false,
-        currentWord: null,
-        resetMessage: null
-      }).then(() => {
-        loginScreen.style.display = 'none';
-        gameScreen.style.display = 'block';
-        roomCodeDisplay.textContent = currentRoomCode;
-        listenToRoom(currentRoomCode);
-      });
-    });
-
-    joinRoomBtn.addEventListener('click', () => {
-      const name = playerNameInput.value.trim();
-      const roomCode = roomCodeInput.value.trim().toUpperCase();
-
-      if (!name || !roomCode) {
-        showMessage('Wpisz nick i kod pokoju!');
-        return;
       }
 
-      currentPlayerName = name;
-      currentRoomCode = roomCode;
-      currentPlayerId = db.ref().push().key;
+      function setLoading(isLoading) {
+        const createBtn = document.getElementById('createRoom');
+        const joinBtn = document.getElementById('joinRoom');
+        if (createBtn) createBtn.disabled = isLoading;
+        if (joinBtn) joinBtn.disabled = isLoading;
+      }
 
-      const roomRef = db.ref(`rooms/${currentRoomCode}`);
-      roomRef.once('value').then(snapshot => {
-        if (!snapshot.exists()) {
-          showMessage('Pokój nie istnieje!');
+      function showGameScreen(roomId) {
+        const loginScreen = document.getElementById('loginScreen');
+        const gameScreen = document.getElementById('gameScreen');
+        const roomCodeDisplay = document.getElementById('roomCodeDisplay');
+
+        if (loginScreen) loginScreen.style.display = 'none';
+        if (gameScreen) gameScreen.style.display = 'block';
+        if (roomCodeDisplay) roomCodeDisplay.textContent = roomId;
+      }
+
+      function updatePlayersList(playersData) {
+        const playersList = document.getElementById('playersList');
+        if (!playersList) return;
+
+        playersList.innerHTML = '';
+        for (const playerId in playersData) {
+          const player = playersData[playerId];
+          const li = document.createElement('li');
+          li.textContent = player.name + (player.isHost ? ' (host)' : '');
+
+          if (playerId === currentPlayerId) {
+            li.classList.add('self');
+          }
+          if (player.isHost) {
+            li.classList.add('host');
+          }
+
+          playersList.appendChild(li);
+        }
+      }
+
+      // Create room
+      document.getElementById('createRoom').addEventListener('click', () => {
+        const playerName = document.getElementById('playerName').value.trim();
+        if (!playerName) {
+          setStatus("Podaj swój nick!", true);
           return;
         }
+        setStatus('');
+        setLoading(true);
 
-        roomRef.child('players').update({
-          [currentPlayerId]: { name: currentPlayerName, isHost: false, role: null }
-        }).then(() => {
-          loginScreen.style.display = 'none';
-          gameScreen.style.display = 'block';
-          roomCodeDisplay.textContent = currentRoomCode;
-          listenToRoom(currentRoomCode);
-        });
-      });
-    });
+        let newRoomCode = generateRoomCode();
 
-    startGameBtn.addEventListener('click', () => {
-      startGame();
-    });
+        // Sprawdź, czy kod jest wolny
+        const roomRef = db.ref(`rooms/${newRoomCode}`);
+        roomRef.get().then(snapshot => {
+          if (snapshot.exists()) {
+            // jeśli pokój istnieje, spróbuj ponownie (rzadka sytuacja)
+            newRoomCode = generateRoomCode();
+          }
 
-    function startGame() {
-      if (!currentRoomCode) return;
-
-      const roomRef = db.ref(`rooms/${currentRoomCode}`);
-
-      roomRef.child('players').once('value').then(snapshot => {
-        const players = snapshot.val();
-        if (!players || Object.keys(players).length < 2) {
-          showMessage("Potrzeba minimum 2 graczy, aby zacząć grę.");
-          return;
-        }
-
-        const playerIds = Object.keys(players);
-        const impostorIndex = Math.floor(Math.random() * playerIds.length);
-        const impostorId = playerIds[impostorIndex];
-
-        const randomWord = words[Math.floor(Math.random() * words.length)];
-
-        const updatedPlayers = {};
-        playerIds.forEach(id => {
-          updatedPlayers[id] = {
-            name: players[id].name,
-            isHost: players[id].isHost,
-            role: id === impostorId ? 'impostor' : 'innocent'
+          // Dodaj pokój z hostem
+          const playerId = generatePlayerId();
+          const roomData = {
+            host: playerId,
+            players: {
+              [playerId]: {
+                name: playerName,
+                isHost: true,
+                joinedAt: Date.now(),
+              }
+            },
+            status: 'waiting',
           };
-        });
 
-        roomRef.update({
-          players: updatedPlayers,
-          gameStarted: true,
-          currentWord: randomWord,
-          resetMessage: null
-        }).then(() => {
-          startGameBtn.style.display = 'none';
-          if (isHost) endRoundBtn.style.display = 'block';
-        });
-      });
-    }
+          roomRef.set(roomData).then(() => {
+            currentRoomId = newRoomCode;
+            currentPlayerId = playerId;
+            setLoading(false);
+            setStatus('');
+            showGameScreen(currentRoomId);
 
-    endRoundBtn.addEventListener('click', () => {
-      if (!currentRoomCode) return;
-      const roomRef = db.ref(`rooms/${currentRoomCode}`);
+            playersRef = db.ref(`rooms/${currentRoomId}/players`);
+            statusRef = db.ref(`rooms/${currentRoomId}/status`);
 
-      roomRef.once('value').then(snapshot => {
-        if (!snapshot.exists()) return;
+            listenToRoomUpdates();
 
-        const roomData = snapshot.val();
-        if (!roomData.players) return;
+            setGameStatus('Czekasz na dołączenie innych graczy...');
 
-        const resetPlayers = {};
-        for (const [id, player] of Object.entries(roomData.players)) {
-          resetPlayers[id] = {
-            name: player.name,
-            isHost: player.isHost,
-            role: null
-          };
-        }
-
-        roomRef.update({
-          players: resetPlayers,
-          gameStarted: false,
-          currentWord: null,
-          resetMessage: "Wrócono do lobby."
+            console.log(`Pokój ${currentRoomId} stworzony`);
+          }).catch((error) => {
+            setLoading(false);
+            setStatus('Błąd podczas tworzenia pokoju. Spróbuj ponownie.', true);
+            console.error(error);
+          });
+        }).catch((error) => {
+          setLoading(false);
+          setStatus('Błąd podczas sprawdzania pokoju. Spróbuj ponownie.', true);
+          console.error(error);
         });
       });
-    });
 
-    // Funkcja do usuwania gracza i przekazywania hosta
-    async function removePlayerAndTransferHost() {
-      if (!currentRoomCode || !currentPlayerId) return;
-
-      const roomRef = db.ref(`rooms/${currentRoomCode}`);
-      const snapshot = await roomRef.once('value');
-      if (!snapshot.exists()) return;
-      const roomData = snapshot.val();
-      if (!roomData.players) return;
-
-      const players = roomData.players;
-
-      // Usuń obecnego gracza
-      delete players[currentPlayerId];
-
-      // Sprawdź, czy był hostem i przekaż hosta, jeśli trzeba
-      let newHostId = null;
-      if (isHost) {
-        // Jeśli są inni gracze, wybierz pierwszego alfabetycznie (lub po kluczu)
-        const playerIds = Object.keys(players);
-        if (playerIds.length > 0) {
-          newHostId = playerIds[0];
-          players[newHostId].isHost = true;
-          if (newHostId === currentPlayerId) {
-            // Nie powinno się zdarzyć, ale zabezpieczenie
-            isHost = false;
-          }
+      // Join room
+      document.getElementById('joinRoom').addEventListener('click', () => {
+        const playerName = document.getElementById('playerName').value.trim();
+        const roomCodeInput = document.getElementById('roomCodeInput').value.trim().toUpperCase();
+        if (!playerName) {
+          setStatus("Podaj swój nick!", true);
+          return;
         }
-      }
-
-      await roomRef.child('players').set(players);
-
-      // Zaktualizuj isHost lokalnie jeśli utracono hosta
-      if (isHost && newHostId && newHostId !== currentPlayerId) {
-        isHost = false;
-      }
-    }
-
-    // Przycisk opuszczania pokoju
-    leaveRoomBtn.addEventListener('click', async () => {
-      await removePlayerAndTransferHost();
-      location.reload();
-    });
-
-    // Obsługa odświeżania i zamknięcia okna
-    window.addEventListener('beforeunload', async (event) => {
-      // Blokuj synchroniczne akcje i użyj async - nie gwarantuje 100% w niektórych przeglądarkach,
-      // ale lepsze niż nic.
-      if (currentPlayerId && currentRoomCode) {
-        await removePlayerAndTransferHost();
-      }
-    });
-
-    function listenToRoom(roomCode) {
-      const roomRef = db.ref(`rooms/${roomCode}`);
-
-      roomRef.on('value', (snapshot) => {
-        if (!snapshot.exists()) {
-          // Pokój usunięty (lub zakończony)
-          showMessage('Pokój został zamknięty.');
-          loginScreen.style.display = 'block';
-          gameScreen.style.display = 'none';
+        if (!roomCodeInput || roomCodeInput.length !== 4) {
+          setStatus("Wpisz poprawny kod pokoju (4 znaki).", true);
           return;
         }
 
-        const data = snapshot.val();
+        setStatus('');
+        setLoading(true);
 
-        // Aktualizuj listę graczy
-        if (data.players) {
-          updatePlayersList(data.players);
-          if (data.players[currentPlayerId]) {
-            isHost = !!data.players[currentPlayerId].isHost;
-            startGameBtn.style.display = isHost && !data.gameStarted ? 'block' : 'none';
-            endRoundBtn.style.display = isHost && data.gameStarted ? 'block' : 'none';
+        const roomRef = db.ref(`rooms/${roomCodeInput}`);
+        roomRef.get().then(snapshot => {
+          if (!snapshot.exists()) {
+            setLoading(false);
+            setStatus("Pokój o podanym kodzie nie istnieje.", true);
+            return;
           }
+
+          const roomData = snapshot.val();
+          if (roomData.status !== 'waiting') {
+            setLoading(false);
+            setStatus("Gra już się rozpoczęła lub zakończyła.", true);
+            return;
+          }
+
+          // Dodaj nowego gracza
+          const playerId = generatePlayerId();
+          const newPlayer = {
+            name: playerName,
+            isHost: false,
+            joinedAt: Date.now(),
+          };
+
+          db.ref(`rooms/${roomCodeInput}/players/${playerId}`).set(newPlayer).then(() => {
+            currentRoomId = roomCodeInput;
+            currentPlayerId = playerId;
+            setLoading(false);
+            setStatus('');
+            showGameScreen(currentRoomId);
+
+            playersRef = db.ref(`rooms/${currentRoomId}/players`);
+            statusRef = db.ref(`rooms/${currentRoomId}/status`);
+
+            listenToRoomUpdates();
+
+            setGameStatus('Dołączono do pokoju. Czekaj na rozpoczęcie gry.');
+
+            console.log(`Dołączono do pokoju ${currentRoomId}`);
+          }).catch(error => {
+            setLoading(false);
+            setStatus('Błąd podczas dołączania do pokoju.', true);
+            console.error(error);
+          });
+        }).catch(error => {
+          setLoading(false);
+          setStatus('Błąd podczas pobierania pokoju.', true);
+          console.error(error);
+        });
+      });
+
+      // Listen to room players and status changes
+      function listenToRoomUpdates() {
+        if (!currentRoomId) return;
+
+        if (playersRef) {
+          playersRef.on('value', (snapshot) => {
+            const players = snapshot.val() || {};
+            updatePlayersList(players);
+            updateStartButtonVisibility(players);
+          });
         }
 
-        // Gdy gra wystartowała
-        if (data.gameStarted) {
-          loginScreen.style.display = 'none';
-          gameScreen.style.display = 'block';
+        if (statusRef) {
+          statusRef.on('value', (snapshot) => {
+            const status = snapshot.val();
+            handleGameStatusChange(status);
+          });
+        }
+      }
 
-          if (data.players && data.players[currentPlayerId]) {
-            const role = data.players[currentPlayerId].role;
-            if (role === 'impostor') {
-              showRoleMessage("Jesteś oszustem!\nNie znasz słowa.");
-            } else if (role === 'innocent') {
-              showRoleMessage(`Słowo: ${data.currentWord}`);
-            }
-          }
-          startGameBtn.style.display = 'none';
-          endRoundBtn.style.display = isHost ? 'block' : 'none';
+      function updateStartButtonVisibility(players) {
+        const startBtn = document.getElementById('startGame');
+        if (!startBtn) {
+          // jeśli przycisku jeszcze nie ma, dodajemy go tylko dla hosta
+          const container = document.querySelector('#gameScreen');
+          if (!container) return;
 
+          const newStartBtn = document.createElement('button');
+          newStartBtn.id = 'startGame';
+          newStartBtn.textContent = 'Rozpocznij grę';
+          newStartBtn.style.display = 'none';
+          container.appendChild(newStartBtn);
+
+          newStartBtn.addEventListener('click', () => {
+            if (!currentRoomId) return;
+            db.ref(`rooms/${currentRoomId}/status`).set('started');
+            setGameStatus('Gra rozpoczęta!');
+            newStartBtn.style.display = 'none';
+          });
+          return updateStartButtonVisibility(players);
+        }
+
+        // wyświetlamy przycisk startu tylko jeśli:
+        // - gracz jest hostem
+        // - jest co najmniej 2 graczy
+        const playerIsHost = players[currentPlayerId]?.isHost;
+        const enoughPlayers = Object.keys(players).length >= 2;
+        if (playerIsHost && enoughPlayers) {
+          startBtn.style.display = 'block';
         } else {
-          // Gdy gra nie jest aktywna
-          resetToLobby();
+          startBtn.style.display = 'none';
         }
+      }
 
-        // Pokazuj komunikat resetMessage jeśli jest
-        if (data.resetMessage) {
-          showMessage(data.resetMessage);
-          // Wyzeruj go
-          roomRef.child('resetMessage').set(null);
+      function handleGameStatusChange(status) {
+        const endRoundBtn = document.getElementById('endRoundBtn');
+
+        if (status === 'started') {
+          setGameStatus('Gra trwa...');
+          if (endRoundBtn) endRoundBtn.style.display = 'block';
+        } else if (status === 'waiting') {
+          setGameStatus('Czekasz na rozpoczęcie gry...');
+          if (endRoundBtn) endRoundBtn.style.display = 'none';
+        } else if (status === 'ended') {
+          setGameStatus('Gra zakończona. Dziękujemy za grę!');
+          if (endRoundBtn) endRoundBtn.style.display = 'none';
+        } else {
+          setGameStatus('');
+          if (endRoundBtn) endRoundBtn.style.display = 'none';
         }
+      }
+
+      // End round button
+      document.getElementById('endRoundBtn').addEventListener('click', () => {
+        if (!currentRoomId) return;
+        // tylko host może zakończyć rundę
+        const playersSnapshot = playersRef.once('value');
+        playersSnapshot.then(snapshot => {
+          const players = snapshot.val() || {};
+          if (!players[currentPlayerId]?.isHost) {
+            alert('Tylko host może zakończyć rundę.');
+            return;
+          }
+          db.ref(`rooms/${currentRoomId}/status`).set('ended');
+        });
       });
-    }
+
+    });
   </script>
 </body>
 </html>
