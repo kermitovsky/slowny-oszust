@@ -371,7 +371,8 @@
           if (role === 'impostor') {
             showRoleMessage(`Jesteś oszustem!`);
           } else if (role === 'innocent') {
-            showRoleMessage(`${word}`);
+            // Poprawiony komunikat: wszyscy niewinni widzą "Twoje słowo: ..."
+            showRoleMessage(`Twoje słowo:\n${word}`);
           } else {
             roleMessageBox.style.display = 'none';
           }
