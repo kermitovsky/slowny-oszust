@@ -185,7 +185,7 @@
     let isHost = false;
     let words = [];
 
-    // Załaduj słowa z words.json
+    // Załaduj słowa z words.json (jeśli potrzebujesz)
     fetch('words.json')
       .then(response => response.json())
       .then(data => {
@@ -200,9 +200,11 @@
       return Math.random().toString(36).substr(2, 4).toUpperCase();
     }
 
-    function updatePlayersList(players) {
+    // Aktualizuj listę graczy, pomijając wyrzuconych
+    function updatePlayersList(players, kicked) {
       playersList.innerHTML = '';
       for (const [id, player] of Object.entries(players)) {
+        if (kicked && kicked[id]) continue; // pomiń wyrzuconych
         const li = document.createElement('li');
         li.textContent = player.name;
         if (player.isHost) {
@@ -213,7 +215,6 @@
           li.classList.add('self');
         }
 
-        // Dodaj przycisk wyrzucania tylko dla hosta i innych graczy niż siebie
         if (isHost && id !== currentPlayerId) {
           const kickBtn = document.createElement('button');
           kickBtn.textContent = '×';
@@ -222,17 +223,18 @@
           kickBtn.onclick = () => kickPlayer(id);
           li.appendChild(kickBtn);
         }
-
         playersList.appendChild(li);
       }
     }
 
     function kickPlayer(playerId) {
       if (!currentRoomCode || !isHost) return;
-      const kickedRef = db.ref(`kicked/${playerId}`);
+
+      // Dodaj do listy wyrzuconych w pokoju
+      const kickedRef = db.ref(`rooms/${currentRoomCode}/kicked/${playerId}`);
       kickedRef.set(true);
 
-      // Usuwamy gracza z pokoju
+      // Usuń gracza z listy graczy pokoju
       const playerRef = db.ref(`rooms/${currentRoomCode}/players/${playerId}`);
       playerRef.remove();
     }
@@ -286,6 +288,7 @@
       roomRef.set({
         players,
         gameStarted: false,
+        kicked: {}
       }).then(() => {
         loginScreen.style.display = 'none';
         gameScreen.style.display = 'block';
@@ -343,15 +346,18 @@
     };
 
     startGameBtn.onclick = () => {
-      if (!currentRoomCode) return;
-      const roomRef = db.ref(`rooms/${currentRoomCode}`);
-      roomRef.update({ gameStarted: true });
+      if (!currentRoomCode || !isHost) return;
+      db.ref(`rooms/${currentRoomCode}/gameStarted`).set(true);
+      startGameBtn.style.display = 'none';
+      endRoundBtn.style.display = 'inline-block';
     };
 
     endRoundBtn.onclick = () => {
-      if (!currentRoomCode) return;
-      const roomRef = db.ref(`rooms/${currentRoomCode}`);
-      roomRef.update({ gameStarted: false, currentRound: null });
+      if (!currentRoomCode || !isHost) return;
+      db.ref(`rooms/${currentRoomCode}/gameStarted`).set(false);
+      endRoundBtn.style.display = 'none';
+      startGameBtn.style.display = 'inline-block';
+      showMessage('Runda zakończona!');
     };
 
     function listenToRoom(roomCode) {
@@ -360,36 +366,37 @@
       roomRef.on('value', snapshot => {
         const room = snapshot.val();
         if (!room) {
-          showMessage('Pokój został zamknięty');
+          alert('Pokój został usunięty');
           resetState();
           return;
         }
-        const players = room.players || {};
-        updatePlayersList(players);
 
-        // Pokazuj startGameBtn tylko hostowi i jeśli jest co najmniej 2 graczy
-        if (isHost && Object.keys(players).length >= 2 && !room.gameStarted) {
-          startGameBtn.style.display = 'block';
-          endRoundBtn.style.display = 'none';
-        } else if (room.gameStarted) {
-          startGameBtn.style.display = 'none';
-          endRoundBtn.style.display = 'block';
+        // Lista wyrzuconych graczy w pokoju
+        const kicked = room.kicked || {};
+
+        // Jeśli jesteś wyrzucony to automatycznie wyjdź z pokoju i wróć do ekranu logowania
+        if (kicked[currentPlayerId]) {
+          alert('Zostałeś wyrzucony z pokoju');
+          resetState();
+          return;
+        }
+
+        const players = room.players || {};
+        updatePlayersList(players, kicked);
+
+        // Wyświetl przycisk startu tylko hostowi i gdy jest minimum 2 graczy
+        if (isHost && Object.keys(players).length >= 2) {
+          startGameBtn.style.display = room.gameStarted ? 'none' : 'inline-block';
+          endRoundBtn.style.display = room.gameStarted ? 'inline-block' : 'none';
         } else {
           startGameBtn.style.display = 'none';
           endRoundBtn.style.display = 'none';
         }
       });
-
-      // Sprawdzaj, czy gracz jest wyrzucony
-      const kickedRef = db.ref(`kicked/${currentPlayerId}`);
-      kickedRef.on('value', snapshot => {
-        if (snapshot.exists()) {
-          alert('Zostałeś wyrzucony z pokoju');
-          kickedRef.remove();
-          resetState();
-        }
-      });
     }
+
+    // Start z czystym stanem
+    resetState();
   </script>
 </body>
 </html>
