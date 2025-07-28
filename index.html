@@ -67,20 +67,8 @@
       background-color: #f9f3f0;
       color: #333;
       display: flex;
-      align-items: center;
       justify-content: space-between;
-    }
-    #playersList li .kickBtn {
-      background-color: #c0392b;
-      color: white;
-      border: none;
-      border-radius: 0.5rem;
-      cursor: pointer;
-      font-weight: bold;
-      padding: 0 1rem;
-      font-size: 1.5rem;
-      line-height: 1;
-      user-select: none;
+      align-items: center;
     }
     .host {
       color: #3498db !important;
@@ -89,6 +77,30 @@
     .self {
       color: black !important;
       font-weight: bold;
+    }
+    /* Styl przycisku wyrzucania */
+    #playersList li .kickBtn {
+      background-color: #c0392b;
+      color: white;
+      border: none;
+      border-radius: 0.3rem;
+      cursor: pointer;
+      font-weight: bold;
+      padding: 0 0.7rem;
+      font-size: 1.6rem;
+      line-height: 1;
+      user-select: none;
+      width: 2.5rem;
+      height: 2.5rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #playersList li .kickBtn:hover {
+      background-color: #e74c3c;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.5);
     }
     #messageBox, #roleMessageBox {
       position: fixed;
@@ -193,26 +205,25 @@
       playersList.innerHTML = '';
       for (const [id, player] of Object.entries(players)) {
         const li = document.createElement('li');
-        li.textContent = player.name;
+
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = player.name;
         if (player.isHost) {
-          li.classList.add('host');
-          li.textContent += ' (host)';
+          nameSpan.classList.add('host');
+          nameSpan.textContent += ' (host)';
         }
         if (id === currentPlayerId) {
-          li.classList.add('self');
+          nameSpan.classList.add('self');
         }
+        li.appendChild(nameSpan);
 
-        // Dodajemy przycisk wyrzucania jeśli jesteś hostem i to nie ty
+        // Dodaj przycisk wyrzucania tylko jeśli ja jestem hostem i to nie mój własny nick
         if (isHost && id !== currentPlayerId) {
           const kickBtn = document.createElement('button');
-          kickBtn.textContent = 'X';
+          kickBtn.textContent = '×';
           kickBtn.classList.add('kickBtn');
           kickBtn.title = `Wyrzuć ${player.name}`;
-          kickBtn.addEventListener('click', () => {
-            if (confirm(`Czy na pewno chcesz wyrzucić gracza ${player.name}?`)) {
-              kickPlayer(id);
-            }
-          });
+          kickBtn.addEventListener('click', () => kickPlayer(id));
           li.appendChild(kickBtn);
         }
 
@@ -289,17 +300,9 @@
           showMessage('Pokój nie istnieje!');
           return;
         }
-        const data = snapshot.val();
-        if (data.gameStarted) {
-          showMessage('Gra już się rozpoczęła!');
-          return;
-        }
 
-        // Dodaj gracza do pokoju
-        roomRef.child('players').child(currentPlayerId).set({
-          name: currentPlayerName,
-          isHost: false,
-          role: null
+        roomRef.child('players').update({
+          [currentPlayerId]: { name: currentPlayerName, isHost: false, role: null }
         }).then(() => {
           loginScreen.style.display = 'none';
           gameScreen.style.display = 'block';
@@ -310,114 +313,146 @@
       });
     });
 
-    function listenToRoom(roomCode) {
-      const roomRef = db.ref(`rooms/${roomCode}`);
-
-      roomRef.child('players').on('value', snapshot => {
-        const players = snapshot.val() || {};
-        updatePlayersList(players);
-      });
-
-      roomRef.child('gameStarted').on('value', snapshot => {
-        const started = snapshot.val();
-        if (started) {
-          startGameBtn.style.display = 'none';
-          endRoundBtn.style.display = 'block';
-        } else {
-          resetToLobby();
-        }
-      });
-
-      roomRef.child('currentWord').on('value', snapshot => {
-        const word = snapshot.val();
-        if (word) {
-          showRoleMessage(`Hasło: ${word}`, 7000);
-        }
-      });
-
-      // Reset message może służyć do sygnalizacji np. resetu rundy, ale nie jest konieczny do wyrzucania
-    }
-
     startGameBtn.addEventListener('click', () => {
+      startGame();
+    });
+
+    function startGame() {
       if (!currentRoomCode) return;
 
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
+
       roomRef.child('players').once('value').then(snapshot => {
         const players = snapshot.val();
-        if (!players) {
-          showMessage('Brak graczy w pokoju!');
+        if (!players || Object.keys(players).length < 2) {
+          showMessage("Potrzeba co najmniej 2 graczy, aby zacząć!");
           return;
         }
+
+        // Losuj słowo
+        const randomWord = words[Math.floor(Math.random() * words.length)];
+
+        // Losuj "impostora"
         const playerIds = Object.keys(players);
-        if (playerIds.length < 3) {
-          showMessage('Potrzeba co najmniej 3 graczy!');
-          return;
+        const impostorId = playerIds[Math.floor(Math.random() * playerIds.length)];
+
+        // Ustaw role i słowo
+        for (const pid of playerIds) {
+          if (pid === impostorId) {
+            players[pid].role = 'oszust';
+          } else {
+            players[pid].role = 'uczciwy';
+          }
         }
-
-        // Wybierz słowo i przypisz role
-        const impostorIndex = Math.floor(Math.random() * playerIds.length);
-        const wordIndex = Math.floor(Math.random() * words.length);
-        const secretWord = words[wordIndex];
-
-        const updates = {};
-        playerIds.forEach((pid, i) => {
-          updates[`players/${pid}/role`] = (i === impostorIndex) ? 'impostor' : 'innocent';
-        });
 
         roomRef.update({
           gameStarted: true,
-          currentWord: secretWord,
-          ...updates
+          currentWord: randomWord,
+          players
         });
       });
-    });
+    }
+
+    function listenToRoom(roomCode) {
+      const roomRef = db.ref(`rooms/${roomCode}`);
+      roomRef.on('value', snapshot => {
+        const room = snapshot.val();
+        if (!room) {
+          showMessage('Pokój został zamknięty!');
+          location.reload();
+          return;
+        }
+
+        // Aktualizuj listę graczy
+        if (room.players) {
+          updatePlayersList(room.players);
+
+          // Pokazuj przycisk startu jeśli jestem hostem i gra nie zaczęta
+          startGameBtn.style.display = (isHost && !room.gameStarted) ? 'block' : 'none';
+
+          // Po starcie gry pokaż role i słowo
+          if (room.gameStarted) {
+            const playerRole = room.players[currentPlayerId]?.role;
+            if (playerRole) {
+              const word = room.currentWord || '';
+              if (playerRole === 'oszust') {
+                showRoleMessage('Jesteś oszustem!\nNie znasz słowa');
+              } else {
+                showRoleMessage(`Jesteś uczciwy!\nSłowo to:\n${word}`);
+              }
+              endRoundBtn.style.display = 'block';
+            }
+          } else {
+            resetToLobby();
+          }
+        }
+      });
+    }
 
     endRoundBtn.addEventListener('click', () => {
       if (!currentRoomCode) return;
+
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
+
       roomRef.update({
         gameStarted: false,
-        currentWord: null,
+        currentWord: null
+      }).then(() => {
+        showMessage('Runda zakończona. Możesz zacząć nową.');
       });
     });
 
     leaveRoomBtn.addEventListener('click', () => {
-      if (!currentRoomCode || !currentPlayerId) return;
-      const roomRef = db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`);
-      roomRef.remove().then(() => {
-        currentRoomCode = null;
-        currentPlayerId = null;
-        currentPlayerName = null;
-        isHost = false;
-
-        loginScreen.style.display = 'block';
-        gameScreen.style.display = 'none';
-        roomCodeDisplay.textContent = '';
-      });
+      leaveRoom();
     });
 
-    // --- NOWA FUNKCJA WYRZUCANIA GRACZA ---
+    function leaveRoom() {
+      if (!currentRoomCode || !currentPlayerId) return;
 
-    function kickPlayer(playerIdToKick) {
-      if (!currentRoomCode) return;
-      const roomRef = db.ref(`rooms/${currentRoomCode}`);
+      const playerRef = db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`);
+      playerRef.remove().then(() => {
+        // Jeśli byłem hostem i zostałem wyrzucony, przenieś hosta
+        if (isHost) {
+          const roomRef = db.ref(`rooms/${currentRoomCode}`);
+          roomRef.child('players').once('value').then(snapshot => {
+            const players = snapshot.val();
+            if (players) {
+              const ids = Object.keys(players);
+              if (ids.length > 0) {
+                const newHostId = ids[0];
+                roomRef.child(`players/${newHostId}`).update({ isHost: true });
+              } else {
+                // Nie ma nikogo w pokoju - usuń pokój
+                roomRef.remove();
+              }
+            } else {
+              roomRef.remove();
+            }
+          });
+        }
 
-      roomRef.child('players').once('value').then(snapshot => {
-        const players = snapshot.val();
-        if (!players || !players[playerIdToKick]) return;
+        // Resetowanie stanu
+        currentRoomCode = null;
+        currentPlayerId = null;
+        isHost = false;
+        currentPlayerName = null;
 
-        delete players[playerIdToKick];
-        roomRef.child('players').set(players);
-
-        // Ustaw sygnał wyrzucenia
-        db.ref(`kicked/${playerIdToKick}`).set({
-          room: currentRoomCode,
-          timestamp: Date.now()
-        });
+        // Powrót do ekranu logowania
+        gameScreen.style.display = 'none';
+        loginScreen.style.display = 'block';
       });
     }
 
-    // Funkcja nasłuchująca czy zostaliśmy wyrzuceni
+    function kickPlayer(playerId) {
+      if (!currentRoomCode) return;
+
+      // Dodaj wpis w 'kicked' żeby wyrzucony dostał sygnał
+      db.ref(`kicked/${playerId}`).set({ kickedFrom: currentRoomCode }).then(() => {
+        // Usuń gracza z listy w pokoju
+        db.ref(`rooms/${currentRoomCode}/players/${playerId}`).remove();
+      });
+    }
+
     function listenForKick() {
       if (!currentPlayerId) return;
 
@@ -425,22 +460,17 @@
       kickRef.on('value', snapshot => {
         if (snapshot.exists()) {
           // Wyrzucono gracza!
-          showMessage('Zostałeś wyrzucony z pokoju.', 5000);
+          messageBox.textContent = 'Zostałeś wyrzucony z pokoju.';
+          messageBox.style.display = 'block';
 
-          // Wyczyść lokalny stan i wróć do logowania
-          loginScreen.style.display = 'block';
-          gameScreen.style.display = 'none';
-
-          currentRoomCode = null;
-          currentPlayerId = null;
-          currentPlayerName = null;
-          isHost = false;
-
-          kickRef.remove();
+          // Po 3 sekundach odśwież stronę (powrót do ekranu logowania)
+          setTimeout(() => {
+            kickRef.remove();
+            location.reload();
+          }, 3000);
         }
       });
     }
-
   </script>
 </body>
 </html>
