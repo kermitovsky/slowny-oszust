@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Słowny Impostor</title>
+  <title>Słowny Oszust</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
   <style>
     body {
-      background-color: #e67e22;
+      background-color: #e67e22; /* pomarańczowe tło */
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       color: #fff;
       font-size: 2rem;
@@ -30,6 +30,7 @@
       text-align: center;
       font-size: 3.5rem;
       color: #f5f5f5;
+      font-family: 'Pacifico', cursive;
     }
 
     input, button {
@@ -85,80 +86,71 @@
       font-weight: bold;
     }
 
-    #messageModal {
+    /* Estetyczne komunikaty */
+    #statusMessage {
       position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background: #2c3e50;
-      color: #ecf0f1;
-      padding: 2rem 3rem;
-      border-radius: 1rem;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
-      font-size: 2rem;
-      z-index: 9999;
-      display: none;
-      text-align: center;
-    }
-
-    #roleReveal {
-      font-size: 4rem;
-      padding: 4rem 6rem;
-      display: none;
-      border-radius: 2rem;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.8);
       color: white;
-      font-weight: bold;
-      z-index: 99999;
+      padding: 2rem 3rem;
+      font-size: 2.5rem;
+      border-radius: 1.5rem;
       text-align: center;
-      box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
-    }
-
-    .impostor {
-      background-color: #c0392b;
-    }
-
-    .innocent {
-      background-color: #27ae60;
-    }
-
-    #endRound {
       display: none;
-      background-color: #c0392b;
+      z-index: 1000;
+      max-width: 90vw;
+      word-wrap: break-word;
+      box-shadow: 0 0 20px rgba(0,0,0,0.7);
     }
 
-    #endRound:hover {
-      background-color: #e74c3c;
+    /* Komunikat roli większy i wyśrodkowany */
+    #roleReveal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #8e44ad;
+      color: white;
+      padding: 3rem 4rem;
+      font-size: 4rem;
+      font-weight: bold;
+      border-radius: 2rem;
+      text-align: center;
+      display: none;
+      z-index: 1100;
+      box-shadow: 0 0 30px rgba(0,0,0,0.8);
+      font-family: 'Pacifico', cursive;
+      user-select: none;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Słowny Impostor</h1>
+    <h1 class="fancy-title">Słowny Impostor</h1>
     <div id="loginScreen">
       <input type="text" id="playerName" placeholder="Podaj swój nick" />
       <button id="createRoom">Stwórz pokój</button>
       <input type="text" id="roomCodeInput" placeholder="Kod pokoju" maxlength="4" />
       <button id="joinRoom">Dołącz do pokoju</button>
+      <p id="statusMessage"></p>
     </div>
 
     <div id="gameScreen" style="display:none;">
       <p>Kod pokoju: <span id="roomCodeDisplay"></span></p>
       <ul id="playersList"></ul>
       <button id="startGame">Start gry</button>
-      <button id="endRound">Zakończ rundę</button>
+      <button id="endRound" style="display:none; margin-top: 1rem; background-color:#c0392b;">Zakończ rundę</button>
     </div>
-
-    <div id="messageModal"></div>
-    <div id="roleReveal"></div>
   </div>
+
+  <!-- Komunikat roli -->
+  <div id="roleReveal"></div>
 
   <script>
     const firebaseConfig = {
-      apiKey: "AIzaSyCyj5pbNgUHaV-_g__sTQmsUtYOhegYoSI",
+     apiKey: "AIzaSyCyj5pbNgUHaV-_g__sTQmsUtYOhegYoSI",
       authDomain: "slowny-oszust.firebaseapp.com",
       databaseURL: "https://slowny-oszust-default-rtdb.europe-west1.firebasedatabase.app",
       projectId: "slowny-oszust",
@@ -174,13 +166,13 @@
     const createRoomBtn = document.getElementById('createRoom');
     const joinRoomBtn = document.getElementById('joinRoom');
     const roomCodeInput = document.getElementById('roomCodeInput');
+    const statusMessage = document.getElementById('statusMessage');
     const loginScreen = document.getElementById('loginScreen');
     const gameScreen = document.getElementById('gameScreen');
     const roomCodeDisplay = document.getElementById('roomCodeDisplay');
     const playersList = document.getElementById('playersList');
     const startGameBtn = document.getElementById('startGame');
     const endRoundBtn = document.getElementById('endRound');
-    const messageModal = document.getElementById('messageModal');
     const roleReveal = document.getElementById('roleReveal');
 
     let currentRoomCode = null;
@@ -188,60 +180,52 @@
     let currentPlayerName = null;
     let isHost = false;
 
-    function showMessage(message, duration = 3000) {
-      messageModal.textContent = message;
-      messageModal.style.display = 'block';
-      setTimeout(() => {
-        messageModal.style.display = 'none';
-      }, duration);
-    }
-
-    function showRole(role) {
-      roleReveal.className = '';
-      if (role === 'impostor') {
-        roleReveal.textContent = 'IMPOSTOR';
-        roleReveal.classList.add('impostor');
-      } else {
-        roleReveal.textContent = 'NIEWINNY';
-        roleReveal.classList.add('innocent');
-      }
-      roleReveal.style.display = 'block';
-      setTimeout(() => {
-        roleReveal.style.display = 'none';
-      }, 4000);
+    function generateRoomCode() {
+      return Math.random().toString(36).substr(2, 4).toUpperCase();
     }
 
     function updatePlayersList(players) {
       playersList.innerHTML = '';
       for (const [id, player] of Object.entries(players)) {
         const li = document.createElement('li');
-        li.textContent = player.name;
-        if (player.isHost) li.classList.add('host');
-        if (id === currentPlayerId) li.classList.add('self');
+        li.textContent = player.name + (player.isHost ? " (host)" : "");
+
+        if (player.isHost) {
+          li.classList.add('host');
+        }
+
+        if (id === currentPlayerId) {
+          li.classList.add('self');
+        }
+
         playersList.appendChild(li);
       }
     }
 
     function listenToRoom(roomCode) {
       const roomRef = db.ref(`rooms/${roomCode}`);
+
       roomRef.on('value', (snapshot) => {
         const roomData = snapshot.val();
+
         if (!roomData) {
-          showMessage('Pokój został usunięty.');
+          showStatusMessage('Pokój został usunięty.');
           resetToLogin();
           return;
         }
 
-        if (roomData.players) updatePlayersList(roomData.players);
-        if (roomData.gameState === 'inProgress') {
-          startGameBtn.style.display = 'none';
-          if (isHost) endRoundBtn.style.display = 'block';
-
-          if (roomData.roles && roomData.roles[currentPlayerId]) {
-            const role = roomData.roles[currentPlayerId];
-            showRole(role);
+        if (roomData.players) {
+          updatePlayersList(roomData.players);
+          // Pokaż/ukryj przyciski start/end rundy tylko dla hosta
+          if (isHost) {
+            startGameBtn.style.display = roomData.gameStarted ? 'none' : 'block';
+            endRoundBtn.style.display = roomData.gameStarted ? 'block' : 'none';
+          } else {
+            startGameBtn.style.display = 'none';
+            endRoundBtn.style.display = 'none';
           }
         } else {
+          playersList.innerHTML = '';
           startGameBtn.style.display = isHost ? 'block' : 'none';
           endRoundBtn.style.display = 'none';
         }
@@ -258,12 +242,34 @@
       playersList.innerHTML = '';
     }
 
+    function showStatusMessage(message) {
+      statusMessage.textContent = message;
+      statusMessage.style.display = 'block';
+      setTimeout(() => {
+        statusMessage.style.display = 'none';
+        statusMessage.textContent = '';
+      }, 3000);
+    }
+
+    function showRole(role) {
+      roleReveal.textContent = role === 'impostor' ? 'IMPOSTOR' : 'NIEWINNY';
+      roleReveal.style.display = 'block';
+
+      setTimeout(() => {
+        roleReveal.style.display = 'none';
+      }, 7000); // 6 sekund
+    }
+
     createRoomBtn.addEventListener('click', () => {
       const name = playerNameInput.value.trim();
-      if (!name) return showMessage('Wpisz nick!');
+      if (!name) {
+        showStatusMessage('Wpisz nick!');
+        return;
+      }
+
       currentPlayerName = name;
       isHost = true;
-      currentRoomCode = Math.random().toString(36).substr(2, 4).toUpperCase();
+      currentRoomCode = generateRoomCode();
       currentPlayerId = db.ref().push().key;
 
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
@@ -271,11 +277,12 @@
         players: {
           [currentPlayerId]: { name: currentPlayerName, isHost: true }
         },
-        gameState: 'lobby'
+        gameStarted: false
       }).then(() => {
         loginScreen.style.display = 'none';
         gameScreen.style.display = 'block';
         roomCodeDisplay.textContent = currentRoomCode;
+
         listenToRoom(currentRoomCode);
       });
     });
@@ -283,59 +290,103 @@
     joinRoomBtn.addEventListener('click', () => {
       const name = playerNameInput.value.trim();
       const roomCode = roomCodeInput.value.trim().toUpperCase();
-      if (!name || !roomCode) return showMessage('Wpisz nick i kod pokoju!');
+
+      if (!name || !roomCode) {
+        showStatusMessage('Wpisz nick i kod pokoju!');
+        return;
+      }
 
       currentPlayerName = name;
       currentRoomCode = roomCode;
       currentPlayerId = db.ref().push().key;
 
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
-      roomRef.once('value').then(snapshot => {
-        if (!snapshot.exists()) return showMessage('Pokój nie istnieje.');
 
-        const players = snapshot.val().players || {};
-        players[currentPlayerId] = { name: currentPlayerName, isHost: false };
-        roomRef.child('players').set(players).then(() => {
+      roomRef.once('value').then(snapshot => {
+        if (!snapshot.exists()) {
+          showStatusMessage('Pokój nie istnieje!');
+          return;
+        }
+
+        // Dodaj gracza do pokoju
+        roomRef.child('players').update({
+          [currentPlayerId]: { name: currentPlayerName, isHost: false }
+        }).then(() => {
           loginScreen.style.display = 'none';
           gameScreen.style.display = 'block';
           roomCodeDisplay.textContent = currentRoomCode;
+
           listenToRoom(currentRoomCode);
         });
       });
     });
 
     startGameBtn.addEventListener('click', () => {
-      if (!isHost || !currentRoomCode) return;
-
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
+
       roomRef.once('value').then(snapshot => {
-        const room = snapshot.val();
-        if (!room || !room.players) return;
+        const roomData = snapshot.val();
+        if (!roomData) return;
 
-        const playerIds = Object.keys(room.players);
-        const randomIndex = Math.floor(Math.random() * playerIds.length);
-        const impostorId = playerIds[randomIndex];
+        const players = roomData.players;
+        if (!players) return;
 
-        const roles = {};
+        const playerIds = Object.keys(players);
+        if (playerIds.length < 2) {
+          showStatusMessage('Potrzeba co najmniej 2 graczy!');
+          return;
+        }
+
+        // Losowanie impostora
+        const impostorIndex = Math.floor(Math.random() * playerIds.length);
+        const impostorId = playerIds[impostorIndex];
+
+        // Ustaw role graczom w bazie
+        let updates = {};
         playerIds.forEach(id => {
-          roles[id] = (id === impostorId) ? 'impostor' : 'innocent';
+          updates[`players/${id}/role`] = (id === impostorId) ? 'impostor' : 'innocent';
         });
 
         roomRef.update({
-          gameState: 'inProgress',
-          roles
+          ...updates,
+          gameStarted: true
+        }).then(() => {
+          // Pokaz rolę dla siebie
+          const myRole = (currentPlayerId === impostorId) ? 'impostor' : 'innocent';
+          showRole(myRole);
+
+          startGameBtn.style.display = 'none';
+          endRoundBtn.style.display = 'block';
         });
       });
     });
 
     endRoundBtn.addEventListener('click', () => {
-      if (!isHost || !currentRoomCode) return;
-      db.ref(`rooms/${currentRoomCode}`).update({
-        gameState: 'lobby',
-        roles: null
+      if (!isHost) return;
+
+      const roomRef = db.ref(`rooms/${currentRoomCode}`);
+
+      roomRef.once('value').then(snapshot => {
+        const roomData = snapshot.val();
+        if (!roomData) return;
+
+        // Usuwamy role i ustawiamy gameStarted na false
+        let updates = { gameStarted: false };
+        if (roomData.players) {
+          for (const id in roomData.players) {
+            updates[`players/${id}/role`] = null;
+          }
+        }
+
+        roomRef.update(updates).then(() => {
+          showStatusMessage('Runda zakończona. Wracacie do lobby.');
+
+          startGameBtn.style.display = 'block';
+          endRoundBtn.style.display = 'none';
+        });
       });
-      showMessage('Runda zakończona!');
     });
+
   </script>
 </body>
 </html>
