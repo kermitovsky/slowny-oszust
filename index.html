@@ -6,7 +6,7 @@
   <title>Słowny Oszust</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet" />
   <style>
     body {
       background-color: #e67e22; /* pomarańczowe tło */
@@ -30,7 +30,8 @@
       text-align: center;
       font-size: 3.5rem;
       color: #f5f5f5;
-      font-family: 'Pacifico', cursive;
+      font-family: 'Fredoka One', cursive;
+      margin-bottom: 1rem;
     }
 
     input, button {
@@ -121,14 +122,13 @@
       display: none;
       z-index: 1100;
       box-shadow: 0 0 30px rgba(0,0,0,0.8);
-      font-family: 'Pacifico', cursive;
       user-select: none;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1 class="fancy-title">Słowny Impostor</h1>
+    <h1>Słowny Impostor</h1>
     <div id="loginScreen">
       <input type="text" id="playerName" placeholder="Podaj swój nick" />
       <button id="createRoom">Stwórz pokój</button>
@@ -150,7 +150,7 @@
 
   <script>
     const firebaseConfig = {
-     apiKey: "AIzaSyCyj5pbNgUHaV-_g__sTQmsUtYOhegYoSI",
+      apiKey: "AIzaSyCyj5pbNgUHaV-_g__sTQmsUtYOhegYoSI",
       authDomain: "slowny-oszust.firebaseapp.com",
       databaseURL: "https://slowny-oszust-default-rtdb.europe-west1.firebasedatabase.app",
       projectId: "slowny-oszust",
@@ -216,13 +216,19 @@
 
         if (roomData.players) {
           updatePlayersList(roomData.players);
-          // Pokaż/ukryj przyciski start/end rundy tylko dla hosta
+
+          // Pokaz/ukryj przyciski start/end rundy tylko dla hosta
           if (isHost) {
             startGameBtn.style.display = roomData.gameStarted ? 'none' : 'block';
             endRoundBtn.style.display = roomData.gameStarted ? 'block' : 'none';
           } else {
             startGameBtn.style.display = 'none';
             endRoundBtn.style.display = 'none';
+          }
+
+          // Jeśli gra już trwa i gracz ma rolę - pokaż mu ją
+          if (roomData.gameStarted && roomData.players[currentPlayerId] && roomData.players[currentPlayerId].role) {
+            showRole(roomData.players[currentPlayerId].role);
           }
         } else {
           playersList.innerHTML = '';
@@ -252,12 +258,14 @@
     }
 
     function showRole(role) {
-      roleReveal.textContent = role === 'impostor' ? 'IMPOSTOR' : 'NIEWINNY';
+      const text = (role === 'impostor') ? 'IMPOSTOR' : 'NIEWINNY';
+      roleReveal.textContent = text;
       roleReveal.style.display = 'block';
 
-      setTimeout(() => {
+      clearTimeout(roleReveal._timeout);
+      roleReveal._timeout = setTimeout(() => {
         roleReveal.style.display = 'none';
-      }, 7000); // 6 sekund
+      }, 6000); // 6 sekund
     }
 
     createRoomBtn.addEventListener('click', () => {
