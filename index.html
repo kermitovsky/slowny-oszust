@@ -9,26 +9,38 @@
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@600&display=swap" rel="stylesheet" />
   <style>
     body {
-      background-color: #e67e22;
+      background: linear-gradient(135deg, #f39c12 0%, #e67e22 70%, #d35400 100%);
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       color: #fff;
       font-size: 2rem;
       margin: 0;
       padding: 2rem;
+      min-height: 100vh;
     }
     .container {
       max-width: 800px;
       margin: auto;
-      background: #d35400;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       padding: 2rem;
       border-radius: 1.5rem;
-      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    #loginScreen, #gameScreen {
+      animation: fadeIn 0.5s ease-in-out;
     }
     h1 {
       text-align: center;
       font-size: 3.5rem;
       color: #f5f5f5;
       font-family: 'Pacifico', cursive;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
     }
     input, button {
       font-size: 2rem;
@@ -45,16 +57,17 @@
     input {
       border: 2px solid #8e44ad;
       color: #333;
+      background: rgba(255, 255, 255, 0.9);
     }
     button {
-      background-color: #8e44ad;
+      background: linear-gradient(45deg, #8e44ad, #9b59b6);
       color: white;
       cursor: pointer;
-      transition: transform 0.2s ease, background-color 0.3s ease;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
     }
     button:hover {
-      background-color: #9b59b6;
       transform: scale(1.05);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     }
     #playersList {
       list-style: none;
@@ -65,7 +78,7 @@
       padding: 1rem 3.5rem 1rem 1rem;
       margin: 0.5rem 0;
       border-radius: 1rem;
-      background-color: #f9f3f0;
+      background-color: rgba(255, 255, 255, 0.8);
       color: #333;
     }
     #playersList li .kickBtn {
@@ -81,7 +94,7 @@
       border-radius: 4px;
       border: none;
       cursor: pointer;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
       font-size: 1.8rem;
       line-height: 1;
       text-align: center;
@@ -90,7 +103,7 @@
     }
     #playersList li .kickBtn:hover {
       background-color: #c0392b;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
       transform: translateY(-50%) scale(1.1);
     }
     .host {
@@ -116,8 +129,10 @@
       max-width: 90vw;
       word-wrap: break-word;
       white-space: pre-line;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-      border: 2px solid #f5f5f5;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
     }
     #messageBox {
       font-size: 3rem;
@@ -137,7 +152,7 @@
       color: #f5f5f5;
       font-family: 'Poppins', sans-serif;
       font-weight: 600;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
     }
     #impostorSelectionBox .button-container {
       display: flex;
@@ -151,12 +166,12 @@
       font-size: 2.5rem;
       font-weight: bold;
       border-radius: 1rem;
-      transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
     #impostorSelectionBox button:hover {
       background: linear-gradient(45deg, #8e44ad, #9b59b6);
       transform: scale(1.1);
-      box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
     }
     #impostorCountDisplay, #playerCountDisplay {
       font-size: 1.8rem;
@@ -165,7 +180,7 @@
       margin: 1rem 0;
       font-family: 'Poppins', sans-serif;
       font-weight: 600;
-      text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
     }
   </style>
 </head>
@@ -269,7 +284,6 @@
           li.classList.add('self');
         }
 
-        // Dodaj przycisk wyrzucania tylko dla hosta i innych graczy niż siebie
         if (isHost && id !== currentPlayerId) {
           const kickBtn = document.createElement('button');
           kickBtn.textContent = '×';
@@ -509,7 +523,7 @@
         }
 
         const players = room.players || {};
-        console.log('Dane pokoju:', room); // Log dla debugowania
+        console.log('Dane pokoju:', room);
         updatePlayersList(players);
 
         impostorCountDisplay.textContent = room.numImpostors ? `Liczba impostorów: ${room.numImpostors}` : '';
