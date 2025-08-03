@@ -1,362 +1,301 @@
 <!DOCTYPE html> 
 <html lang="pl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Słowny Oszust</title>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet" />
-  <style>
-    body {
-      background-color: #e67e22;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      color: #fff;
-      font-size: 2rem;
-      margin: 0;
-      padding: 2rem;
-    }
-    .container {
-      max-width: 800px;
-      margin: auto;
-      background: #d35400;
-      padding: 2rem;
-      border-radius: 1.5rem;
-      box-shadow: 0 0 20px rgba(0,0,0,0.3);
-    }
-    h1 {
-      text-align: center;
-      font-size: 3.5rem;
-      color: #f5f5f5;
-      font-family: 'Pacifico', cursive;
-    }
-    input, button {
-      font-size: 2rem;
-      padding: 1rem;
-      margin: 1rem 0;
-      border-radius: 0.8rem;
-      border: none;
-      width: 100%;
-      max-width: 400px;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    input {
-      border: 2px solid #8e44ad;
-      color: #333;
-    }
-    button {
-      background-color: #8e44ad;
-      color: white;
-      cursor: pointer;
-      transition: transform 0.2s ease, background-color 0.3s ease;
-    }
-    button:hover {
-      background-color: #9b59b6;
-      transform: scale(1.05);
-    }
-    #playersList {
-      list-style: none;
-      padding: 0;
-    }
-    #playersList li {
-      position: relative;
-      padding: 1rem 3.5rem 1rem 1rem;
-      margin: 0.5rem 0;
-      border-radius: 1rem;
-      background-color: #f9f3f0;
-      color: #333;
-    }
-    #playersList li .kickBtn {
-      position: absolute;
-      top: 50%;
-      right: 1rem;
-      transform: translateY(-50%);
-      width: 32px;
-      height: 32px;
-      background-color: #e74c3c;
-      color: white;
-      font-weight: bold;
-      border-radius: 4px;
-      border: none;
-      cursor: pointer;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-      font-size: 1.8rem;
-      line-height: 1;
-      text-align: center;
-      padding: 0;
-      user-select: none;
-    }
-    #playersList li .kickBtn:hover {
-      background-color: #c0392b;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-      transform: translateY(-50%) scale(1.1);
-    }
-    .host {
-      color: #3498db !important;
-      font-weight: bold;
-    }
-    .self {
-      color: black !important;
-      font-weight: bold;
-    }
-    #messageBox, #roleMessageBox {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background-color: rgba(0,0,0,0.85);
-      color: white;
-      padding: 2rem 3rem;
-      border-radius: 1.5rem;
-      text-align: center;
-      z-index: 1000;
-      display: none;
-      max-width: 90vw;
-      word-wrap: break-word;
-      white-space: pre-line;
-    }
-    #messageBox {
-      font-size: 3rem;
-    }
-    #roleMessageBox {
-      font-size: 4rem;
-      font-weight: bold;
-      font-family: 'Segoe UI Black', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Słowny Oszust</title>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet" />
+<style>
+  body {
+    background-color: #e67e22;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #fff;
+    font-size: 2rem;
+    margin: 0;
+    padding: 2rem;
+  }
+  .container {
+    max-width: 800px;
+    margin: auto;
+    background: #d35400;
+    padding: 2rem;
+    border-radius: 1.5rem;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
+  }
+  h1 {
+    text-align: center;
+    font-size: 3.5rem;
+    color: #f5f5f5;
+    font-family: 'Pacifico', cursive;
+  }
+  input, button {
+    font-size: 2rem;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 0.8rem;
+    border: none;
+    width: 100%;
+    max-width: 400px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  input {
+    border: 2px solid #8e44ad;
+    color: #333;
+  }
+  button {
+    background-color: #8e44ad;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.3s ease;
+  }
+  button:hover {
+    background-color: #9b59b6;
+    transform: scale(1.05);
+  }
+  #playersList {
+    list-style: none;
+    padding: 0;
+  }
+  #playersList li {
+    position: relative;
+    padding: 1rem 3.5rem 1rem 1rem;
+    margin: 0.5rem 0;
+    border-radius: 1rem;
+    background-color: #f9f3f0;
+    color: #333;
+  }
+  .host {
+    color: #3498db !important;
+    font-weight: bold;
+  }
+  .self {
+    color: black !important;
+    font-weight: bold;
+  }
+  #messageBox, #roleMessageBox {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0,0,0,0.85);
+    color: white;
+    padding: 2rem 3rem;
+    border-radius: 1.5rem;
+    text-align: center;
+    z-index: 1000;
+    display: none;
+    max-width: 90vw;
+    white-space: pre-line;
+  }
+  #messageBox { font-size: 3rem; }
+  #roleMessageBox {
+    font-size: 4rem;
+    font-weight: bold;
+  }
+  #impostorSelect {
+    display: none;
+    text-align: center;
+  }
+  #impostorSelect button {
+    display: inline-block;
+    width: auto;
+    margin: 1rem;
+  }
+</style>
 </head>
 <body>
-  <div class="container">
-    <h1 class="fancy-title">Słowny Impostor</h1>
-    <div id="loginScreen">
-      <input type="text" id="playerName" placeholder="Podaj swój nick" />
-      <button id="createRoom">Stwórz pokój</button>
-      <input type="text" id="roomCodeInput" placeholder="Kod pokoju" maxlength="4" />
-      <button id="joinRoom">Dołącz do pokoju</button>
-      <p id="statusMessage"></p>
-    </div>
-
-    <div id="gameScreen" style="display:none;">
-      <p>Kod pokoju: <span id="roomCodeDisplay"></span></p>
-      <ul id="playersList"></ul>
-      <button id="startGame" style="display:none;">Start gry</button>
-      <button id="endRound" style="display:none; margin-top: 1rem; background-color: #c0392b;">Zakończ rundę</button>
-      <button id="leaveRoom" style="margin-top: 1rem; background-color: #7f8c8d;">Opuść pokój</button>
-    </div>
+<div class="container">
+  <h1 class="fancy-title">Słowny Impostor</h1>
+  
+  <div id="loginScreen">
+    <input type="text" id="playerName" placeholder="Podaj swój nick" />
+    <button id="createRoom">Stwórz pokój</button>
+    <input type="text" id="roomCodeInput" placeholder="Kod pokoju" maxlength="4" />
+    <button id="joinRoom">Dołącz do pokoju</button>
+    <p id="statusMessage"></p>
   </div>
 
-  <div id="messageBox"></div>
-  <div id="roleMessageBox"></div>
+  <div id="impostorSelect">
+    <h2>Wybierz liczbę impostorów</h2>
+    <button id="oneImp">1 impostor</button>
+    <button id="twoImp">2 impostorów</button>
+  </div>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyCyj5pbNgUHaV-_g__sTQmsUtYOhegYoSI",
-      authDomain: "slowny-oszust.firebaseapp.com",
-      databaseURL: "https://slowny-oszust-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "slowny-oszust",
-      storageBucket: "slowny-oszust.appspot.com",
-      messagingSenderId: "679726628348",
-      appId: "1:679726628348:web:83f9c43fee9cf514784679"
-    };
+  <div id="gameScreen" style="display:none;">
+    <p>Kod pokoju: <span id="roomCodeDisplay"></span></p>
+    <ul id="playersList"></ul>
+    <button id="startGame" style="display:none;">Start gry</button>
+    <button id="endRound" style="display:none; margin-top: 1rem; background-color: #c0392b;">Zakończ rundę</button>
+    <button id="leaveRoom" style="margin-top: 1rem; background-color: #7f8c8d;">Opuść pokój</button>
+  </div>
+</div>
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+<div id="messageBox"></div>
+<div id="roleMessageBox"></div>
 
-    const playerNameInput = document.getElementById('playerName');
-    const createRoomBtn = document.getElementById('createRoom');
-    const joinRoomBtn = document.getElementById('joinRoom');
-    const roomCodeInput = document.getElementById('roomCodeInput');
-    const statusMessage = document.getElementById('statusMessage');
-    const loginScreen = document.getElementById('loginScreen');
-    const gameScreen = document.getElementById('gameScreen');
-    const roomCodeDisplay = document.getElementById('roomCodeDisplay');
-    const playersList = document.getElementById('playersList');
-    const startGameBtn = document.getElementById('startGame');
-    const endRoundBtn = document.getElementById('endRound');
-    const leaveRoomBtn = document.getElementById('leaveRoom');
-    const messageBox = document.getElementById('messageBox');
-    const roleMessageBox = document.getElementById('roleMessageBox');
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCyj5pbNgUHaV-_g__sTQmsUtYOhegYoSI",
+  authDomain: "slowny-oszust.firebaseapp.com",
+  databaseURL: "https://slowny-oszust-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "slowny-oszust",
+  storageBucket: "slowny-oszust.appspot.com",
+  messagingSenderId: "679726628348",
+  appId: "1:679726628348:web:83f9c43fee9cf514784679"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-    let currentRoomCode = null;
-    let currentPlayerId = null;
-    let currentPlayerName = null;
-    let isHost = false;
-    let words = [];
+let currentRoomCode = null;
+let currentPlayerId = null;
+let currentPlayerName = null;
+let isHost = false;
+let impostorCount = 1;
+let words = [];
 
-    // Załaduj słowa z words.json
-    fetch('words.json')
-      .then(response => response.json())
-      .then(data => {
-        words = data;
-        console.log('Załadowano słowa:', words.length);
-      })
-      .catch(error => {
-        console.error('Błąd ładowania words.json:', error);
-      });
+const playerNameInput = document.getElementById('playerName');
+const createRoomBtn = document.getElementById('createRoom');
+const joinRoomBtn = document.getElementById('joinRoom');
+const roomCodeInput = document.getElementById('roomCodeInput');
+const loginScreen = document.getElementById('loginScreen');
+const impostorSelect = document.getElementById('impostorSelect');
+const oneImp = document.getElementById('oneImp');
+const twoImp = document.getElementById('twoImp');
+const gameScreen = document.getElementById('gameScreen');
+const roomCodeDisplay = document.getElementById('roomCodeDisplay');
+const playersList = document.getElementById('playersList');
+const startGameBtn = document.getElementById('startGame');
+const endRoundBtn = document.getElementById('endRound');
+const leaveRoomBtn = document.getElementById('leaveRoom');
+const messageBox = document.getElementById('messageBox');
+const roleMessageBox = document.getElementById('roleMessageBox');
 
-    function generateRoomCode() {
-      return Math.random().toString(36).substr(2, 4).toUpperCase();
+fetch('words.json')
+  .then(r => r.json())
+  .then(data => { words = data; });
+
+function generateRoomCode() {
+  return Math.random().toString(36).substr(2, 4).toUpperCase();
+}
+
+function showMessage(text, duration=3500) {
+  messageBox.textContent = text;
+  messageBox.style.display = 'block';
+  setTimeout(()=> messageBox.style.display='none', duration);
+}
+
+function showRoleMessage(text, duration=7000) {
+  roleMessageBox.textContent = text;
+  roleMessageBox.style.display = 'block';
+  setTimeout(()=> roleMessageBox.style.display='none', duration);
+}
+
+function updatePlayersList(players) {
+  playersList.innerHTML = '';
+  for (const [id, player] of Object.entries(players)) {
+    const li = document.createElement('li');
+    li.textContent = player.name;
+    if (player.isHost) li.classList.add('host');
+    if (id === currentPlayerId) li.classList.add('self');
+    playersList.appendChild(li);
+  }
+}
+
+createRoomBtn.onclick = () => {
+  const name = playerNameInput.value.trim();
+  if (!name) return showMessage('Wpisz nick!');
+  currentPlayerName = name;
+  isHost = true;
+  loginScreen.style.display = 'none';
+  impostorSelect.style.display = 'block';
+};
+
+oneImp.onclick = () => { impostorCount = 1; createRoomInFirebase(); };
+twoImp.onclick = () => { impostorCount = 2; createRoomInFirebase(); };
+
+function createRoomInFirebase() {
+  currentRoomCode = generateRoomCode();
+  currentPlayerId = db.ref().push().key;
+  db.ref(`rooms/${currentRoomCode}`).set({
+    players: { [currentPlayerId]: { name: currentPlayerName, isHost: true, role: null } },
+    gameStarted: false,
+    currentWord: null,
+    impostorCount: impostorCount,
+    starterId: null
+  }).then(()=>{
+    impostorSelect.style.display = 'none';
+    gameScreen.style.display = 'block';
+    roomCodeDisplay.textContent = currentRoomCode;
+    listenToRoom(currentRoomCode);
+  });
+}
+
+joinRoomBtn.onclick = () => {
+  const name = playerNameInput.value.trim();
+  const code = roomCodeInput.value.trim().toUpperCase();
+  if (!name || !code) return showMessage('Wpisz nick i kod pokoju!');
+  currentPlayerName = name;
+  currentRoomCode = code;
+  currentPlayerId = db.ref().push().key;
+  const roomRef = db.ref(`rooms/${code}`);
+  roomRef.once('value').then(snap=>{
+    if (!snap.exists()) return showMessage('Pokój nie istnieje!');
+    roomRef.child('players').update({
+      [currentPlayerId]: { name: currentPlayerName, isHost: false, role: null }
+    }).then(()=>{
+      loginScreen.style.display='none';
+      gameScreen.style.display='block';
+      roomCodeDisplay.textContent = currentRoomCode;
+      listenToRoom(currentRoomCode);
+    });
+  });
+};
+
+startGameBtn.onclick = () => { startGame(); };
+
+function startGame() {
+  const roomRef = db.ref(`rooms/${currentRoomCode}`);
+  roomRef.once('value').then(snap=>{
+    const room = snap.val();
+    const players = room.players;
+    const ids = Object.keys(players);
+    if (ids.length < room.impostorCount + 1) return showMessage('Za mało graczy!');
+    
+    // Losowanie impostorów
+    const imps = [];
+    while (imps.length < room.impostorCount) {
+      const id = ids[Math.floor(Math.random()*ids.length)];
+      if (!imps.includes(id)) imps.push(id);
     }
-
-    function updatePlayersList(players) {
-      playersList.innerHTML = '';
-      for (const [id, player] of Object.entries(players)) {
-        const li = document.createElement('li');
-        li.textContent = player.name;
-        if (player.isHost) {
-          li.classList.add('host');
-          li.textContent += ' (host)';
-        }
-        if (id === currentPlayerId) {
-          li.classList.add('self');
-        }
-
-        // Dodaj przycisk wyrzucania tylko dla hosta i innych graczy niż siebie
-        if (isHost && id !== currentPlayerId) {
-          const kickBtn = document.createElement('button');
-          kickBtn.textContent = '×';
-          kickBtn.title = 'Wyrzuć gracza';
-          kickBtn.classList.add('kickBtn');
-          kickBtn.addEventListener('click', () => {
-            kickPlayer(id);
-          });
-          li.appendChild(kickBtn);
-        }
-
-        playersList.appendChild(li);
-      }
-    }
-
-    function showMessage(text, duration = 3500) {
-      messageBox.textContent = text;
-      messageBox.style.display = 'block';
-      setTimeout(() => {
-        messageBox.style.display = 'none';
-      }, duration);
-    }
-
-    function showRoleMessage(text, duration = 7000) {
-      roleMessageBox.textContent = text;
-      roleMessageBox.style.display = 'block';
-      setTimeout(() => {
-        roleMessageBox.style.display = 'none';
-      }, duration);
-    }
-
-    function resetToLobby() {
-      startGameBtn.style.display = isHost ? 'block' : 'none';
-      endRoundBtn.style.display = 'none';
-      roleMessageBox.style.display = 'none';
-    }
-
-    createRoomBtn.addEventListener('click', () => {
-      const name = playerNameInput.value.trim();
-      if (!name) {
-        showMessage('Wpisz nick!');
-        return;
-      }
-      currentPlayerName = name;
-      isHost = true;
-      currentRoomCode = generateRoomCode();
-      currentPlayerId = db.ref().push().key;
-
-      const roomRef = db.ref(`rooms/${currentRoomCode}`);
-      roomRef.set({
-        players: {
-          [currentPlayerId]: { name: currentPlayerName, isHost: true, role: null }
-        },
-        gameStarted: false,
-        currentWord: null,
-        resetMessage: null,
-        starterId: null
-      }).then(() => {
-        loginScreen.style.display = 'none';
-        gameScreen.style.display = 'block';
-        roomCodeDisplay.textContent = currentRoomCode;
-        listenToRoom(currentRoomCode);
-      });
+    
+    const updates = {};
+    ids.forEach(id=>{
+      updates[`players/${id}/role`] = imps.includes(id) ? 'impostor' : 'normal';
     });
 
-    joinRoomBtn.addEventListener('click', () => {
-      const name = playerNameInput.value.trim();
-      const roomCode = roomCodeInput.value.trim().toUpperCase();
+    // Losowanie słowa
+    const word = words[Math.floor(Math.random()*words.length)];
 
-      if (!name || !roomCode) {
-        showMessage('Wpisz nick i kod pokoju!');
-        return;
+    // Losowanie startera wg wag
+    const weights = ids.map(id => (imps.includes(id) ? 0.5 : 1));
+    const totalWeight = weights.reduce((a, b) => a + b, 0);
+    let r = Math.random() * totalWeight;
+    let starterIndex = 0;
+    for (let i = 0; i < weights.length; i++) {
+      r -= weights[i];
+      if (r <= 0) {
+        starterIndex = i;
+        break;
       }
+    }
+    const starterId = ids[starterIndex];
+    updates['starterId'] = starterId;
 
-      currentPlayerName = name;
-      currentRoomCode = roomCode;
-      currentPlayerId = db.ref().push().key;
-
-      const roomRef = db.ref(`rooms/${currentRoomCode}`);
-      roomRef.once('value').then(snapshot => {
-        if (!snapshot.exists()) {
-          showMessage('Pokój nie istnieje!');
-          return;
-        }
-
-        roomRef.child('players').update({
-          [currentPlayerId]: { name: currentPlayerName, isHost: false, role: null }
-        }).then(() => {
-          loginScreen.style.display = 'none';
-          gameScreen.style.display = 'block';
-          roomCodeDisplay.textContent = currentRoomCode;
-          listenToRoom(currentRoomCode);
-        });
-      });
-    });
-
-    startGameBtn.addEventListener('click', () => {
-      startGame();
-    });
-
-    function startGame() {
-      if (!currentRoomCode) return;
-
-      const roomRef = db.ref(`rooms/${currentRoomCode}`);
-
-      roomRef.child('players').once('value').then(snapshot => {
-        const players = snapshot.val();
-        if (!players || Object.keys(players).length < 3) {
-          showMessage('Potrzeba co najmniej 3 graczy!');
-          return;
-        }
-
-        // Losuj słowo
-        const word = words[Math.floor(Math.random() * words.length)];
-
-        // Losuj oszusta
-        const playerIds = Object.keys(players);
-        const impostorIndex = Math.floor(Math.random() * playerIds.length);
-        const impostorId = playerIds[impostorIndex];
-
-        // Ustaw role
-        const updates = {};
-        for (const id of playerIds) {
-          updates[`players/${id}/role`] = id === impostorId ? 'impostor' : 'normal';
-        }
-
-        // Losuj startera wg wag: impostor = 0.5, reszta = 1
-        const weights = playerIds.map(id => (id === impostorId ? 0.5 : 1));
-        const totalWeight = weights.reduce((a, b) => a + b, 0);
-        let r = Math.random() * totalWeight;
-        let starterIndex = 0;
-        for (let i = 0; i < weights.length; i++) {
-          r -= weights[i];
-          if (r <= 0) {
-            starterIndex = i;
-            break;
-          }
-        }
-        const starterId = playerIds[starterIndex];
-        updates['starterId'] = starterId;
-
-        // Zaktualizuj dane pokoju
-        roomRef.update({
+    roomRef.update({
       gameStarted: true,
       currentWord: word,
       resetMessage: null,
@@ -365,105 +304,58 @@
   });
 }
 
-endRoundBtn.addEventListener('click', () => {
-  if (!currentRoomCode) return;
-  const roomRef = db.ref(`rooms/${currentRoomCode}`);
-
-  roomRef.update({
+endRoundBtn.onclick = () => {
+  db.ref(`rooms/${currentRoomCode}`).update({
     gameStarted: false,
     currentWord: null,
     resetMessage: 'Runda zakończona',
     starterId: null
   });
-});
+};
 
-leaveRoomBtn.addEventListener('click', () => {
-  leaveRoom();
-});
-
-function leaveRoom() {
-  if (!currentRoomCode || !currentPlayerId) return;
-
-  const playerRef = db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`);
-  playerRef.remove().then(() => {
-    if (isHost) {
-      db.ref(`rooms/${currentRoomCode}`).remove();
-    }
+leaveRoomBtn.onclick = () => {
+  db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).remove().then(()=>{
+    if (isHost) db.ref(`rooms/${currentRoomCode}`).remove();
     resetState();
-    showMessage('Opuściłeś pokój');
   });
-}
+};
 
 function resetState() {
   currentRoomCode = null;
   currentPlayerId = null;
   currentPlayerName = null;
   isHost = false;
-  loginScreen.style.display = 'block';
-  gameScreen.style.display = 'none';
-  playersList.innerHTML = '';
-  roomCodeDisplay.textContent = '';
-  statusMessage.textContent = '';
+  loginScreen.style.display='block';
+  gameScreen.style.display='none';
 }
 
-function listenToRoom(roomCode) {
-  const roomRef = db.ref(`rooms/${roomCode}`);
-  const kickedRef = db.ref(`kicked/${currentPlayerId}`);
-
-  roomRef.on('value', snapshot => {
-    const room = snapshot.val();
-    if (!room) {
-      resetState();
-      showMessage('Pokój został zamknięty');
-      return;
-    }
-
-    const players = room.players || {};
-    updatePlayersList(players);
-
+function listenToRoom(code) {
+  db.ref(`rooms/${code}`).on('value', snap=>{
+    const room = snap.val();
+    if (!room) { resetState(); return; }
+    impostorCount = room.impostorCount || 1;
+    updatePlayersList(room.players || {});
     startGameBtn.style.display = isHost && !room.gameStarted ? 'block' : 'none';
     endRoundBtn.style.display = isHost && room.gameStarted ? 'block' : 'none';
-
-    if (room.gameStarted && players[currentPlayerId]) {
-      const role = players[currentPlayerId].role;
+    if (room.gameStarted && room.players[currentPlayerId]) {
+      const role = room.players[currentPlayerId].role;
       if (role) {
-        showRoleMessage(role === 'impostor' ? 'Jesteś oszustem!' : `Twoje słowo: ${room.currentWord}`);
-        if (room.starterId && players[room.starterId]) {
+        showRoleMessage(role==='impostor' ? 'Jesteś oszustem!' : `Twoje słowo: ${room.currentWord}`);
+        if (room.starterId && room.players[room.starterId]) {
           setTimeout(() => {
-            showMessage(`Zaczyna mówić: ${players[room.starterId].name}`, 5000);
+            showMessage(`Zaczyna mówić: ${room.players[room.starterId].name}`, 5000);
           }, 7500);
         }
       }
     } else {
       roleMessageBox.style.display = 'none';
     }
-
     if (room.resetMessage) {
       showMessage(room.resetMessage);
-      roomRef.child('resetMessage').set(null);
-    }
-  });
-
-  kickedRef.on('value', snapshot => {
-    if (snapshot.exists()) {
-      showMessage('Zostałeś wyrzucony z pokoju!', 3000);
-      setTimeout(() => {
-        kickedRef.remove();
-        resetState();
-      }, 3000);
+      db.ref(`rooms/${code}/resetMessage`).set(null);
     }
   });
 }
-
-function kickPlayer(playerId) {
-  if (!currentRoomCode) return;
-  const kickedRef = db.ref(`kicked/${playerId}`);
-  const playerRef = db.ref(`rooms/${currentRoomCode}/players/${playerId}`);
-
-  kickedRef.set({ kickedFrom: currentRoomCode })
-    .then(() => playerRef.remove())
-    .catch(err => console.error('Błąd wyrzucania gracza:', err));
-}
-</script> 
-</body> 
+</script>
+</body>
 </html>
