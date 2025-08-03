@@ -87,11 +87,14 @@
     }
     #copyRoomCode {
       background: linear-gradient(45deg, #8e44ad, #9b59b6);
-      width: 150px;
-      font-size: 1.6rem;
-      padding: 0.5rem;
-      display: inline-block;
-      margin-left: 1rem;
+      width: 3rem;
+      height: 3rem;
+      font-size: 2.2rem;
+      padding: 0;
+      display: block;
+      margin: 0.5rem auto;
+      line-height: 3rem;
+      text-align: center;
     }
     #copyRoomCode:hover {
       background: linear-gradient(45deg, #9b59b6, #8e44ad);
@@ -99,9 +102,10 @@
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     }
     #roomCodeContainer {
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      text-align: center;
+    }
+    #roomCodeDisplay {
+      font-weight: bold;
     }
     #playersList {
       list-style: none;
@@ -261,7 +265,7 @@
     <div id="gameScreen" style="display:none;">
       <div id="roomCodeContainer">
         <p>Kod pokoju: <span id="roomCodeDisplay"></span></p>
-        <button id="copyRoomCode">Kopiuj kod</button>
+        <button id="copyRoomCode" title="Kopiuj kod">📋</button>
       </div>
       <p id="impostorCountDisplay"></p>
       <p id="playerCountDisplay"></p>
@@ -324,7 +328,7 @@
     let words = [];
 
     // Kolory dla awatarów
-    const avatarColors = ['#8e44ad', '#e67e22', '#3498db', '#e74c3c', '#2ecc71', '#f1c40f', '#9b59b6', '#d35400'];
+    const avatarColors = ['#8e44ad', '#e67e22', '#3498db', '#eLMFAO', '#2ecc71', '#f1c40f', '#9b59b6', '#d35400'];
 
     // Załaduj słowa z words.json
     fetch('words.json')
