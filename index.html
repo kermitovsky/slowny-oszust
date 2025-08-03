@@ -6,7 +6,7 @@
   <title>Słowny Oszust</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@600;800&display=swap" rel="stylesheet" />
   <style>
     body {
       background: linear-gradient(135deg, #f39c12 0%, #e67e22 70%, #d35400 100%);
@@ -147,6 +147,9 @@
       font-family: 'Poppins', sans-serif;
       font-weight: 600;
       text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+    }
+    #messageBox strong {
+      font-weight: 800;
     }
     #roleMessageBox {
       font-size: 4rem;
@@ -311,13 +314,7 @@
     }
 
     function showMessage(text, duration = 3500) {
-      // Pogrubienie nicku w komunikacie "Zaczyna mówić:"
-      if (text.startsWith('Zaczyna mówić:')) {
-        const parts = text.split(': ');
-        if (parts.length === 2) {
-          text = `Zaczyna mówić: <strong>${parts[1]}</strong>`;
-        }
-      }
+      console.log('showMessage:', text); // Debugowanie
       messageBox.innerHTML = text;
       messageBox.style.display = 'block';
       setTimeout(() => {
@@ -556,7 +553,7 @@
             showRoleMessage(role === 'impostor' ? 'Jesteś oszustem!' : `Twoje słowo: ${room.currentWord}`);
             if (room.starterId && players[room.starterId]) {
               setTimeout(() => {
-                showMessage(`Zaczyna mówić: ${players[room.starterId].name}`, 5000);
+                showMessage(`Zaczyna mówić: <strong>${players[room.starterId].name}</strong>`, 5000);
               }, 7500);
             }
           }
