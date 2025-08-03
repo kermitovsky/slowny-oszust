@@ -158,6 +158,14 @@
       transform: scale(1.1);
       box-shadow: 0 6px 15px rgba(0,0,0,0.4);
     }
+    #impostorCountDisplay, #playerCountDisplay {
+      font-size: 1.8rem;
+      color: #f5f5f5;
+      text-align: center;
+      margin: 1rem 0;
+      font-family: 'Roboto', sans-serif;
+      font-weight: 700;
+    }
   </style>
 </head>
 <body>
@@ -173,6 +181,8 @@
 
     <div id="gameScreen" style="display:none;">
       <p>Kod pokoju: <span id="roomCodeDisplay"></span></p>
+      <p id="impostorCountDisplay"></p>
+      <p id="playerCountDisplay"></p>
       <ul id="playersList"></ul>
       <button id="startGame" style="display:none;">Start gry</button>
       <button id="endRound" style="display:none; margin-top: 1rem; background-color: #c0392b;">Zakończ rundę</button>
@@ -212,6 +222,8 @@
     const loginScreen = document.getElementById('loginScreen');
     const gameScreen = document.getElementById('gameScreen');
     const roomCodeDisplay = document.getElementById('roomCodeDisplay');
+    const impostorCountDisplay = document.getElementById('impostorCountDisplay');
+    const playerCountDisplay = document.getElementById('playerCountDisplay');
     const playersList = document.getElementById('playersList');
     const startGameBtn = document.getElementById('startGame');
     const endRoundBtn = document.getElementById('endRound');
@@ -293,6 +305,8 @@
       endRoundBtn.style.display = 'none';
       roleMessageBox.style.display = 'none';
       impostorSelectionBox.style.display = 'none';
+      impostorCountDisplay.textContent = '';
+      playerCountDisplay.textContent = '';
     }
 
     createRoomBtn.addEventListener('click', () => {
@@ -357,6 +371,12 @@
           return;
         }
 
+        const players = snapshot.val().players || {};
+        if (Object.keys(players).length >= 10) {
+          showMessage('Pokój jest pełny! Maksymalnie 10 graczy.');
+          return;
+        }
+
         roomRef.child('players').update({
           [currentPlayerId]: { name: currentPlayerName, isHost: false, role: null }
         }).then(() => {
@@ -380,7 +400,7 @@
       roomRef.once('value').then(snapshot => {
         const room = snapshot.val();
         const players = room.players || {};
-        const numImpostors = room.numImpostors || 1; // Domyślnie 1, jeśli nie ustawiono
+        const numImpostors = room.numImpostors || 1;
 
         if (!players || Object.keys(players).length < 3) {
           showMessage('Potrzeba co najmniej 3 graczy!');
@@ -392,10 +412,7 @@
           return;
         }
 
-        // Losuj słowo
         const word = words[Math.floor(Math.random() * words.length)];
-
-        // Losuj impostorów
         const playerIds = Object.keys(players);
         const impostorIndices = [];
         while (impostorIndices.length < numImpostors) {
@@ -406,13 +423,11 @@
         }
         const impostorIds = impostorIndices.map(index => playerIds[index]);
 
-        // Ustaw role
         const updates = {};
         for (const id of playerIds) {
           updates[`players/${id}/role`] = impostorIds.includes(id) ? 'impostor' : 'normal';
         }
 
-        // Losuj startera wg wag: impostor = 0.5, reszta = 1
         const weights = playerIds.map(id => (impostorIds.includes(id) ? 0.5 : 1));
         const totalWeight = weights.reduce((a, b) => a + b, 0);
         let r = Math.random() * totalWeight;
@@ -427,7 +442,6 @@
         const starterId = playerIds[starterIndex];
         updates['starterId'] = starterId;
 
-        // Zaktualizuj dane pokoju
         roomRef.update({
           gameStarted: true,
           currentWord: word,
@@ -475,6 +489,8 @@
       gameScreen.style.display = 'none';
       playersList.innerHTML = '';
       roomCodeDisplay.textContent = '';
+      impostorCountDisplay.textContent = '';
+      playerCountDisplay.textContent = '';
       statusMessage.textContent = '';
       impostorSelectionBox.style.display = 'none';
     }
@@ -493,6 +509,9 @@
 
         const players = room.players || {};
         updatePlayersList(players);
+
+        impostorCountDisplay.textContent = room.numImpostors ? `Liczba impostorów: ${room.numImpostors}` : '';
+        playerCountDisplay.textContent = players ? `Gracze: ${Object.keys(players).length}` : '';
 
         startGameBtn.style.display = isHost && !room.gameStarted ? 'block' : 'none';
         endRoundBtn.style.display = isHost && room.gameStarted ? 'block' : 'none';
