@@ -270,7 +270,7 @@
         gameStarted: false,
         currentWord: null,
         resetMessage: null,
-        currentSpeakerId: null
+        starterId: null
       }).then(() => {
         loginScreen.style.display = 'none';
         gameScreen.style.display = 'block';
@@ -310,248 +310,160 @@
       });
     });
 
-    function kickPlayer(playerId) {
-      if (!isHost || !currentRoomCode) return;
-      db.ref(`rooms/${currentRoomCode}/players/${playerId}`).remove();
-    }
-
     startGameBtn.addEventListener('click', () => {
       startGame();
     });
 
-    endRoundBtn.addEventListener('click', () => {
-      endRound();
-    });
-
-    leaveRoomBtn.addEventListener('click', () => {
-      leaveRoom();
-    });
-
-    function listenToRoom(roomCode) {
-      const roomRef = db.ref(`rooms/${roomCode}`);
-
-      roomRef.on('value', snapshot => {
-        const roomData = snapshot.val();
-        if (!roomData) {
-          // Pokój został usunięty
-          resetGameState();
-          return;
-        }
-
-        const players = roomData.players || {};
-        updatePlayersList(players);
-
-        if (roomData.gameStarted) {
-          startGameBtn.style.display = 'none';
-          endRoundBtn.style.display = 'block';
-        } else {
-          resetToLobby();
-        }
-
-        // Po otrzymaniu ról wyświetl je lokalnie
-        if (players[currentPlayerId] && players[currentPlayerId].role) {
-          const role = players[currentPlayerId].role;
-          const impostorWord = roomData.currentWord && roomData.currentWord.impostorWord;
-          const normalWord = roomData.currentWord && roomData.currentWord.normalWord;
-
-          let wordToShow = role === 'impostor' ? impostorWord : normalWord;
-          if (!wordToShow) wordToShow = '(brak słowa)';
-
-          showRoleMessage(`Jesteś: ${role.toUpperCase()}\nSłowo: ${wordToShow}`);
-
-          // Po wyświetleniu roli pokaż kto zaczyna mówić
-          if (roomData.currentSpeakerId) {
-            const speaker = players[roomData.currentSpeakerId];
-            if (speaker) {
-              showMessage(`Zaczyna mówić: ${speaker.name}`, 5000);
-            }
-          }
-        } else {
-          roleMessageBox.style.display = 'none';
-        }
-      });
-    }
-
-    function resetGameState() {
-      currentRoomCode = null;
-      currentPlayerId = null;
-      currentPlayerName = null;
-      isHost = false;
-      loginScreen.style.display = 'block';
-      gameScreen.style.display = 'none';
-      statusMessage.textContent = 'Pokój został zamknięty.';
-    }
-
-    // Funkcja losująca startera z wagami:
-    // impostor ma wagę 0.5, pozostali 1
-    function pickStarter(players) {
-      const playerEntries = Object.entries(players);
-      if (playerEntries.length === 0) return null;
-
-      // Przypisz wagi
-      const weights = playerEntries.map(([id, player]) => {
-        return player.role === 'impostor' ? 0.5 : 1;
-      });
-
-      // Oblicz sumę wag
-      const sumWeights = weights.reduce((a,b) => a+b, 0);
-
-      // Wylosuj wartość losową od 0 do sumWeights
-      const rand = Math.random() * sumWeights;
-
-      let acc = 0;
-      for (let i = 0; i < playerEntries.length; i++) {
-        acc += weights[i];
-        if (rand < acc) {
-          return playerEntries[i][0]; // zwróć ID gracza
-        }
-      }
-
-      return playerEntries[playerEntries.length-1][0]; // na wszelki wypadek ostatni
-    }
-
-    // Funkcja startująca grę - losowanie ról, słowa, startera
     function startGame() {
       if (!currentRoomCode) return;
 
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
 
-      roomRef.once('value').then(snapshot => {
-        const roomData = snapshot.val();
-        if (!roomData) return;
-
-        const players = roomData.players || {};
-        const playerIds = Object.keys(players);
-
-        if (playerIds.length < 3) {
-          showMessage('Potrzeba co najmniej 3 graczy aby zacząć grę!');
+      roomRef.child('players').once('value').then(snapshot => {
+        const players = snapshot.val();
+        if (!players || Object.keys(players).length < 3) {
+          showMessage('Potrzeba co najmniej 3 graczy!');
           return;
         }
 
-        // Losuj impostora (jeden)
+        // Losuj słowo
+        const word = words[Math.floor(Math.random() * words.length)];
+
+        // Losuj oszusta
+        const playerIds = Object.keys(players);
         const impostorIndex = Math.floor(Math.random() * playerIds.length);
         const impostorId = playerIds[impostorIndex];
 
-        // Losuj słowo - para słów: normalne i impostora
-        if (words.length === 0) {
-          showMessage('Brak słów do gry!');
-          return;
-        }
-        const randomWordPair = words[Math.floor(Math.random() * words.length)];
-
-        // Przygotuj aktualizacje ról i słowa
+        // Ustaw role
         const updates = {};
-        playerIds.forEach(id => {
-          updates[`players/${id}/role`] = (id === impostorId) ? 'impostor' : 'normal';
-        });
-
-        updates['gameStarted'] = true;
-        updates['currentWord'] = {
-          normalWord: randomWordPair.normal,
-          impostorWord: randomWordPair.impostor
-        };
-
-        // Losuj startera zgodnie z wagami
-        const updatedPlayers = {};
-        playerIds.forEach(id => {
-          updatedPlayers[id] = {
-            role: (id === impostorId) ? 'impostor' : 'normal'
-          };
-        });
-
-        const starterId = pickStarter(updatedPlayers);
-        updates['currentSpeakerId'] = starterId;
-
-        roomRef.update(updates).then(() => {
-          showMessage('Gra rozpoczęta!');
-        });
-      });
-    }
-
-    function endRound() {
-      if (!currentRoomCode) return;
-      const roomRef = db.ref(`rooms/${currentRoomCode}`);
-      // Resetuj rundę: wyzeruj role, słowa, startera
-      roomRef.update({
-        gameStarted: false,
-        currentWord: null,
-        currentSpeakerId: null,
-        players: null // resetujemy role (zostawiamy tylko imiona i isHost)
-      }).then(() => {
-        // Musimy przywrócić graczy bez ról (ale z nazwami i isHost)
-        // Niestety powyższy update usunął całą listę players, więc trzeba dodać ich z powrotem:
-        // Można to zrobić inaczej - ale uprościmy:
-        // Zapytaj po snapshot jeszcze raz i dodaj graczy bez ról:
-        roomRef.once('value').then(snap => {
-          if (!snap.exists()) return;
-          const data = snap.val();
-          // Nie powinniśmy kasować graczy w update, więc poprawię poniżej.
-
-          // Poprawka: lepiej nie usuwać players, a usuwać tylko role w każdym graczu
-          // więc zamiast update z players: null, wykonamy update poszczególnych ról do null:
-        });
-      });
-    }
-
-    // Poprawiona funkcja zakończenia rundy — usuń role u graczy i resetuj stan gry
-    function endRound() {
-      if (!currentRoomCode) return;
-      const roomRef = db.ref(`rooms/${currentRoomCode}`);
-
-      roomRef.once('value').then(snapshot => {
-        const roomData = snapshot.val();
-        if (!roomData) return;
-
-        const players = roomData.players || {};
-        const updates = {};
-        Object.entries(players).forEach(([id, player]) => {
-          updates[`players/${id}/role`] = null;
-        });
-
-        updates['gameStarted'] = false;
-        updates['currentWord'] = null;
-        updates['currentSpeakerId'] = null;
-
-        roomRef.update(updates).then(() => {
-          showMessage('Runda zakończona. Możesz zacząć nową grę.');
-          resetToLobby();
-        });
-      });
-    }
-
-    function leaveRoom() {
-      if (!currentRoomCode || !currentPlayerId) return;
-
-      const roomRef = db.ref(`rooms/${currentRoomCode}`);
-      roomRef.child(`players/${currentPlayerId}`).remove().then(() => {
-        // Jeśli jesteś hostem i odchodzisz, wybierz nowego hosta (pierwszego z listy)
-        if (isHost) {
-          roomRef.once('value').then(snapshot => {
-            const roomData = snapshot.val();
-            if (!roomData) {
-              // pokój nie istnieje
-              resetGameState();
-              return;
-            }
-
-            const players = roomData.players || {};
-            const playerIds = Object.keys(players);
-            if (playerIds.length === 0) {
-              // Usuń pokój jeśli nie ma graczy
-              roomRef.remove();
-              resetGameState();
-              return;
-            }
-
-            // Nadaj pierwszemu graczowi rolę hosta
-            const newHostId = playerIds[0];
-            roomRef.child(`players/${newHostId}`).update({ isHost: true });
-          });
+        for (const id of playerIds) {
+          updates[`players/${id}/role`] = id === impostorId ? 'impostor' : 'normal';
         }
-        resetGameState();
-      });
+
+        // Losuj startera wg wag: impostor = 0.5, reszta = 1
+        const weights = playerIds.map(id => (id === impostorId ? 0.5 : 1));
+        const totalWeight = weights.reduce((a, b) => a + b, 0);
+        let r = Math.random() * totalWeight;
+        let starterIndex = 0;
+        for (let i = 0; i < weights.length; i++) {
+          r -= weights[i];
+          if (r <= 0) {
+            starterIndex = i;
+            break;
+          }
+        }
+        const starterId = playerIds[starterIndex];
+        updates['starterId'] = starterId;
+
+        // Zaktualizuj dane pokoju
+        roomRef.update({
+      gameStarted: true,
+      currentWord: word,
+      resetMessage: null,
+      ...updates
+    });
+  });
+}
+
+endRoundBtn.addEventListener('click', () => {
+  if (!currentRoomCode) return;
+  const roomRef = db.ref(`rooms/${currentRoomCode}`);
+
+  roomRef.update({
+    gameStarted: false,
+    currentWord: null,
+    resetMessage: 'Runda zakończona',
+    starterId: null
+  });
+});
+
+leaveRoomBtn.addEventListener('click', () => {
+  leaveRoom();
+});
+
+function leaveRoom() {
+  if (!currentRoomCode || !currentPlayerId) return;
+
+  const playerRef = db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`);
+  playerRef.remove().then(() => {
+    if (isHost) {
+      db.ref(`rooms/${currentRoomCode}`).remove();
+    }
+    resetState();
+    showMessage('Opuściłeś pokój');
+  });
+}
+
+function resetState() {
+  currentRoomCode = null;
+  currentPlayerId = null;
+  currentPlayerName = null;
+  isHost = false;
+  loginScreen.style.display = 'block';
+  gameScreen.style.display = 'none';
+  playersList.innerHTML = '';
+  roomCodeDisplay.textContent = '';
+  statusMessage.textContent = '';
+}
+
+function listenToRoom(roomCode) {
+  const roomRef = db.ref(`rooms/${roomCode}`);
+  const kickedRef = db.ref(`kicked/${currentPlayerId}`);
+
+  roomRef.on('value', snapshot => {
+    const room = snapshot.val();
+    if (!room) {
+      resetState();
+      showMessage('Pokój został zamknięty');
+      return;
     }
 
-  </script>
-</body>
+    const players = room.players || {};
+    updatePlayersList(players);
+
+    startGameBtn.style.display = isHost && !room.gameStarted ? 'block' : 'none';
+    endRoundBtn.style.display = isHost && room.gameStarted ? 'block' : 'none';
+
+    if (room.gameStarted && players[currentPlayerId]) {
+      const role = players[currentPlayerId].role;
+      if (role) {
+        showRoleMessage(role === 'impostor' ? 'Jesteś oszustem!' : `Twoje słowo: ${room.currentWord}`);
+        if (room.starterId && players[room.starterId]) {
+          setTimeout(() => {
+            showMessage(`Zaczyna mówić: ${players[room.starterId].name}`, 5000);
+          }, 7500);
+        }
+      }
+    } else {
+      roleMessageBox.style.display = 'none';
+    }
+
+    if (room.resetMessage) {
+      showMessage(room.resetMessage);
+      roomRef.child('resetMessage').set(null);
+    }
+  });
+
+  kickedRef.on('value', snapshot => {
+    if (snapshot.exists()) {
+      showMessage('Zostałeś wyrzucony z pokoju!', 3000);
+      setTimeout(() => {
+        kickedRef.remove();
+        resetState();
+      }, 3000);
+    }
+  });
+}
+
+function kickPlayer(playerId) {
+  if (!currentRoomCode) return;
+  const kickedRef = db.ref(`kicked/${playerId}`);
+  const playerRef = db.ref(`rooms/${currentRoomCode}/players/${playerId}`);
+
+  kickedRef.set({ kickedFrom: currentRoomCode })
+    .then(() => playerRef.remove())
+    .catch(err => console.error('Błąd wyrzucania gracza:', err));
+}
+</script> 
+</body> 
 </html>
