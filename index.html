@@ -115,6 +115,7 @@
       justify-content: center;
       text-align: center;
       margin: 1rem 0;
+      flex-wrap: nowrap; /* Zapobiega zawijaniu elementów */
     }
     #roomCodeDisplay {
       font-weight: bold;
@@ -384,13 +385,17 @@
 
     // Załaduj słowa z words.json
     fetch('words.json')
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) throw new Error('Błąd ładowania words.json: ' + response.status);
+        return response.json();
+      })
       .then(data => {
         words = data;
         console.log('Załadowano słowa:', words.length);
       })
       .catch(error => {
         console.error('Błąd ładowania words.json:', error);
+        showMessage('Błąd ładowania słów gry!');
       });
 
     function generateRoomCode() {
@@ -465,25 +470,31 @@
     }
 
     createRoomBtn.addEventListener('click', () => {
+      console.log('Kliknięto Stwórz pokój');
       const name = playerNameInput.value.trim();
       if (!name) {
         showMessage('Wpisz nick!');
+        console.log('Brak nicku');
         return;
       }
       currentPlayerName = name;
       isHost = true;
+      console.log('Ustawiono hosta, imię:', currentPlayerName);
       impostorSelectionBox.style.display = 'block';
     });
 
     selectOneImpostor.addEventListener('click', () => {
+      console.log('Wybrano 1 impostora');
       createRoom(1);
     });
 
     selectTwoImpostors.addEventListener('click', () => {
+      console.log('Wybrano 2 impostorów');
       createRoom(2);
     });
 
     function createRoom(numImpostors) {
+      console.log('Tworzenie pokoju z', numImpostors, 'impostorami');
       currentRoomCode = generateRoomCode();
       currentPlayerId = db.ref().push().key;
 
@@ -498,56 +509,74 @@
         starterId: null,
         numImpostors: numImpostors
       }).then(() => {
+        console.log('Pokój utworzony:', currentRoomCode);
         loginScreen.style.display = 'none';
         gameScreen.style.display = 'block';
         roomCodeDisplay.textContent = currentRoomCode;
         impostorSelectionBox.style.display = 'none';
         listenToRoom(currentRoomCode);
+      }).catch(error => {
+        console.error('Błąd tworzenia pokoju:', error);
+        showMessage('Błąd tworzenia pokoju!');
       });
     }
 
     joinRoomBtn.addEventListener('click', () => {
+      console.log('Kliknięto Dołącz do pokoju');
       const name = playerNameInput.value.trim();
       const roomCode = roomCodeInput.value.trim().toUpperCase();
 
       if (!name || !roomCode) {
         showMessage('Wpisz nick i kod pokoju!');
+        console.log('Brak nicku lub kodu pokoju');
         return;
       }
 
       currentPlayerName = name;
       currentRoomCode = roomCode;
       currentPlayerId = db.ref().push().key;
+      console.log('Dołączanie do pokoju:', roomCode, 'Nick:', name);
 
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
       roomRef.once('value').then(snapshot => {
         if (!snapshot.exists()) {
           showMessage('Pokój nie istnieje!');
+          console.log('Pokój nie istnieje:', roomCode);
           return;
         }
 
         const players = snapshot.val().players || {};
         if (Object.keys(players).length >= 10) {
           showMessage('Pokój jest pełny! Maksymalnie 10 graczy.');
+          console.log('Pokój pełny:', roomCode);
           return;
         }
 
         roomRef.child('players').update({
           [currentPlayerId]: { name: currentPlayerName, isHost: false, role: null }
         }).then(() => {
+          console.log('Dołączono do pokoju:', roomCode);
           loginScreen.style.display = 'none';
           gameScreen.style.display = 'block';
           roomCodeDisplay.textContent = currentRoomCode;
           listenToRoom(currentRoomCode);
+        }).catch(error => {
+          console.error('Błąd dołączania do pokoju:', error);
+          showMessage('Błąd dołączania do pokoju!');
         });
+      }).catch(error => {
+        console.error('Błąd sprawdzania pokoju:', error);
+        showMessage('Błąd sprawdzania pokoju!');
       });
     });
 
     copyRoomCodeBtn.addEventListener('click', () => {
+      console.log('Kliknięto Kopiuj kod');
       if (currentRoomCode) {
         navigator.clipboard.writeText(currentRoomCode)
           .then(() => {
             showMessage('Kod skopiowany!', 1500);
+            console.log('Kod skopiowany:', currentRoomCode);
           })
           .catch(err => {
             console.error('Błąd kopiowania kodu:', err);
@@ -557,11 +586,15 @@
     });
 
     startGameBtn.addEventListener('click', () => {
+      console.log('Kliknięto Start gry');
       startGame();
     });
 
     function startGame() {
-      if (!currentRoomCode) return;
+      if (!currentRoomCode) {
+        console.log('Brak kodu pokoju');
+        return;
+      }
 
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
 
@@ -572,11 +605,13 @@
 
         if (!players || Object.keys(players).length < 3) {
           showMessage('Potrzeba co najmniej 3 graczy!');
+          console.log('Za mało graczy:', Object.keys(players).length);
           return;
         }
 
         if (numImpostors === 2 && Object.keys(players).length < 4) {
           showMessage('Potrzeba co najmniej 4 graczy dla 2 impostorów!');
+          console.log('Za mało graczy dla 2 impostorów:', Object.keys(players).length);
           return;
         }
 
@@ -615,11 +650,24 @@
           currentWord: word,
           resetMessage: null,
           ...updates
+        }).then(() => {
+          console.log('Gra rozpoczęta, słowo:', word, 'Startuje:', starterId);
+        }).catch(error => {
+          console.error('Błąd rozpoczynania gry:', error);
+          showMessage('Błąd rozpoczynania gry!');
         });
-    });
+      }).catch(error => {
+        console.error('Błąd pobierania danych pokoju:', error);
+        showMessage('Błąd pobierania danych pokoju!');
+      });
+    }
 
     endRoundBtn.addEventListener('click', () => {
-      if (!currentRoomCode) return;
+      console.log('Kliknięto Zakończ rundę');
+      if (!currentRoomCode) {
+        console.log('Brak kodu pokoju');
+        return;
+      }
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
 
       roomRef.update({
@@ -627,27 +675,43 @@
         currentWord: null,
         resetMessage: 'Runda zakończona',
         starterId: null
+      }).then(() => {
+        console.log('Runda zakończona');
+      }).catch(error => {
+        console.error('Błąd kończenia rundy:', error);
+        showMessage('Błąd kończenia rundy!');
       });
     });
 
     leaveRoomBtn.addEventListener('click', () => {
+      console.log('Kliknięto Opuść pokój');
       leaveRoom();
     });
 
     function leaveRoom() {
-      if (!currentRoomCode || !currentPlayerId) return;
+      if (!currentRoomCode || !currentPlayerId) {
+        console.log('Brak kodu pokoju lub ID gracza');
+        return;
+      }
 
       const playerRef = db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`);
       playerRef.remove().then(() => {
         if (isHost) {
-          db.ref(`rooms/${currentRoomCode}`).remove();
+          db.ref(`rooms/${currentRoomCode}`).remove().then(() => {
+            console.log('Pokój usunięty przez hosta');
+          });
         }
         resetState();
         showMessage('Opuściłeś pokój');
+        console.log('Gracz opuścił pokój');
+      }).catch(error => {
+        console.error('Błąd opuszczania pokoju:', error);
+        showMessage('Błąd opuszczania pokoju!');
       });
     }
 
     function resetState() {
+      console.log('Resetowanie stanu gry');
       currentRoomCode = null;
       currentPlayerId = null;
       currentPlayerName = null;
@@ -663,6 +727,7 @@
     }
 
     function listenToRoom(roomCode) {
+      console.log('Nasłuchiwanie pokoju:', roomCode);
       const roomRef = db.ref(`rooms/${roomCode}`);
       const kickedRef = db.ref(`kicked/${currentPlayerId}`);
 
@@ -671,11 +736,12 @@
         if (!room) {
           resetState();
           showMessage('Pokój został zamknięty');
+          console.log('Pokój zamknięty:', roomCode);
           return;
         }
 
         const players = room.players || {};
-        console.log('Dane pokoju:', room);
+        console.log('Aktualizacja danych pokoju:', room);
         updatePlayersList(players);
 
         impostorCountDisplay.textContent = room.numImpostors ? `Liczba impostorów: ${room.numImpostors}` : '';
@@ -707,6 +773,7 @@
       kickedRef.on('value', snapshot => {
         if (snapshot.exists()) {
           showMessage('Zostałeś wyrzucony z pokoju!', 3000);
+          console.log('Gracz wyrzucony:', currentPlayerId);
           setTimeout(() => {
             kickedRef.remove();
             resetState();
@@ -716,13 +783,23 @@
     }
 
     function kickPlayer(playerId) {
-      if (!currentRoomCode) return;
+      console.log('Wyrzucanie gracza:', playerId);
+      if (!currentRoomCode) {
+        console.log('Brak kodu pokoju');
+        return;
+      }
       const kickedRef = db.ref(`kicked/${playerId}`);
       const playerRef = db.ref(`rooms/${currentRoomCode}/players/${playerId}`);
 
       kickedRef.set({ kickedFrom: currentRoomCode })
         .then(() => playerRef.remove())
-        .catch(err => console.error('Błąd wyrzucania gracza:', err));
+        .then(() => {
+          console.log('Gracz wyrzucony:', playerId);
+        })
+        .catch(err => {
+          console.error('Błąd wyrzucania gracza:', err);
+          showMessage('Błąd wyrzucania gracza!');
+        });
     }
   </script> 
 </body> 
