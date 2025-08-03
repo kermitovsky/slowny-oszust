@@ -91,10 +91,10 @@
       height: 3rem;
       font-size: 2.2rem;
       padding: 0;
-      display: block;
-      margin: 0.5rem auto;
+      margin: 0 0.5rem;
       line-height: 3rem;
       text-align: center;
+      display: inline-block;
     }
     #copyRoomCode:hover {
       background: linear-gradient(45deg, #9b59b6, #8e44ad);
@@ -102,6 +102,9 @@
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     }
     #roomCodeContainer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
       text-align: center;
     }
     #roomCodeDisplay {
@@ -165,8 +168,7 @@
     }
     #playersList li .kickBtn:hover {
       background-color: #c0392b;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-      transform: translateY(-50%) scale(1.1);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
     }
     .host {
       color: #3498db !important;
@@ -176,7 +178,42 @@
       color: black !important;
       font-weight: bold;
     }
-    #messageBox, #roleMessageBox, #impostorSelectionBox {
+    #messageBox {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      color: #333;
+      padding: 1.5rem;
+      border-radius: 1rem;
+      text-align: center;
+      z-index: 1000;
+      display: none;
+      max-width: 90vw;
+      word-wrap: break-word;
+      white-space: pre-line;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      font-size: 2rem;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+    }
+    #messageBox:not(.copy-message) {
+      font-size: 3.2rem;
+      background: linear-gradient(135deg, #8e44ad, #d35400);
+      color: white;
+      padding: 3rem;
+      border-radius: 2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+    }
+    #messageBox strong {
+      font-weight: 800;
+    }
+    #roleMessageBox {
       position: fixed;
       top: 50%;
       left: 50%;
@@ -195,24 +232,30 @@
       border: 2px solid rgba(255, 255, 255, 0.2);
       backdrop-filter: blur(5px);
       -webkit-backdrop-filter: blur(5px);
-    }
-    #messageBox {
-      font-size: 3.2rem;
-      font-family: 'Poppins', sans-serif;
-      font-weight: 600;
-      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
-    }
-    #messageBox strong {
-      font-weight: 800;
-    }
-    #roleMessageBox {
       font-size: 4rem;
       font-weight: bold;
       font-family: 'Segoe UI Black', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     #impostorSelectionBox {
-      font-size: 2.5rem;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(135deg, #8e44ad, #d35400);
+      color: white;
       padding: 2.5rem 4rem;
+      border-radius: 2rem;
+      text-align: center;
+      z-index: 1000;
+      display: none;
+      max-width: 90vw;
+      word-wrap: break-word;
+      white-space: pre-line;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      font-size: 2.5rem;
     }
     #impostorSelectionBox p {
       margin: 0 0 2rem 0;
@@ -328,7 +371,7 @@
     let words = [];
 
     // Kolory dla awatarów
-    const avatarColors = ['#8e44ad', '#e67e22', '#3498db', '#eLMFAO', '#2ecc71', '#f1c40f', '#9b59b6', '#d35400'];
+    const avatarColors = ['#8e44ad', '#e67e22', '#3498db', '#e74c3c', '#2ecc71', '#f1c40f', '#9b59b6', '#d35400'];
 
     // Załaduj słowa z words.json
     fetch('words.json')
@@ -383,8 +426,15 @@
       console.log('showMessage:', text);
       messageBox.innerHTML = text;
       messageBox.style.display = 'block';
+      if (text === 'Kod skopiowany!' || text === 'Nie udało się skopiować kodu') {
+        messageBox.classList.add('copy-message');
+        duration = 1500;
+      } else {
+        messageBox.classList.remove('copy-message');
+      }
       setTimeout(() => {
         messageBox.style.display = 'none';
+        messageBox.classList.remove('copy-message');
       }, duration);
     }
 
@@ -488,11 +538,11 @@
       if (currentRoomCode) {
         navigator.clipboard.writeText(currentRoomCode)
           .then(() => {
-            showMessage('Kod skopiowany!', 2000);
+            showMessage('Kod skopiowany!', 1500);
           })
           .catch(err => {
             console.error('Błąd kopiowania kodu:', err);
-            showMessage('Nie udało się skopiować kodu', 2000);
+            showMessage('Nie udało się skopiować kodu', 1500);
           });
       }
     });
