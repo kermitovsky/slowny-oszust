@@ -9,7 +9,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@600;800&display=swap" rel="stylesheet" />
   <style>
     body {
-      background: linear-gradient(135deg, #f39c12 0%, #e67e22 70%, #d35400 100%);
+      background: linear-gradient(135deg, #f39c12 0%, #e67e22 70%, #d35400 100%), 
+                  radial-gradient(circle, rgba(255, 255, 255, 0.1) 2px, transparent 2px);
+      background-size: auto, 20px 20px;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       color: #fff;
       font-size: 2rem;
@@ -31,6 +33,11 @@
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
     }
     #loginScreen, #gameScreen {
       animation: fadeIn 0.5s ease-in-out;
@@ -63,10 +70,11 @@
       background: linear-gradient(45deg, #8e44ad, #9b59b6);
       color: white;
       cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.3s ease;
+      transition: box-shadow 0.3s ease;
     }
     button:hover {
-      transform: scale(1.05);
+      background: linear-gradient(45deg, #9b59b6, #8e44ad);
+      animation: pulse 1s infinite;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     }
     #leaveRoom {
@@ -74,8 +82,26 @@
     }
     #leaveRoom:hover {
       background: linear-gradient(45deg, #95a5a6, #7f8c8d);
-      transform: scale(1.05);
+      animation: pulse 1s infinite;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+    #copyRoomCode {
+      background: linear-gradient(45deg, #8e44ad, #9b59b6);
+      width: 150px;
+      font-size: 1.6rem;
+      padding: 0.5rem;
+      display: inline-block;
+      margin-left: 1rem;
+    }
+    #copyRoomCode:hover {
+      background: linear-gradient(45deg, #9b59b6, #8e44ad);
+      animation: pulse 1s infinite;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+    #roomCodeContainer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     #playersList {
       list-style: none;
@@ -83,11 +109,35 @@
     }
     #playersList li {
       position: relative;
-      padding: 1rem 3.5rem 1rem 1rem;
+      padding: 1rem 3.5rem 1rem 4.5rem;
       margin: 0.5rem 0;
       border-radius: 1rem;
       background-color: rgba(255, 255, 255, 0.8);
       color: #333;
+      display: flex;
+      align-items: center;
+    }
+    #playersList li .avatar {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.4rem;
+      font-weight: bold;
+      margin-right: 1rem;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      position: absolute;
+      left: 1rem;
+    }
+    #playersList li.host .avatar::after {
+      content: '👑';
+      position: absolute;
+      top: -0.5rem;
+      right: -0.5rem;
+      font-size: 1rem;
     }
     #playersList li .kickBtn {
       position: absolute;
@@ -180,11 +230,10 @@
       font-size: 2.5rem;
       font-weight: bold;
       border-radius: 1rem;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
     #impostorSelectionBox button:hover {
       background: linear-gradient(45deg, #8e44ad, #9b59b6);
-      transform: scale(1.1);
+      animation: pulse 1s infinite;
       box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
     }
     #impostorCountDisplay, #playerCountDisplay {
@@ -210,7 +259,10 @@
     </div>
 
     <div id="gameScreen" style="display:none;">
-      <p>Kod pokoju: <span id="roomCodeDisplay"></span></p>
+      <div id="roomCodeContainer">
+        <p>Kod pokoju: <span id="roomCodeDisplay"></span></p>
+        <button id="copyRoomCode">Kopiuj kod</button>
+      </div>
       <p id="impostorCountDisplay"></p>
       <p id="playerCountDisplay"></p>
       <ul id="playersList"></ul>
@@ -252,6 +304,7 @@
     const loginScreen = document.getElementById('loginScreen');
     const gameScreen = document.getElementById('gameScreen');
     const roomCodeDisplay = document.getElementById('roomCodeDisplay');
+    const copyRoomCodeBtn = document.getElementById('copyRoomCode');
     const impostorCountDisplay = document.getElementById('impostorCountDisplay');
     const playerCountDisplay = document.getElementById('playerCountDisplay');
     const playersList = document.getElementById('playersList');
@@ -269,6 +322,9 @@
     let currentPlayerName = null;
     let isHost = false;
     let words = [];
+
+    // Kolory dla awatarów
+    const avatarColors = ['#8e44ad', '#e67e22', '#3498db', '#e74c3c', '#2ecc71', '#f1c40f', '#9b59b6', '#d35400'];
 
     // Załaduj słowa z words.json
     fetch('words.json')
@@ -289,10 +345,16 @@
       playersList.innerHTML = '';
       for (const [id, player] of Object.entries(players)) {
         const li = document.createElement('li');
-        li.textContent = player.name;
+        const avatar = document.createElement('span');
+        avatar.classList.add('avatar');
+        avatar.textContent = player.name.charAt(0).toUpperCase();
+        const colorIndex = Math.floor(Math.random() * avatarColors.length);
+        avatar.style.backgroundColor = avatarColors[colorIndex];
+        li.appendChild(avatar);
+        li.appendChild(document.createTextNode(` ${player.name}`));
         if (player.isHost) {
           li.classList.add('host');
-          li.textContent += ' (host)';
+          li.appendChild(document.createTextNode(' (host)'));
         }
         if (id === currentPlayerId) {
           li.classList.add('self');
@@ -314,7 +376,7 @@
     }
 
     function showMessage(text, duration = 3500) {
-      console.log('showMessage:', text); // Debugowanie
+      console.log('showMessage:', text);
       messageBox.innerHTML = text;
       messageBox.style.display = 'block';
       setTimeout(() => {
@@ -416,6 +478,19 @@
           listenToRoom(currentRoomCode);
         });
       });
+    });
+
+    copyRoomCodeBtn.addEventListener('click', () => {
+      if (currentRoomCode) {
+        navigator.clipboard.writeText(currentRoomCode)
+          .then(() => {
+            showMessage('Kod skopiowany!', 2000);
+          })
+          .catch(err => {
+            console.error('Błąd kopiowania kodu:', err);
+            showMessage('Nie udało się skopiować kodu', 2000);
+          });
+      }
     });
 
     startGameBtn.addEventListener('click', () => {
