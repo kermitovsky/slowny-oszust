@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="pl">
 <head>
   <meta charset="UTF-8" />
@@ -115,7 +115,6 @@
     const statusMessage = document.getElementById('statusMessage');
     const loginScreen = document.getElementById('loginScreen');
     const gameScreen = document.getElementById('gameScreen');
-    const roomCodeContainer = document.getElementById('roomCodeContainer');
     const roomCodeDisplay = document.getElementById('roomCodeDisplay');
     const copyRoomCodeBtn = document.getElementById('copyRoomCode');
     const impostorCountDisplay = document.getElementById('impostorCountDisplay');
@@ -184,63 +183,6 @@
       "rzeka", "góra", "film", "serial", "człowiek", "muzyka"
     ];
 
-    // Funkcja pomocnicza do obsługi animacji przejścia
-    function animateTransition(hideElement, showElement, callback) {
-      console.log('Uruchamiam animateTransition:', { hideElement: hideElement?.id, showElement: showElement?.id });
-      if (hideElement) {
-        hideElement.classList.add('slide-out');
-        setTimeout(() => {
-          hideElement.style.display = 'none';
-          hideElement.classList.remove('slide-out');
-          if (showElement) {
-            showElement.style.display = 'block';
-            // Resetowanie układu dla modali
-            if (showElement.id === 'categorySelectionBox' || showElement.id === 'impostorSelectionBox' || showElement.id === 'rulesBox') {
-              showElement.style.transform = 'translate(-50%, -50%)';
-            }
-            // Ustawienie układu dla #gameScreen
-            if (showElement.id === 'gameScreen') {
-              showElement.style.display = 'flex';
-              showElement.style.flexDirection = 'column';
-              showElement.style.alignItems = 'center';
-              roomCodeContainer.style.display = 'flex';
-              roomCodeContainer.style.alignItems = 'center';
-              roomCodeContainer.style.justifyContent = 'center';
-              countsContainer.style.display = 'flex';
-              countsContainer.style.justifyContent = 'center';
-              countsContainer.style.alignItems = 'center';
-              countsContainer.style.gap = '3rem';
-              playersList.style.display = 'block';
-              startGameBtn.style.display = isHost && !db.ref(`rooms/${currentRoomCode}`).once('value').then(s => !s.val().gameStarted) ? 'block' : 'none';
-              endRoundBtn.style.display = isHost && db.ref(`rooms/${currentRoomCode}`).once('value').then(s => s.val().gameStarted) ? 'block' : 'none';
-            }
-          }
-          if (callback) callback();
-        }, 500); // Czas animacji slideOutToTop
-      } else if (showElement) {
-        showElement.style.display = 'block';
-        if (showElement.id === 'categorySelectionBox' || showElement.id === 'impostorSelectionBox' || showElement.id === 'rulesBox') {
-          showElement.style.transform = 'translate(-50%, -50%)';
-        }
-        if (showElement.id === 'gameScreen') {
-          showElement.style.display = 'flex';
-          showElement.style.flexDirection = 'column';
-          showElement.style.alignItems = 'center';
-          roomCodeContainer.style.display = 'flex';
-          roomCodeContainer.style.alignItems = 'center';
-          roomCodeContainer.style.justifyContent = 'center';
-          countsContainer.style.display = 'flex';
-          countsContainer.style.justifyContent = 'center';
-          countsContainer.style.alignItems = 'center';
-          countsContainer.style.gap = '3rem';
-          playersList.style.display = 'block';
-          startGameBtn.style.display = isHost && !db.ref(`rooms/${currentRoomCode}`).once('value').then(s => !s.val().gameStarted) ? 'block' : 'none';
-          endRoundBtn.style.display = isHost && db.ref(`rooms/${currentRoomCode}`).once('value').then(s => s.val().gameStarted) ? 'block' : 'none';
-        }
-        if (callback) callback();
-      }
-    }
-
     // Inicjalizacja wyboru emotek
     function initializeEmojiSelection() {
       console.log('Inicjalizacja wyboru emotek');
@@ -271,10 +213,9 @@
     // Funkcja zamykania zasad
     function closeRules() {
       console.log('Kliknięto Zamknij zasady');
-      animateTransition(rulesBox, null, () => {
-        rulesBtn.classList.remove('hidden');
-        themeToggle.classList.remove('hidden');
-      });
+      rulesBox.style.display = 'none';
+      rulesBtn.classList.remove('hidden');
+      themeToggle.classList.remove('hidden');
     }
 
     // Funkcja przełączania trybu
@@ -368,23 +309,23 @@
         return;
       }
       console.log('Potwierdzono kategorie:', selectedCategories);
-      animateTransition(categorySelectionBox, impostorSelectionBox, () => {
-        document.getElementById('loadingMessage').style.display = 'block';
-        confirmImpostors.disabled = true;
-        loadWords().then(() => {
-          document.getElementById('loadingMessage').style.display = 'none';
-          confirmImpostors.disabled = false;
-          impostorCount = 1;
-          impostorCountDisplaySelector.textContent = impostorCount;
-          updateImpostorButtons();
-          updateRecommendedPlayers();
-          console.log('Przełączono na wybór impostorów');
-        }).catch(error => {
-          document.getElementById('loadingMessage').style.display = 'none';
-          confirmImpostors.disabled = false;
-          showMessage('❌ Błąd ładowania kategorii! Używam domyślnych słów.');
-          console.error('Błąd w confirmCategories:', error);
-        });
+      categorySelectionBox.style.display = 'none';
+      impostorSelectionBox.style.display = 'block';
+      document.getElementById('loadingMessage').style.display = 'block';
+      confirmImpostors.disabled = true;
+      loadWords().then(() => {
+        document.getElementById('loadingMessage').style.display = 'none';
+        confirmImpostors.disabled = false;
+        impostorCount = 1;
+        impostorCountDisplaySelector.textContent = impostorCount;
+        updateImpostorButtons();
+        updateRecommendedPlayers();
+        console.log('Przełączono na wybór impostorów');
+      }).catch(error => {
+        document.getElementById('loadingMessage').style.display = 'none';
+        confirmImpostors.disabled = false;
+        showMessage('❌ Błąd ładowania kategorii! Używam domyślnych słów.');
+        console.error('Błąd w confirmCategories:', error);
       });
     });
 
@@ -621,12 +562,11 @@
       currentPlayerName = name;
       isHost = true;
       console.log('Ustawiono hosta, imię:', currentPlayerName);
-      animateTransition(loginScreen, categorySelectionBox, () => {
-        console.log('Wyświetlono categorySelectionBox');
-        initializeCategorySelection();
-        rulesBtn.classList.add('hidden');
-        themeToggle.classList.add('hidden');
-      });
+      categorySelectionBox.style.display = 'block';
+      console.log('Wyświetlono categorySelectionBox');
+      initializeCategorySelection();
+      rulesBtn.classList.add('hidden');
+      themeToggle.classList.add('hidden');
     });
 
     minusImpostor.addEventListener('click', () => {
@@ -651,9 +591,7 @@
 
     confirmImpostors.addEventListener('click', () => {
       console.log('Potwierdzono liczbę impostorów:', impostorCount);
-      animateTransition(impostorSelectionBox, gameScreen, () => {
-        createRoom(impostorCount);
-      });
+      createRoom(impostorCount);
     });
 
     function createRoom(numImpostors) {
@@ -678,7 +616,10 @@
         currentRound: 0
       }).then(() => {
         console.log('Pokój utworzony:', currentRoomCode, 'Gracz:', playerData, 'Kategorie:', selectedCategories);
+        loginScreen.style.display = 'none';
+        gameScreen.style.display = 'block';
         roomCodeDisplay.textContent = currentRoomCode;
+        impostorSelectionBox.style.display = 'none';
         rulesBtn.classList.remove('hidden');
         themeToggle.classList.remove('hidden');
         db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).onDisconnect().remove();
@@ -688,7 +629,6 @@
         showMessage('❌ Błąd tworzenia pokoju!');
         rulesBtn.classList.remove('hidden');
         themeToggle.classList.remove('hidden');
-        animateTransition(gameScreen, loginScreen);
       });
     }
 
@@ -739,13 +679,13 @@
           [currentPlayerId]: playerData
         }).then(() => {
           console.log('Dołączono do pokoju:', roomCode, 'Gracz:', playerData);
-          animateTransition(loginScreen, gameScreen, () => {
-            roomCodeDisplay.textContent = currentRoomCode;
-            selectedCategories = room.categories || ['all'];
-            loadWords();
-            db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).onDisconnect().remove();
-            listenToRoom(currentRoomCode);
-          });
+          loginScreen.style.display = 'none';
+          gameScreen.style.display = 'block';
+          roomCodeDisplay.textContent = currentRoomCode;
+          selectedCategories = room.categories || ['all'];
+          loadWords();
+          db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).onDisconnect().remove();
+          listenToRoom(currentRoomCode);
         }).catch(error => {
           console.error('Błąd dołączania do pokoju:', error);
           showMessage('❌ Błąd dołączania do pokoju!');
@@ -794,23 +734,16 @@
             });
           }
           resetToLobby();
-          animateTransition(gameScreen, loginScreen, () => {
-            currentRoomCode = null;
-            currentPlayerId = null;
-            isHost = false;
-            roomCodeInput.value = '';
-            playerNameInput.value = '';
-          });
+          loginScreen.style.display = 'block';
+          gameScreen.style.display = 'none';
+          currentRoomCode = null;
+          currentPlayerId = null;
+          isHost = false;
+          roomCodeInput.value = '';
+          playerNameInput.value = '';
         }).catch(error => {
           console.error('Błąd opuszczania pokoju:', error);
           showMessage('❌ Błąd opuszczania pokoju!');
-          animateTransition(gameScreen, loginScreen, () => {
-            currentRoomCode = null;
-            currentPlayerId = null;
-            isHost = false;
-            roomCodeInput.value = '';
-            playerNameInput.value = '';
-          });
         });
       }
     });
@@ -823,11 +756,11 @@
           console.log('Pokój usunięty:', roomCode);
           showMessage('❌ Pokój został usunięty!');
           resetToLobby();
-          animateTransition(gameScreen, loginScreen, () => {
-            currentRoomCode = null;
-            currentPlayerId = null;
-            isHost = false;
-          });
+          loginScreen.style.display = 'block';
+          gameScreen.style.display = 'none';
+          currentRoomCode = null;
+          currentPlayerId = null;
+          isHost = false;
           return;
         }
 
