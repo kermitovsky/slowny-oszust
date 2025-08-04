@@ -14,7 +14,11 @@
     <h1 class="fancy-title">Słowny Impostor</h1>
     <div id="loginScreen">
       <input type="text" id="playerName" placeholder="Podaj swój nick" />
+      <h3>Wybierz awatar</h3>
+      <div id="emojiSelection"></div>
+      <hr class="section-divider" />
       <button id="createRoom">Stwórz pokój</button>
+      <hr class="section-divider" />
       <input type="text" id="roomCodeInput" placeholder="Kod pokoju" maxlength="4" />
       <button id="joinRoom">Dołącz do pokoju</button>
       <p id="statusMessage"></p>
@@ -135,6 +139,7 @@
     const closeRulesBtn = document.getElementById('closeRules');
     const closeRulesTopBtn = document.getElementById('closeRulesTop');
     const recommendedPlayers = document.getElementById('recommendedPlayers');
+    const emojiSelection = document.getElementById('emojiSelection');
 
     let currentRoomCode = null;
     let currentPlayerId = null;
@@ -144,6 +149,7 @@
     let impostorCount = 1;
     let selectedCategories = [];
     let hasShownStartMessage = false;
+    let selectedEmoji = null;
 
     // Lista kategorii
     const categories = [
@@ -162,10 +168,29 @@
     ];
     const wordsBaseUrl = 'https://raw.githubusercontent.com/kermitovsky/slowny-oszust/main/words/';
 
-    // Lista emoji (tylko zwierzęta)
+    // Lista emoji
     const emojiList = ['🐱', '🦁', '🐘', '🐶', '🐻', '🦊', '🐷', '🐰', '🐼', '🦒'];
     // Kolory dla awatarów
     const avatarColors = ['#8e44ad', '#e67e22', '#3498db', '#e74c3c', '#2ecc71', '#f1c40f', '#9b59b6', '#d35400'];
+
+    // Inicjalizacja wyboru emotek
+    function initializeEmojiSelection() {
+      console.log('Inicjalizacja wyboru emotek');
+      emojiSelection.innerHTML = '';
+      emojiList.forEach(emoji => {
+        const btn = document.createElement('button');
+        btn.classList.add('emoji-btn');
+        btn.textContent = emoji;
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          selectedEmoji = emoji;
+          console.log('Wybrano emotkę:', selectedEmoji);
+        });
+        emojiSelection.appendChild(btn);
+      });
+    }
+    initializeEmojiSelection();
 
     // Wykrywanie zamknięcia przeglądarki lub odświeżenia
     window.addEventListener('beforeunload', () => {
@@ -334,13 +359,17 @@
     function assignUniqueEmoji(players) {
       const usedEmojis = Object.values(players || {}).map(p => p.emoji).filter(e => e);
       const availableEmojis = emojiList.filter(e => !usedEmojis.includes(e));
+      if (selectedEmoji && !usedEmojis.includes(selectedEmoji)) {
+        console.log('Użyto wybranej emotki:', selectedEmoji);
+        return selectedEmoji;
+      }
       if (availableEmojis.length === 0) {
         console.warn('Brak dostępnych emoji, przypisuję losowe');
         return emojiList[Math.floor(Math.random() * emojiList.length)];
       }
-      const selectedEmoji = availableEmojis[Math.floor(Math.random() * availableEmojis.length)];
-      console.log('Przypisano emoji:', selectedEmoji);
-      return selectedEmoji;
+      const randomEmoji = availableEmojis[Math.floor(Math.random() * availableEmojis.length)];
+      console.log('Przypisano losową emotkę:', randomEmoji);
+      return randomEmoji;
     }
 
     function assignUniqueColor(players) {
@@ -433,6 +462,8 @@
       impostorCountDisplaySelector.textContent = impostorCount;
       selectedCategories = [];
       hasShownStartMessage = false;
+      selectedEmoji = null;
+      document.querySelectorAll('.emoji-btn').forEach(btn => btn.classList.remove('selected'));
       updateImpostorButtons();
       updateRecommendedPlayers();
     }
@@ -472,6 +503,11 @@
       if (!name) {
         showMessage('❌ Wpisz nick!');
         console.log('Brak nicku');
+        return;
+      }
+      if (!selectedEmoji) {
+        showMessage('❌ Wybierz awatar!');
+        console.log('Brak wybranej emotki');
         return;
       }
       currentPlayerName = name;
@@ -556,6 +592,11 @@
         showMessage('❌ Wpisz nick i kod pokoju!');
         console.log('Brak nicku lub kodu pokoju');
         roomCodeInput.value = '';
+        return;
+      }
+      if (!selectedEmoji) {
+        showMessage('❌ Wybierz awatar!');
+        console.log('Brak wybranej emotki');
         return;
       }
 
