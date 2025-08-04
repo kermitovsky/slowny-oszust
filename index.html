@@ -115,6 +115,7 @@
     const statusMessage = document.getElementById('statusMessage');
     const loginScreen = document.getElementById('loginScreen');
     const gameScreen = document.getElementById('gameScreen');
+    const roomCodeContainer = document.getElementById('roomCodeContainer');
     const roomCodeDisplay = document.getElementById('roomCodeDisplay');
     const copyRoomCodeBtn = document.getElementById('copyRoomCode');
     const impostorCountDisplay = document.getElementById('impostorCountDisplay');
@@ -193,12 +194,22 @@
           hideElement.classList.remove('slide-out');
           if (showElement) {
             showElement.style.display = 'block';
-            // Resetowanie układu #gameScreen po animacji
+            // Resetowanie układu dla modali
+            if (showElement.id === 'categorySelectionBox' || showElement.id === 'impostorSelectionBox' || showElement.id === 'rulesBox') {
+              showElement.style.transform = 'translate(-50%, -50%)';
+            }
+            // Ustawienie układu dla #gameScreen
             if (showElement.id === 'gameScreen') {
-              showElement.style.height = '';
-              showElement.style.overflow = '';
+              showElement.style.display = 'flex';
+              showElement.style.flexDirection = 'column';
+              showElement.style.alignItems = 'center';
               roomCodeContainer.style.display = 'flex';
+              roomCodeContainer.style.alignItems = 'center';
+              roomCodeContainer.style.justifyContent = 'center';
               countsContainer.style.display = 'flex';
+              countsContainer.style.justifyContent = 'center';
+              countsContainer.style.alignItems = 'center';
+              countsContainer.style.gap = '3rem';
               playersList.style.display = 'block';
               startGameBtn.style.display = isHost && !db.ref(`rooms/${currentRoomCode}`).once('value').then(s => !s.val().gameStarted) ? 'block' : 'none';
               endRoundBtn.style.display = isHost && db.ref(`rooms/${currentRoomCode}`).once('value').then(s => s.val().gameStarted) ? 'block' : 'none';
@@ -208,11 +219,20 @@
         }, 500); // Czas animacji slideOutToTop
       } else if (showElement) {
         showElement.style.display = 'block';
+        if (showElement.id === 'categorySelectionBox' || showElement.id === 'impostorSelectionBox' || showElement.id === 'rulesBox') {
+          showElement.style.transform = 'translate(-50%, -50%)';
+        }
         if (showElement.id === 'gameScreen') {
-          showElement.style.height = '';
-          showElement.style.overflow = '';
+          showElement.style.display = 'flex';
+          showElement.style.flexDirection = 'column';
+          showElement.style.alignItems = 'center';
           roomCodeContainer.style.display = 'flex';
+          roomCodeContainer.style.alignItems = 'center';
+          roomCodeContainer.style.justifyContent = 'center';
           countsContainer.style.display = 'flex';
+          countsContainer.style.justifyContent = 'center';
+          countsContainer.style.alignItems = 'center';
+          countsContainer.style.gap = '3rem';
           playersList.style.display = 'block';
           startGameBtn.style.display = isHost && !db.ref(`rooms/${currentRoomCode}`).once('value').then(s => !s.val().gameStarted) ? 'block' : 'none';
           endRoundBtn.style.display = isHost && db.ref(`rooms/${currentRoomCode}`).once('value').then(s => s.val().gameStarted) ? 'block' : 'none';
