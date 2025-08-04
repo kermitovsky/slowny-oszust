@@ -50,13 +50,15 @@
       border: 2px solid rgba(255, 255, 255, 0.1);
     }
     body.dark-mode #impostorSelectionBox #minusImpostor,
-    body.dark-mode #impostorSelectionBox #plusImpostor {
-      background: rgba(255, 255, 255, 0.2);
-      border: 1px solid rgba(255, 255, 255, 0.3);
+    body.dark-mode #impostorSelectionBox #plusImpostor,
+    body.dark-mode #impostorSelectionBox #confirmImpostors {
+      background: rgba(230, 126, 34, 0.2);
+      border: 1px solid rgba(230, 126, 34, 0.3);
     }
     body.dark-mode #impostorSelectionBox #minusImpostor:hover:not(:disabled),
-    body.dark-mode #impostorSelectionBox #plusImpostor:hover:not(:disabled) {
-      background: rgba(255, 255, 255, 0.3);
+    body.dark-mode #impostorSelectionBox #plusImpostor:hover:not(:disabled),
+    body.dark-mode #impostorSelectionBox #confirmImpostors:hover {
+      background: rgba(230, 126, 34, 0.3);
     }
     body.dark-mode #impostorSelectionBox #minusImpostor:disabled,
     body.dark-mode #impostorSelectionBox #plusImpostor:disabled {
@@ -416,6 +418,7 @@
       font-family: 'Poppins', sans-serif;
       font-weight: 600;
       text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      white-space: nowrap;
     }
     #impostorSelectionBox .impostor-selector {
       display: flex;
@@ -426,13 +429,13 @@
     }
     #impostorSelectionBox #minusImpostor,
     #impostorSelectionBox #plusImpostor {
-      width: 40px;
-      height: 40px;
+      width: 50px;
+      height: 50px;
       border-radius: 50%;
       background: rgba(255, 255, 255, 0.2);
       border: 1px solid rgba(255, 255, 255, 0.3);
       color: white;
-      font-size: 2rem;
+      font-size: 2.5rem;
       font-weight: bold;
       display: flex;
       align-items: center;
@@ -450,30 +453,42 @@
       opacity: 0.5;
       cursor: not-allowed;
     }
-    #impostorSelectionBox #impostorCount {
-      font-size: 3rem;
-      font-weight: bold;
-      color: #f5f5f5;
-      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
-    }
     #impostorSelectionBox #confirmImpostors {
       width: 150px;
       margin: 0 auto;
-      background: linear-gradient(45deg, #9b59b6, #8e44ad);
+      background: rgba(142, 68, 173, 0.2);
+      border: 1px solid rgba(142, 68, 173, 0.3);
+      color: white;
       font-size: 2rem;
       font-weight: bold;
       border-radius: 0.8rem;
-    }
-    body.dark-mode #impostorSelectionBox #confirmImpostors {
-      background: linear-gradient(45deg, #e67e22, #d35400);
+      transition: background 0.3s ease, box-shadow 0.3s ease;
     }
     #impostorSelectionBox #confirmImpostors:hover {
-      background: linear-gradient(45deg, #8e44ad, #9b59b6);
+      background: rgba(142, 68, 173, 0.3);
       animation: pulse 1s infinite;
       box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
     }
-    body.dark-mode #impostorSelectionBox #confirmImpostors:hover {
-      background: linear-gradient(45deg, #d35400, #e67e22);
+    @media (max-width: 600px) {
+      #impostorSelectionBox {
+        padding: 1.5rem 2rem;
+      }
+      #impostorSelectionBox p {
+        font-size: 2rem;
+      }
+      #impostorSelectionBox #impostorCount {
+        font-size: 2.5rem;
+      }
+      #impostorSelectionBox #minusImpostor,
+      #impostorSelectionBox #plusImpostor {
+        width: 45px;
+        height: 45px;
+        font-size: 2.2rem;
+      }
+      #impostorSelectionBox #confirmImpostors {
+        width: 120px;
+        font-size: 1.8rem;
+      }
     }
     #rulesBox {
       position: fixed;
@@ -607,25 +622,6 @@
         font-size: 2.8rem;
         padding: 1.5rem;
       }
-      #impostorSelectionBox {
-        padding: 1.5rem 2rem;
-      }
-      #impostorSelectionBox p {
-        font-size: 2.2rem;
-      }
-      #impostorSelectionBox #impostorCount {
-        font-size: 2.5rem;
-      }
-      #impostorSelectionBox #minusImpostor,
-      #impostorSelectionBox #plusImpostor {
-        width: 35px;
-        height: 35px;
-        font-size: 1.8rem;
-      }
-      #impostorSelectionBox #confirmImpostors {
-        width: 120px;
-        font-size: 1.8rem;
-      }
     }
     #countsContainer p, #roundCounter {
       font-size: 1.6rem;
@@ -685,7 +681,7 @@
       <span id="impostorCount">1</span>
       <button id="plusImpostor" title="Zwiększ">+</button>
     </div>
-    <button id="confirmImpostors">Potwierdź</button>
+    <button id="confirmImpostors">Stwórz</button>
   </div>
   <div id="rulesBox">
     <button id="closeRulesTop" title="Zamknij">X</button>
@@ -773,6 +769,14 @@
     // Kolory dla awatarów
     const avatarColors = ['#8e44ad', '#e67e22', '#3498db', '#e74c3c', '#2ecc71', '#f1c40f', '#9b59b6', '#d35400'];
 
+    // Wykrywanie zamknięcia przeglądarki lub odświeżenia
+    window.addEventListener('beforeunload', () => {
+      if (currentRoomCode && currentPlayerId) {
+        console.log('Wykryto zamknięcie/odświeżenie, usuwanie gracza:', currentPlayerId);
+        db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).remove();
+      }
+    });
+
     // Funkcja zamykania zasad
     function closeRules() {
       console.log('Kliknięto Zamknij zasady');
@@ -828,8 +832,8 @@
       return selectedEmoji;
     }
 
-    function updatePlayersList(players) {
-      console.log('Dane players:', players);
+    function updatePlayersList(players, avatarColor) {
+      console.log('Dane players:', players, 'Kolor awatara:', avatarColor);
       if (!players || !Object.keys(players).length) {
         playersList.innerHTML = '<li>Brak graczy</li>';
         return;
@@ -840,8 +844,7 @@
         const avatar = document.createElement('span');
         avatar.classList.add('avatar');
         avatar.textContent = player.emoji || '❓';
-        const colorIndex = Math.floor(Math.random() * avatarColors.length);
-        avatar.style.backgroundColor = avatarColors[colorIndex];
+        avatar.style.backgroundColor = avatarColor || avatarColors[0];
         li.appendChild(avatar);
         li.appendChild(document.createTextNode(` ${player.name || 'Nieznany gracz'}`));
         if (player.isHost) {
@@ -978,6 +981,7 @@
       currentRoomCode = generateRoomCode();
       currentPlayerId = db.ref().push().key;
       const emoji = assignUniqueEmoji({});
+      const avatarColor = avatarColors[Math.floor(Math.random() * avatarColors.length)];
 
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
       const playerData = { name: currentPlayerName, isHost: true, role: null, emoji: emoji };
@@ -990,15 +994,18 @@
         resetMessage: null,
         starterId: null,
         numImpostors: numImpostors,
-        currentRound: 0
+        currentRound: 0,
+        avatarColor: avatarColor
       }).then(() => {
-        console.log('Pokój utworzony:', currentRoomCode, 'Gracz:', playerData);
+        console.log('Pokój utworzony:', currentRoomCode, 'Gracz:', playerData, 'Kolor awatara:', avatarColor);
         loginScreen.style.display = 'none';
         gameScreen.style.display = 'block';
         roomCodeDisplay.textContent = currentRoomCode;
         impostorSelectionBox.style.display = 'none';
         rulesBtn.classList.remove('hidden');
         themeToggle.classList.remove('hidden');
+        // Ustaw onDisconnect dla hosta
+        db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).onDisconnect().remove();
         listenToRoom(currentRoomCode);
       }).catch(error => {
         console.error('Błąd tworzenia pokoju:', error);
@@ -1034,7 +1041,8 @@
           return;
         }
 
-        const players = snapshot.val().players || {};
+        const room = snapshot.val();
+        const players = room.players || {};
         if (Object.keys(players).length >= 10) {
           showMessage('❌ Pokój jest pełny! Maksymalnie 10 graczy.');
           console.log('Pokój pełny:', roomCode);
@@ -1051,6 +1059,8 @@
           loginScreen.style.display = 'none';
           gameScreen.style.display = 'block';
           roomCodeDisplay.textContent = currentRoomCode;
+          // Ustaw onDisconnect dla gracza
+          db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).onDisconnect().remove();
           listenToRoom(currentRoomCode);
         }).catch(error => {
           console.error('Błąd dołączania do pokoju:', error);
@@ -1194,14 +1204,9 @@
 
       const playerRef = db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`);
       playerRef.remove().then(() => {
-        if (isHost) {
-          db.ref(`rooms/${currentRoomCode}`).remove().then(() => {
-            console.log('Pokój usunięty przez hosta');
-          });
-        }
+        console.log('Gracz opuścił pokój:', currentPlayerId);
         resetState();
         showMessage('Opuściłeś pokój');
-        console.log('Gracz opuścił pokój');
       }).catch(error => {
         console.error('Błąd opuszczania pokoju:', error);
         showMessage('❌ Błąd opuszczania pokoju!');
@@ -1247,7 +1252,19 @@
         }
 
         const players = room.players || {};
-        updatePlayersList(players);
+        const avatarColor = room.avatarColor || avatarColors[0];
+        updatePlayersList(players, avatarColor);
+
+        // Sprawdzanie i przypisanie nowego hosta
+        if (!Object.values(players).some(p => p.isHost) && Object.keys(players).length > 0) {
+          const newHostId = Object.keys(players)[0];
+          if (newHostId === currentPlayerId) {
+            isHost = true;
+            showMessage('👑 Zostałeś hostem!', 5000);
+            db.ref(`rooms/${roomCode}/players/${newHostId}`).update({ isHost: true });
+            console.log('Nowy host:', newHostId);
+          }
+        }
 
         impostorCountDisplay.textContent = room.numImpostors ? `Liczba impostorów: ${room.numImpostors}` : 'Liczba impostorów: 0';
         playerCountDisplay.textContent = players && Object.keys(players).length ? `Gracze: ${Object.keys(players).length}` : 'Gracze: 0';
