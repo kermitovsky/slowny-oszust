@@ -53,12 +53,13 @@
   </div>
   <div id="impostorSelectionBox" style="display:none;">
     <p>Wybierz liczbę impostorów</p>
+    <p id="loadingMessage" style="display: none;">Ładowanie kategorii...</p>
     <div class="impostor-selector">
       <button id="minusImpostor" title="Zmniejsz">-</button>
       <span id="impostorCount">1</span>
       <button id="plusImpostor" title="Zwiększ">+</button>
     </div>
-    <button id="confirmImpostors">Stwórz</button>
+    <button id="confirmImpostors" disabled>Stwórz</button>
     <p id="recommendedPlayers"></p>
   </div>
   <div id="rulesBox">
@@ -306,14 +307,24 @@
         return;
       }
       console.log('Potwierdzono kategorie:', selectedCategories);
+      // Natychmiastowe przełączenie ekranów
+      categorySelectionBox.style.display = 'none';
+      impostorSelectionBox.style.display = 'block';
+      document.getElementById('loadingMessage').style.display = 'block';
+      confirmImpostors.disabled = true; // Dezaktywuj przycisk podczas ładowania
       loadWords().then(() => {
-        categorySelectionBox.style.display = 'none';
-        impostorSelectionBox.style.display = 'block';
+        document.getElementById('loadingMessage').style.display = 'none';
+        confirmImpostors.disabled = false; // Aktywuj przycisk po załadowaniu
         impostorCount = 1;
         impostorCountDisplaySelector.textContent = impostorCount;
         updateImpostorButtons();
         updateRecommendedPlayers();
         console.log('Przełączono na wybór impostorów');
+      }).catch(error => {
+        document.getElementById('loadingMessage').style.display = 'none';
+        confirmImpostors.disabled = false;
+        showMessage('❌ Błąd ładowania kategorii! Używam domyślnych słów.');
+        console.error('Błąd w confirmCategories:', error);
       });
     });
 
@@ -322,20 +333,37 @@
       const filesToLoad = selectedCategories.includes('all') ? categories.map(c => c.file) : selectedCategories;
       let loadedAnyFile = false;
 
-      try {
-        for (const file of filesToLoad) {
-          try {
-            const response = await fetch(`${wordsBaseUrl}${file}`);
-            if (!response.ok) throw new Error(`Błąd ładowania ${file}: ${response.status}`);
-            const categoryWords = await response.json();
-            words = [...words, ...categoryWords];
-            loadedAnyFile = true;
-            console.log(`Załadowano ${categoryWords.length} słów z ${file}`);
-          } catch (error) {
-            console.error(`Błąd ładowania pliku ${file}:`, error);
-            showMessage(`❌ Błąd ładowania kategorii ${file}! Pomijam.`);
-          }
+      // Funkcja pomocnicza z timeoutem
+      const fetchWithTimeout = async (url, timeout = 5000) => {
+        const controller = new AbortController();
+        const id = setTimeout(() => controller.abort(), timeout);
+        try {
+          const response = await fetch(url, { signal: controller.signal });
+          clearTimeout(id);
+          if (!response.ok) throw new Error(`Błąd ładowania ${url}: ${response.status}`);
+          return await response.json();
+        } catch (error) {
+          clearTimeout(id);
+          throw error;
         }
+      };
+
+      try {
+        // Równoległe ładowanie wszystkich kategorii
+        const fetchPromises = filesToLoad.map(file =>
+          fetchWithTimeout(`${wordsBaseUrl}${file}`)
+            .then(categoryWords => {
+              words = [...words, ...categoryWords];
+              loadedAnyFile = true;
+              console.log(`Załadowano ${categoryWords.length} słów z ${file}`);
+            })
+            .catch(error => {
+              console.error(`Błąd ładowania pliku ${file}:`, error);
+              showMessage(`❌ Błąd ładowania kategorii ${file}! Pomijam.`);
+            })
+        );
+
+        await Promise.all(fetchPromises);
 
         if (!loadedAnyFile) {
           throw new Error('Nie udało się załadować żadnego pliku kategorii.');
@@ -344,11 +372,9 @@
         console.log('Łącznie załadowano słów:', words.length);
       } catch (error) {
         console.error('Błąd ładowania słów:', error);
-        showMessage('❌ Błąd ładowania kategorii! Używam domyślnych słów.');
         try {
-          const response = await fetch('words.json');
-          if (!response.ok) throw new Error('Błąd ładowania words.json: ' + response.status);
-          words = await response.json();
+          const response = await fetchWithTimeout('words.json');
+          words = response;
           console.log('Załadowano domyślne słowa:', words.length);
         } catch (err) {
           console.error('Błąd ładowania domyślnych słów:', err);
