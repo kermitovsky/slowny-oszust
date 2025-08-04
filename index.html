@@ -14,7 +14,9 @@
     <h1 class="fancy-title">Słowny Impostor</h1>
     <div id="loginScreen">
       <input type="text" id="playerName" placeholder="Podaj swój nick" />
+      <p class="selection-label">Wybierz emoji</p>
       <div id="emojiSelectionGrid" class="selection-grid"></div>
+      <p class="selection-label">Wybierz kolor</p>
       <div id="colorSelectionGrid" class="selection-grid"></div>
       <button id="createRoom">Stwórz pokój</button>
       <input type="text" id="roomCodeInput" placeholder="Kod pokoju" maxlength="4" />
@@ -59,7 +61,7 @@
     <button id="confirmImpostors">Stwórz</button>
     <p id="recommendedPlayers"></p>
   </div>
-  <div id="rulesBox">
+  <div id="rulesBox" style="display:none;">
     <button id="closeRulesTop" title="Zamknij">X</button>
     <h2>Zasady gry Słowny Impostor</h2>
     <h3>Cel gry</h3>
