@@ -30,6 +30,7 @@
         <button id="copyRoomCode" title="Kopiuj kod">📋</button>
       </div>
       <p id="roundCounter"></p>
+      <p id="wordDisplay"></p>
       <div id="countsContainer">
         <p id="playerCountDisplay"></p>
         <p id="impostorCountDisplay"></p>
@@ -119,6 +120,7 @@
     const impostorCountDisplay = document.getElementById('impostorCountDisplay');
     const playerCountDisplay = document.getElementById('playerCountDisplay');
     const roundCounter = document.getElementById('roundCounter');
+    const wordDisplay = document.getElementById('wordDisplay');
     const playersList = document.getElementById('playersList');
     const startGameBtn = document.getElementById('startGame');
     const endRoundBtn = document.getElementById('endRound');
@@ -170,7 +172,7 @@
     const wordsBaseUrl = 'https://raw.githubusercontent.com/kermitovsky/slowny-oszust/main/words/';
 
     // Lista emoji
-    const emojiList = ['🐱', '🦁', '🐭', '🐶', '🐻', '🦊', '🐨', '🐰', '🐼', '🦒'];
+    const emojiList = ['🐱', '🦁', '🐭', '🐶', '🐻', '🦊', '🐨', '🐰', '🐼', '🐹'];
     // Kolory dla awatarów
     const avatarColors = ['#8e44ad', '#e67e22', '#3498db', '#e74c3c', '#2ecc71', '#f1c40f', '#9b59b6', '#d35400'];
 
@@ -504,6 +506,7 @@
       impostorCountDisplay.innerHTML = '';
       playerCountDisplay.innerHTML = '';
       roundCounter.innerHTML = '';
+      wordDisplay.innerHTML = '';
       impostorCount = 1;
       impostorCountDisplaySelector.textContent = impostorCount;
       selectedCategories = [];
@@ -766,6 +769,11 @@
         playerCountDisplay.innerHTML = `Gracze: <span class="bold">${Object.keys(players).length}</span>`;
         impostorCountDisplay.innerHTML = `Impostorzy: <span class="bold">${room.numImpostors || 0}</span>`;
         roundCounter.innerHTML = room.currentRound > 0 ? `Runda: <strong>${room.currentRound}</strong>` : '';
+        wordDisplay.innerHTML = room.gameStarted && room.currentWord && players[currentPlayerId] 
+          ? (players[currentPlayerId].role === 'impostor' 
+            ? `Twoje słowo: <span class="word-impostor">OSZUST!</span>` 
+            : `Twoje słowo: <span class="word-normal">${room.currentWord}</span>`) 
+          : '';
 
         isHost = players[currentPlayerId]?.isHost || false;
         startGameBtn.style.display = isHost && !room.gameStarted ? 'block' : 'none';
