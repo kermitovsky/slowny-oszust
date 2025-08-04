@@ -88,6 +88,25 @@ body.dark-mode #categorySelectionBox #confirmCategories {
 body.dark-mode #categorySelectionBox #confirmCategories:hover:not(:disabled) {
   background: rgba(230, 126, 34, 0.3);
 }
+body.dark-mode #rulesBox {
+  background: linear-gradient(135deg, #4b0082, #e67e22);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+body.dark-mode #rulesBox h2,
+body.dark-mode #rulesBox h3,
+body.dark-mode #rulesBox p,
+body.dark-mode #rulesBox li {
+  color: #e6e6e6;
+}
+body.dark-mode #rulesBox #closeRules,
+body.dark-mode #rulesBox #closeRulesTop {
+  background: rgba(230, 126, 34, 0.2);
+  border: 1px solid rgba(230, 126, 34, 0.3);
+}
+body.dark-mode #rulesBox #closeRules:hover,
+body.dark-mode #rulesBox #closeRulesTop:hover {
+  background: rgba(230, 126, 34, 0.3);
+}
 .container {
   max-width: 800px;
   margin: auto;
@@ -128,7 +147,7 @@ body.dark-mode #categorySelectionBox #confirmCategories:hover:not(:disabled) {
   50% { transform: translateY(-5px); }
   100% { transform: translateY(0); }
 }
-#loginScreen, #gameScreen, #categorySelectionBox {
+#loginScreen, #gameScreen, #categorySelectionBox, #rulesBox {
   animation: fadeIn 0.5s ease-in-out;
 }
 #gameScreen h1 {
@@ -251,20 +270,6 @@ body.dark-mode #copyRoomCode:hover {
 }
 #rulesBtn.hidden, #themeToggle.hidden {
   display: none;
-}
-@media (max-width: 600px) {
-  #rulesBtn, #themeToggle {
-    width: 3rem;
-    height: 3rem;
-    font-size: 1.8rem;
-    bottom: 1rem;
-  }
-  #rulesBtn {
-    right: 1rem;
-  }
-  #themeToggle {
-    right: 5rem;
-  }
 }
 #roomCodeContainer {
   display: flex;
@@ -674,10 +679,105 @@ body.dark-mode #categorySelectionBox #allCategoriesBtn .checkbox:hover {
   opacity: 0.5;
   cursor: not-allowed;
 }
+#rulesBox {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(135deg, #8e44ad, #d35400);
+  color: white;
+  padding: 2rem;
+  border-radius: 1.5rem;
+  text-align: left;
+  z-index: 1002;
+  display: none;
+  max-width: 600px;
+  width: 90vw;
+  word-wrap: break-word;
+  white-space: normal;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  font-size: 1.8rem;
+  font-family: 'Poppins', sans-serif;
+  animation: scaleIn 0.3s ease-in-out;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+#rulesBox h2 {
+  font-size: 2.5rem;
+  color: #f5f5f5;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+#rulesBox h3 {
+  font-size: 2rem;
+  color: #f5f5f5;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  margin: 1rem 0 0.5rem;
+}
+#rulesBox p {
+  font-size: 1.6rem;
+  color: #f5f5f5;
+  font-family: 'Poppins', sans-serif;
+  margin: 0.5rem 0;
+}
+#rulesBox ul {
+  padding-left: 2rem;
+  margin: 0.5rem 0;
+}
+#rulesBox li {
+  font-size: 1.6rem;
+  color: #f5f5f5;
+  font-family: 'Poppins', sans-serif;
+  margin-bottom: 0.5rem;
+}
+#rulesBox #closeRules,
+#rulesBox #closeRulesTop {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 30px;
+  height: 30px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  font-size: 1.8rem;
+  font-weight: bold;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+#rulesBox #closeRules {
+  position: static;
+  margin: 1rem auto 0;
+}
+#rulesBox #closeRules:hover,
+#rulesBox #closeRulesTop:hover {
+  background: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+#loginScreen .selection-label {
+  font-size: 1.8rem;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  color: #f5f5f5;
+  text-align: center;
+  margin: 0.8rem 0;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
 #loginScreen .selection-grid {
   display: grid;
   gap: 0.8rem;
-  margin: 1rem auto;
+  margin: 0.5rem auto 1rem;
   max-width: 350px;
   background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(5px);
@@ -692,27 +792,11 @@ body.dark-mode #loginScreen .selection-grid {
   background: rgba(230, 126, 34, 0.2);
   border: 1px solid rgba(230, 126, 34, 0.3);
 }
-#loginScreen .selection-grid::before {
-  content: attr(data-label);
-  font-size: 1.8rem;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 600;
-  color: #f5f5f5;
-  text-align: center;
-  margin-bottom: 0.8rem;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-}
 #emojiSelectionGrid {
   grid-template-columns: repeat(5, 1fr);
 }
-#emojiSelectionGrid::before {
-  content: 'Wybierz emoji';
-}
 #colorSelectionGrid {
   grid-template-columns: repeat(4, 1fr);
-}
-#colorSelectionGrid::before {
-  content: 'Wybierz kolor';
 }
 #loginScreen .emoji-btn {
   width: 50px;
@@ -813,13 +897,35 @@ body.dark-mode #loginScreen .color-btn {
     width: 120px;
     font-size: 1.8rem;
   }
+  #rulesBox {
+    padding: 1.5rem;
+    max-width: 90vw;
+  }
+  #rulesBox h2 {
+    font-size: 2rem;
+  }
+  #rulesBox h3 {
+    font-size: 1.8rem;
+  }
+  #rulesBox p {
+    font-size: 1.4rem;
+  }
+  #rulesBox li {
+    font-size: 1.4rem;
+  }
+  #rulesBox #closeRules,
+  #rulesBox #closeRulesTop {
+    width: 25px;
+    height: 25px;
+    font-size: 1.6rem;
+  }
+  #loginScreen .selection-label {
+    font-size: 1.6rem;
+  }
   #loginScreen .selection-grid {
     grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
     padding: 0.8rem;
     margin: 0.5rem auto;
-  }
-  #loginScreen .selection-grid::before {
-    font-size: 1.6rem;
   }
   #loginScreen .emoji-btn {
     width: 45px;
