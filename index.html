@@ -185,7 +185,7 @@
 
     // Funkcja pomocnicza do obsługi animacji przejścia
     function animateTransition(hideElement, showElement, callback) {
-      console.log('Uruchamiam animateTransition:', { hideElement: hideElement.id, showElement: showElement?.id });
+      console.log('Uruchamiam animateTransition:', { hideElement: hideElement?.id, showElement: showElement?.id });
       if (hideElement) {
         hideElement.classList.add('slide-out');
         setTimeout(() => {
@@ -193,11 +193,30 @@
           hideElement.classList.remove('slide-out');
           if (showElement) {
             showElement.style.display = 'block';
+            // Resetowanie układu #gameScreen po animacji
+            if (showElement.id === 'gameScreen') {
+              showElement.style.height = '';
+              showElement.style.overflow = '';
+              roomCodeContainer.style.display = 'flex';
+              countsContainer.style.display = 'flex';
+              playersList.style.display = 'block';
+              startGameBtn.style.display = isHost && !db.ref(`rooms/${currentRoomCode}`).once('value').then(s => !s.val().gameStarted) ? 'block' : 'none';
+              endRoundBtn.style.display = isHost && db.ref(`rooms/${currentRoomCode}`).once('value').then(s => s.val().gameStarted) ? 'block' : 'none';
+            }
           }
           if (callback) callback();
         }, 500); // Czas animacji slideOutToTop
       } else if (showElement) {
         showElement.style.display = 'block';
+        if (showElement.id === 'gameScreen') {
+          showElement.style.height = '';
+          showElement.style.overflow = '';
+          roomCodeContainer.style.display = 'flex';
+          countsContainer.style.display = 'flex';
+          playersList.style.display = 'block';
+          startGameBtn.style.display = isHost && !db.ref(`rooms/${currentRoomCode}`).once('value').then(s => !s.val().gameStarted) ? 'block' : 'none';
+          endRoundBtn.style.display = isHost && db.ref(`rooms/${currentRoomCode}`).once('value').then(s => s.val().gameStarted) ? 'block' : 'none';
+        }
         if (callback) callback();
       }
     }
