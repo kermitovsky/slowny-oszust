@@ -100,7 +100,7 @@
     }
     @keyframes pulse {
       0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
+      50% { transform: scale(1.02); } /* Subtelne powiększenie */
       100% { transform: scale(1); }
     }
     @keyframes float {
@@ -317,6 +317,7 @@
     #playersList li .kickBtn:hover {
       background-color: #c0392b;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      animation: pulse 0.5s ease-in-out;
     }
     .host {
       color: #3498db !important;
@@ -832,8 +833,20 @@
       return selectedEmoji;
     }
 
-    function updatePlayersList(players, avatarColor) {
-      console.log('Dane players:', players, 'Kolor awatara:', avatarColor);
+    function assignUniqueColor(players) {
+      const usedColors = Object.values(players || {}).map(p => p.avatarColor).filter(c => c);
+      const availableColors = avatarColors.filter(c => !usedColors.includes(c));
+      if (availableColors.length === 0) {
+        console.warn('Brak dostępnych kolorów, przypisuję losowy');
+        return avatarColors[Math.floor(Math.random() * avatarColors.length)];
+      }
+      const selectedColor = availableColors[Math.floor(Math.random() * availableColors.length)];
+      console.log('Przypisano kolor:', selectedColor);
+      return selectedColor;
+    }
+
+    function updatePlayersList(players) {
+      console.log('Dane players:', players);
       if (!players || !Object.keys(players).length) {
         playersList.innerHTML = '<li>Brak graczy</li>';
         return;
@@ -844,7 +857,7 @@
         const avatar = document.createElement('span');
         avatar.classList.add('avatar');
         avatar.textContent = player.emoji || '❓';
-        avatar.style.backgroundColor = avatarColor || avatarColors[0];
+        avatar.style.backgroundColor = player.avatarColor || avatarColors[0];
         li.appendChild(avatar);
         li.appendChild(document.createTextNode(` ${player.name || 'Nieznany gracz'}`));
         if (player.isHost) {
@@ -981,10 +994,10 @@
       currentRoomCode = generateRoomCode();
       currentPlayerId = db.ref().push().key;
       const emoji = assignUniqueEmoji({});
-      const avatarColor = avatarColors[Math.floor(Math.random() * avatarColors.length)];
+      const avatarColor = assignUniqueColor({});
 
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
-      const playerData = { name: currentPlayerName, isHost: true, role: null, emoji: emoji };
+      const playerData = { name: currentPlayerName, isHost: true, role: null, emoji: emoji, avatarColor: avatarColor };
       roomRef.set({
         players: {
           [currentPlayerId]: playerData
@@ -994,10 +1007,9 @@
         resetMessage: null,
         starterId: null,
         numImpostors: numImpostors,
-        currentRound: 0,
-        avatarColor: avatarColor
+        currentRound: 0
       }).then(() => {
-        console.log('Pokój utworzony:', currentRoomCode, 'Gracz:', playerData, 'Kolor awatara:', avatarColor);
+        console.log('Pokój utworzony:', currentRoomCode, 'Gracz:', playerData);
         loginScreen.style.display = 'none';
         gameScreen.style.display = 'block';
         roomCodeDisplay.textContent = currentRoomCode;
@@ -1051,7 +1063,8 @@
         }
 
         const emoji = assignUniqueEmoji(players);
-        const playerData = { name: currentPlayerName, isHost: false, role: null, emoji: emoji };
+        const avatarColor = assignUniqueColor(players);
+        const playerData = { name: currentPlayerName, isHost: false, role: null, emoji: emoji, avatarColor: avatarColor };
         roomRef.child('players').update({
           [currentPlayerId]: playerData
         }).then(() => {
@@ -1252,8 +1265,7 @@
         }
 
         const players = room.players || {};
-        const avatarColor = room.avatarColor || avatarColors[0];
-        updatePlayersList(players, avatarColor);
+        updatePlayersList(players);
 
         // Sprawdzanie i przypisanie nowego hosta
         if (!Object.values(players).some(p => p.isHost) && Object.keys(players).length > 0) {
