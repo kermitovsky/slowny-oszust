@@ -6,7 +6,7 @@
   <title>Słowny Oszust</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@600;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet" />
   <style>
     body {
       background: 
@@ -65,6 +65,9 @@
       opacity: 0.5;
       cursor: not-allowed;
     }
+    body.dark-mode #impostorSelectionBox #recommendedPlayers {
+      color: #e6e6e6;
+    }
     body.dark-mode #rulesBox {
       background: linear-gradient(135deg, #4b0082, #e67e22);
       border: 2px solid rgba(255, 255, 255, 0.1);
@@ -100,7 +103,7 @@
     }
     @keyframes pulse {
       0% { transform: scale(1); }
-      50% { transform: scale(1.02); } /* Subtelne powiększenie */
+      50% { transform: scale(1.02); }
       100% { transform: scale(1); }
     }
     @keyframes float {
@@ -317,7 +320,6 @@
     #playersList li .kickBtn:hover {
       background-color: #c0392b;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-      animation: pulse 0.5s ease-in-out;
     }
     .host {
       color: #3498db !important;
@@ -421,6 +423,16 @@
       text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
       white-space: nowrap;
     }
+    #impostorSelectionBox #recommendedPlayers {
+      font-size: 1.4rem;
+      font-weight: 400;
+      font-family: 'Poppins', sans-serif;
+      color: #f5f5f5;
+      opacity: 0.8;
+      margin-top: 1rem;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+      text-align: center;
+    }
     #impostorSelectionBox .impostor-selector {
       display: flex;
       justify-content: center;
@@ -489,6 +501,10 @@
       #impostorSelectionBox #confirmImpostors {
         width: 120px;
         font-size: 1.8rem;
+      }
+      #impostorSelectionBox #recommendedPlayers {
+        font-size: 1.2rem;
+        margin-top: 0.8rem;
       }
     }
     #rulesBox {
@@ -683,6 +699,7 @@
       <button id="plusImpostor" title="Zwiększ">+</button>
     </div>
     <button id="confirmImpostors">Stwórz</button>
+    <p id="recommendedPlayers"></p>
   </div>
   <div id="rulesBox">
     <button id="closeRulesTop" title="Zamknij">X</button>
@@ -757,6 +774,7 @@
     const rulesBox = document.getElementById('rulesBox');
     const closeRulesBtn = document.getElementById('closeRules');
     const closeRulesTopBtn = document.getElementById('closeRulesTop');
+    const recommendedPlayers = document.getElementById('recommendedPlayers');
 
     let currentRoomCode = null;
     let currentPlayerId = null;
@@ -921,6 +939,7 @@
       impostorCount = 1;
       impostorCountDisplaySelector.textContent = impostorCount;
       updateImpostorButtons();
+      updateRecommendedPlayers();
     }
 
     // Funkcja aktualizująca stan przycisków minus/plus
@@ -930,6 +949,14 @@
       minusImpostor.style.opacity = impostorCount <= 1 ? '0.5' : '1';
       plusImpostor.style.opacity = impostorCount >= 5 ? '0.5' : '1';
       console.log('Zaktualizowano przyciski impostorów:', { impostorCount });
+    }
+
+    // Funkcja aktualizująca zalecaną liczbę graczy
+    function updateRecommendedPlayers() {
+      const minPlayers = impostorCount + 2;
+      const maxPlayers = Math.min(impostorCount + 4, 10);
+      recommendedPlayers.textContent = `Zalecana liczba graczy: ${minPlayers}–${maxPlayers}`;
+      console.log('Zaktualizowano zalecaną liczbę graczy:', recommendedPlayers.textContent);
     }
 
     // Event listenery dla zamykania zasad
@@ -962,6 +989,7 @@
       impostorCount = 1;
       impostorCountDisplaySelector.textContent = impostorCount;
       updateImpostorButtons();
+      updateRecommendedPlayers();
       rulesBtn.classList.add('hidden');
       themeToggle.classList.add('hidden');
     });
@@ -971,6 +999,7 @@
         impostorCount--;
         impostorCountDisplaySelector.textContent = impostorCount;
         updateImpostorButtons();
+        updateRecommendedPlayers();
         console.log('Zmniejszono liczbę impostorów:', impostorCount);
       }
     });
@@ -980,6 +1009,7 @@
         impostorCount++;
         impostorCountDisplaySelector.textContent = impostorCount;
         updateImpostorButtons();
+        updateRecommendedPlayers();
         console.log('Zwiększono liczbę impostorów:', impostorCount);
       }
     });
@@ -1247,6 +1277,7 @@
       impostorCount = 1;
       impostorCountDisplaySelector.textContent = impostorCount;
       updateImpostorButtons();
+      updateRecommendedPlayers();
     }
 
     function listenToRoom(roomCode) {
