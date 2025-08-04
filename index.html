@@ -14,28 +14,8 @@
     <h1 class="fancy-title">Słowny Impostor</h1>
     <div id="loginScreen">
       <input type="text" id="playerName" placeholder="Podaj swój nick" />
-      <select id="playerEmoji">
-        <option value="🐱">🐱</option>
-        <option value="🦁">🦁</option>
-        <option value="🐘">🐘</option>
-        <option value="🐶">🐶</option>
-        <option value="🐻">🐻</option>
-        <option value="🦊">🦊</option>
-        <option value="🐷">🐷</option>
-        <option value="🐰">🐰</option>
-        <option value="🐼">🐼</option>
-        <option value="🦒">🦒</option>
-      </select>
-      <select id="playerColor">
-        <option value="#8e44ad">Fioletowy</option>
-        <option value="#e67e22">Pomarańczowy</option>
-        <option value="#3498db">Niebieski</option>
-        <option value="#e74c3c">Czerwony</option>
-        <option value="#2ecc71">Zielony</option>
-        <option value="#f1c40f">Żółty</option>
-        <option value="#9b59b6">Jasny fiolet</option>
-        <option value="#d35400">Ciemny pomarańcz</option>
-      </select>
+      <div id="emojiSelectionGrid" class="selection-grid"></div>
+      <div id="colorSelectionGrid" class="selection-grid"></div>
       <button id="createRoom">Stwórz pokój</button>
       <input type="text" id="roomCodeInput" placeholder="Kod pokoju" maxlength="4" />
       <button id="joinRoom">Dołącz do pokoju</button>
@@ -125,8 +105,8 @@
     db.ref('test').set({ test: 'hello' }).then(() => console.log('Firebase działa')).catch(err => console.error('Błąd Firebase:', err));
 
     const playerNameInput = document.getElementById('playerName');
-    const playerEmojiSelect = document.getElementById('playerEmoji');
-    const playerColorSelect = document.getElementById('playerColor');
+    const emojiSelectionGrid = document.getElementById('emojiSelectionGrid');
+    const colorSelectionGrid = document.getElementById('colorSelectionGrid');
     const createRoomBtn = document.getElementById('createRoom');
     const joinRoomBtn = document.getElementById('joinRoom');
     const roomCodeInput = document.getElementById('roomCodeInput');
@@ -168,6 +148,8 @@
     let impostorCount = 1;
     let selectedCategories = [];
     let hasShownStartMessage = false;
+    let selectedEmoji = '🐱';
+    let selectedColor = '#8e44ad';
 
     // Lista kategorii
     const categories = [
@@ -186,9 +168,47 @@
     ];
     const wordsBaseUrl = 'https://raw.githubusercontent.com/kermitovsky/slowny-oszust/main/words/';
 
-    // Lista emoji i kolorów (używane w dropdownach)
+    // Lista emoji i kolorów
     const emojiList = ['🐱', '🦁', '🐘', '🐶', '🐻', '🦊', '🐷', '🐰', '🐼', '🦒'];
     const avatarColors = ['#8e44ad', '#e67e22', '#3498db', '#e74c3c', '#2ecc71', '#f1c40f', '#9b59b6', '#d35400'];
+
+    // Inicjalizacja siatek wyboru emoji i kolorów
+    function initializeSelectionGrids() {
+      // Emoji grid
+      emojiSelectionGrid.innerHTML = '';
+      emojiList.forEach(emoji => {
+        const btn = document.createElement('button');
+        btn.classList.add('emoji-btn');
+        btn.textContent = emoji;
+        if (emoji === selectedEmoji) btn.classList.add('selected');
+        btn.addEventListener('click', () => {
+          selectedEmoji = emoji;
+          document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          console.log('Wybrano emoji:', selectedEmoji);
+        });
+        emojiSelectionGrid.appendChild(btn);
+      });
+
+      // Color grid
+      colorSelectionGrid.innerHTML = '';
+      avatarColors.forEach(color => {
+        const btn = document.createElement('button');
+        btn.classList.add('color-btn');
+        btn.style.backgroundColor = color;
+        if (color === selectedColor) btn.classList.add('selected');
+        btn.addEventListener('click', () => {
+          selectedColor = color;
+          document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          console.log('Wybrano kolor:', selectedColor);
+        });
+        colorSelectionGrid.appendChild(btn);
+      });
+    }
+
+    // Wywołanie inicjalizacji siatek
+    initializeSelectionGrids();
 
     // Wykrywanie zamknięcia przeglądarki lub odświeżenia
     window.addEventListener('beforeunload', () => {
@@ -436,6 +456,9 @@
       hasShownStartMessage = false;
       updateImpostorButtons();
       updateRecommendedPlayers();
+      selectedEmoji = emojiList[0];
+      selectedColor = avatarColors[0];
+      initializeSelectionGrids();
     }
 
     function updateImpostorButtons() {
@@ -470,16 +493,19 @@
     createRoomBtn.addEventListener('click', () => {
       console.log('Kliknięto Stwórz pokój');
       const name = playerNameInput.value.trim();
-      const emoji = playerEmojiSelect.value;
-      const color = playerColorSelect.value;
       if (!name) {
         showMessage('❌ Wpisz nick!');
         console.log('Brak nicku');
         return;
       }
+      if (!selectedEmoji || !selectedColor) {
+        showMessage('❌ Wybierz emoji i kolor!');
+        console.log('Brak emoji lub koloru');
+        return;
+      }
       currentPlayerName = name;
       isHost = true;
-      console.log('Ustawiono hosta, imię:', currentPlayerName, 'emoji:', emoji, 'kolor:', color);
+      console.log('Ustawiono hosta, imię:', currentPlayerName, 'emoji:', selectedEmoji, 'kolor:', selectedColor);
       categorySelectionBox.style.display = 'block';
       console.log('Wyświetlono categorySelectionBox');
       initializeCategorySelection();
@@ -516,11 +542,9 @@
       console.log('Tworzenie pokoju z', numImpostors, 'impostorami, kategorie:', selectedCategories);
       currentRoomCode = generateRoomCode();
       currentPlayerId = db.ref().push().key;
-      const emoji = playerEmojiSelect.value;
-      const avatarColor = playerColorSelect.value;
 
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
-      const playerData = { name: currentPlayerName, isHost: true, role: null, emoji: emoji, avatarColor: avatarColor };
+      const playerData = { name: currentPlayerName, isHost: true, role: null, emoji: selectedEmoji, avatarColor: selectedColor };
       roomRef.set({
         players: {
           [currentPlayerId]: playerData
@@ -554,20 +578,21 @@
       console.log('Kliknięto Dołącz do pokoju');
       const name = playerNameInput.value.trim();
       const roomCode = roomCodeInput.value.trim().toUpperCase();
-      const emoji = playerEmojiSelect.value;
-      const color = playerColorSelect.value;
-
       if (!name || !roomCode) {
         showMessage('❌ Wpisz nick i kod pokoju!');
         console.log('Brak nicku lub kodu pokoju');
         roomCodeInput.value = '';
         return;
       }
-
+      if (!selectedEmoji || !selectedColor) {
+        showMessage('❌ Wybierz emoji i kolor!');
+        console.log('Brak emoji lub koloru');
+        return;
+      }
       currentPlayerName = name;
       currentRoomCode = roomCode;
       currentPlayerId = db.ref().push().key;
-      console.log('Dołączanie do pokoju:', roomCode, 'Nick:', name, 'emoji:', emoji, 'kolor:', color);
+      console.log('Dołączanie do pokoju:', roomCode, 'Nick:', name, 'emoji:', selectedEmoji, 'kolor:', selectedColor);
 
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
       roomRef.once('value').then(snapshot => {
@@ -587,7 +612,7 @@
           return;
         }
 
-        const playerData = { name: currentPlayerName, isHost: false, role: null, emoji: emoji, avatarColor: color };
+        const playerData = { name: currentPlayerName, isHost: false, role: null, emoji: selectedEmoji, avatarColor: selectedColor };
         roomRef.child('players').update({
           [currentPlayerId]: playerData
         }).then(() => {
@@ -654,8 +679,6 @@
           isHost = false;
           roomCodeInput.value = '';
           playerNameInput.value = '';
-          playerEmojiSelect.value = emojiList[0];
-          playerColorSelect.value = avatarColors[0];
         }).catch(error => {
           console.error('Błąd opuszczania pokoju:', error);
           showMessage('❌ Błąd opuszczania pokoju!');
