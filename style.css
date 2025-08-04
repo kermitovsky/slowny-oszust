@@ -11,7 +11,7 @@ body {
   padding: 1.5rem;
   min-height: 100vh;
   position: relative;
-  transition: background 0.3s ease, color 0.3s ease;
+  transition: background 0.3s ease;
   overflow-x: hidden;
 }
 body.dark-mode {
@@ -19,45 +19,37 @@ body.dark-mode {
     radial-gradient(circle, rgba(255, 255, 255, 0.05) 2px, transparent 3px),
     linear-gradient(135deg, #4b0082 0%, #2c003e 100%);
   background-size: 15px 15px, auto;
-  transition: background 0.3s ease, color 0.3s ease;
 }
 body.dark-mode .container {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: background 0.3s ease, border 0.3s ease;
 }
 body.dark-mode #playersList li {
   background-color: rgba(255, 255, 255, 0.1);
   color: #e67e22;
-  transition: background-color 0.3s ease, color 0.3s ease;
 }
 body.dark-mode #messageBox:not(.copy-message) {
   background: linear-gradient(135deg, #4b0082, #e67e22);
   border: 2px solid rgba(255, 255, 255, 0.1);
-  transition: background 0.3s ease, border 0.3s ease;
 }
 body.dark-mode #roleMessageBox {
   background: linear-gradient(135deg, #4b0082, #e67e22);
   border: 2px solid rgba(255, 255, 255, 0.1);
-  transition: background 0.3s ease, border 0.3s ease;
 }
 body.dark-mode #impostorSelectionBox {
   background: linear-gradient(135deg, #4b0082, #e67e22);
   border: 2px solid rgba(255, 255, 255, 0.1);
-  transition: background 0.3s ease, border 0.3s ease;
 }
 body.dark-mode #impostorSelectionBox #minusImpostor,
 body.dark-mode #impostorSelectionBox #plusImpostor,
 body.dark-mode #impostorSelectionBox #confirmImpostors {
   background: rgba(230, 126, 34, 0.2);
   border: 1px solid rgba(230, 126, 34, 0.3);
-  transition: background 0.3s ease, border 0.3s ease;
 }
 body.dark-mode #impostorSelectionBox #minusImpostor:hover:not(:disabled),
 body.dark-mode #impostorSelectionBox #plusImpostor:hover:not(:disabled),
 body.dark-mode #impostorSelectionBox #confirmImpostors:hover:not(:disabled) {
   background: rgba(230, 126, 34, 0.3);
-  transition: background 0.3s ease;
 }
 body.dark-mode #impostorSelectionBox #minusImpostor:disabled,
 body.dark-mode #impostorSelectionBox #plusImpostor:disabled,
@@ -67,38 +59,30 @@ body.dark-mode #impostorSelectionBox #confirmImpostors:disabled {
 }
 body.dark-mode #impostorSelectionBox #recommendedPlayers {
   color: #e6e6e6;
-  transition: color 0.3s ease;
 }
 body.dark-mode #categorySelectionBox {
   background: linear-gradient(135deg, #4b0082, #e67e22);
   border: 2px solid rgba(255, 255, 255, 0.1);
-  transition: background 0.3s ease, border 0.3s ease;
 }
 body.dark-mode #categorySelectionBox .category-btn {
   background: rgba(0, 0, 0, 0.4);
-  transition: background 0.3s ease;
 }
 body.dark-mode #categorySelectionBox .category-btn.selected {
   background: rgba(230, 126, 34, 0.4);
-  transition: background 0.3s ease;
 }
 body.dark-mode #categorySelectionBox #allCategoriesBtn .checkbox {
   background: rgba(230, 126, 34, 0.2);
   border: 1px solid rgba(230, 126, 34, 0.3);
-  transition: background 0.3s ease, border 0.3s ease;
 }
 body.dark-mode #categorySelectionBox #allCategoriesBtn .checkbox:hover {
   background: rgba(230, 126, 34, 0.3);
-  transition: background 0.3s ease;
 }
 body.dark-mode #categorySelectionBox #confirmCategories {
   background: rgba(230, 126, 34, 0.2);
   border: 1px solid rgba(230, 126, 34, 0.3);
-  transition: background 0.3s ease, border 0.3s ease;
 }
 body.dark-mode #categorySelectionBox #confirmCategories:hover:not(:disabled) {
   background: rgba(230, 126, 34, 0.3);
-  transition: background 0.3s ease;
 }
 .container {
   max-width: 800px;
@@ -126,14 +110,6 @@ body.dark-mode #categorySelectionBox #confirmCategories:hover:not(:disabled) {
     margin: 0.5rem;
   }
 }
-@keyframes slideInFromBottom {
-  from { opacity: 0; transform: translate(-50%, 100%); }
-  to { opacity: 1; transform: translate(-50%, -50%); }
-}
-@keyframes slideOutToTop {
-  from { opacity: 1; transform: translate(-50%, -50%); }
-  to { opacity: 0; transform: translate(-50%, -100%); }
-}
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
@@ -152,14 +128,8 @@ body.dark-mode #categorySelectionBox #confirmCategories:hover:not(:disabled) {
   50% { transform: translateY(-5px); }
   100% { transform: translateY(0); }
 }
-#loginScreen {
+#loginScreen, #gameScreen, #categorySelectionBox {
   animation: fadeIn 0.5s ease-in-out;
-}
-#gameScreen, #categorySelectionBox, #impostorSelectionBox {
-  animation: slideInFromBottom 0.5s ease-in-out forwards;
-}
-#gameScreen.slide-out, #categorySelectionBox.slide-out, #impostorSelectionBox.slide-out {
-  animation: slideOutToTop 0.5s ease-in-out forwards;
 }
 #gameScreen h1 {
   text-align: center;
@@ -202,17 +172,15 @@ input {
   border: 2px solid #8e44ad;
   color: #333;
   background: rgba(255, 255, 255, 0.9);
-  transition: border 0.3s ease, background 0.3s ease;
 }
 button {
   background: linear-gradient(45deg, #8e44ad, #9b59b6);
   color: white;
   cursor: pointer;
-  transition: background 0.3s ease, box-shadow 0.3s ease;
+  transition: box-shadow 0.3s ease;
 }
 body.dark-mode button {
   background: linear-gradient(45deg, #e67e22, #d35400);
-  transition: background 0.3s ease;
 }
 button:hover {
   background: linear-gradient(45deg, #9b59b6, #8e44ad);
@@ -221,11 +189,9 @@ button:hover {
 }
 body.dark-mode button:hover {
   background: linear-gradient(45deg, #d35400, #e67e22);
-  transition: background 0.3s ease;
 }
 #leaveRoom {
   background: linear-gradient(45deg, #7f8c8d, #95a5a6);
-  transition: background 0.3s ease;
 }
 #leaveRoom:hover {
   background: linear-gradient(45deg, #95a5a6, #7f8c8d);
@@ -242,11 +208,9 @@ body.dark-mode button:hover {
   line-height: 2.8rem;
   text-align: center;
   display: inline-block;
-  transition: background 0.3s ease;
 }
 body.dark-mode #copyRoomCode {
   background: linear-gradient(45deg, #e67e22, #d35400);
-  transition: background 0.3s ease;
 }
 #copyRoomCode:hover {
   background: linear-gradient(45deg, #9b59b6, #8e44ad);
@@ -255,7 +219,6 @@ body.dark-mode #copyRoomCode {
 }
 body.dark-mode #copyRoomCode:hover {
   background: linear-gradient(45deg, #d35400, #e67e22);
-  transition: background 0.3s ease;
 }
 #rulesBtn, #themeToggle {
   position: fixed;
@@ -275,7 +238,6 @@ body.dark-mode #copyRoomCode:hover {
   animation: float 2s ease-in-out infinite;
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
-  transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 #rulesBtn {
   right: 1.5rem;
@@ -290,7 +252,6 @@ body.dark-mode #copyRoomCode:hover {
 #rulesBtn:hover, #themeToggle:hover {
   background: rgba(52, 152, 219, 0.5);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-  transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 #rulesBtn.hidden, #themeToggle.hidden {
   display: none;
@@ -331,14 +292,12 @@ body.dark-mode #copyRoomCode:hover {
   font-family: 'Poppins', sans-serif;
   color: #f5f5f5;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-  transition: color 0.3s ease;
 }
 #playerCountDisplay span, #impostorCountDisplay span {
   font-weight: 800;
 }
 body.dark-mode #playerCountDisplay, body.dark-mode #impostorCountDisplay {
   color: #e6e6e6;
-  transition: color 0.3s ease;
 }
 .bold {
   font-family: 'Poppins', sans-serif;
@@ -352,14 +311,12 @@ body.dark-mode #playerCountDisplay, body.dark-mode #impostorCountDisplay {
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
   text-align: center;
   margin: 1rem 0;
-  transition: color 0.3s ease;
 }
 #roundCounter strong {
   font-weight: 800;
 }
 body.dark-mode #roundCounter {
   color: #e6e6e6;
-  transition: color 0.3s ease;
 }
 #wordDisplay {
   font-size: 2rem;
@@ -369,11 +326,9 @@ body.dark-mode #roundCounter {
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
   text-align: center;
   margin: 0.5rem 0;
-  transition: color 0.3s ease;
 }
 body.dark-mode #wordDisplay {
   color: #e6e6e6;
-  transition: color 0.3s ease;
 }
 .word-normal {
   color: #2ecc71;
@@ -405,7 +360,6 @@ body.dark-mode #wordDisplay {
   animation: fadeIn 0.3s ease-in-out;
   max-width: 100%;
   box-sizing: border-box;
-  transition: background-color 0.3s ease, color 0.3s ease;
 }
 #playersList li .avatar {
   width: 2.2rem;
@@ -445,7 +399,7 @@ body.dark-mode #wordDisplay {
   text-align: center;
   padding: 0;
   user-select: none;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.2s ease;
 }
 #playersList li .kickBtn:hover {
   background-color: #c0392b;
@@ -460,7 +414,6 @@ body.dark-mode #wordDisplay {
 }
 body.dark-mode .self {
   color: #e67e22 !important;
-  transition: color 0.3s ease;
 }
 #messageBox {
   position: fixed;
@@ -485,7 +438,6 @@ body.dark-mode .self {
   font-weight: 600;
   animation: scaleIn 0.3s ease-in-out;
   box-sizing: border-box;
-  transition: background 0.3s ease, color 0.3s ease, border 0.3s ease;
 }
 #messageBox:not(.copy-message) {
   font-size: 2.8rem;
@@ -496,7 +448,6 @@ body.dark-mode .self {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   border: 2px solid rgba(255, 255, 255, 0.2);
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
-  transition: background 0.3s ease, border 0.3s ease, color 0.3s ease;
 }
 #messageBox strong {
   font-weight: 800;
@@ -525,7 +476,6 @@ body.dark-mode .self {
   font-family: 'Segoe UI Black', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   animation: scaleIn 0.3s ease-in-out;
   box-sizing: border-box;
-  transition: background 0.3s ease, border 0.3s ease, color 0.3s ease;
 }
 #impostorSelectionBox {
   position: fixed;
@@ -545,9 +495,9 @@ body.dark-mode .self {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   border: 2px solid rgba(255, 255, 255, 0.2);
   font-size: 2rem;
+  animation: scaleIn 0.2s ease-in-out;
   box-sizing: border-box;
   will-change: transform, opacity;
-  transition: background 0.3s ease, border 0.3s ease, color 0.3s ease;
 }
 #impostorSelectionBox p {
   margin: 0 0 1.5rem 0;
@@ -557,7 +507,6 @@ body.dark-mode .self {
   font-weight: 600;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
   white-space: nowrap;
-  transition: color 0.3s ease;
 }
 #impostorSelectionBox #loadingMessage {
   font-size: 1.8rem;
@@ -566,7 +515,6 @@ body.dark-mode .self {
   font-weight: 500;
   margin: 0.5rem 0;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-  transition: color 0.3s ease;
 }
 #impostorSelectionBox #recommendedPlayers {
   font-size: 1.4rem;
@@ -577,7 +525,6 @@ body.dark-mode .self {
   margin-top: 1rem;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
   text-align: center;
-  transition: color 0.3s ease;
 }
 #impostorSelectionBox .impostor-selector {
   display: flex;
@@ -600,13 +547,12 @@ body.dark-mode .self {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.3s ease, border 0.3s ease, opacity 0.3s ease;
+  transition: opacity 0.3s ease, background 0.3s ease;
 }
 #impostorSelectionBox #minusImpostor:hover:not(:disabled),
 #impostorSelectionBox #plusImpostor:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.3);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-  transition: background 0.3s ease;
 }
 #impostorSelectionBox #minusImpostor:disabled,
 #impostorSelectionBox #plusImpostor:disabled {
@@ -622,12 +568,11 @@ body.dark-mode .self {
   font-size: 2rem;
   font-weight: bold;
   border-radius: 0.8rem;
-  transition: background 0.3s ease, border 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+  transition: background 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
 }
 #impostorSelectionBox #confirmImpostors:hover:not(:disabled) {
   background: rgba(142, 68, 173, 0.3);
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
-  transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 #impostorSelectionBox #confirmImpostors:disabled {
   opacity: 0.5;
@@ -651,9 +596,9 @@ body.dark-mode .self {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   border: 2px solid rgba(255, 255, 255, 0.2);
   font-size: 2rem;
+  animation: scaleIn 0.2s ease-in-out;
   box-sizing: border-box;
   will-change: transform, opacity;
-  transition: background 0.3s ease, border 0.3s ease, color 0.3s ease;
 }
 #categorySelectionBox p {
   margin: 0 0 1.5rem 0;
@@ -663,7 +608,6 @@ body.dark-mode .self {
   font-weight: 600;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
   white-space: nowrap;
-  transition: color 0.3s ease;
 }
 #categorySelectionBox .category-grid {
   display: grid;
@@ -684,28 +628,22 @@ body.dark-mode .self {
 #categorySelectionBox .category-grid::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 4px;
-  transition: background 0.3s ease;
 }
 #categorySelectionBox .category-grid::-webkit-scrollbar-thumb {
   background: linear-gradient(45deg, #8e44ad, #9b59b6);
   border-radius: 4px;
-  transition: background 0.3s ease;
 }
 #categorySelectionBox .category-grid::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(45deg, #9b59b6, #8e44ad);
-  transition: background 0.3s ease;
 }
 body.dark-mode #categorySelectionBox .category-grid::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.05);
-  transition: background 0.3s ease;
 }
 body.dark-mode #categorySelectionBox .category-grid::-webkit-scrollbar-thumb {
   background: linear-gradient(45deg, #e67e22, #d35400);
-  transition: background 0.3s ease;
 }
 body.dark-mode #categorySelectionBox .category-grid::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(45deg, #d35400, #e67e22);
-  transition: background 0.3s ease;
 }
 #categorySelectionBox .category-btn {
   background: rgba(0, 0, 0, 0.4);
@@ -725,7 +663,6 @@ body.dark-mode #categorySelectionBox .category-grid::-webkit-scrollbar-thumb:hov
   background: rgba(142, 68, 173, 0.4);
   opacity: 1;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-  transition: background 0.3s ease, opacity 0.3s ease;
 }
 #categorySelectionBox .category-btn:hover:not(.selected) {
   opacity: 0.7;
@@ -740,7 +677,6 @@ body.dark-mode #categorySelectionBox .category-grid::-webkit-scrollbar-thumb:hov
   font-family: 'Poppins', sans-serif;
   font-weight: 600;
   color: #f5f5f5;
-  transition: color 0.3s ease;
 }
 #categorySelectionBox #allCategoriesBtn .checkbox {
   width: 24px;
@@ -753,21 +689,18 @@ body.dark-mode #categorySelectionBox .category-grid::-webkit-scrollbar-thumb:hov
   font-size: 1.6rem;
   cursor: pointer;
   background: rgba(142, 68, 173, 0.2);
-  transition: background 0.3s ease, border 0.3s ease;
+  transition: background 0.3s ease;
   box-sizing: border-box;
 }
 #categorySelectionBox #allCategoriesBtn .checkbox:hover {
   background: rgba(142, 68, 173, 0.3);
-  transition: background 0.3s ease;
 }
 body.dark-mode #categorySelectionBox #allCategoriesBtn .checkbox {
   border-color: #e6e6e6;
   background: rgba(230, 126, 34, 0.2);
-  transition: border 0.3s ease, background 0.3s ease;
 }
 body.dark-mode #categorySelectionBox #allCategoriesBtn .checkbox:hover {
   background: rgba(230, 126, 34, 0.3);
-  transition: background 0.3s ease;
 }
 #categorySelectionBox #confirmCategories {
   width: 150px;
@@ -778,14 +711,13 @@ body.dark-mode #categorySelectionBox #allCategoriesBtn .checkbox:hover {
   font-size: 2rem;
   font-weight: bold;
   border-radius: 0.8rem;
-  transition: background 0.3s ease, border 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+  transition: background 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
   display: block;
   box-sizing: border-box;
 }
 #categorySelectionBox #confirmCategories:hover:not(:disabled) {
   background: rgba(142, 68, 173, 0.3);
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
-  transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 #categorySelectionBox #confirmCategories:disabled {
   opacity: 0.5;
@@ -827,20 +759,16 @@ body.dark-mode #categorySelectionBox #allCategoriesBtn .checkbox:hover {
   background: rgba(142, 68, 173, 0.4);
   border: 2px solid #9b59b6;
   transform: scale(1.1);
-  transition: background 0.3s ease, border 0.3s ease;
 }
 body.dark-mode .emoji-btn {
   background: rgba(230, 126, 34, 0.2);
-  transition: background 0.3s ease;
 }
 body.dark-mode .emoji-btn:hover {
   background: rgba(230, 126, 34, 0.3);
-  transition: background 0.3s ease;
 }
 body.dark-mode .emoji-btn.selected {
   background: rgba(230, 126, 34, 0.4);
   border: 2px solid #e67e22;
-  transition: background 0.3s ease, border 0.3s ease;
 }
 .section-divider {
   border: 0;
@@ -872,7 +800,6 @@ body.dark-mode .emoji-btn.selected {
   box-sizing: border-box;
   scrollbar-width: thin;
   scrollbar-color: #9b59b6 rgba(255, 255, 255, 0.1);
-  transition: background 0.3s ease, border 0.3s ease, color 0.3s ease;
 }
 #rulesBox::-webkit-scrollbar {
   width: 8px;
@@ -880,33 +807,26 @@ body.dark-mode .emoji-btn.selected {
 #rulesBox::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 4px;
-  transition: background 0.3s ease;
 }
 #rulesBox::-webkit-scrollbar-thumb {
   background: linear-gradient(45deg, #8e44ad, #9b59b6);
   border-radius: 4px;
-  transition: background 0.3s ease;
 }
 #rulesBox::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(45deg, #9b59b6, #8e44ad);
-  transition: background 0.3s ease;
 }
 body.dark-mode #rulesBox {
   background: linear-gradient(135deg, #4b0082, #e67e22);
   border: 2px solid rgba(255, 255, 255, 0.1);
-  transition: background 0.3s ease, border 0.3s ease;
 }
 body.dark-mode #rulesBox::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.05);
-  transition: background 0.3s ease;
 }
 body.dark-mode #rulesBox::-webkit-scrollbar-thumb {
   background: linear-gradient(45deg, #e67e22, #d35400);
-  transition: background 0.3s ease;
 }
 body.dark-mode #rulesBox::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(45deg, #d35400, #e67e22);
-  transition: background 0.3s ease;
 }
 #rulesBox h2 {
   font-size: 2.5rem;
