@@ -7,832 +7,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet" />
-  <style>
-    body {
-      background: 
-        radial-gradient(circle, rgba(255, 255, 255, 0.15) 2px, transparent 3px),
-        linear-gradient(135deg, #f39c12 0%, #e67e22 70%, #d35400 100%);
-      background-size: 15px 15px, auto;
-      background-position: 0 0, 0 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      color: #fff;
-      font-size: 2rem;
-      margin: 0;
-      padding: 1.5rem;
-      min-height: 100vh;
-      position: relative;
-      transition: background 0.3s ease;
-      overflow-x: hidden;
-    }
-    body.dark-mode {
-      background: 
-        radial-gradient(circle, rgba(255, 255, 255, 0.05) 2px, transparent 3px),
-        linear-gradient(135deg, #4b0082 0%, #2c003e 100%);
-      background-size: 15px 15px, auto;
-    }
-    body.dark-mode .container {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    body.dark-mode #playersList li {
-      background-color: rgba(255, 255, 255, 0.1);
-      color: #e67e22;
-    }
-    body.dark-mode #messageBox:not(.copy-message) {
-      background: linear-gradient(135deg, #4b0082, #e67e22);
-      border: 2px solid rgba(255, 255, 255, 0.1);
-    }
-    body.dark-mode #roleMessageBox {
-      background: linear-gradient(135deg, #4b0082, #e67e22);
-      border: 2px solid rgba(255, 255, 255, 0.1);
-    }
-    body.dark-mode #impostorSelectionBox {
-      background: linear-gradient(135deg, #4b0082, #e67e22);
-      border: 2px solid rgba(255, 255, 255, 0.1);
-    }
-    body.dark-mode #impostorSelectionBox #minusImpostor,
-    body.dark-mode #impostorSelectionBox #plusImpostor,
-    body.dark-mode #impostorSelectionBox #confirmImpostors {
-      background: rgba(230, 126, 34, 0.2);
-      border: 1px solid rgba(230, 126, 34, 0.3);
-    }
-    body.dark-mode #impostorSelectionBox #minusImpostor:hover:not(:disabled),
-    body.dark-mode #impostorSelectionBox #plusImpostor:hover:not(:disabled),
-    body.dark-mode #impostorSelectionBox #confirmImpostors:hover {
-      background: rgba(230, 126, 34, 0.3);
-    }
-    body.dark-mode #impostorSelectionBox #minusImpostor:disabled,
-    body.dark-mode #impostorSelectionBox #plusImpostor:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    body.dark-mode #impostorSelectionBox #recommendedPlayers {
-      color: #e6e6e6;
-    }
-    body.dark-mode #categorySelectionBox {
-      background: linear-gradient(135deg, #4b0082, #e67e22);
-      border: 2px solid rgba(255, 255, 255, 0.1);
-    }
-    body.dark-mode #categorySelectionBox .category-btn {
-      background: rgba(0, 0, 0, 0.4);
-    }
-    body.dark-mode #categorySelectionBox .category-btn.selected {
-      background: rgba(230, 126, 34, 0.4);
-    }
-    body.dark-mode #categorySelectionBox #allCategoriesBtn .checkbox {
-      background: rgba(230, 126, 34, 0.2);
-      border: 1px solid rgba(230, 126, 34, 0.3);
-    }
-    body.dark-mode #categorySelectionBox #allCategoriesBtn .checkbox:hover {
-      background: rgba(230, 126, 34, 0.3);
-    }
-    body.dark-mode #categorySelectionBox #confirmCategories {
-      background: rgba(230, 126, 34, 0.2);
-      border: 1px solid rgba(230, 126, 34, 0.3);
-    }
-    body.dark-mode #categorySelectionBox #confirmCategories:hover:not(:disabled) {
-      background: rgba(230, 126, 34, 0.3);
-    }
-    .container {
-      max-width: 800px;
-      margin: auto;
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      padding: 1.5rem;
-      border-radius: 1.5rem;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      transition: background 0.3s ease, border 0.3s ease;
-      box-sizing: border-box;
-    }
-    @media (max-width: 600px) {
-      body {
-        padding: 1rem;
-      }
-      .container {
-        padding: 1rem;
-        margin: 0.5rem;
-      }
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes scaleIn {
-      from { opacity: 0; transform: scale(0.8); }
-      to { opacity: 1; transform: scale(1); }
-    }
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.02); }
-      100% { transform: scale(1); }
-    }
-    @keyframes float {
-      0% { transform: translateY(0); }
-      50% { transform: translateY(-5px); }
-      100% { transform: translateY(0); }
-    }
-    #loginScreen, #gameScreen, #categorySelectionBox {
-      animation: fadeIn 0.5s ease-in-out;
-    }
-    #gameScreen h1 {
-      text-align: center;
-      font-size: 4.5rem;
-      color: #f5f5f5;
-      font-family: 'Pacifico', cursive;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-      margin-bottom: 1.5rem;
-    }
-    h1 {
-      text-align: center;
-      font-size: 3rem;
-      color: #f5f5f5;
-      font-family: 'Pacifico', cursive;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-    }
-    input, button {
-      font-size: 1.8rem;
-      padding: 0.8rem;
-      margin: 0.8rem 0;
-      border-radius: 0.8rem;
-      border: none;
-      width: 100%;
-      max-width: 350px;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-      box-sizing: border-box;
-    }
-    input {
-      border: 2px solid #8e44ad;
-      color: #333;
-      background: rgba(255, 255, 255, 0.9);
-    }
-    button {
-      background: linear-gradient(45deg, #8e44ad, #9b59b6);
-      color: white;
-      cursor: pointer;
-      transition: box-shadow 0.3s ease;
-    }
-    body.dark-mode button {
-      background: linear-gradient(45deg, #e67e22, #d35400);
-    }
-    button:hover {
-      background: linear-gradient(45deg, #9b59b6, #8e44ad);
-      animation: pulse 1s infinite;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    }
-    body.dark-mode button:hover {
-      background: linear-gradient(45deg, #d35400, #e67e22);
-    }
-    #leaveRoom {
-      background: linear-gradient(45deg, #7f8c8d, #95a5a6);
-    }
-    #leaveRoom:hover {
-      background: linear-gradient(45deg, #95a5a6, #7f8c8d);
-      animation: pulse 1s infinite;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    }
-    #copyRoomCode {
-      background: linear-gradient(45deg, #8e44ad, #9b59b6);
-      width: 2.8rem;
-      height: 2.8rem;
-      font-size: 2rem;
-      padding: 0;
-      margin: 0 0.5rem;
-      line-height: 2.8rem;
-      text-align: center;
-      display: inline-block;
-    }
-    body.dark-mode #copyRoomCode {
-      background: linear-gradient(45deg, #e67e22, #d35400);
-    }
-    #copyRoomCode:hover {
-      background: linear-gradient(45deg, #9b59b6, #8e44ad);
-      animation: pulse 1s infinite;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    }
-    body.dark-mode #copyRoomCode:hover {
-      background: linear-gradient(45deg, #d35400, #e67e22);
-    }
-    #rulesBtn, #themeToggle {
-      position: fixed;
-      bottom: 1.5rem;
-      border-radius: 50%;
-      background: rgba(52, 152, 219, 0.3);
-      color: white;
-      font-size: 2rem;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      cursor: pointer;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-      z-index: 1000;
-      animation: float 2s ease-in-out infinite;
-      backdrop-filter: blur(5px);
-      -webkit-backdrop-filter: blur(5px);
-    }
-    #rulesBtn {
-      right: 1.5rem;
-      width: 3.5rem;
-      height: 3.5rem;
-    }
-    #themeToggle {
-      right: 6rem;
-      width: 3.5rem;
-      height: 3.5rem;
-    }
-    #rulesBtn:hover, #themeToggle:hover {
-      background: rgba(52, 152, 219, 0.5);
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    }
-    #rulesBtn.hidden, #themeToggle.hidden {
-      display: none;
-    }
-    @media (max-width: 600px) {
-      #rulesBtn, #themeToggle {
-        width: 3rem;
-        height: 3rem;
-        font-size: 1.8rem;
-        bottom: 1rem;
-      }
-      #rulesBtn {
-        right: 1rem;
-      }
-      #themeToggle {
-        right: 5rem;
-      }
-    }
-    #roomCodeContainer {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      margin: 0.8rem 0;
-      flex-wrap: nowrap;
-      max-width: 100%;
-    }
-    #countsContainer {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 1rem;
-      margin: 0.8rem 0;
-      flex-wrap: wrap;
-      max-width: 100%;
-    }
-    #roomCodeDisplay {
-      font-weight: bold;
-    }
-    #playersList {
-      list-style: none;
-      padding: 0;
-      max-width: 100%;
-    }
-    #playersList li {
-      position: relative;
-      padding: 0.8rem 4.5rem 0.8rem 3.5rem;
-      margin: 0.5rem 0;
-      border-radius: 1rem;
-      background-color: rgba(255, 255, 255, 0.8);
-      color: #333;
-      display: flex;
-      align-items: center;
-      animation: fadeIn 0.3s ease-in-out;
-      max-width: 100%;
-      box-sizing: border-box;
-    }
-    #playersList li .avatar {
-      width: 2.2rem;
-      height: 2.2rem;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-      margin-right: 0.8rem;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-      position: absolute;
-      left: 0.8rem;
-    }
-    #playersList li.host .avatar::after {
-      content: '👑';
-      position: absolute;
-      top: -0.4rem;
-      right: -0.4rem;
-      font-size: 0.9rem;
-    }
-    #playersList li .kickBtn {
-      position: absolute;
-      top: 50%;
-      right: 0.8rem;
-      transform: translateY(-50%);
-      width: 28px;
-      height: 28px;
-      background-color: #e74c3c;
-      color: white;
-      font-weight: bold;
-      border-radius: 4px;
-      border: none;
-      cursor: pointer;
-      font-size: 1.6rem;
-      line-height: 1;
-      text-align: center;
-      padding: 0;
-      user-select: none;
-      transition: transform 0.2s ease, background-color 0.2s ease;
-    }
-    #playersList li .kickBtn:hover {
-      background-color: #c0392b;
-      transform: scale(1.1);
-    }
-    .host {
-      color: #3498db !important;
-      font-weight: bold;
-    }
-    .self {
-      color: black !important;
-      font-weight: bold;
-    }
-    body.dark-mode .self {
-      color: #e67e22 !important;
-    }
-    #messageBox {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(255, 255, 255, 0.8);
-      backdrop-filter: blur(5px);
-      -webkit-backdrop-filter: blur(5px);
-      color: #333;
-      padding: 1.2rem;
-      border-radius: 1rem;
-      text-align: center;
-      z-index: 1001;
-      display: none;
-      max-width: 90vw;
-      word-wrap: break-word;
-      white-space: pre-line;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-      font-size: 1.8rem;
-      font-family: 'Poppins', sans-serif;
-      font-weight: 600;
-      animation: scaleIn 0.3s ease-in-out;
-      box-sizing: border-box;
-    }
-    #messageBox:not(.copy-message) {
-      font-size: 2.8rem;
-      background: linear-gradient(135deg, #8e44ad, #d35400);
-      color: white;
-      padding: 2rem;
-      border-radius: 1.5rem;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      border: 2px solid rgba(255, 255, 255, 0.2);
-      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
-    }
-    #messageBox strong {
-      font-weight: 800;
-    }
-    #roleMessageBox {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: linear-gradient(135deg, #8e44ad, #d35400);
-      color: white;
-      padding: 2rem;
-      border-radius: 1.5rem;
-      text-align: center;
-      z-index: 1001;
-      display: none;
-      max-width: 90vw;
-      word-wrap: break-word;
-      white-space: pre-line;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      border: 2px solid rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(5px);
-      -webkit-backdrop-filter: blur(5px);
-      font-size: 3.5rem;
-      font-weight: bold;
-      font-family: 'Segoe UI Black', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      animation: scaleIn 0.3s ease-in-out;
-      box-sizing: border-box;
-    }
-    #impostorSelectionBox {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: linear-gradient(135deg, #8e44ad, #d35400);
-      color: white;
-      padding: 2rem 3rem;
-      border-radius: 1.5rem;
-      text-align: center;
-      z-index: 1001;
-      display: none;
-      max-width: 90vw;
-      word-wrap: break-word;
-      white-space: pre-line;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      border: 2px solid rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(5px);
-      -webkit-backdrop-filter: blur(5px);
-      font-size: 2rem;
-      animation: scaleIn 0.3s ease-in-out;
-      box-sizing: border-box;
-    }
-    #impostorSelectionBox p {
-      margin: 0 0 1.5rem 0;
-      font-size: 3rem;
-      color: #f5f5f5;
-      font-family: 'Poppins', sans-serif;
-      font-weight: 600;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-      white-space: nowrap;
-    }
-    #impostorSelectionBox #recommendedPlayers {
-      font-size: 1.4rem;
-      font-weight: 400;
-      font-family: 'Poppins', sans-serif;
-      color: #f5f5f5;
-      opacity: 0.8;
-      margin-top: 1rem;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-      text-align: center;
-    }
-    #impostorSelectionBox .impostor-selector {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
-    #impostorSelectionBox #minusImpostor,
-    #impostorSelectionBox #plusImpostor {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.2);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      color: white;
-      font-size: 2.5rem;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: opacity 0.3s ease, background 0.3s ease;
-    }
-    #impostorSelectionBox #minusImpostor:hover:not(:disabled),
-    #impostorSelectionBox #plusImpostor:hover:not(:disabled) {
-      background: rgba(255, 255, 255, 0.3);
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    }
-    #impostorSelectionBox #minusImpostor:disabled,
-    #impostorSelectionBox #plusImpostor:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    #impostorSelectionBox #confirmImpostors {
-      width: 150px;
-      margin: 0 auto;
-      background: rgba(142, 68, 173, 0.2);
-      border: 1px solid rgba(142, 68, 173, 0.3);
-      color: white;
-      font-size: 2rem;
-      font-weight: bold;
-      border-radius: 0.8rem;
-      transition: background 0.3s ease, box-shadow 0.3s ease;
-    }
-    #impostorSelectionBox #confirmImpostors:hover {
-      background: rgba(142, 68, 173, 0.3);
-      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
-    }
-    #categorySelectionBox {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: linear-gradient(135deg, #8e44ad, #d35400);
-      color: white;
-      padding: 2rem 3rem;
-      border-radius: 1.5rem;
-      text-align: center;
-      z-index: 1001;
-      display: none;
-      max-width: 90vw;
-      word-wrap: break-word;
-      white-space: pre-line;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      border: 2px solid rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(5px);
-      -webkit-backdrop-filter: blur(5px);
-      font-size: 2rem;
-      animation: scaleIn 0.3s ease-in-out;
-      box-sizing: border-box;
-    }
-    #categorySelectionBox p {
-      margin: 0 0 1.5rem 0;
-      font-size: 3rem;
-      color: #f5f5f5;
-      font-family: 'Poppins', sans-serif;
-      font-weight: 600;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-      white-space: nowrap;
-    }
-    #categorySelectionBox .category-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-      max-height: 300px;
-      overflow-y: auto;
-      overflow-x: hidden;
-      box-sizing: border-box;
-    }
-    #categorySelectionBox .category-btn {
-      background: rgba(0, 0, 0, 0.4);
-      border: none;
-      border-radius: 0.8rem;
-      padding: 1rem;
-      font-size: 1.8rem;
-      font-family: 'Poppins', sans-serif;
-      font-weight: 600;
-      color: #f5f5f5;
-      cursor: pointer;
-      opacity: 0.5;
-      transition: opacity 0.3s ease, background 0.3s ease;
-      box-sizing: border-box;
-    }
-    #categorySelectionBox .category-btn.selected {
-      background: rgba(142, 68, 173, 0.4);
-      opacity: 1;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    }
-    #categorySelectionBox .category-btn:hover:not(.selected) {
-      opacity: 0.7;
-    }
-    #categorySelectionBox #allCategoriesBtn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      margin: 0.8rem auto;
-      font-size: 2rem;
-      font-family: 'Poppins', sans-serif;
-      font-weight: 600;
-      color: #f5f5f5;
-    }
-    #categorySelectionBox #allCategoriesBtn .checkbox {
-      width: 24px;
-      height: 24px;
-      border: 2px solid #f5f5f5;
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.6rem;
-      cursor: pointer;
-      background: rgba(142, 68, 173, 0.2);
-      transition: background 0.3s ease;
-      box-sizing: border-box;
-    }
-    #categorySelectionBox #allCategoriesBtn .checkbox:hover {
-      background: rgba(142, 68, 173, 0.3);
-    }
-    body.dark-mode #categorySelectionBox #allCategoriesBtn .checkbox {
-      border-color: #e6e6e6;
-      background: rgba(230, 126, 34, 0.2);
-    }
-    body.dark-mode #categorySelectionBox #allCategoriesBtn .checkbox:hover {
-      background: rgba(230, 126, 34, 0.3);
-    }
-    #categorySelectionBox #confirmCategories {
-      width: 150px;
-      margin: 0 auto;
-      background: rgba(142, 68, 173, 0.2);
-      border: 1px solid rgba(142, 68, 173, 0.3);
-      color: white;
-      font-size: 2rem;
-      font-weight: bold;
-      border-radius: 0.8rem;
-      transition: background 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
-      box-sizing: border-box;
-    }
-    #categorySelectionBox #confirmCategories:hover:not(:disabled) {
-      background: rgba(142, 68, 173, 0.3);
-      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
-    }
-    #categorySelectionBox #confirmCategories:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    @media (max-width: 600px) {
-      #impostorSelectionBox {
-        padding: 1.5rem 2rem;
-      }
-      #impostorSelectionBox p {
-        font-size: 2rem;
-      }
-      #impostorSelectionBox #impostorCount {
-        font-size: 2.5rem;
-      }
-      #impostorSelectionBox #minusImpostor,
-      #impostorSelectionBox #plusImpostor {
-        width: 45px;
-        height: 45px;
-        font-size: 2.2rem;
-      }
-      #impostorSelectionBox #confirmImpostors {
-        width: 120px;
-        font-size: 1.8rem;
-      }
-      #impostorSelectionBox #recommendedPlayers {
-        font-size: 1.2rem;
-        margin-top: 0.8rem;
-      }
-      #categorySelectionBox {
-        padding: 1.5rem 2rem;
-      }
-      #categorySelectionBox p {
-        font-size: 2rem;
-      }
-      #categorySelectionBox .category-grid {
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      }
-      #categorySelectionBox .category-btn {
-        font-size: 1.6rem;
-        padding: 0.8rem;
-      }
-      #categorySelectionBox #allCategoriesBtn {
-        font-size: 1.8rem;
-      }
-      #categorySelectionBox #allCategoriesBtn .checkbox {
-        width: 20px;
-        height: 20px;
-        font-size: 1.4rem;
-      }
-      #categorySelectionBox #confirmCategories {
-        width: 120px;
-        font-size: 1.8rem;
-      }
-    }
-    #rulesBox {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: linear-gradient(135deg, #8e44ad, #d35400);
-      color: white;
-      padding: 2rem 3rem;
-      border-radius: 1.5rem;
-      text-align: left;
-      z-index: 1001;
-      display: none;
-      max-width: 90vw;
-      max-height: 80vh;
-      overflow-y: auto;
-      overflow-x: hidden;
-      word-wrap: break-word;
-      white-space: pre-line;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      border: 2px solid rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(5px);
-      -webkit-backdrop-filter: blur(5px);
-      font-size: 1.8rem;
-      font-family: 'Poppins', sans-serif;
-      font-weight: 600;
-      animation: scaleIn 0.3s ease-in-out;
-      box-sizing: border-box;
-    }
-    #rulesBox h2 {
-      font-size: 3.2rem;
-      color: #f5f5f5;
-      font-family: 'Pacifico', cursive;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-      margin: 0.8rem 0;
-      text-align: center;
-    }
-    #rulesBox h3 {
-      font-size: 2.6rem;
-      color: #f5f5f5;
-      margin: 0.8rem 0;
-      text-align: center;
-    }
-    #rulesBox ul {
-      list-style-type: disc;
-      padding-left: 1.5rem;
-      margin: 0.8rem 0;
-    }
-    #rulesBox li {
-      margin-bottom: 0.5rem;
-      font-size: 1.6rem;
-      color: #f5f5f5;
-    }
-    #rulesBox #closeRules {
-      background: linear-gradient(45deg, #9b59b6, #8e44ad);
-      font-size: 1.8rem;
-      padding: 0.8rem;
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0.8rem auto 0;
-    }
-    body.dark-mode #rulesBox #closeRules {
-      background: linear-gradient(45deg, #e67e22, #d35400);
-    }
-    #rulesBox #closeRules:hover {
-      background: linear-gradient(45deg, #8e44ad, #9b59b6);
-      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
-    }
-    body.dark-mode #rulesBox #closeRules:hover {
-      background: linear-gradient(45deg, #d35400, #e67e22);
-    }
-    #rulesBox #closeRulesTop {
-      position: sticky;
-      top: 0.5rem;
-      right: 0.5rem;
-      float: right;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: rgba(127, 140, 141, 0.5);
-      color: #f5f5f5;
-      font-size: 1.6rem;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-      z-index: 1002;
-      border: none;
-    }
-    #rulesBox #closeRulesTop:hover {
-      background: rgba(127, 140, 141, 0.7);
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    }
-    @media (max-width: 600px) {
-      #rulesBox {
-        padding: 1.5rem;
-        font-size: 1.6rem;
-      }
-      #rulesBox h2 {
-        font-size: 2.6rem;
-      }
-      #rulesBox h3 {
-        font-size: 2rem;
-      }
-      #rulesBox li {
-        font-size: 1.4rem;
-      }
-      #rulesBox #closeRules {
-        width: 40px;
-        height: 40px;
-        font-size: 1.6rem;
-      }
-      #rulesBox #closeRulesTop {
-        width: 35px;
-        height: 35px;
-        font-size: 1.4rem;
-        top: 0.3rem;
-        right: 0.3rem;
-      }
-      #messageBox:not(.copy-message) {
-        font-size: 2.2rem;
-        padding: 1.5rem;
-      }
-      #roleMessageBox {
-        font-size: 2.8rem;
-        padding: 1.5rem;
-      }
-    }
-    #countsContainer p, #roundCounter {
-      font-size: 1.6rem;
-      color: #f5f5f5;
-      text-align: center;
-      margin: 0;
-      font-family: 'Poppins', sans-serif;
-      font-weight: 600;
-      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
-      max-width: 100%;
-    }
-    #roundCounter {
-      margin-top: 0.8rem;
-    }
-    @media (max-width: 600px) {
-      #countsContainer p, #roundCounter {
-        font-size: 1.4rem;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
@@ -975,7 +150,15 @@
       { name: 'Zwierzęta', file: 'animals.json' },
       { name: 'Jedzenie', file: 'food.json' },
       { name: 'Przedmioty', file: 'objects.json' },
-      { name: 'Miejsca', file: 'places.json' }
+      { name: 'Miejsca', file: 'places.json' },
+      { name: 'Zawody', file: 'jobs.json' },
+      { name: 'Sport', file: 'sports.json' },
+      { name: 'Motoryzacja', file: 'automotive.json' },
+      { name: 'Rośliny', file: 'plants.json' },
+      { name: 'Geografia', file: 'geography.json' },
+      { name: 'Filmy i seriale', file: 'movies_series.json' },
+      { name: 'Człowiek', file: 'people.json' },
+      { name: 'Muzyka', file: 'music.json' }
     ];
     const wordsBaseUrl = 'https://raw.githubusercontent.com/kermitovsky/slowny-oszust/main/words/';
 
@@ -1018,6 +201,7 @@
 
     // Inicjalizacja wyboru kategorii
     function initializeCategorySelection() {
+      console.log('Inicjalizacja wyboru kategorii');
       categoryGrid.innerHTML = '';
       categories.forEach(category => {
         const btn = document.createElement('button');
@@ -1068,6 +252,7 @@
       confirmCategories.disabled = selectedCategories.length === 0;
       confirmCategories.style.opacity = selectedCategories.length === 0 ? '0.5' : '1';
       confirmCategories.style.cursor = selectedCategories.length === 0 ? 'not-allowed' : 'pointer';
+      console.log('Zaktualizowano przycisk Dalej, disabled:', confirmCategories.disabled);
     }
 
     allCategoriesBtn.querySelector('.checkbox').addEventListener('click', () => {
@@ -1083,7 +268,11 @@
     });
 
     confirmCategories.addEventListener('click', () => {
-      if (selectedCategories.length === 0) return;
+      if (selectedCategories.length === 0) {
+        showMessage('❌ Wybierz przynajmniej jedną kategorię!');
+        console.log('Brak wybranych kategorii');
+        return;
+      }
       console.log('Potwierdzono kategorie:', selectedCategories);
       loadWords().then(() => {
         categorySelectionBox.style.display = 'none';
@@ -1092,6 +281,7 @@
         impostorCountDisplaySelector.textContent = impostorCount;
         updateImpostorButtons();
         updateRecommendedPlayers();
+        console.log('Przełączono na wybór impostorów');
       });
     });
 
@@ -1288,6 +478,7 @@
       isHost = true;
       console.log('Ustawiono hosta, imię:', currentPlayerName);
       categorySelectionBox.style.display = 'block';
+      console.log('Wyświetlono categorySelectionBox');
       initializeCategorySelection();
       rulesBtn.classList.add('hidden');
       themeToggle.classList.add('hidden');
@@ -1438,6 +629,35 @@
       });
     }
 
+    leaveRoomBtn.addEventListener('click', () => {
+      console.log('Kliknięto Opuść pokój');
+      if (currentRoomCode && currentPlayerId) {
+        const roomRef = db.ref(`rooms/${currentRoomCode}`);
+        roomRef.child(`players/${currentPlayerId}`).remove().then(() => {
+          console.log('Gracz opuścił pokój:', currentPlayerId);
+          if (isHost) {
+            roomRef.remove().then(() => {
+              console.log('Pokój usunięty przez hosta:', currentRoomCode);
+            }).catch(error => {
+              console.error('Błąd usuwania pokoju:', error);
+              showMessage('❌ Błąd usuwania pokoju!');
+            });
+          }
+          resetToLobby();
+          loginScreen.style.display = 'block';
+          gameScreen.style.display = 'none';
+          currentRoomCode = null;
+          currentPlayerId = null;
+          isHost = false;
+          roomCodeInput.value = '';
+          playerNameInput.value = '';
+        }).catch(error => {
+          console.error('Błąd opuszczania pokoju:', error);
+          showMessage('❌ Błąd opuszczania pokoju!');
+        });
+      }
+    });
+
     function listenToRoom(roomCode) {
       const roomRef = db.ref(`rooms/${roomCode}`);
       roomRef.on('value', snapshot => {
@@ -1489,7 +709,10 @@
 
     startGameBtn.addEventListener('click', () => {
       console.log('Kliknięto Start gry');
-      if (!isHost) return;
+      if (!isHost) {
+        console.log('Tylko host może rozpocząć grę');
+        return;
+      }
 
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
       roomRef.once('value').then(snapshot => {
@@ -1504,110 +727,87 @@
           return;
         }
 
-        const playerIds = Object.keys(players);
-        const impostorIds = [];
-        for (let i = 0; i < room.numImpostors; i++) {
-          if (playerIds.length === 0) break;
-          const randomIndex = Math.floor(Math.random() * playerIds.length);
-          impostorIds.push(playerIds[randomIndex]);
-          playerIds.splice(randomIndex, 1);
+        if (words.length === 0) {
+          showMessage('❌ Brak słów do gry!');
+          console.log('Brak słów do gry');
+          return;
         }
 
-        // Ważone losowanie startera
-        const weightedPlayers = [];
-        Object.entries(players).forEach(([id, player]) => {
-          const weight = impostorIds.includes(id) ? 0.5 : 1;
-          weightedPlayers.push({ id, weight });
-        });
-        const totalWeight = weightedPlayers.reduce((sum, p) => sum + p.weight, 0);
-        let randomWeight = Math.random() * totalWeight;
-        let starterId = weightedPlayers[0].id;
-        for (const player of weightedPlayers) {
-          randomWeight -= player.weight;
-          if (randomWeight <= 0) {
-            starterId = player.id;
-            break;
-          }
+        const word = words[Math.floor(Math.random() * words.length)];
+        const playerIds = Object.keys(players);
+        const impostorIds = [];
+        const shuffledIds = playerIds.sort(() => Math.random() - 0.5);
+        for (let i = 0; i < room.numImpostors; i++) {
+          if (shuffledIds[i]) impostorIds.push(shuffledIds[i]);
         }
 
         const updates = {};
-        Object.keys(players).forEach(id => {
+        playerIds.forEach(id => {
           updates[`players/${id}/role`] = impostorIds.includes(id) ? 'impostor' : 'normal';
         });
 
-        const currentWord = words[Math.floor(Math.random() * words.length)];
+        const nonImpostorIds = playerIds.filter(id => !impostorIds.includes(id));
+        let starterId;
+        if (nonImpostorIds.length > 0) {
+          starterId = nonImpostorIds[Math.floor(Math.random() * nonImpostorIds.length)];
+        } else {
+          starterId = playerIds[Math.floor(Math.random() * playerIds.length)];
+        }
 
         updates.gameStarted = true;
-        updates.currentWord = currentWord;
+        updates.currentWord = word;
         updates.starterId = starterId;
         updates.currentRound = (room.currentRound || 0) + 1;
 
         roomRef.update(updates).then(() => {
-          console.log('Gra rozpoczęta:', { word: currentWord, impostors: impostorIds, starter: starterId });
+          console.log('Gra rozpoczęta:', { word, impostorIds, starterId });
+          showMessage('Gra rozpoczęta!', 3000);
         }).catch(error => {
           console.error('Błąd rozpoczynania gry:', error);
           showMessage('❌ Błąd rozpoczynania gry!');
         });
+      }).catch(error => {
+        console.error('Błąd pobierania danych pokoju:', error);
+        showMessage('❌ Błąd pobierania danych pokoju!');
       });
     });
 
     endRoundBtn.addEventListener('click', () => {
       console.log('Kliknięto Zakończ rundę');
-      if (!isHost) return;
+      if (!isHost) {
+        console.log('Tylko host może zakończyć rundę');
+        return;
+      }
 
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
       roomRef.once('value').then(snapshot => {
         const room = snapshot.val();
         const players = room.players || {};
-        const updates = {};
+        const currentWord = room.currentWord;
+        const impostorIds = Object.keys(players).filter(id => players[id].role === 'impostor');
+        const impostorNames = impostorIds.map(id => players[id].name).join(', ');
+
+        const updates = {
+          gameStarted: false,
+          currentWord: null,
+          starterId: null,
+          resetMessage: `Runda zakończona! Słowo: <strong>${currentWord}</strong><br>Impostorzy: <strong>${impostorNames || 'Brak'}</strong>`
+        };
         Object.keys(players).forEach(id => {
           updates[`players/${id}/role`] = null;
         });
-        updates.gameStarted = false;
-        updates.currentWord = null;
-        updates.starterId = null;
-        updates.resetMessage = 'Runda zakończona';
 
         roomRef.update(updates).then(() => {
-          console.log('Runda zakończona');
-          resetToLobby();
+          console.log('Runda zakończona:', { word: currentWord, impostorIds });
+          hasShownStartMessage = false;
         }).catch(error => {
           console.error('Błąd kończenia rundy:', error);
           showMessage('❌ Błąd kończenia rundy!');
         });
+      }).catch(error => {
+        console.error('Błąd pobierania danych pokoju:', error);
+        showMessage('❌ Błąd pobierania danych pokoju!');
       });
-    });
-
-    leaveRoomBtn.addEventListener('click', () => {
-      console.log('Kliknięto Opuść pokój');
-      if (currentRoomCode && currentPlayerId) {
-        const roomRef = db.ref(`rooms/${currentRoomCode}`);
-        roomRef.once('value').then(snapshot => {
-          const room = snapshot.val();
-          const players = room.players || {};
-          if (isHost && Object.keys(players).length > 1) {
-            const newHostId = Object.keys(players).find(id => id !== currentPlayerId);
-            roomRef.child(`players/${newHostId}`).update({ isHost: true });
-            console.log('Przypisano nowego hosta:', newHostId);
-          }
-          db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).remove().then(() => {
-            console.log('Gracz opuścił pokój:', currentPlayerId);
-            if (Object.keys(players).length <= 1) {
-              roomRef.remove();
-              console.log('Pokój usunięty, brak graczy');
-            }
-            resetToLobby();
-            loginScreen.style.display = 'block';
-            gameScreen.style.display = 'none';
-            currentRoomCode = null;
-            currentPlayerId = null;
-            isHost = false;
-          }).catch(error => {
-            console.error('Błąd opuszczania pokoju:', error);
-            showMessage('❌ Błąd opuszczania pokoju!');
-          });
-        });
-      }
     });
   </script>
 </body>
