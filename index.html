@@ -3,31 +3,852 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Słowny Impostor</title>
+  <title>S艂owny Impostor</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      background: 
+        radial-gradient(circle, rgba(255, 255, 255, 0.15) 2px, transparent 3px),
+        linear-gradient(135deg, #f39c12 0%, #e67e22 70%, #d35400 100%);
+      background-size: 15px 15px, auto;
+      background-position: 0 0, 0 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #fff;
+      font-size: 2rem;
+      margin: 0;
+      padding: 1.5rem;
+      min-height: 100vh;
+      position: relative;
+      transition: background 0.3s ease;
+      overflow-x: hidden;
+    }
+    body.dark-mode {
+      background: 
+        radial-gradient(circle, rgba(255, 255, 255, 0.05) 2px, transparent 3px),
+        linear-gradient(135deg, #4b0082 0%, #2c003e 100%);
+      background-size: 15px 15px, auto;
+    }
+    body.dark-mode .container {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    body.dark-mode #playersList li {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: #e67e22;
+    }
+    body.dark-mode #messageBox:not(.copy-message) {
+      background: linear-gradient(135deg, #4b0082, #e67e22);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+    }
+    body.dark-mode #roleMessageBox {
+      background: linear-gradient(135deg, #4b0082, #e67e22);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+    }
+    body.dark-mode #impostorSelectionBox {
+      background: linear-gradient(135deg, #4b0082, #e67e22);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+    }
+    body.dark-mode #impostorSelectionBox #minusImpostor,
+    body.dark-mode #impostorSelectionBox #plusImpostor,
+    body.dark-mode #impostorSelectionBox #confirmImpostors {
+      background: rgba(230, 126, 34, 0.2);
+      border: 1px solid rgba(230, 126, 34, 0.3);
+    }
+    body.dark-mode #impostorSelectionBox #minusImpostor:hover:not(:disabled),
+    body.dark-mode #impostorSelectionBox #plusImpostor:hover:not(:disabled),
+    body.dark-mode #impostorSelectionBox #confirmImpostors:hover {
+      background: rgba(230, 126, 34, 0.3);
+    }
+    body.dark-mode #impostorSelectionBox #minusImpostor:disabled,
+    body.dark-mode #impostorSelectionBox #plusImpostor:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    body.dark-mode #impostorSelectionBox #recommendedPlayers {
+      color: #e6e6e6;
+    }
+    body.dark-mode #categorySelectionBox {
+      background: linear-gradient(135deg, #4b0082, #e67e22);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+    }
+    body.dark-mode #categorySelectionBox .category-btn {
+      background: rgba(0, 0, 0, 0.4);
+    }
+    body.dark-mode #categorySelectionBox .category-btn.selected {
+      background: rgba(230, 126, 34, 0.4);
+    }
+    body.dark-mode #categorySelectionBox #allCategoriesBtn .checkbox {
+      background: rgba(230, 126, 34, 0.2);
+      border: 1px solid rgba(230, 126, 34, 0.3);
+    }
+    body.dark-mode #categorySelectionBox #allCategoriesBtn .checkbox:hover {
+      background: rgba(230, 126, 34, 0.3);
+    }
+    body.dark-mode #categorySelectionBox #confirmCategories {
+      background: rgba(230, 126, 34, 0.2);
+      border: 1px solid rgba(230, 126, 34, 0.3);
+    }
+    body.dark-mode #categorySelectionBox #confirmCategories:hover:not(:disabled) {
+      background: rgba(230, 126, 34, 0.3);
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 1.5rem;
+      border-radius: 1.5rem;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: background 0.3s ease, border 0.3s ease;
+      box-sizing: border-box;
+    }
+    @media (max-width: 600px) {
+      body {
+        padding: 1rem;
+      }
+      .container {
+        padding: 1rem;
+        margin: 0.5rem;
+      }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
+    @keyframes float {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+      100% { transform: translateY(0); }
+    }
+    #loginScreen, #gameScreen, #categorySelectionBox {
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    #gameScreen h1 {
+      text-align: center;
+      font-size: 4.5rem;
+      color: #f5f5f5;
+      font-family: 'Pacifico', cursive;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      margin-bottom: 1.5rem;
+    }
+    h1 {
+      text-align: center;
+      font-size: 3rem;
+      color: #f5f5f5;
+      font-family: 'Pacifico', cursive;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    input, button {
+      font-size: 1.8rem;
+      padding: 0.8rem;
+      margin: 0.8rem 0;
+      border-radius: 0.8rem;
+      border: none;
+      width: 100%;
+      max-width: 350px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      box-sizing: border-box;
+    }
+    input {
+      border: 2px solid #8e44ad;
+      color: #333;
+      background: rgba(255, 255, 255, 0.9);
+    }
+    button {
+      background: linear-gradient(45deg, #8e44ad, #9b59b6);
+      color: white;
+      cursor: pointer;
+      transition: box-shadow 0.3s ease;
+    }
+    body.dark-mode button {
+      background: linear-gradient(45deg, #e67e22, #d35400);
+    }
+    button:hover {
+      background: linear-gradient(45deg, #9b59b6, #8e44ad);
+      animation: pulse 1s infinite;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+    body.dark-mode button:hover {
+      background: linear-gradient(45deg, #d35400, #e67e22);
+    }
+    #leaveRoom {
+      background: linear-gradient(45deg, #7f8c8d, #95a5a6);
+    }
+    #leaveRoom:hover {
+      background: linear-gradient(45deg, #95a5a6, #7f8c8d);
+      animation: pulse 1s infinite;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+    #copyRoomCode {
+      background: linear-gradient(45deg, #8e44ad, #9b59b6);
+      width: 2.8rem;
+      height: 2.8rem;
+      font-size: 2rem;
+      padding: 0;
+      margin: 0 0.5rem;
+      line-height: 2.8rem;
+      text-align: center;
+      display: inline-block;
+    }
+    body.dark-mode #copyRoomCode {
+      background: linear-gradient(45deg, #e67e22, #d35400);
+    }
+    #copyRoomCode:hover {
+      background: linear-gradient(45deg, #9b59b6, #8e44ad);
+      animation: pulse 1s infinite;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+    body.dark-mode #copyRoomCode:hover {
+      background: linear-gradient(45deg, #d35400, #e67e22);
+    }
+    #rulesBtn, #themeToggle {
+      position: fixed;
+      bottom: 1.5rem;
+      border-radius: 50%;
+      background: rgba(52, 152, 219, 0.3);
+      color: white;
+      font-size: 2rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      animation: float 2s ease-in-out infinite;
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+    }
+    #rulesBtn {
+      right: 1.5rem;
+      width: 3.5rem;
+      height: 3.5rem;
+    }
+    #themeToggle {
+      right: 6rem;
+      width: 3.5rem;
+      height: 3.5rem;
+    }
+    #rulesBtn:hover, #themeToggle:hover {
+      background: rgba(52, 152, 219, 0.5);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+    #rulesBtn.hidden, #themeToggle.hidden {
+      display: none;
+    }
+    @media (max-width: 600px) {
+      #rulesBtn, #themeToggle {
+        width: 3rem;
+        height: 3rem;
+        font-size: 1.8rem;
+        bottom: 1rem;
+      }
+      #rulesBtn {
+        right: 1rem;
+      }
+      #themeToggle {
+        right: 5rem;
+      }
+    }
+    #roomCodeContainer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      margin: 0.8rem 0;
+      flex-wrap: nowrap;
+      max-width: 100%;
+    }
+    #countsContainer {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      margin: 0.8rem 0;
+      flex-wrap: wrap;
+      max-width: 100%;
+    }
+    #roomCodeDisplay {
+      font-weight: bold;
+    }
+    #playersList {
+      list-style: none;
+      padding: 0;
+      max-width: 100%;
+    }
+    #playersList li {
+      position: relative;
+      padding: 0.8rem 4.5rem 0.8rem 3.5rem;
+      margin: 0.5rem 0;
+      border-radius: 1rem;
+      background-color: rgba(255, 255, 255, 0.8);
+      color: #333;
+      display: flex;
+      align-items: center;
+      animation: fadeIn 0.3s ease-in-out;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+    #playersList li .avatar {
+      width: 2.2rem;
+      height: 2.2rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-right: 0.8rem;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      position: absolute;
+      left: 0.8rem;
+    }
+    #playersList li.host .avatar::after {
+      content: '馃憫';
+      position: absolute;
+      top: -0.4rem;
+      right: -0.4rem;
+      font-size: 0.9rem;
+    }
+    #playersList li .kickBtn {
+      position: absolute;
+      top: 50%;
+      right: 0.8rem;
+      transform: translateY(-50%);
+      width: 28px;
+      height: 28px;
+      background-color: #e74c3c;
+      color: white;
+      font-weight: bold;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      font-size: 1.6rem;
+      line-height: 1;
+      text-align: center;
+      padding: 0;
+      user-select: none;
+      transition: transform 0.2s ease, background-color 0.2s ease;
+    }
+    #playersList li .kickBtn:hover {
+      background-color: #c0392b;
+      transform: scale(1.1);
+    }
+    .host {
+      color: #3498db !important;
+      font-weight: bold;
+    }
+    .self {
+      color: black !important;
+      font-weight: bold;
+    }
+    body.dark-mode .self {
+      color: #e67e22 !important;
+    }
+    #messageBox {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      color: #333;
+      padding: 1.2rem;
+      border-radius: 1rem;
+      text-align: center;
+      z-index: 1001;
+      display: none;
+      max-width: 90vw;
+      word-wrap: break-word;
+      white-space: pre-line;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      font-size: 1.8rem;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      animation: scaleIn 0.3s ease-in-out;
+      box-sizing: border-box;
+    }
+    #messageBox:not(.copy-message) {
+      font-size: 2.8rem;
+      background: linear-gradient(135deg, #8e44ad, #d35400);
+      color: white;
+      padding: 2rem;
+      border-radius: 1.5rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+    }
+    #messageBox strong {
+      font-weight: 800;
+    }
+    #roleMessageBox {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(135deg, #8e44ad, #d35400);
+      color: white;
+      padding: 2rem;
+      border-radius: 1.5rem;
+      text-align: center;
+      z-index: 1001;
+      display: none;
+      max-width: 90vw;
+      word-wrap: break-word;
+      white-space: pre-line;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      font-size: 3.5rem;
+      font-weight: bold;
+      font-family: 'Segoe UI Black', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      animation: scaleIn 0.3s ease-in-out;
+      box-sizing: border-box;
+    }
+    #impostorSelectionBox {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(135deg, #8e44ad, #d35400);
+      color: white;
+      padding: 2rem 3rem;
+      border-radius: 1.5rem;
+      text-align: center;
+      z-index: 1001;
+      display: none;
+      max-width: 90vw;
+      word-wrap: break-word;
+      white-space: pre-line;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      font-size: 2rem;
+      animation: scaleIn 0.3s ease-in-out;
+      box-sizing: border-box;
+    }
+    #impostorSelectionBox p {
+      margin: 0 0 1.5rem 0;
+      font-size: 3rem;
+      color: #f5f5f5;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      white-space: nowrap;
+    }
+    #impostorSelectionBox #recommendedPlayers {
+      font-size: 1.4rem;
+      font-weight: 400;
+      font-family: 'Poppins', sans-serif;
+      color: #f5f5f5;
+      opacity: 0.8;
+      margin-top: 1rem;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+      text-align: center;
+    }
+    #impostorSelectionBox .impostor-selector {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    #impostorSelectionBox #minusImpostor,
+    #impostorSelectionBox #plusImpostor {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      font-size: 2.5rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: opacity 0.3s ease, background 0.3s ease;
+    }
+    #impostorSelectionBox #minusImpostor:hover:not(:disabled),
+    #impostorSelectionBox #plusImpostor:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.3);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+    #impostorSelectionBox #minusImpostor:disabled,
+    #impostorSelectionBox #plusImpostor:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    #impostorSelectionBox #confirmImpostors {
+      width: 150px;
+      margin: 0 auto;
+      background: rgba(142, 68, 173, 0.2);
+      border: 1px solid rgba(142, 68, 173, 0.3);
+      color: white;
+      font-size: 2rem;
+      font-weight: bold;
+      border-radius: 0.8rem;
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+    #impostorSelectionBox #confirmImpostors:hover {
+      background: rgba(142, 68, 173, 0.3);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+    }
+    #categorySelectionBox {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(135deg, #8e44ad, #d35400);
+      color: white;
+      padding: 2rem 3rem;
+      border-radius: 1.5rem;
+      text-align: center;
+      z-index: 1001;
+      display: none;
+      max-width: 90vw;
+      word-wrap: break-word;
+      white-space: pre-line;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      font-size: 2rem;
+      animation: scaleIn 0.3s ease-in-out;
+      box-sizing: border-box;
+    }
+    #categorySelectionBox p {
+      margin: 0 0 1.5rem 0;
+      font-size: 3rem;
+      color: #f5f5f5;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      white-space: nowrap;
+    }
+    #categorySelectionBox .category-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      max-height: 300px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      box-sizing: border-box;
+    }
+    #categorySelectionBox .category-btn {
+      background: rgba(0, 0, 0, 0.4);
+      border: none;
+      border-radius: 0.8rem;
+      padding: 1rem;
+      font-size: 1.8rem;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      color: #f5f5f5;
+      cursor: pointer;
+      opacity: 0.5;
+      transition: opacity 0.3s ease, background 0.3s ease;
+      box-sizing: border-box;
+    }
+    #categorySelectionBox .category-btn.selected {
+      background: rgba(142, 68, 173, 0.4);
+      opacity: 1;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+    #categorySelectionBox .category-btn:hover:not(.selected) {
+      opacity: 0.7;
+    }
+    #categorySelectionBox #allCategoriesBtn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin: 0.8rem auto;
+      font-size: 2rem;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      color: #f5f5f5;
+    }
+    #categorySelectionBox #allCategoriesBtn .checkbox {
+      width: 24px;
+      height: 24px;
+      border: 2px solid #f5f5f5;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      cursor: pointer;
+      background: rgba(142, 68, 173, 0.2);
+      transition: background 0.3s ease;
+      box-sizing: border-box;
+    }
+    #categorySelectionBox #allCategoriesBtn .checkbox:hover {
+      background: rgba(142, 68, 173, 0.3);
+    }
+    body.dark-mode #categorySelectionBox #allCategoriesBtn .checkbox {
+      border-color: #e6e6e6;
+      background: rgba(230, 126, 34, 0.2);
+    }
+    body.dark-mode #categorySelectionBox #allCategoriesBtn .checkbox:hover {
+      background: rgba(230, 126, 34, 0.3);
+    }
+    #categorySelectionBox #confirmCategories {
+      width: 150px;
+      margin: 0 auto;
+      background: rgba(142, 68, 173, 0.2);
+      border: 1px solid rgba(142, 68, 173, 0.3);
+      color: white;
+      font-size: 2rem;
+      font-weight: bold;
+      border-radius: 0.8rem;
+      transition: background 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+      box-sizing: border-box;
+    }
+    #categorySelectionBox #confirmCategories:hover:not(:disabled) {
+      background: rgba(142, 68, 173, 0.3);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+    }
+    #categorySelectionBox #confirmCategories:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    @media (max-width: 600px) {
+      #impostorSelectionBox {
+        padding: 1.5rem 2rem;
+      }
+      #impostorSelectionBox p {
+        font-size: 2rem;
+      }
+      #impostorSelectionBox #impostorCount {
+        font-size: 2.5rem;
+      }
+      #impostorSelectionBox #minusImpostor,
+      #impostorSelectionBox #plusImpostor {
+        width: 45px;
+        height: 45px;
+        font-size: 2.2rem;
+      }
+      #impostorSelectionBox #confirmImpostors {
+        width: 120px;
+        font-size: 1.8rem;
+      }
+      #impostorSelectionBox #recommendedPlayers {
+        font-size: 1.2rem;
+        margin-top: 0.8rem;
+      }
+      #categorySelectionBox {
+        padding: 1.5rem 2rem;
+      }
+      #categorySelectionBox p {
+        font-size: 2rem;
+      }
+      #categorySelectionBox .category-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      }
+      #categorySelectionBox .category-btn {
+        font-size: 1.6rem;
+        padding: 0.8rem;
+      }
+      #categorySelectionBox #allCategoriesBtn {
+        font-size: 1.8rem;
+      }
+      #categorySelectionBox #allCategoriesBtn .checkbox {
+        width: 20px;
+        height: 20px;
+        font-size: 1.4rem;
+      }
+      #categorySelectionBox #confirmCategories {
+        width: 120px;
+        font-size: 1.8rem;
+      }
+    }
+    #rulesBox {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(135deg, #8e44ad, #d35400);
+      color: white;
+      padding: 2rem 3rem;
+      border-radius: 1.5rem;
+      text-align: left;
+      z-index: 1001;
+      display: none;
+      max-width: 90vw;
+      max-height: 80vh;
+      overflow-y: auto;
+      overflow-x: hidden;
+      word-wrap: break-word;
+      white-space: pre-line;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      font-size: 1.8rem;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      animation: scaleIn 0.3s ease-in-out;
+      box-sizing: border-box;
+    }
+    #rulesBox h2 {
+      font-size: 3.2rem;
+      color: #f5f5f5;
+      font-family: 'Pacifico', cursive;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      margin: 0.8rem 0;
+      text-align: center;
+    }
+    #rulesBox h3 {
+      font-size: 2.6rem;
+      color: #f5f5f5;
+      margin: 0.8rem 0;
+      text-align: center;
+    }
+    #rulesBox ul {
+      list-style-type: disc;
+      padding-left: 1.5rem;
+      margin: 0.8rem 0;
+    }
+    #rulesBox li {
+      margin-bottom: 0.5rem;
+      font-size: 1.6rem;
+      color: #f5f5f5;
+    }
+    #rulesBox #closeRules {
+      background: linear-gradient(45deg, #9b59b6, #8e44ad);
+      font-size: 1.8rem;
+      padding: 0.8rem;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0.8rem auto 0;
+    }
+    body.dark-mode #rulesBox #closeRules {
+      background: linear-gradient(45deg, #e67e22, #d35400);
+    }
+    #rulesBox #closeRules:hover {
+      background: linear-gradient(45deg, #8e44ad, #9b59b6);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+    }
+    body.dark-mode #rulesBox #closeRules:hover {
+      background: linear-gradient(45deg, #d35400, #e67e22);
+    }
+    #rulesBox #closeRulesTop {
+      position: sticky;
+      top: 0.5rem;
+      right: 0.5rem;
+      float: right;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(127, 140, 141, 0.5);
+      color: #f5f5f5;
+      font-size: 1.6rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      z-index: 1002;
+      border: none;
+    }
+    #rulesBox #closeRulesTop:hover {
+      background: rgba(127, 140, 141, 0.7);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+    @media (max-width: 600px) {
+      #rulesBox {
+        padding: 1.5rem;
+        font-size: 1.6rem;
+      }
+      #rulesBox h2 {
+        font-size: 2.6rem;
+      }
+      #rulesBox h3 {
+        font-size: 2rem;
+      }
+      #rulesBox li {
+        font-size: 1.4rem;
+      }
+      #rulesBox #closeRules {
+        width: 40px;
+        height: 40px;
+        font-size: 1.6rem;
+      }
+      #rulesBox #closeRulesTop {
+        width: 35px;
+        height: 35px;
+        font-size: 1.4rem;
+        top: 0.3rem;
+        right: 0.3rem;
+      }
+      #messageBox:not(.copy-message) {
+        font-size: 2.2rem;
+        padding: 1.5rem;
+      }
+      #roleMessageBox {
+        font-size: 2.8rem;
+        padding: 1.5rem;
+      }
+    }
+    #countsContainer p, #roundCounter {
+      font-size: 1.6rem;
+      color: #f5f5f5;
+      text-align: center;
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+      max-width: 100%;
+    }
+    #roundCounter {
+      margin-top: 0.8rem;
+    }
+    @media (max-width: 600px) {
+      #countsContainer p, #roundCounter {
+        font-size: 1.4rem;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="container">
-    <h1 class="fancy-title">Słowny Impostor</h1>
+    <h1 class="fancy-title">S艂owny Impostor</h1>
     <div id="loginScreen">
-      <input type="text" id="playerName" placeholder="Podaj swój nick" />
-      <p class="selection-label">Wybierz emoji</p>
-      <div id="emojiSelectionGrid" class="selection-grid"></div>
-      <p class="selection-label">Wybierz kolor</p>
-      <div id="colorSelectionGrid" class="selection-grid"></div>
-      <button id="createRoom">Stwórz pokój</button>
+      <input type="text" id="playerName" placeholder="Podaj sw贸j nick" />
+      <button id="createRoom">Stw贸rz pok贸j</button>
       <input type="text" id="roomCodeInput" placeholder="Kod pokoju" maxlength="4" />
-      <button id="joinRoom">Dołącz do pokoju</button>
+      <button id="joinRoom">Do艂膮cz do pokoju</button>
       <p id="statusMessage"></p>
     </div>
 
     <div id="gameScreen" style="display:none;">
       <div id="roomCodeContainer">
         <p>Kod pokoju: <span id="roomCodeDisplay"></span></p>
-        <button id="copyRoomCode" title="Kopiuj kod">📋</button>
+        <button id="copyRoomCode" title="Kopiuj kod">馃搵</button>
       </div>
       <div id="countsContainer">
         <p id="playerCountDisplay"></p>
@@ -36,13 +857,13 @@
       <p id="roundCounter"></p>
       <ul id="playersList"></ul>
       <button id="startGame" style="display:none;">Start gry</button>
-      <button id="endRound" style="display:none; margin-top: 0.8rem; background-color: #c0392b;">Zakończ rundę</button>
-      <button id="leaveRoom" style="margin-top: 0.8rem;">Opuść pokój</button>
+      <button id="endRound" style="display:none; margin-top: 0.8rem; background-color: #c0392b;">Zako艅cz rund臋</button>
+      <button id="leaveRoom" style="margin-top: 0.8rem;">Opu艣膰 pok贸j</button>
     </div>
   </div>
 
   <button id="rulesBtn" title="Zasady gry">i</button>
-  <button id="themeToggle" title="Przełącz tryb"></button>
+  <button id="themeToggle" title="Prze艂膮cz tryb"></button>
   <div id="messageBox"></div>
   <div id="roleMessageBox"></div>
   <div id="categorySelectionBox" style="display:none;">
@@ -52,39 +873,39 @@
     <button id="confirmCategories">Dalej</button>
   </div>
   <div id="impostorSelectionBox" style="display:none;">
-    <p>Wybierz liczbę impostorów</p>
+    <p>Wybierz liczb臋 impostor贸w</p>
     <div class="impostor-selector">
       <button id="minusImpostor" title="Zmniejsz">-</button>
       <span id="impostorCount">1</span>
-      <button id="plusImpostor" title="Zwiększ">+</button>
+      <button id="plusImpostor" title="Zwi臋ksz">+</button>
     </div>
-    <button id="confirmImpostors">Stwórz</button>
+    <button id="confirmImpostors">Stw贸rz</button>
     <p id="recommendedPlayers"></p>
   </div>
-  <div id="rulesBox" style="display:none;">
+  <div id="rulesBox">
     <button id="closeRulesTop" title="Zamknij">X</button>
-    <h2>Zasady gry Słowny Impostor</h2>
+    <h2>Zasady gry S艂owny Impostor</h2>
     <h3>Cel gry</h3>
-    <p>Wciel się w detektywa słów! Twoim zadaniem jest opisanie tajemniczego słowa, nie zdradzając go, lub blefowanie jako impostor, który słowa nie zna. Celem jest zidentyfikowanie impostora przed końcem rundy!</p>
+    <p>Wciel si臋 w detektywa s艂贸w! Twoim zadaniem jest opisanie tajemniczego s艂owa, nie zdradzaj膮c go, lub blefowanie jako impostor, kt贸ry s艂owa nie zna. Celem jest zidentyfikowanie impostora przed ko艅cem rundy!</p>
     <h3>Przebieg gry</h3>
     <ul>
-      <li><strong>Tworzenie pokoju:</strong> Host tworzy pokój, wybierając kategorie słów i liczbę impostorów (1–5). Gracze dołączają, wpisując kod pokoju.</li>
-      <li><strong>Start gry:</strong> Host uruchamia grę, gdy w pokoju jest odpowiednia liczba graczy (min. 3 dla 1 impostora, 4 dla 2, itd., maks. 10).</li>
-      <li><strong>Losowanie słowa:</strong> Gra losuje jedno słowo z wybranych kategorii. Normalni gracze znają słowo, impostorzy muszą blefować.</li>
-      <li><strong>Opisywanie:</strong> Gracze po kolei opisują słowo w kreatywny sposób, unikając jego bezpośredniego użycia. Losowy gracz zaczyna, z mniejszą szansą na impostora.</li>
-      <li><strong>Zakończenie rundy:</strong> Host może zakończyć rundę, gdy podejrzewa impostora. Omówcie, kto był impostorem, i zacznijcie nową rundę!</li>
+      <li><strong>Tworzenie pokoju:</strong> Host tworzy pok贸j, wybieraj膮c kategorie s艂贸w i liczb臋 impostor贸w (1鈥?). Gracze do艂膮czaj膮, wpisuj膮c kod pokoju.</li>
+      <li><strong>Start gry:</strong> Host uruchamia gr臋, gdy w pokoju jest odpowiednia liczba graczy (min. 3 dla 1 impostora, 4 dla 2, itd., maks. 10).</li>
+      <li><strong>Losowanie s艂owa:</strong> Gra losuje jedno s艂owo z wybranych kategorii. Normalni gracze znaj膮 s艂owo, impostorzy musz膮 blefowa膰.</li>
+      <li><strong>Opisywanie:</strong> Gracze po kolei opisuj膮 s艂owo w kreatywny spos贸b, unikaj膮c jego bezpo艣redniego u偶ycia. Losowy gracz zaczyna, z mniejsz膮 szans膮 na impostora.</li>
+      <li><strong>Zako艅czenie rundy:</strong> Host mo偶e zako艅czy膰 rund臋, gdy podejrzewa impostora. Om贸wcie, kto by艂 impostorem, i zacznijcie now膮 rund臋!</li>
     </ul>
     <h3>Role w grze</h3>
     <ul>
-      <li><strong>Normalny gracz:</strong> Zna słowo i opisuje je, aby pomóc innym graczom, jednocześnie obserwując, kto może blefować.</li>
-      <li><strong>Impostor:</strong> Nie zna słowa i musi sprytnie udawać, że je zna, aby nie zostać zdemaskowanym.</li>
-      <li><strong>Host:</strong> Tworzy pokój, wybiera kategorie i liczbę impostorów, rozpoczyna i kończy rundy. Może też wyrzucać graczy z pokoju.</li>
+      <li><strong>Normalny gracz:</strong> Zna s艂owo i opisuje je, aby pom贸c innym graczom, jednocze艣nie obserwuj膮c, kto mo偶e blefowa膰.</li>
+      <li><strong>Impostor:</strong> Nie zna s艂owa i musi sprytnie udawa膰, 偶e je zna, aby nie zosta膰 zdemaskowanym.</li>
+      <li><strong>Host:</strong> Tworzy pok贸j, wybiera kategorie i liczb臋 impostor贸w, rozpoczyna i ko艅czy rundy. Mo偶e te偶 wyrzuca膰 graczy z pokoju.</li>
     </ul>
     <h3>Porady</h3>
     <ul>
-      <li>Bądź kreatywny w opisach, ale uważaj, by nie zdradzić słowa!</li>
-      <li>Obserwuj, czy opisy innych graczy są spójne – impostorzy mogą się zdradzić!</li>
-      <li>Graj w grupie do 10 osób dla najlepszej zabawy.</li>
+      <li>B膮d藕 kreatywny w opisach, ale uwa偶aj, by nie zdradzi膰 s艂owa!</li>
+      <li>Obserwuj, czy opisy innych graczy s膮 sp贸jne 鈥?impostorzy mog膮 si臋 zdradzi膰!</li>
+      <li>Graj w grupie do 10 os贸b dla najlepszej zabawy.</li>
     </ul>
     <button id="closeRules">X</button>
   </div>
@@ -103,12 +924,10 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Test połączenia z Firebase
-    db.ref('test').set({ test: 'hello' }).then(() => console.log('Firebase działa')).catch(err => console.error('Błąd Firebase:', err));
+    // Test po艂膮czenia z Firebase
+    db.ref('test').set({ test: 'hello' }).then(() => console.log('Firebase dzia艂a')).catch(err => console.error('B艂膮d Firebase:', err));
 
     const playerNameInput = document.getElementById('playerName');
-    const emojiSelectionGrid = document.getElementById('emojiSelectionGrid');
-    const colorSelectionGrid = document.getElementById('colorSelectionGrid');
     const createRoomBtn = document.getElementById('createRoom');
     const joinRoomBtn = document.getElementById('joinRoom');
     const roomCodeInput = document.getElementById('roomCodeInput');
@@ -150,103 +969,55 @@
     let impostorCount = 1;
     let selectedCategories = [];
     let hasShownStartMessage = false;
-    let selectedEmoji = '🐱';
-    let selectedColor = '#8e44ad';
 
     // Lista kategorii
     const categories = [
-      { name: 'Zwierzęta', file: 'animals.json' },
+      { name: 'Zwierz臋ta', file: 'animals.json' },
       { name: 'Jedzenie', file: 'food.json' },
       { name: 'Przedmioty', file: 'objects.json' },
-      { name: 'Miejsca', file: 'places.json' },
-      { name: 'Zawody', file: 'jobs.json' },
-      { name: 'Sport', file: 'sports.json' },
-      { name: 'Motoryzacja', file: 'automotive.json' },
-      { name: 'Rośliny', file: 'plants.json' },
-      { name: 'Geografia', file: 'geography.json' },
-      { name: 'Filmy i seriale', file: 'movies_series.json' },
-      { name: 'Człowiek', file: 'people.json' },
-      { name: 'Muzyka', file: 'music.json' }
+      { name: 'Miejsca', file: 'places.json' }
     ];
     const wordsBaseUrl = 'https://raw.githubusercontent.com/kermitovsky/slowny-oszust/main/words/';
 
-    // Lista emoji i kolorów
-    const emojiList = ['🐱', '🦁', '🐘', '🐶', '🐻', '🦊', '🐷', '🐰', '🐼', '🦒'];
+    // Lista emoji (tylko zwierz臋ta)
+    const emojiList = ['馃惐', '馃', '馃悩', '馃惗', '馃惢', '馃', '馃惙', '馃惏', '馃惣', '馃'];
+    // Kolory dla awatar贸w
     const avatarColors = ['#8e44ad', '#e67e22', '#3498db', '#e74c3c', '#2ecc71', '#f1c40f', '#9b59b6', '#d35400'];
 
-    // Inicjalizacja siatek wyboru emoji i kolorów
-    function initializeSelectionGrids() {
-      // Emoji grid
-      emojiSelectionGrid.innerHTML = '';
-      emojiList.forEach(emoji => {
-        const btn = document.createElement('button');
-        btn.classList.add('emoji-btn');
-        btn.textContent = emoji;
-        if (emoji === selectedEmoji) btn.classList.add('selected');
-        btn.addEventListener('click', () => {
-          selectedEmoji = emoji;
-          document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
-          btn.classList.add('selected');
-          console.log('Wybrano emoji:', selectedEmoji);
-        });
-        emojiSelectionGrid.appendChild(btn);
-      });
-
-      // Color grid
-      colorSelectionGrid.innerHTML = '';
-      avatarColors.forEach(color => {
-        const btn = document.createElement('button');
-        btn.classList.add('color-btn');
-        btn.style.backgroundColor = color;
-        if (color === selectedColor) btn.classList.add('selected');
-        btn.addEventListener('click', () => {
-          selectedColor = color;
-          document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
-          btn.classList.add('selected');
-          console.log('Wybrano kolor:', selectedColor);
-        });
-        colorSelectionGrid.appendChild(btn);
-      });
-    }
-
-    // Wywołanie inicjalizacji siatek
-    initializeSelectionGrids();
-
-    // Wykrywanie zamknięcia przeglądarki lub odświeżenia
+    // Wykrywanie zamkni臋cia przegl膮darki lub od艣wie偶enia
     window.addEventListener('beforeunload', () => {
       if (currentRoomCode && currentPlayerId) {
-        console.log('Wykryto zamknięcie/odświeżenie, usuwanie gracza:', currentPlayerId);
+        console.log('Wykryto zamkni臋cie/od艣wie偶enie, usuwanie gracza:', currentPlayerId);
         db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).remove();
       }
     });
 
     // Funkcja zamykania zasad
     function closeRules() {
-      console.log('Kliknięto Zamknij zasady');
+      console.log('Klikni臋to Zamknij zasady');
       rulesBox.style.display = 'none';
       rulesBtn.classList.remove('hidden');
       themeToggle.classList.remove('hidden');
     }
 
-    // Funkcja przełączania trybu
+    // Funkcja prze艂膮czania trybu
     function toggleTheme() {
       const isDark = document.body.classList.toggle('dark-mode');
-      themeToggle.textContent = isDark ? '☀️' : '🌙';
+      themeToggle.textContent = isDark ? '鈽€锔? : '馃寵';
       localStorage.setItem('theme', isDark ? 'dark' : 'light');
-      console.log('Przełączono na tryb:', isDark ? 'ciemny' : 'jasny');
+      console.log('Prze艂膮czono na tryb:', isDark ? 'ciemny' : 'jasny');
     }
 
     // Inicjalizacja trybu
     if (localStorage.getItem('theme') === 'dark') {
       document.body.classList.add('dark-mode');
-      themeToggle.textContent = '☀️';
+      themeToggle.textContent = '鈽€锔?;
     } else {
-      themeToggle.textContent = '🌙';
+      themeToggle.textContent = '馃寵';
     }
 
     // Inicjalizacja wyboru kategorii
     function initializeCategorySelection() {
-      console.log('Inicjalizacja wyboru kategorii');
       categoryGrid.innerHTML = '';
       categories.forEach(category => {
         const btn = document.createElement('button');
@@ -290,14 +1061,13 @@
 
     function updateAllCategoriesCheckbox() {
       const allSelected = categories.every(c => selectedCategories.includes(c.file)) || selectedCategories.includes('all');
-      allCategoriesBtn.querySelector('.checkbox').textContent = allSelected ? '✔' : '';
+      allCategoriesBtn.querySelector('.checkbox').textContent = allSelected ? '鉁? : '';
     }
 
     function updateConfirmCategoriesButton() {
       confirmCategories.disabled = selectedCategories.length === 0;
       confirmCategories.style.opacity = selectedCategories.length === 0 ? '0.5' : '1';
       confirmCategories.style.cursor = selectedCategories.length === 0 ? 'not-allowed' : 'pointer';
-      console.log('Zaktualizowano przycisk Dalej, disabled:', confirmCategories.disabled);
     }
 
     allCategoriesBtn.querySelector('.checkbox').addEventListener('click', () => {
@@ -309,15 +1079,11 @@
       updateCategoryButtons();
       updateAllCategoriesCheckbox();
       updateConfirmCategoriesButton();
-      console.log('Kliknięto Wszystkie, kategorie:', selectedCategories);
+      console.log('Klikni臋to Wszystkie, kategorie:', selectedCategories);
     });
 
     confirmCategories.addEventListener('click', () => {
-      if (selectedCategories.length === 0) {
-        showMessage('❌ Wybierz przynajmniej jedną kategorię!');
-        console.log('Brak wybranych kategorii');
-        return;
-      }
+      if (selectedCategories.length === 0) return;
       console.log('Potwierdzono kategorie:', selectedCategories);
       loadWords().then(() => {
         categorySelectionBox.style.display = 'none';
@@ -326,7 +1092,6 @@
         impostorCountDisplaySelector.textContent = impostorCount;
         updateImpostorButtons();
         updateRecommendedPlayers();
-        console.log('Przełączono na wybór impostorów');
       });
     });
 
@@ -336,44 +1101,68 @@
       try {
         for (const file of filesToLoad) {
           const response = await fetch(`${wordsBaseUrl}${file}`);
-          if (!response.ok) throw new Error(`Błąd ładowania ${file}`);
+          if (!response.ok) throw new Error(`B艂膮d 艂adowania ${file}`);
           const categoryWords = await response.json();
           words = [...words, ...categoryWords];
-          console.log(`Załadowano ${categoryWords.length} słów z ${file}`);
+          console.log(`Za艂adowano ${categoryWords.length} s艂贸w z ${file}`);
         }
-        console.log('Łącznie załadowano słów:', words.length);
+        console.log('艁膮cznie za艂adowano s艂贸w:', words.length);
       } catch (error) {
-        console.error('Błąd ładowania słów:', error);
-        showMessage('❌ Błąd ładowania kategorii! Używam domyślnych słów.');
+        console.error('B艂膮d 艂adowania s艂贸w:', error);
+        showMessage('鉂?B艂膮d 艂adowania kategorii! U偶ywam domy艣lnych s艂贸w.');
         try {
           const response = await fetch('words.json');
-          if (!response.ok) throw new Error('Błąd ładowania words.json');
+          if (!response.ok) throw new Error('B艂膮d 艂adowania words.json');
           words = await response.json();
-          console.log('Załadowano domyślne słowa:', words.length);
+          console.log('Za艂adowano domy艣lne s艂owa:', words.length);
         } catch (err) {
-          console.error('Błąd ładowania domyślnych słów:', err);
-          showMessage('❌ Błąd ładowania słów gry!');
+          console.error('B艂膮d 艂adowania domy艣lnych s艂贸w:', err);
+          showMessage('鉂?B艂膮d 艂adowania s艂贸w gry!');
         }
       }
     }
 
-    // Załaduj domyślne słowa jako fallback
+    // Za艂aduj domy艣lne s艂owa jako fallback
     fetch('words.json')
       .then(response => {
-        if (!response.ok) throw new Error('Błąd ładowania words.json: ' + response.status);
+        if (!response.ok) throw new Error('B艂膮d 艂adowania words.json: ' + response.status);
         return response.json();
       })
       .then(data => {
         words = data;
-        console.log('Załadowano domyślne słowa:', words.length);
+        console.log('Za艂adowano domy艣lne s艂owa:', words.length);
       })
       .catch(error => {
-        console.error('Błąd ładowania words.json:', error);
-        showMessage('❌ Błąd ładowania słów gry!');
+        console.error('B艂膮d 艂adowania words.json:', error);
+        showMessage('鉂?B艂膮d 艂adowania s艂贸w gry!');
       });
 
     function generateRoomCode() {
       return Math.random().toString(36).substr(2, 4).toUpperCase();
+    }
+
+    function assignUniqueEmoji(players) {
+      const usedEmojis = Object.values(players || {}).map(p => p.emoji).filter(e => e);
+      const availableEmojis = emojiList.filter(e => !usedEmojis.includes(e));
+      if (availableEmojis.length === 0) {
+        console.warn('Brak dost臋pnych emoji, przypisuj臋 losowe');
+        return emojiList[Math.floor(Math.random() * emojiList.length)];
+      }
+      const selectedEmoji = availableEmojis[Math.floor(Math.random() * availableEmojis.length)];
+      console.log('Przypisano emoji:', selectedEmoji);
+      return selectedEmoji;
+    }
+
+    function assignUniqueColor(players) {
+      const usedColors = Object.values(players || {}).map(p => p.avatarColor).filter(c => c);
+      const availableColors = avatarColors.filter(c => !usedColors.includes(c));
+      if (availableColors.length === 0) {
+        console.warn('Brak dost臋pnych kolor贸w, przypisuj臋 losowy');
+        return avatarColors[Math.floor(Math.random() * avatarColors.length)];
+      }
+      const selectedColor = availableColors[Math.floor(Math.random() * availableColors.length)];
+      console.log('Przypisano kolor:', selectedColor);
+      return selectedColor;
     }
 
     function updatePlayersList(players) {
@@ -387,7 +1176,7 @@
         const li = document.createElement('li');
         const avatar = document.createElement('span');
         avatar.classList.add('avatar');
-        avatar.textContent = player.emoji || '❓';
+        avatar.textContent = player.emoji || '鉂?;
         avatar.style.backgroundColor = player.avatarColor || avatarColors[0];
         li.appendChild(avatar);
         li.appendChild(document.createTextNode(` ${player.name || 'Nieznany gracz'}`));
@@ -401,8 +1190,8 @@
 
         if (isHost && id !== currentPlayerId) {
           const kickBtn = document.createElement('button');
-          kickBtn.textContent = '×';
-          kickBtn.title = 'Wyrzuć gracza';
+          kickBtn.textContent = '脳';
+          kickBtn.title = 'Wyrzu膰 gracza';
           kickBtn.classList.add('kickBtn');
           kickBtn.addEventListener('click', () => {
             kickPlayer(id);
@@ -418,7 +1207,7 @@
       console.log('showMessage:', text);
       messageBox.innerHTML = text;
       messageBox.style.display = 'block';
-      if (text === '✅ Kod skopiowany!' || text === '❌ Nie udało się skopiować kodu') {
+      if (text === '鉁?Kod skopiowany!' || text === '鉂?Nie uda艂o si臋 skopiowa膰 kodu') {
         messageBox.classList.add('copy-message');
         duration = 1500;
       } else {
@@ -430,13 +1219,11 @@
       }, duration);
     }
 
-    function showRoleMessage(text, duration = 5000, role = null) {
-      roleMessageBox.textContent = role === 'impostor' ? `🕵️ ${text}` : `🔍 ${text}`;
-      roleMessageBox.className = role ? `${role}-role` : '';
+    function showRoleMessage(text, duration = 5000) {
+      roleMessageBox.textContent = text;
       roleMessageBox.style.display = 'block';
       setTimeout(() => {
         roleMessageBox.style.display = 'none';
-        roleMessageBox.className = '';
       }, duration);
     }
 
@@ -458,9 +1245,6 @@
       hasShownStartMessage = false;
       updateImpostorButtons();
       updateRecommendedPlayers();
-      selectedEmoji = emojiList[0];
-      selectedColor = avatarColors[0];
-      initializeSelectionGrids();
     }
 
     function updateImpostorButtons() {
@@ -468,21 +1252,21 @@
       plusImpostor.disabled = impostorCount >= 5;
       minusImpostor.style.opacity = impostorCount <= 1 ? '0.5' : '1';
       plusImpostor.style.opacity = impostorCount >= 5 ? '0.5' : '1';
-      console.log('Zaktualizowano przyciski impostorów:', { impostorCount });
+      console.log('Zaktualizowano przyciski impostor贸w:', { impostorCount });
     }
 
     function updateRecommendedPlayers() {
       const minPlayers = impostorCount + 2;
       const maxPlayers = Math.min(impostorCount + 4, 10);
-      recommendedPlayers.textContent = `Zalecana liczba graczy: ${minPlayers}–${maxPlayers}`;
-      console.log('Zaktualizowano zalecaną liczbę graczy:', recommendedPlayers.textContent);
+      recommendedPlayers.textContent = `Zalecana liczba graczy: ${minPlayers}鈥?{maxPlayers}`;
+      console.log('Zaktualizowano zalecan膮 liczb臋 graczy:', recommendedPlayers.textContent);
     }
 
     closeRulesBtn.addEventListener('click', closeRules);
     closeRulesTopBtn.addEventListener('click', closeRules);
 
     rulesBtn.addEventListener('click', () => {
-      console.log('Kliknięto Zasady gry');
+      console.log('Klikni臋to Zasady gry');
       rulesBox.style.display = 'block';
       rulesBtn.classList.add('hidden');
       themeToggle.classList.add('hidden');
@@ -493,23 +1277,17 @@
     });
 
     createRoomBtn.addEventListener('click', () => {
-      console.log('Kliknięto Stwórz pokój');
+      console.log('Klikni臋to Stw贸rz pok贸j');
       const name = playerNameInput.value.trim();
       if (!name) {
-        showMessage('❌ Wpisz nick!');
+        showMessage('鉂?Wpisz nick!');
         console.log('Brak nicku');
-        return;
-      }
-      if (!selectedEmoji || !selectedColor) {
-        showMessage('❌ Wybierz emoji i kolor!');
-        console.log('Brak emoji lub koloru');
         return;
       }
       currentPlayerName = name;
       isHost = true;
-      console.log('Ustawiono hosta, imię:', currentPlayerName, 'emoji:', selectedEmoji, 'kolor:', selectedColor);
+      console.log('Ustawiono hosta, imi臋:', currentPlayerName);
       categorySelectionBox.style.display = 'block';
-      console.log('Wyświetlono categorySelectionBox');
       initializeCategorySelection();
       rulesBtn.classList.add('hidden');
       themeToggle.classList.add('hidden');
@@ -521,7 +1299,7 @@
         impostorCountDisplaySelector.textContent = impostorCount;
         updateImpostorButtons();
         updateRecommendedPlayers();
-        console.log('Zmniejszono liczbę impostorów:', impostorCount);
+        console.log('Zmniejszono liczb臋 impostor贸w:', impostorCount);
       }
     });
 
@@ -531,12 +1309,12 @@
         impostorCountDisplaySelector.textContent = impostorCount;
         updateImpostorButtons();
         updateRecommendedPlayers();
-        console.log('Zwiększono liczbę impostorów:', impostorCount);
+        console.log('Zwi臋kszono liczb臋 impostor贸w:', impostorCount);
       }
     });
 
     confirmImpostors.addEventListener('click', () => {
-      console.log('Potwierdzono liczbę impostorów:', impostorCount);
+      console.log('Potwierdzono liczb臋 impostor贸w:', impostorCount);
       createRoom(impostorCount);
     });
 
@@ -544,9 +1322,11 @@
       console.log('Tworzenie pokoju z', numImpostors, 'impostorami, kategorie:', selectedCategories);
       currentRoomCode = generateRoomCode();
       currentPlayerId = db.ref().push().key;
+      const emoji = assignUniqueEmoji({});
+      const avatarColor = assignUniqueColor({});
 
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
-      const playerData = { name: currentPlayerName, isHost: true, role: null, emoji: selectedEmoji, avatarColor: selectedColor };
+      const playerData = { name: currentPlayerName, isHost: true, role: null, emoji: emoji, avatarColor: avatarColor };
       roomRef.set({
         players: {
           [currentPlayerId]: playerData
@@ -559,7 +1339,7 @@
         categories: selectedCategories,
         currentRound: 0
       }).then(() => {
-        console.log('Pokój utworzony:', currentRoomCode, 'Gracz:', playerData, 'Kategorie:', selectedCategories);
+        console.log('Pok贸j utworzony:', currentRoomCode, 'Gracz:', playerData, 'Kategorie:', selectedCategories);
         loginScreen.style.display = 'none';
         gameScreen.style.display = 'block';
         roomCodeDisplay.textContent = currentRoomCode;
@@ -569,38 +1349,35 @@
         db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).onDisconnect().remove();
         listenToRoom(currentRoomCode);
       }).catch(error => {
-        console.error('Błąd tworzenia pokoju:', error);
-        showMessage('❌ Błąd tworzenia pokoju!');
+        console.error('B艂膮d tworzenia pokoju:', error);
+        showMessage('鉂?B艂膮d tworzenia pokoju!');
         rulesBtn.classList.remove('hidden');
         themeToggle.classList.remove('hidden');
       });
     }
 
     joinRoomBtn.addEventListener('click', () => {
-      console.log('Kliknięto Dołącz do pokoju');
+      console.log('Klikni臋to Do艂膮cz do pokoju');
       const name = playerNameInput.value.trim();
       const roomCode = roomCodeInput.value.trim().toUpperCase();
+
       if (!name || !roomCode) {
-        showMessage('❌ Wpisz nick i kod pokoju!');
+        showMessage('鉂?Wpisz nick i kod pokoju!');
         console.log('Brak nicku lub kodu pokoju');
         roomCodeInput.value = '';
         return;
       }
-      if (!selectedEmoji || !selectedColor) {
-        showMessage('❌ Wybierz emoji i kolor!');
-        console.log('Brak emoji lub koloru');
-        return;
-      }
+
       currentPlayerName = name;
       currentRoomCode = roomCode;
       currentPlayerId = db.ref().push().key;
-      console.log('Dołączanie do pokoju:', roomCode, 'Nick:', name, 'emoji:', selectedEmoji, 'kolor:', selectedColor);
+      console.log('Do艂膮czanie do pokoju:', roomCode, 'Nick:', name);
 
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
       roomRef.once('value').then(snapshot => {
         if (!snapshot.exists()) {
-          showMessage('❌ Pokój nie istnieje!');
-          console.log('Pokój nie istnieje:', roomCode);
+          showMessage('鉂?Pok贸j nie istnieje!');
+          console.log('Pok贸j nie istnieje:', roomCode);
           roomCodeInput.value = '';
           return;
         }
@@ -608,17 +1385,19 @@
         const room = snapshot.val();
         const players = room.players || {};
         if (Object.keys(players).length >= 10) {
-          showMessage('❌ Pokój jest pełny! Maksymalnie 10 graczy.');
-          console.log('Pokój pełny:', roomCode);
+          showMessage('鉂?Pok贸j jest pe艂ny! Maksymalnie 10 graczy.');
+          console.log('Pok贸j pe艂ny:', roomCode);
           roomCodeInput.value = '';
           return;
         }
 
-        const playerData = { name: currentPlayerName, isHost: false, role: null, emoji: selectedEmoji, avatarColor: selectedColor };
+        const emoji = assignUniqueEmoji(players);
+        const avatarColor = assignUniqueColor(players);
+        const playerData = { name: currentPlayerName, isHost: false, role: null, emoji: emoji, avatarColor: avatarColor };
         roomRef.child('players').update({
           [currentPlayerId]: playerData
         }).then(() => {
-          console.log('Dołączono do pokoju:', roomCode, 'Gracz:', playerData);
+          console.log('Do艂膮czono do pokoju:', roomCode, 'Gracz:', playerData);
           loginScreen.style.display = 'none';
           gameScreen.style.display = 'block';
           roomCodeDisplay.textContent = currentRoomCode;
@@ -627,24 +1406,24 @@
           db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).onDisconnect().remove();
           listenToRoom(currentRoomCode);
         }).catch(error => {
-          console.error('Błąd dołączania do pokoju:', error);
-          showMessage('❌ Błąd dołączania do pokoju!');
+          console.error('B艂膮d do艂膮czania do pokoju:', error);
+          showMessage('鉂?B艂膮d do艂膮czania do pokoju!');
           roomCodeInput.value = '';
         });
       }).catch(error => {
-        console.error('Błąd sprawdzania pokoju:', error);
-        showMessage('❌ Błąd sprawdzania pokoju!');
+        console.error('B艂膮d sprawdzania pokoju:', error);
+        showMessage('鉂?B艂膮d sprawdzania pokoju!');
         roomCodeInput.value = '';
       });
     });
 
     copyRoomCodeBtn.addEventListener('click', () => {
-      console.log('Kliknięto Kopiuj kod');
+      console.log('Klikni臋to Kopiuj kod');
       const roomCode = roomCodeDisplay.textContent;
       navigator.clipboard.writeText(roomCode).then(() => {
-        showMessage('✅ Kod skopiowany!');
+        showMessage('鉁?Kod skopiowany!');
       }).catch(() => {
-        showMessage('❌ Nie udało się skopiować kodu');
+        showMessage('鉂?Nie uda艂o si臋 skopiowa膰 kodu');
       });
     });
 
@@ -654,47 +1433,18 @@
       db.ref(`rooms/${currentRoomCode}/players/${playerId}`).remove().then(() => {
         console.log('Gracz wyrzucony:', playerId);
       }).catch(error => {
-        console.error('Błąd wyrzucania gracza:', error);
-        showMessage('❌ Błąd wyrzucania gracza!');
+        console.error('B艂膮d wyrzucania gracza:', error);
+        showMessage('鉂?B艂膮d wyrzucania gracza!');
       });
     }
-
-    leaveRoomBtn.addEventListener('click', () => {
-      console.log('Kliknięto Opuść pokój');
-      if (currentRoomCode && currentPlayerId) {
-        const roomRef = db.ref(`rooms/${currentRoomCode}`);
-        roomRef.child(`players/${currentPlayerId}`).remove().then(() => {
-          console.log('Gracz opuścił pokój:', currentPlayerId);
-          if (isHost) {
-            roomRef.remove().then(() => {
-              console.log('Pokój usunięty przez hosta:', currentRoomCode);
-            }).catch(error => {
-              console.error('Błąd usuwania pokoju:', error);
-              showMessage('❌ Błąd usuwania pokoju!');
-            });
-          }
-          resetToLobby();
-          loginScreen.style.display = 'block';
-          gameScreen.style.display = 'none';
-          currentRoomCode = null;
-          currentPlayerId = null;
-          isHost = false;
-          roomCodeInput.value = '';
-          playerNameInput.value = '';
-        }).catch(error => {
-          console.error('Błąd opuszczania pokoju:', error);
-          showMessage('❌ Błąd opuszczania pokoju!');
-        });
-      }
-    });
 
     function listenToRoom(roomCode) {
       const roomRef = db.ref(`rooms/${roomCode}`);
       roomRef.on('value', snapshot => {
         const room = snapshot.val();
         if (!room) {
-          console.log('Pokój usunięty:', roomCode);
-          showMessage('❌ Pokój został usunięty!');
+          console.log('Pok贸j usuni臋ty:', roomCode);
+          showMessage('鉂?Pok贸j zosta艂 usuni臋ty!');
           resetToLobby();
           loginScreen.style.display = 'block';
           gameScreen.style.display = 'none';
@@ -716,11 +1466,11 @@
 
         if (room.gameStarted && room.currentWord && players[currentPlayerId]) {
           const isImpostor = players[currentPlayerId].role === 'impostor';
-          const message = isImpostor ? 'Jesteś oszustem!' : `Słowo: ${room.currentWord}`;
-          showRoleMessage(message, 5000, isImpostor ? 'impostor' : 'normal');
+          const message = isImpostor ? 'Jeste艣 oszustem!' : `S艂owo: ${room.currentWord}`;
+          showRoleMessage(message, 5000);
           if (room.starterId && !hasShownStartMessage && players[room.starterId]) {
             setTimeout(() => {
-              showMessage(`Zaczyna mówić: <strong>${players[room.starterId].name}</strong>`, 5000);
+              showMessage(`Zaczyna m贸wi膰: <strong>${players[room.starterId].name}</strong>`, 5000);
               hasShownStartMessage = true;
             }, 5000);
           }
@@ -738,11 +1488,8 @@
     }
 
     startGameBtn.addEventListener('click', () => {
-      console.log('Kliknięto Start gry');
-      if (!isHost) {
-        console.log('Tylko host może rozpocząć grę');
-        return;
-      }
+      console.log('Klikni臋to Start gry');
+      if (!isHost) return;
 
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
       roomRef.once('value').then(snapshot => {
@@ -752,92 +1499,115 @@
         const minPlayers = room.numImpostors + 2;
 
         if (numPlayers < minPlayers) {
-          showMessage(`❌ Za mało graczy! Minimum ${minPlayers}.`);
-          console.log('Za mało graczy:', numPlayers, 'Minimum:', minPlayers);
+          showMessage(`鉂?Za ma艂o graczy! Minimum ${minPlayers}.`);
+          console.log('Za ma艂o graczy:', numPlayers, 'Minimum:', minPlayers);
           return;
         }
 
-        if (words.length === 0) {
-          showMessage('❌ Brak słów do gry!');
-          console.log('Brak słów do gry');
-          return;
-        }
-
-        const word = words[Math.floor(Math.random() * words.length)];
         const playerIds = Object.keys(players);
         const impostorIds = [];
-        const shuffledIds = playerIds.sort(() => Math.random() - 0.5);
         for (let i = 0; i < room.numImpostors; i++) {
-          if (shuffledIds[i]) impostorIds.push(shuffledIds[i]);
+          if (playerIds.length === 0) break;
+          const randomIndex = Math.floor(Math.random() * playerIds.length);
+          impostorIds.push(playerIds[randomIndex]);
+          playerIds.splice(randomIndex, 1);
+        }
+
+        // Wa偶one losowanie startera
+        const weightedPlayers = [];
+        Object.entries(players).forEach(([id, player]) => {
+          const weight = impostorIds.includes(id) ? 0.5 : 1;
+          weightedPlayers.push({ id, weight });
+        });
+        const totalWeight = weightedPlayers.reduce((sum, p) => sum + p.weight, 0);
+        let randomWeight = Math.random() * totalWeight;
+        let starterId = weightedPlayers[0].id;
+        for (const player of weightedPlayers) {
+          randomWeight -= player.weight;
+          if (randomWeight <= 0) {
+            starterId = player.id;
+            break;
+          }
         }
 
         const updates = {};
-        playerIds.forEach(id => {
+        Object.keys(players).forEach(id => {
           updates[`players/${id}/role`] = impostorIds.includes(id) ? 'impostor' : 'normal';
         });
 
-        const nonImpostorIds = playerIds.filter(id => !impostorIds.includes(id));
-        let starterId;
-        if (nonImpostorIds.length > 0) {
-          starterId = nonImpostorIds[Math.floor(Math.random() * nonImpostorIds.length)];
-        } else {
-          starterId = playerIds[Math.floor(Math.random() * playerIds.length)];
-        }
+        const currentWord = words[Math.floor(Math.random() * words.length)];
 
         updates.gameStarted = true;
-        updates.currentWord = word;
+        updates.currentWord = currentWord;
         updates.starterId = starterId;
         updates.currentRound = (room.currentRound || 0) + 1;
 
         roomRef.update(updates).then(() => {
-          console.log('Gra rozpoczęta:', { word, impostorIds, starterId });
-          showMessage('Gra rozpoczęta!', 3000);
+          console.log('Gra rozpocz臋ta:', { word: currentWord, impostors: impostorIds, starter: starterId });
         }).catch(error => {
-          console.error('Błąd rozpoczynania gry:', error);
-          showMessage('❌ Błąd rozpoczynania gry!');
+          console.error('B艂膮d rozpoczynania gry:', error);
+          showMessage('鉂?B艂膮d rozpoczynania gry!');
         });
-      }).catch(error => {
-        console.error('Błąd pobierania danych pokoju:', error);
-        showMessage('❌ Błąd pobierania danych pokoju!');
       });
     });
 
     endRoundBtn.addEventListener('click', () => {
-      console.log('Kliknięto Zakończ rundę');
-      if (!isHost) {
-        console.log('Tylko host może zakończyć rundę');
-        return;
-      }
+      console.log('Klikni臋to Zako艅cz rund臋');
+      if (!isHost) return;
 
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
       roomRef.once('value').then(snapshot => {
         const room = snapshot.val();
         const players = room.players || {};
-        const currentWord = room.currentWord;
-        const impostorIds = Object.keys(players).filter(id => players[id].role === 'impostor');
-        const impostorNames = impostorIds.map(id => players[id].name).join(', ');
-
-        const updates = {
-          gameStarted: false,
-          currentWord: null,
-          starterId: null,
-          resetMessage: `Runda zakończona! Słowo: <strong>${currentWord}</strong><br>Impostorzy: <strong>${impostorNames || 'Brak'}</strong>`
-        };
+        const updates = {};
         Object.keys(players).forEach(id => {
           updates[`players/${id}/role`] = null;
         });
+        updates.gameStarted = false;
+        updates.currentWord = null;
+        updates.starterId = null;
+        updates.resetMessage = 'Runda zako艅czona';
 
         roomRef.update(updates).then(() => {
-          console.log('Runda zakończona:', { word: currentWord, impostorIds });
-          hasShownStartMessage = false;
+          console.log('Runda zako艅czona');
+          resetToLobby();
         }).catch(error => {
-          console.error('Błąd kończenia rundy:', error);
-          showMessage('❌ Błąd kończenia rundy!');
+          console.error('B艂膮d ko艅czenia rundy:', error);
+          showMessage('鉂?B艂膮d ko艅czenia rundy!');
         });
-      }).catch(error => {
-        console.error('Błąd pobierania danych pokoju:', error);
-        showMessage('❌ Błąd pobierania danych pokoju!');
       });
+    });
+
+    leaveRoomBtn.addEventListener('click', () => {
+      console.log('Klikni臋to Opu艣膰 pok贸j');
+      if (currentRoomCode && currentPlayerId) {
+        const roomRef = db.ref(`rooms/${currentRoomCode}`);
+        roomRef.once('value').then(snapshot => {
+          const room = snapshot.val();
+          const players = room.players || {};
+          if (isHost && Object.keys(players).length > 1) {
+            const newHostId = Object.keys(players).find(id => id !== currentPlayerId);
+            roomRef.child(`players/${newHostId}`).update({ isHost: true });
+            console.log('Przypisano nowego hosta:', newHostId);
+          }
+          db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).remove().then(() => {
+            console.log('Gracz opu艣ci艂 pok贸j:', currentPlayerId);
+            if (Object.keys(players).length <= 1) {
+              roomRef.remove();
+              console.log('Pok贸j usuni臋ty, brak graczy');
+            }
+            resetToLobby();
+            loginScreen.style.display = 'block';
+            gameScreen.style.display = 'none';
+            currentRoomCode = null;
+            currentPlayerId = null;
+            isHost = false;
+          }).catch(error => {
+            console.error('B艂膮d opuszczania pokoju:', error);
+            showMessage('鉂?B艂膮d opuszczania pokoju!');
+          });
+        });
+      }
     });
   </script>
 </body>
