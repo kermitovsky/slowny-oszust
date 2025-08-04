@@ -29,11 +29,11 @@
         <p>Kod pokoju: <span id="roomCodeDisplay"></span></p>
         <button id="copyRoomCode" title="Kopiuj kod">📋</button>
       </div>
+      <p id="roundCounter"></p>
       <div id="countsContainer">
         <p id="playerCountDisplay"></p>
         <p id="impostorCountDisplay"></p>
       </div>
-      <p id="roundCounter"></p>
       <ul id="playersList"></ul>
       <button id="startGame" style="display:none;">Start gry</button>
       <button id="endRound" style="display:none; margin-top: 0.8rem; background-color: #c0392b;">Zakończ rundę</button>
@@ -307,14 +307,13 @@
         return;
       }
       console.log('Potwierdzono kategorie:', selectedCategories);
-      // Natychmiastowe przełączenie ekranów
       categorySelectionBox.style.display = 'none';
       impostorSelectionBox.style.display = 'block';
       document.getElementById('loadingMessage').style.display = 'block';
-      confirmImpostors.disabled = true; // Dezaktywuj przycisk podczas ładowania
+      confirmImpostors.disabled = true;
       loadWords().then(() => {
         document.getElementById('loadingMessage').style.display = 'none';
-        confirmImpostors.disabled = false; // Aktywuj przycisk po załadowaniu
+        confirmImpostors.disabled = false;
         impostorCount = 1;
         impostorCountDisplaySelector.textContent = impostorCount;
         updateImpostorButtons();
@@ -333,7 +332,6 @@
       const filesToLoad = selectedCategories.includes('all') ? categories.map(c => c.file) : selectedCategories;
       let loadedAnyFile = false;
 
-      // Funkcja pomocnicza z timeoutem
       const fetchWithTimeout = async (url, timeout = 5000) => {
         const controller = new AbortController();
         const id = setTimeout(() => controller.abort(), timeout);
@@ -349,7 +347,6 @@
       };
 
       try {
-        // Równoległe ładowanie wszystkich kategorii
         const fetchPromises = filesToLoad.map(file =>
           fetchWithTimeout(`${wordsBaseUrl}${file}`)
             .then(categoryWords => {
@@ -385,7 +382,6 @@
       }
     }
 
-    // Załaduj domyślne słowa jako fallback
     fetch('words.json')
       .then(response => {
         if (!response.ok) throw new Error('Błąd ładowania words.json: ' + response.status);
@@ -505,9 +501,9 @@
       rulesBox.style.display = 'none';
       rulesBtn.classList.remove('hidden');
       themeToggle.classList.remove('hidden');
-      impostorCountDisplay.textContent = '';
-      playerCountDisplay.textContent = '';
-      roundCounter.textContent = '';
+      impostorCountDisplay.innerHTML = '';
+      playerCountDisplay.innerHTML = '';
+      roundCounter.innerHTML = '';
       impostorCount = 1;
       impostorCountDisplaySelector.textContent = impostorCount;
       selectedCategories = [];
@@ -767,9 +763,9 @@
 
         const players = room.players || {};
         updatePlayersList(players);
-        playerCountDisplay.textContent = `Gracze: ${Object.keys(players).length}`;
-        impostorCountDisplay.textContent = `Impostorzy: ${room.numImpostors || 0}`;
-        roundCounter.textContent = `Runda: ${room.currentRound || 0}`;
+        playerCountDisplay.innerHTML = `Gracze: <span class="bold">${Object.keys(players).length}</span>`;
+        impostorCountDisplay.innerHTML = `Impostorzy: <span class="bold">${room.numImpostors || 0}</span>`;
+        roundCounter.innerHTML = room.currentRound > 0 ? `Runda: <strong>${room.currentRound}</strong>` : '';
 
         isHost = players[currentPlayerId]?.isHost || false;
         startGameBtn.style.display = isHost && !room.gameStarted ? 'block' : 'none';
