@@ -33,8 +33,13 @@ body.dark-mode #messageBox:not(.copy-message) {
   border: 2px solid rgba(255, 255, 255, 0.1);
 }
 body.dark-mode #roleMessageBox {
-  background: linear-gradient(135deg, #4b0082, #e67e22);
   border: 2px solid rgba(255, 255, 255, 0.1);
+}
+body.dark-mode #roleMessageBox.impostor-role {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+body.dark-mode #roleMessageBox.normal-role {
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
 }
 body.dark-mode #impostorSelectionBox {
   background: linear-gradient(135deg, #4b0082, #e67e22);
@@ -141,7 +146,7 @@ h1 {
   font-family: 'Pacifico', cursive;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
-input, button {
+input, button, select {
   font-size: 1.8rem;
   padding: 0.8rem;
   margin: 0.8rem 0;
@@ -158,6 +163,21 @@ input {
   border: 2px solid #8e44ad;
   color: #333;
   background: rgba(255, 255, 255, 0.9);
+}
+select {
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+  border: 2px solid #8e44ad;
+  cursor: pointer;
+  transition: box-shadow 0.3s ease;
+}
+select:hover {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+body.dark-mode select {
+  background: rgba(255, 255, 255, 0.2);
+  color: #f5f5f5;
+  border: 2px solid #e67e22;
 }
 button {
   background: linear-gradient(45deg, #8e44ad, #9b59b6);
@@ -413,6 +433,14 @@ body.dark-mode .self {
   animation: scaleIn 0.3s ease-in-out;
   box-sizing: border-box;
 }
+#roleMessageBox.impostor-role {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  animation: pulse 1.5s infinite;
+}
+#roleMessageBox.normal-role {
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  animation: pulse 1.5s infinite;
+}
 #impostorSelectionBox {
   position: fixed;
   top: 50%;
@@ -444,6 +472,13 @@ body.dark-mode .self {
   font-weight: 600;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
   white-space: nowrap;
+}
+#impostorSelectionBox #impostorCount {
+  font-size: 3rem;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  color: #f5f5f5;
+  margin: 0 1rem;
 }
 #impostorSelectionBox #recommendedPlayers {
   font-size: 1.4rem;
@@ -658,12 +693,13 @@ body.dark-mode #categorySelectionBox #allCategoriesBtn .checkbox:hover {
   }
   #impostorSelectionBox #impostorCount {
     font-size: 2.5rem;
+    margin: 0 0.8rem;
   }
   #impostorSelectionBox #minusImpostor,
   #impostorSelectionBox #plusImpostor {
     width: 45px;
     height: 45px;
-    font-size: 2.2rem;
+    font-size: 2rem;
   }
   #impostorSelectionBox #confirmImpostors {
     width: 120px;
@@ -671,7 +707,6 @@ body.dark-mode #categorySelectionBox #allCategoriesBtn .checkbox:hover {
   }
   #impostorSelectionBox #recommendedPlayers {
     font-size: 1.2rem;
-    margin-top: 0.8rem;
   }
   #categorySelectionBox {
     padding: 1.5rem 2rem;
@@ -681,7 +716,9 @@ body.dark-mode #categorySelectionBox #allCategoriesBtn .checkbox:hover {
   }
   #categorySelectionBox .category-grid {
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    margin-right: 20px;
+    gap: 0.8rem;
+    margin-right: 15px;
+    max-height: 250px;
   }
   #categorySelectionBox .category-btn {
     font-size: 1.6rem;
@@ -698,156 +735,5 @@ body.dark-mode #categorySelectionBox #allCategoriesBtn .checkbox:hover {
   #categorySelectionBox #confirmCategories {
     width: 120px;
     font-size: 1.8rem;
-  }
-}
-#rulesBox {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: linear-gradient(135deg, #8e44ad, #d35400);
-  color: white;
-  padding: 2rem 3rem;
-  border-radius: 1.5rem;
-  text-align: left;
-  z-index: 1001;
-  display: none;
-  max-width: 90vw;
-  max-height: 80vh;
-  overflow-y: auto;
-  overflow-x: hidden;
-  word-wrap: break-word;
-  white-space: pre-line;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-  font-size: 1.8rem;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 600;
-  animation: scaleIn 0.3s ease-in-out;
-  box-sizing: border-box;
-}
-#rulesBox h2 {
-  font-size: 3.2rem;
-  color: #f5f5f5;
-  font-family: 'Pacifico', cursive;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-  margin: 0.8rem 0;
-  text-align: center;
-}
-#rulesBox h3 {
-  font-size: 2.6rem;
-  color: #f5f5f5;
-  margin: 0.8rem 0;
-  text-align: center;
-}
-#rulesBox ul {
-  list-style-type: disc;
-  padding-left: 1.5rem;
-  margin: 0.8rem 0;
-}
-#rulesBox li {
-  margin-bottom: 0.5rem;
-  font-size: 1.6rem;
-  color: #f5f5f5;
-}
-#rulesBox #closeRules {
-  background: linear-gradient(45deg, #9b59b6, #8e44ad);
-  font-size: 1.8rem;
-  padding: 0.8rem;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0.8rem auto 0;
-}
-body.dark-mode #rulesBox #closeRules {
-  background: linear-gradient(45deg, #e67e22, #d35400);
-}
-#rulesBox #closeRules:hover {
-  background: linear-gradient(45deg, #8e44ad, #9b59b6);
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
-}
-body.dark-mode #rulesBox #closeRules:hover {
-  background: linear-gradient(45deg, #d35400, #e67e22);
-}
-#rulesBox #closeRulesTop {
-  position: sticky;
-  top: 0.5rem;
-  right: 0.5rem;
-  float: right;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: rgba(127, 140, 141, 0.5);
-  color: #f5f5f5;
-  font-size: 1.6rem;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  z-index: 1002;
-  border: none;
-}
-#rulesBox #closeRulesTop:hover {
-  background: rgba(127, 140, 141, 0.7);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-}
-@media (max-width: 600px) {
-  #rulesBox {
-    padding: 1.5rem;
-    font-size: 1.6rem;
-  }
-  #rulesBox h2 {
-    font-size: 2.6rem;
-  }
-  #rulesBox h3 {
-    font-size: 2rem;
-  }
-  #rulesBox li {
-    font-size: 1.4rem;
-  }
-  #rulesBox #closeRules {
-    width: 40px;
-    height: 40px;
-    font-size: 1.6rem;
-  }
-  #rulesBox #closeRulesTop {
-    width: 35px;
-    height: 35px;
-    font-size: 1.4rem;
-    top: 0.3rem;
-    right: 0.3rem;
-  }
-  #messageBox:not(.copy-message) {
-    font-size: 2.2rem;
-    padding: 1.5rem;
-  }
-  #roleMessageBox {
-    font-size: 2.8rem;
-    padding: 1.5rem;
-  }
-}
-#countsContainer p, #roundCounter {
-  font-size: 1.6rem;
-  color: #f5f5f5;
-  text-align: center;
-  margin: 0;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 600;
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
-  max-width: 100%;
-}
-#roundCounter {
-  margin-top: 0.8rem;
-}
-@media (max-width: 600px) {
-  #countsContainer p, #roundCounter {
-    font-size: 1.4rem;
   }
 }
