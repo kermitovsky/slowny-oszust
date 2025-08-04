@@ -21,6 +21,51 @@
       padding: 1.5rem;
       min-height: 100vh;
       position: relative;
+      transition: background 0.3s ease;
+    }
+    body.dark-mode {
+      background: 
+        radial-gradient(circle, rgba(255, 255, 255, 0.05) 2px, transparent 3px),
+        linear-gradient(135deg, #4b0082 0%, #2c003e 100%);
+      background-size: 15px 15px, auto;
+    }
+    body.dark-mode .container {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    body.dark-mode #playersList li {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: #e67e22;
+    }
+    body.dark-mode #messageBox:not(.copy-message) {
+      background: linear-gradient(135deg, #4b0082, #e67e22);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+    }
+    body.dark-mode #roleMessageBox {
+      background: linear-gradient(135deg, #4b0082, #e67e22);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+    }
+    body.dark-mode #impostorSelectionBox {
+      background: linear-gradient(135deg, #4b0082, #e67e22);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+    }
+    body.dark-mode #impostorSelectionBox #minusImpostor,
+    body.dark-mode #impostorSelectionBox #plusImpostor {
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    body.dark-mode #impostorSelectionBox #minusImpostor:hover:not(:disabled),
+    body.dark-mode #impostorSelectionBox #plusImpostor:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    body.dark-mode #impostorSelectionBox #minusImpostor:disabled,
+    body.dark-mode #impostorSelectionBox #plusImpostor:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    body.dark-mode #rulesBox {
+      background: linear-gradient(135deg, #4b0082, #e67e22);
+      border: 2px solid rgba(255, 255, 255, 0.1);
     }
     .container {
       max-width: 800px;
@@ -32,6 +77,7 @@
       border-radius: 1.5rem;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
       border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: background 0.3s ease, border 0.3s ease;
     }
     @media (max-width: 600px) {
       body {
@@ -54,6 +100,11 @@
       0% { transform: scale(1); }
       50% { transform: scale(1.05); }
       100% { transform: scale(1); }
+    }
+    @keyframes float {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+      100% { transform: translateY(0); }
     }
     #loginScreen, #gameScreen {
       animation: fadeIn 0.5s ease-in-out;
@@ -96,10 +147,16 @@
       cursor: pointer;
       transition: box-shadow 0.3s ease;
     }
+    body.dark-mode button {
+      background: linear-gradient(45deg, #e67e22, #d35400);
+    }
     button:hover {
       background: linear-gradient(45deg, #9b59b6, #8e44ad);
       animation: pulse 1s infinite;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+    body.dark-mode button:hover {
+      background: linear-gradient(45deg, #d35400, #e67e22);
     }
     #leaveRoom {
       background: linear-gradient(45deg, #7f8c8d, #95a5a6);
@@ -120,19 +177,22 @@
       text-align: center;
       display: inline-block;
     }
+    body.dark-mode #copyRoomCode {
+      background: linear-gradient(45deg, #e67e22, #d35400);
+    }
     #copyRoomCode:hover {
       background: linear-gradient(45deg, #9b59b6, #8e44ad);
       animation: pulse 1s infinite;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     }
-    #rulesBtn {
+    body.dark-mode #copyRoomCode:hover {
+      background: linear-gradient(45deg, #d35400, #e67e22);
+    }
+    #rulesBtn, #themeToggle {
       position: fixed;
       bottom: 1.5rem;
-      right: 1.5rem;
-      width: 3.5rem;
-      height: 3.5rem;
       border-radius: 50%;
-      background: linear-gradient(45deg, #3498db, #2980b9);
+      background: rgba(52, 152, 219, 0.3);
       color: white;
       font-size: 2rem;
       font-weight: bold;
@@ -141,24 +201,41 @@
       justify-content: center;
       text-align: center;
       cursor: pointer;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
       z-index: 1000;
-      animation: pulse 2s infinite;
+      animation: float 2s ease-in-out infinite;
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
     }
-    #rulesBtn:hover {
-      background: linear-gradient(45deg, #2980b9, #3498db);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    #rulesBtn {
+      right: 1.5rem;
+      width: 3.5rem;
+      height: 3.5rem;
     }
-    #rulesBtn.hidden {
+    #themeToggle {
+      right: 6rem;
+      width: 3.5rem;
+      height: 3.5rem;
+    }
+    #rulesBtn:hover, #themeToggle:hover {
+      background: rgba(52, 152, 219, 0.5);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+    #rulesBtn.hidden, #themeToggle.hidden {
       display: none;
     }
     @media (max-width: 600px) {
-      #rulesBtn {
+      #rulesBtn, #themeToggle {
         width: 3rem;
         height: 3rem;
         font-size: 1.8rem;
         bottom: 1rem;
+      }
+      #rulesBtn {
         right: 1rem;
+      }
+      #themeToggle {
+        right: 5rem;
       }
     }
     #roomCodeContainer {
@@ -168,6 +245,14 @@
       text-align: center;
       margin: 0.8rem 0;
       flex-wrap: nowrap;
+    }
+    #countsContainer {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      margin: 0.8rem 0;
+      flex-wrap: wrap;
     }
     #roomCodeDisplay {
       font-weight: bold;
@@ -238,6 +323,9 @@
     .self {
       color: black !important;
       font-weight: bold;
+    }
+    body.dark-mode .self {
+      color: #e67e22 !important;
     }
     #messageBox {
       position: fixed;
@@ -329,23 +417,63 @@
       font-weight: 600;
       text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
     }
-    #impostorSelectionBox .button-container {
+    #impostorSelectionBox .impostor-selector {
       display: flex;
       justify-content: center;
+      align-items: center;
       gap: 1.5rem;
+      margin-bottom: 1.5rem;
     }
-    #impostorSelectionBox button {
-      width: 100px;
-      margin: 0;
+    #impostorSelectionBox #minusImpostor,
+    #impostorSelectionBox #plusImpostor {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      font-size: 2rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: opacity 0.3s ease, background 0.3s ease;
+    }
+    #impostorSelectionBox #minusImpostor:hover:not(:disabled),
+    #impostorSelectionBox #plusImpostor:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.3);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+    #impostorSelectionBox #minusImpostor:disabled,
+    #impostorSelectionBox #plusImpostor:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    #impostorSelectionBox #impostorCount {
+      font-size: 3rem;
+      font-weight: bold;
+      color: #f5f5f5;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+    }
+    #impostorSelectionBox #confirmImpostors {
+      width: 150px;
+      margin: 0 auto;
       background: linear-gradient(45deg, #9b59b6, #8e44ad);
       font-size: 2rem;
       font-weight: bold;
       border-radius: 0.8rem;
     }
-    #impostorSelectionBox button:hover {
+    body.dark-mode #impostorSelectionBox #confirmImpostors {
+      background: linear-gradient(45deg, #e67e22, #d35400);
+    }
+    #impostorSelectionBox #confirmImpostors:hover {
       background: linear-gradient(45deg, #8e44ad, #9b59b6);
       animation: pulse 1s infinite;
       box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+    }
+    body.dark-mode #impostorSelectionBox #confirmImpostors:hover {
+      background: linear-gradient(45deg, #d35400, #e67e22);
     }
     #rulesBox {
       position: fixed;
@@ -365,25 +493,28 @@
       word-wrap: break-word;
       white-space: pre-line;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      border: 2px solid rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.1);
       backdrop-filter: blur(5px);
       -webkit-backdrop-filter: blur(5px);
       font-size: 1.8rem;
       font-family: 'Poppins', sans-serif;
       font-weight: 600;
       animation: scaleIn 0.3s ease-in-out;
+      position: relative;
     }
     #rulesBox h2 {
-      font-size: 2.8rem;
+      font-size: 3.2rem;
       color: #f5f5f5;
       font-family: 'Pacifico', cursive;
       text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
       margin: 0.8rem 0;
+      text-align: center;
     }
     #rulesBox h3 {
-      font-size: 2.2rem;
+      font-size: 2.6rem;
       color: #f5f5f5;
       margin: 0.8rem 0;
+      text-align: center;
     }
     #rulesBox ul {
       list-style-type: disc;
@@ -395,18 +526,52 @@
       font-size: 1.6rem;
       color: #f5f5f5;
     }
-    #rulesBox button {
+    #rulesBox #closeRules {
       background: linear-gradient(45deg, #9b59b6, #8e44ad);
       font-size: 1.8rem;
       padding: 0.8rem;
-      width: 140px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       margin: 0.8rem auto 0;
-      display: block;
     }
-    #rulesBox button:hover {
+    body.dark-mode #rulesBox #closeRules {
+      background: linear-gradient(45deg, #e67e22, #d35400);
+    }
+    #rulesBox #closeRules:hover {
       background: linear-gradient(45deg, #8e44ad, #9b59b6);
       animation: pulse 1s infinite;
       box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+    }
+    body.dark-mode #rulesBox #closeRules:hover {
+      background: linear-gradient(45deg, #d35400, #e67e22);
+    }
+    #rulesBox #closeRulesTop {
+      position: sticky;
+      top: 0.5rem;
+      right: 0.5rem;
+      float: right;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(127, 140, 141, 0.5);
+      color: #f5f5f5;
+      font-size: 1.6rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      z-index: 1002;
+      border: none;
+    }
+    #rulesBox #closeRulesTop:hover {
+      background: rgba(127, 140, 141, 0.7);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     }
     @media (max-width: 600px) {
       #rulesBox {
@@ -414,17 +579,25 @@
         font-size: 1.6rem;
       }
       #rulesBox h2 {
-        font-size: 2.2rem;
+        font-size: 2.6rem;
       }
       #rulesBox h3 {
-        font-size: 1.8rem;
+        font-size: 2rem;
       }
       #rulesBox li {
         font-size: 1.4rem;
       }
-      #rulesBox button {
-        width: 120px;
+      #rulesBox #closeRules {
+        width: 40px;
+        height: 40px;
         font-size: 1.6rem;
+      }
+      #rulesBox #closeRulesTop {
+        width: 35px;
+        height: 35px;
+        font-size: 1.4rem;
+        top: 0.3rem;
+        right: 0.3rem;
       }
       #messageBox:not(.copy-message) {
         font-size: 2.2rem;
@@ -440,22 +613,34 @@
       #impostorSelectionBox p {
         font-size: 2.2rem;
       }
-      #impostorSelectionBox button {
-        width: 80px;
+      #impostorSelectionBox #impostorCount {
+        font-size: 2.5rem;
+      }
+      #impostorSelectionBox #minusImpostor,
+      #impostorSelectionBox #plusImpostor {
+        width: 35px;
+        height: 35px;
+        font-size: 1.8rem;
+      }
+      #impostorSelectionBox #confirmImpostors {
+        width: 120px;
         font-size: 1.8rem;
       }
     }
-    #impostorCountDisplay, #playerCountDisplay, #roundCounter {
+    #countsContainer p, #roundCounter {
       font-size: 1.6rem;
       color: #f5f5f5;
       text-align: center;
-      margin: 0.8rem 0;
+      margin: 0;
       font-family: 'Poppins', sans-serif;
       font-weight: 600;
       text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
     }
+    #roundCounter {
+      margin-top: 0.8rem;
+    }
     @media (max-width: 600px) {
-      #impostorCountDisplay, #playerCountDisplay, #roundCounter {
+      #countsContainer p, #roundCounter {
         font-size: 1.4rem;
       }
     }
@@ -477,8 +662,10 @@
         <p>Kod pokoju: <span id="roomCodeDisplay"></span></p>
         <button id="copyRoomCode" title="Kopiuj kod">📋</button>
       </div>
-      <p id="impostorCountDisplay"></p>
-      <p id="playerCountDisplay"></p>
+      <div id="countsContainer">
+        <p id="playerCountDisplay"></p>
+        <p id="impostorCountDisplay"></p>
+      </div>
       <p id="roundCounter"></p>
       <ul id="playersList"></ul>
       <button id="startGame" style="display:none;">Start gry</button>
@@ -488,28 +675,32 @@
   </div>
 
   <button id="rulesBtn" title="Zasady gry">i</button>
+  <button id="themeToggle" title="Przełącz tryb"></button>
   <div id="messageBox"></div>
   <div id="roleMessageBox"></div>
   <div id="impostorSelectionBox">
     <p>Wybierz liczbę impostorów</p>
-    <div class="button-container">
-      <button id="selectOneImpostor">1</button>
-      <button id="selectTwoImpostors">2</button>
+    <div class="impostor-selector">
+      <button id="minusImpostor" title="Zmniejsz">-</button>
+      <span id="impostorCount">1</span>
+      <button id="plusImpostor" title="Zwiększ">+</button>
     </div>
+    <button id="confirmImpostors">Potwierdź</button>
   </div>
   <div id="rulesBox">
+    <button id="closeRulesTop" title="Zamknij">X</button>
     <h2>Zasady gry Słowny Impostor</h2>
     <h3>Cel gry</h3>
     <p>Wciel się w detektywa słów! Twoim zadaniem jest opisanie tajemniczego słowa, nie zdradzając go, lub blefowanie jako impostor, który słowa nie zna. Celem jest zidentyfikowanie impostora przed końcem rundy!</p>
     <h3>Przebieg gry</h3>
     <ul>
-      <li><strong>Tworzenie pokoju:</strong> Host tworzy pokój, wybierając liczbę impostorów (1 lub 2). Gracze dołączają, wpisując kod pokoju.</li>
-      <li><strong>Start gry:</strong> Host uruchamia grę, gdy w pokoju jest co najmniej 3 graczy (lub 4 dla 2 impostorów).</li>
+      <li><strong>Tworzenie pokoju:</strong> Host tworzy pokój, wybierając liczbę impostorów (1–5). Gracze dołączają, wpisując kod pokoju.</li>
+      <li><strong>Start gry:</strong> Host uruchamia grę, gdy w pokoju jest odpowiednia liczba graczy (min. 3 dla 1 impostora, 4 dla 2, itd., maks. 10).</li>
       <li><strong>Losowanie słowa:</strong> Gra losuje jedno słowo dla wszystkich graczy. Normalni gracze znają słowo, impostorzy muszą blefować.</li>
       <li><strong>Opisywanie:</strong> Gracze po kolei opisują słowo w kreatywny sposób, unikając jego bezpośredniego użycia. Losowy gracz zaczyna, z mniejszą szansą na impostora.</li>
       <li><strong>Zakończenie rundy:</strong> Host może zakończyć rundę, gdy podejrzewa impostora. Omówcie, kto był impostorem, i zacznijcie nową rundę!</li>
     </ul>
-    <h3>Role w grze</h3>
+    <h3>Role w gry</h3>
     <ul>
       <li><strong>Normalny gracz:</strong> Zna słowo i opisuje je, aby pomóc innym graczom, jednocześnie obserwując, kto może blefować.</li>
       <li><strong>Impostor:</strong> Nie zna słowa i musi sprytnie udawać, że je zna, aby nie zostać zdemaskowanym.</li>
@@ -519,9 +710,9 @@
     <ul>
       <li>Bądź kreatywny w opisach, ale uważaj, by nie zdradzić słowa!</li>
       <li>Obserwuj, czy opisy innych graczy są spójne – impostorzy mogą się zdradzić!</li>
-      <li>Graj w grupie 3–10 osób dla najlepszej zabawy.</li>
+      <li>Graj w grupie do 10 osób dla najlepszej zabawy.</li>
     </ul>
-    <button id="closeRules">Zamknij</button>
+    <button id="closeRules">X</button>
   </div>
 
   <script>
@@ -560,22 +751,51 @@
     const messageBox = document.getElementById('messageBox');
     const roleMessageBox = document.getElementById('roleMessageBox');
     const impostorSelectionBox = document.getElementById('impostorSelectionBox');
-    const selectOneImpostor = document.getElementById('selectOneImpostor');
-    const selectTwoImpostors = document.getElementById('selectTwoImpostors');
+    const minusImpostor = document.getElementById('minusImpostor');
+    const plusImpostor = document.getElementById('plusImpostor');
+    const impostorCountDisplaySelector = document.getElementById('impostorCount');
+    const confirmImpostors = document.getElementById('confirmImpostors');
     const rulesBtn = document.getElementById('rulesBtn');
+    const themeToggle = document.getElementById('themeToggle');
     const rulesBox = document.getElementById('rulesBox');
     const closeRulesBtn = document.getElementById('closeRules');
+    const closeRulesTopBtn = document.getElementById('closeRulesTop');
 
     let currentRoomCode = null;
     let currentPlayerId = null;
     let currentPlayerName = null;
     let isHost = false;
     let words = [];
+    let impostorCount = 1;
 
-    // Lista emoji dla awatarów
-    const emojiList = ['🐱', '🚀', '🌟', '🍎', '🦁', '🎸', '⚽', '🌈', '🍕', '🦄', '🎉', '🍉', '🦊', '🚗', '🌺'];
+    // Lista emoji (tylko zwierzęta)
+    const emojiList = ['🐱', '🦁', '🐘', '🐶', '🐻', '🦊', '🐷', '🐰', '🐼', '🦒'];
     // Kolory dla awatarów
     const avatarColors = ['#8e44ad', '#e67e22', '#3498db', '#e74c3c', '#2ecc71', '#f1c40f', '#9b59b6', '#d35400'];
+
+    // Funkcja zamykania zasad
+    function closeRules() {
+      console.log('Kliknięto Zamknij zasady');
+      rulesBox.style.display = 'none';
+      rulesBtn.classList.remove('hidden');
+      themeToggle.classList.remove('hidden');
+    }
+
+    // Funkcja przełączania trybu
+    function toggleTheme() {
+      const isDark = document.body.classList.toggle('dark-mode');
+      themeToggle.textContent = isDark ? '☀️' : '🌙';
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      console.log('Przełączono na tryb:', isDark ? 'ciemny' : 'jasny');
+    }
+
+    // Inicjalizacja trybu
+    if (localStorage.getItem('theme') === 'dark') {
+      document.body.classList.add('dark-mode');
+      themeToggle.textContent = '☀️';
+    } else {
+      themeToggle.textContent = '🌙';
+    }
 
     // Załaduj słowa z words.json
     fetch('words.json')
@@ -596,19 +816,34 @@
       return Math.random().toString(36).substr(2, 4).toUpperCase();
     }
 
+    function assignUniqueEmoji(players) {
+      const usedEmojis = Object.values(players || {}).map(p => p.emoji).filter(e => e);
+      const availableEmojis = emojiList.filter(e => !usedEmojis.includes(e));
+      if (availableEmojis.length === 0) {
+        console.warn('Brak dostępnych emoji, przypisuję losowe');
+        return emojiList[Math.floor(Math.random() * emojiList.length)];
+      }
+      const selectedEmoji = availableEmojis[Math.floor(Math.random() * availableEmojis.length)];
+      console.log('Przypisano emoji:', selectedEmoji);
+      return selectedEmoji;
+    }
+
     function updatePlayersList(players) {
+      console.log('Dane players:', players);
+      if (!players || !Object.keys(players).length) {
+        playersList.innerHTML = '<li>Brak graczy</li>';
+        return;
+      }
       playersList.innerHTML = '';
       for (const [id, player] of Object.entries(players)) {
         const li = document.createElement('li');
         const avatar = document.createElement('span');
         avatar.classList.add('avatar');
-        // Losowe emoji dla awatara
-        const emojiIndex = Math.floor(Math.random() * emojiList.length);
-        avatar.textContent = emojiList[emojiIndex];
+        avatar.textContent = player.emoji || '❓';
         const colorIndex = Math.floor(Math.random() * avatarColors.length);
         avatar.style.backgroundColor = avatarColors[colorIndex];
         li.appendChild(avatar);
-        li.appendChild(document.createTextNode(` ${player.name}`));
+        li.appendChild(document.createTextNode(` ${player.name || 'Nieznany gracz'}`));
         if (player.isHost) {
           li.classList.add('host');
           li.appendChild(document.createTextNode(' (host)'));
@@ -663,21 +898,37 @@
       impostorSelectionBox.style.display = 'none';
       rulesBox.style.display = 'none';
       rulesBtn.classList.remove('hidden');
+      themeToggle.classList.remove('hidden');
       impostorCountDisplay.textContent = '';
       playerCountDisplay.textContent = '';
       roundCounter.textContent = '';
+      impostorCount = 1;
+      impostorCountDisplaySelector.textContent = impostorCount;
+      updateImpostorButtons();
     }
+
+    // Funkcja aktualizująca stan przycisków minus/plus
+    function updateImpostorButtons() {
+      minusImpostor.disabled = impostorCount <= 1;
+      plusImpostor.disabled = impostorCount >= 5;
+      minusImpostor.style.opacity = impostorCount <= 1 ? '0.5' : '1';
+      plusImpostor.style.opacity = impostorCount >= 5 ? '0.5' : '1';
+      console.log('Zaktualizowano przyciski impostorów:', { impostorCount });
+    }
+
+    // Event listenery dla zamykania zasad
+    closeRulesBtn.addEventListener('click', closeRules);
+    closeRulesTopBtn.addEventListener('click', closeRules);
 
     rulesBtn.addEventListener('click', () => {
       console.log('Kliknięto Zasady gry');
       rulesBox.style.display = 'block';
       rulesBtn.classList.add('hidden');
+      themeToggle.classList.add('hidden');
     });
 
-    closeRulesBtn.addEventListener('click', () => {
-      console.log('Kliknięto Zamknij zasady');
-      rulesBox.style.display = 'none';
-      rulesBtn.classList.remove('hidden');
+    themeToggle.addEventListener('click', () => {
+      toggleTheme();
     });
 
     createRoomBtn.addEventListener('click', () => {
@@ -692,28 +943,47 @@
       isHost = true;
       console.log('Ustawiono hosta, imię:', currentPlayerName);
       impostorSelectionBox.style.display = 'block';
+      impostorCount = 1;
+      impostorCountDisplaySelector.textContent = impostorCount;
+      updateImpostorButtons();
       rulesBtn.classList.add('hidden');
+      themeToggle.classList.add('hidden');
     });
 
-    selectOneImpostor.addEventListener('click', () => {
-      console.log('Wybrano 1 impostora');
-      createRoom(1);
+    minusImpostor.addEventListener('click', () => {
+      if (impostorCount > 1) {
+        impostorCount--;
+        impostorCountDisplaySelector.textContent = impostorCount;
+        updateImpostorButtons();
+        console.log('Zmniejszono liczbę impostorów:', impostorCount);
+      }
     });
 
-    selectTwoImpostors.addEventListener('click', () => {
-      console.log('Wybrano 2 impostorów');
-      createRoom(2);
+    plusImpostor.addEventListener('click', () => {
+      if (impostorCount < 5) {
+        impostorCount++;
+        impostorCountDisplaySelector.textContent = impostorCount;
+        updateImpostorButtons();
+        console.log('Zwiększono liczbę impostorów:', impostorCount);
+      }
+    });
+
+    confirmImpostors.addEventListener('click', () => {
+      console.log('Potwierdzono liczbę impostorów:', impostorCount);
+      createRoom(impostorCount);
     });
 
     function createRoom(numImpostors) {
       console.log('Tworzenie pokoju z', numImpostors, 'impostorami');
       currentRoomCode = generateRoomCode();
       currentPlayerId = db.ref().push().key;
+      const emoji = assignUniqueEmoji({});
 
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
+      const playerData = { name: currentPlayerName, isHost: true, role: null, emoji: emoji };
       roomRef.set({
         players: {
-          [currentPlayerId]: { name: currentPlayerName, isHost: true, role: null }
+          [currentPlayerId]: playerData
         },
         gameStarted: false,
         currentWord: null,
@@ -722,17 +992,19 @@
         numImpostors: numImpostors,
         currentRound: 0
       }).then(() => {
-        console.log('Pokój utworzony:', currentRoomCode);
+        console.log('Pokój utworzony:', currentRoomCode, 'Gracz:', playerData);
         loginScreen.style.display = 'none';
         gameScreen.style.display = 'block';
         roomCodeDisplay.textContent = currentRoomCode;
         impostorSelectionBox.style.display = 'none';
         rulesBtn.classList.remove('hidden');
+        themeToggle.classList.remove('hidden');
         listenToRoom(currentRoomCode);
       }).catch(error => {
         console.error('Błąd tworzenia pokoju:', error);
         showMessage('❌ Błąd tworzenia pokoju!');
         rulesBtn.classList.remove('hidden');
+        themeToggle.classList.remove('hidden');
       });
     }
 
@@ -770,10 +1042,12 @@
           return;
         }
 
+        const emoji = assignUniqueEmoji(players);
+        const playerData = { name: currentPlayerName, isHost: false, role: null, emoji: emoji };
         roomRef.child('players').update({
-          [currentPlayerId]: { name: currentPlayerName, isHost: false, role: null }
+          [currentPlayerId]: playerData
         }).then(() => {
-          console.log('Dołączono do pokoju:', roomCode);
+          console.log('Dołączono do pokoju:', roomCode, 'Gracz:', playerData);
           loginScreen.style.display = 'none';
           gameScreen.style.display = 'block';
           roomCodeDisplay.textContent = currentRoomCode;
@@ -824,15 +1098,9 @@
         const numImpostors = room.numImpostors || 1;
         const currentRound = (room.currentRound || 0) + 1;
 
-        if (!players || Object.keys(players).length < 3) {
-          showMessage('❌ Potrzeba co najmniej 3 graczy!');
-          console.log('Za mało graczy:', Object.keys(players).length);
-          return;
-        }
-
-        if (numImpostors === 2 && Object.keys(players).length < 4) {
-          showMessage('❌ Potrzeba co najmniej 4 graczy dla 2 impostorów!');
-          console.log('Za mało graczy dla 2 impostorów:', Object.keys(players).length);
+        if (!players || Object.keys(players).length < numImpostors + 2) {
+          showMessage(`❌ Potrzeba co najmniej ${numImpostors + 2} graczy dla ${numImpostors} impostorów!`);
+          console.log('Za mało graczy:', Object.keys(players).length, 'Wymagane:', numImpostors + 2);
           return;
         }
 
@@ -880,7 +1148,7 @@
         });
       }).catch(error => {
         console.error('Błąd pobierania danych pokoju:', error);
-        showMessage('❌ Błąd pobierania danych pokoju!');
+        showMessage('❌ Błąd rozpoczynania gry!');
       });
     }
 
@@ -907,6 +1175,9 @@
           console.error('Błąd kończenia rundy:', error);
           showMessage('❌ Błąd kończenia rundy!');
         });
+      }).catch(error => {
+        console.error('Błąd pobierania danych pokoju:', error);
+        showMessage('❌ Błąd kończenia rundy!');
       });
     });
 
@@ -954,6 +1225,10 @@
       impostorSelectionBox.style.display = 'none';
       rulesBox.style.display = 'none';
       rulesBtn.classList.remove('hidden');
+      themeToggle.classList.remove('hidden');
+      impostorCount = 1;
+      impostorCountDisplaySelector.textContent = impostorCount;
+      updateImpostorButtons();
     }
 
     function listenToRoom(roomCode) {
@@ -963,6 +1238,7 @@
 
       roomRef.on('value', snapshot => {
         const room = snapshot.val();
+        console.log('Odebrano dane pokoju:', room);
         if (!room) {
           resetState();
           showMessage('Pokój został zamknięty');
@@ -971,11 +1247,11 @@
         }
 
         const players = room.players || {};
-        console.log('Aktualizacja danych pokoju:', room);
         updatePlayersList(players);
 
-        impostorCountDisplay.textContent = room.numImpostors ? `Liczba impostorów: ${room.numImpostors}` : '';
-        playerCountDisplay.textContent = players ? `Gracze: ${Object.keys(players).length}` : '';
+        impostorCountDisplay.textContent = room.numImpostors ? `Liczba impostorów: ${room.numImpostors}` : 'Liczba impostorów: 0';
+        playerCountDisplay.textContent = players && Object.keys(players).length ? `Gracze: ${Object.keys(players).length}` : 'Gracze: 0';
+        console.log('Liczniki:', { numImpostors: room.numImpostors, playerCount: Object.keys(players).length });
         roundCounter.textContent = room.currentRound >= 1 ? `Runda ${room.currentRound}` : '';
 
         startGameBtn.style.display = isHost && !room.gameStarted ? 'block' : 'none';
@@ -987,7 +1263,7 @@
             showRoleMessage(role === 'impostor' ? 'Jesteś oszustem!' : `Twoje słowo: ${room.currentWord}`);
             if (room.starterId && players[room.starterId]) {
               setTimeout(() => {
-                showMessage(`Zaczyna mówić: <strong>${players[room.starterId].name}</strong>`, 5000);
+                showMessage(`Zaczyna mówić: <strong>${players[room.starterId]?.name || 'Nieznany gracz'}</strong>`, 5000);
               }, 7500);
             }
           }
