@@ -18,7 +18,7 @@
       color: #fff;
       font-size: 2rem;
       margin: 0;
-      padding: 2rem;
+      padding: 1.5rem;
       min-height: 100vh;
       position: relative;
     }
@@ -28,10 +28,19 @@
       background: rgba(255, 255, 255, 0.1);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
-      padding: 2rem;
+      padding: 1.5rem;
       border-radius: 1.5rem;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
       border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    @media (max-width: 600px) {
+      body {
+        padding: 1rem;
+      }
+      .container {
+        padding: 1rem;
+        margin: 0.5rem;
+      }
     }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(20px); }
@@ -55,23 +64,23 @@
       color: #f5f5f5;
       font-family: 'Pacifico', cursive;
       text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
     }
     h1 {
       text-align: center;
-      font-size: 3.5rem;
+      font-size: 3rem;
       color: #f5f5f5;
       font-family: 'Pacifico', cursive;
       text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
     }
     input, button {
-      font-size: 2rem;
-      padding: 1rem;
-      margin: 1rem 0;
+      font-size: 1.8rem;
+      padding: 0.8rem;
+      margin: 0.8rem 0;
       border-radius: 0.8rem;
       border: none;
       width: 100%;
-      max-width: 400px;
+      max-width: 350px;
       display: block;
       margin-left: auto;
       margin-right: auto;
@@ -102,12 +111,12 @@
     }
     #copyRoomCode {
       background: linear-gradient(45deg, #8e44ad, #9b59b6);
-      width: 3rem;
-      height: 3rem;
-      font-size: 2.2rem;
+      width: 2.8rem;
+      height: 2.8rem;
+      font-size: 2rem;
       padding: 0;
       margin: 0 0.5rem;
-      line-height: 3rem;
+      line-height: 2.8rem;
       text-align: center;
       display: inline-block;
     }
@@ -117,22 +126,47 @@
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     }
     #rulesBtn {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      width: 3.5rem;
+      height: 3.5rem;
+      border-radius: 50%;
       background: linear-gradient(45deg, #3498db, #2980b9);
-      font-size: 1.8rem;
-      padding: 0.8rem;
-      margin-top: 0.5rem;
+      color: white;
+      font-size: 2rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      animation: pulse 2s infinite;
     }
     #rulesBtn:hover {
       background: linear-gradient(45deg, #2980b9, #3498db);
-      animation: pulse 1s infinite;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+    #rulesBtn.hidden {
+      display: none;
+    }
+    @media (max-width: 600px) {
+      #rulesBtn {
+        width: 3rem;
+        height: 3rem;
+        font-size: 1.8rem;
+        bottom: 1rem;
+        right: 1rem;
+      }
     }
     #roomCodeContainer {
       display: flex;
       align-items: center;
       justify-content: center;
       text-align: center;
-      margin: 1rem 0;
+      margin: 0.8rem 0;
       flex-wrap: nowrap;
     }
     #roomCodeDisplay {
@@ -144,7 +178,7 @@
     }
     #playersList li {
       position: relative;
-      padding: 1rem 3.5rem 1rem 4.5rem;
+      padding: 0.8rem 3rem 0.8rem 3.5rem;
       margin: 0.5rem 0;
       border-radius: 1rem;
       background-color: rgba(255, 255, 255, 0.8);
@@ -154,34 +188,32 @@
       animation: fadeIn 0.3s ease-in-out;
     }
     #playersList li .avatar {
-      width: 2.5rem;
-      height: 2.5rem;
+      width: 2.2rem;
+      height: 2.2rem;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
-      font-size: 1.4rem;
-      font-weight: bold;
-      margin-right: 1rem;
+      font-size: 1.5rem;
+      margin-right: 0.8rem;
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
       position: absolute;
-      left: 1rem;
+      left: 0.8rem;
     }
     #playersList li.host .avatar::after {
       content: '👑';
       position: absolute;
-      top: -0.5rem;
-      right: -0.5rem;
-      font-size: 1rem;
+      top: -0.4rem;
+      right: -0.4rem;
+      font-size: 0.9rem;
     }
     #playersList li .kickBtn {
       position: absolute;
       top: 50%;
-      right: 1rem;
+      right: 0.8rem;
       transform: translateY(-50%);
-      width: 32px;
-      height: 32px;
+      width: 28px;
+      height: 28px;
       background-color: #e74c3c;
       color: white;
       font-weight: bold;
@@ -189,7 +221,7 @@
       border: none;
       cursor: pointer;
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-      font-size: 1.8rem;
+      font-size: 1.6rem;
       line-height: 1;
       text-align: center;
       padding: 0;
@@ -216,26 +248,26 @@
       backdrop-filter: blur(5px);
       -webkit-backdrop-filter: blur(5px);
       color: #333;
-      padding: 1.5rem;
+      padding: 1.2rem;
       border-radius: 1rem;
       text-align: center;
-      z-index: 1000;
+      z-index: 1001;
       display: none;
       max-width: 90vw;
       word-wrap: break-word;
       white-space: pre-line;
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-      font-size: 2rem;
+      font-size: 1.8rem;
       font-family: 'Poppins', sans-serif;
       font-weight: 600;
       animation: scaleIn 0.3s ease-in-out;
     }
     #messageBox:not(.copy-message) {
-      font-size: 3.2rem;
+      font-size: 2.8rem;
       background: linear-gradient(135deg, #8e44ad, #d35400);
       color: white;
-      padding: 3rem;
-      border-radius: 2rem;
+      padding: 2rem;
+      border-radius: 1.5rem;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
       border: 2px solid rgba(255, 255, 255, 0.2);
       text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
@@ -250,10 +282,10 @@
       transform: translate(-50%, -50%);
       background: linear-gradient(135deg, #8e44ad, #d35400);
       color: white;
-      padding: 3rem;
-      border-radius: 2rem;
+      padding: 2rem;
+      border-radius: 1.5rem;
       text-align: center;
-      z-index: 1000;
+      z-index: 1001;
       display: none;
       max-width: 90vw;
       word-wrap: break-word;
@@ -262,7 +294,7 @@
       border: 2px solid rgba(255, 255, 255, 0.2);
       backdrop-filter: blur(5px);
       -webkit-backdrop-filter: blur(5px);
-      font-size: 4rem;
+      font-size: 3.5rem;
       font-weight: bold;
       font-family: 'Segoe UI Black', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       animation: scaleIn 0.3s ease-in-out;
@@ -274,10 +306,10 @@
       transform: translate(-50%, -50%);
       background: linear-gradient(135deg, #8e44ad, #d35400);
       color: white;
-      padding: 2.5rem 4rem;
-      border-radius: 2rem;
+      padding: 2rem 3rem;
+      border-radius: 1.5rem;
       text-align: center;
-      z-index: 1000;
+      z-index: 1001;
       display: none;
       max-width: 90vw;
       word-wrap: break-word;
@@ -286,12 +318,12 @@
       border: 2px solid rgba(255, 255, 255, 0.2);
       backdrop-filter: blur(5px);
       -webkit-backdrop-filter: blur(5px);
-      font-size: 2.5rem;
+      font-size: 2rem;
       animation: scaleIn 0.3s ease-in-out;
     }
     #impostorSelectionBox p {
-      margin: 0 0 2rem 0;
-      font-size: 3.5rem;
+      margin: 0 0 1.5rem 0;
+      font-size: 3rem;
       color: #f5f5f5;
       font-family: 'Poppins', sans-serif;
       font-weight: 600;
@@ -300,15 +332,15 @@
     #impostorSelectionBox .button-container {
       display: flex;
       justify-content: center;
-      gap: 2rem;
+      gap: 1.5rem;
     }
     #impostorSelectionBox button {
-      width: 120px;
+      width: 100px;
       margin: 0;
       background: linear-gradient(45deg, #9b59b6, #8e44ad);
-      font-size: 2.5rem;
+      font-size: 2rem;
       font-weight: bold;
-      border-radius: 1rem;
+      border-radius: 0.8rem;
     }
     #impostorSelectionBox button:hover {
       background: linear-gradient(45deg, #8e44ad, #9b59b6);
@@ -322,49 +354,110 @@
       transform: translate(-50%, -50%);
       background: linear-gradient(135deg, #8e44ad, #d35400);
       color: white;
-      padding: 2.5rem 4rem;
-      border-radius: 2rem;
-      text-align: center;
-      z-index: 1000;
+      padding: 2rem 3rem;
+      border-radius: 1.5rem;
+      text-align: left;
+      z-index: 1001;
       display: none;
       max-width: 90vw;
+      max-height: 80vh;
+      overflow-y: auto;
       word-wrap: break-word;
       white-space: pre-line;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
       border: 2px solid rgba(255, 255, 255, 0.2);
       backdrop-filter: blur(5px);
       -webkit-backdrop-filter: blur(5px);
-      font-size: 2rem;
+      font-size: 1.8rem;
       font-family: 'Poppins', sans-serif;
       font-weight: 600;
       animation: scaleIn 0.3s ease-in-out;
     }
-    #rulesBox p {
-      margin: 0 0 2rem 0;
-      font-size: 2.5rem;
+    #rulesBox h2 {
+      font-size: 2.8rem;
       color: #f5f5f5;
+      font-family: 'Pacifico', cursive;
       text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      margin: 0.8rem 0;
+    }
+    #rulesBox h3 {
+      font-size: 2.2rem;
+      color: #f5f5f5;
+      margin: 0.8rem 0;
+    }
+    #rulesBox ul {
+      list-style-type: disc;
+      padding-left: 1.5rem;
+      margin: 0.8rem 0;
+    }
+    #rulesBox li {
+      margin-bottom: 0.5rem;
+      font-size: 1.6rem;
+      color: #f5f5f5;
     }
     #rulesBox button {
       background: linear-gradient(45deg, #9b59b6, #8e44ad);
-      font-size: 2rem;
-      padding: 1rem;
-      width: 150px;
-      margin: 0 auto;
+      font-size: 1.8rem;
+      padding: 0.8rem;
+      width: 140px;
+      margin: 0.8rem auto 0;
+      display: block;
     }
     #rulesBox button:hover {
       background: linear-gradient(45deg, #8e44ad, #9b59b6);
       animation: pulse 1s infinite;
       box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
     }
-    #impostorCountDisplay, #playerCountDisplay {
-      font-size: 1.8rem;
+    @media (max-width: 600px) {
+      #rulesBox {
+        padding: 1.5rem;
+        font-size: 1.6rem;
+      }
+      #rulesBox h2 {
+        font-size: 2.2rem;
+      }
+      #rulesBox h3 {
+        font-size: 1.8rem;
+      }
+      #rulesBox li {
+        font-size: 1.4rem;
+      }
+      #rulesBox button {
+        width: 120px;
+        font-size: 1.6rem;
+      }
+      #messageBox:not(.copy-message) {
+        font-size: 2.2rem;
+        padding: 1.5rem;
+      }
+      #roleMessageBox {
+        font-size: 2.8rem;
+        padding: 1.5rem;
+      }
+      #impostorSelectionBox {
+        padding: 1.5rem 2rem;
+      }
+      #impostorSelectionBox p {
+        font-size: 2.2rem;
+      }
+      #impostorSelectionBox button {
+        width: 80px;
+        font-size: 1.8rem;
+      }
+    }
+    #impostorCountDisplay, #playerCountDisplay, #roundCounter {
+      font-size: 1.6rem;
       color: #f5f5f5;
       text-align: center;
-      margin: 1rem 0;
+      margin: 0.8rem 0;
       font-family: 'Poppins', sans-serif;
       font-weight: 600;
       text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+    }
+    @media (max-width: 600px) {
+      #impostorCountDisplay, #playerCountDisplay, #roundCounter {
+        font-size: 1.4rem;
+      }
     }
   </style>
 </head>
@@ -376,7 +469,6 @@
       <button id="createRoom">Stwórz pokój</button>
       <input type="text" id="roomCodeInput" placeholder="Kod pokoju" maxlength="4" />
       <button id="joinRoom">Dołącz do pokoju</button>
-      <button id="rulesBtn">Zasady gry</button>
       <p id="statusMessage"></p>
     </div>
 
@@ -387,13 +479,15 @@
       </div>
       <p id="impostorCountDisplay"></p>
       <p id="playerCountDisplay"></p>
+      <p id="roundCounter"></p>
       <ul id="playersList"></ul>
       <button id="startGame" style="display:none;">Start gry</button>
-      <button id="endRound" style="display:none; margin-top: 1rem; background-color: #c0392b;">Zakończ rundę</button>
-      <button id="leaveRoom" style="margin-top: 1rem;">Opuść pokój</button>
+      <button id="endRound" style="display:none; margin-top: 0.8rem; background-color: #c0392b;">Zakończ rundę</button>
+      <button id="leaveRoom" style="margin-top: 0.8rem;">Opuść pokój</button>
     </div>
   </div>
 
+  <button id="rulesBtn" title="Zasady gry">i</button>
   <div id="messageBox"></div>
   <div id="roleMessageBox"></div>
   <div id="impostorSelectionBox">
@@ -404,8 +498,29 @@
     </div>
   </div>
   <div id="rulesBox">
-    <p>Zasady gry Słowny Impostor</p>
-    <p>Gracze po kolei opisują wylosowane słowo, nie używając go bezpośrednio. Wśród graczy jest impostor, który nie zna słowa i musi blefować. Twoim zadaniem jest zidentyfikować impostora przed końcem rundy! Host wybiera liczbę impostorów (1 lub 2) i rozpoczyna grę. Po każdej rundzie możesz zakończyć grę lub начать nową rundę.</p>
+    <h2>Zasady gry Słowny Impostor</h2>
+    <h3>Cel gry</h3>
+    <p>Wciel się w detektywa słów! Twoim zadaniem jest opisanie tajemniczego słowa, nie zdradzając go, lub blefowanie jako impostor, który słowa nie zna. Celem jest zidentyfikowanie impostora przed końcem rundy!</p>
+    <h3>Przebieg gry</h3>
+    <ul>
+      <li><strong>Tworzenie pokoju:</strong> Host tworzy pokój, wybierając liczbę impostorów (1 lub 2). Gracze dołączają, wpisując kod pokoju.</li>
+      <li><strong>Start gry:</strong> Host uruchamia grę, gdy w pokoju jest co najmniej 3 graczy (lub 4 dla 2 impostorów).</li>
+      <li><strong>Losowanie słowa:</strong> Gra losuje jedno słowo dla wszystkich graczy. Normalni gracze znają słowo, impostorzy muszą blefować.</li>
+      <li><strong>Opisywanie:</strong> Gracze po kolei opisują słowo w kreatywny sposób, unikając jego bezpośredniego użycia. Losowy gracz zaczyna, z mniejszą szansą na impostora.</li>
+      <li><strong>Zakończenie rundy:</strong> Host może zakończyć rundę, gdy podejrzewa impostora. Omówcie, kto był impostorem, i zacznijcie nową rundę!</li>
+    </ul>
+    <h3>Role w grze</h3>
+    <ul>
+      <li><strong>Normalny gracz:</strong> Zna słowo i opisuje je, aby pomóc innym graczom, jednocześnie obserwując, kto może blefować.</li>
+      <li><strong>Impostor:</strong> Nie zna słowa i musi sprytnie udawać, że je zna, aby nie zostać zdemaskowanym.</li>
+      <li><strong>Host:</strong> Tworzy pokój, wybiera liczbę impostorów, rozpoczyna i kończy rundy. Może też wyrzucać graczy z pokoju.</li>
+    </ul>
+    <h3>Porady</h3>
+    <ul>
+      <li>Bądź kreatywny w opisach, ale uważaj, by nie zdradzić słowa!</li>
+      <li>Obserwuj, czy opisy innych graczy są spójne – impostorzy mogą się zdradzić!</li>
+      <li>Graj w grupie 3–10 osób dla najlepszej zabawy.</li>
+    </ul>
     <button id="closeRules">Zamknij</button>
   </div>
 
@@ -437,6 +552,7 @@
     const copyRoomCodeBtn = document.getElementById('copyRoomCode');
     const impostorCountDisplay = document.getElementById('impostorCountDisplay');
     const playerCountDisplay = document.getElementById('playerCountDisplay');
+    const roundCounter = document.getElementById('roundCounter');
     const playersList = document.getElementById('playersList');
     const startGameBtn = document.getElementById('startGame');
     const endRoundBtn = document.getElementById('endRound');
@@ -456,6 +572,8 @@
     let isHost = false;
     let words = [];
 
+    // Lista emoji dla awatarów
+    const emojiList = ['🐱', '🚀', '🌟', '🍎', '🦁', '🎸', '⚽', '🌈', '🍕', '🦄', '🎉', '🍉', '🦊', '🚗', '🌺'];
     // Kolory dla awatarów
     const avatarColors = ['#8e44ad', '#e67e22', '#3498db', '#e74c3c', '#2ecc71', '#f1c40f', '#9b59b6', '#d35400'];
 
@@ -471,7 +589,7 @@
       })
       .catch(error => {
         console.error('Błąd ładowania words.json:', error);
-        showMessage('Błąd ładowania słów gry!');
+        showMessage('❌ Błąd ładowania słów gry!');
       });
 
     function generateRoomCode() {
@@ -484,7 +602,9 @@
         const li = document.createElement('li');
         const avatar = document.createElement('span');
         avatar.classList.add('avatar');
-        avatar.textContent = player.name.charAt(0).toUpperCase();
+        // Losowe emoji dla awatara
+        const emojiIndex = Math.floor(Math.random() * emojiList.length);
+        avatar.textContent = emojiList[emojiIndex];
         const colorIndex = Math.floor(Math.random() * avatarColors.length);
         avatar.style.backgroundColor = avatarColors[colorIndex];
         li.appendChild(avatar);
@@ -516,7 +636,7 @@
       console.log('showMessage:', text);
       messageBox.innerHTML = text;
       messageBox.style.display = 'block';
-      if (text === 'Kod skopiowany!' || text === 'Nie udało się skopiować kodu') {
+      if (text === '✅ Kod skopiowany!' || text === '❌ Nie udało się skopiować kodu') {
         messageBox.classList.add('copy-message');
         duration = 1500;
       } else {
@@ -542,25 +662,29 @@
       roleMessageBox.style.display = 'none';
       impostorSelectionBox.style.display = 'none';
       rulesBox.style.display = 'none';
+      rulesBtn.classList.remove('hidden');
       impostorCountDisplay.textContent = '';
       playerCountDisplay.textContent = '';
+      roundCounter.textContent = '';
     }
 
     rulesBtn.addEventListener('click', () => {
       console.log('Kliknięto Zasady gry');
       rulesBox.style.display = 'block';
+      rulesBtn.classList.add('hidden');
     });
 
     closeRulesBtn.addEventListener('click', () => {
       console.log('Kliknięto Zamknij zasady');
       rulesBox.style.display = 'none';
+      rulesBtn.classList.remove('hidden');
     });
 
     createRoomBtn.addEventListener('click', () => {
       console.log('Kliknięto Stwórz pokój');
       const name = playerNameInput.value.trim();
       if (!name) {
-        showMessage('Wpisz nick!');
+        showMessage('❌ Wpisz nick!');
         console.log('Brak nicku');
         return;
       }
@@ -568,6 +692,7 @@
       isHost = true;
       console.log('Ustawiono hosta, imię:', currentPlayerName);
       impostorSelectionBox.style.display = 'block';
+      rulesBtn.classList.add('hidden');
     });
 
     selectOneImpostor.addEventListener('click', () => {
@@ -594,17 +719,20 @@
         currentWord: null,
         resetMessage: null,
         starterId: null,
-        numImpostors: numImpostors
+        numImpostors: numImpostors,
+        currentRound: 0
       }).then(() => {
         console.log('Pokój utworzony:', currentRoomCode);
         loginScreen.style.display = 'none';
         gameScreen.style.display = 'block';
         roomCodeDisplay.textContent = currentRoomCode;
         impostorSelectionBox.style.display = 'none';
+        rulesBtn.classList.remove('hidden');
         listenToRoom(currentRoomCode);
       }).catch(error => {
         console.error('Błąd tworzenia pokoju:', error);
         showMessage('❌ Błąd tworzenia pokoju!');
+        rulesBtn.classList.remove('hidden');
       });
     }
 
@@ -616,7 +744,7 @@
       if (!name || !roomCode) {
         showMessage('❌ Wpisz nick i kod pokoju!');
         console.log('Brak nicku lub kodu pokoju');
-        roomCodeInput.value = ''; // Czyść pole kodu po błędzie
+        roomCodeInput.value = '';
         return;
       }
 
@@ -630,7 +758,7 @@
         if (!snapshot.exists()) {
           showMessage('❌ Pokój nie istnieje!');
           console.log('Pokój nie istnieje:', roomCode);
-          roomCodeInput.value = ''; // Czyść pole kodu po błędzie
+          roomCodeInput.value = '';
           return;
         }
 
@@ -638,7 +766,7 @@
         if (Object.keys(players).length >= 10) {
           showMessage('❌ Pokój jest pełny! Maksymalnie 10 graczy.');
           console.log('Pokój pełny:', roomCode);
-          roomCodeInput.value = ''; // Czyść pole kodu po błędzie
+          roomCodeInput.value = '';
           return;
         }
 
@@ -653,12 +781,12 @@
         }).catch(error => {
           console.error('Błąd dołączania do pokoju:', error);
           showMessage('❌ Błąd dołączania do pokoju!');
-          roomCodeInput.value = ''; // Czyść pole kodu po błędzie
+          roomCodeInput.value = '';
         });
       }).catch(error => {
         console.error('Błąd sprawdzania pokoju:', error);
         showMessage('❌ Błąd sprawdzania pokoju!');
-        roomCodeInput.value = ''; // Czyść pole kodu po błędzie
+        roomCodeInput.value = '';
       });
     });
 
@@ -694,6 +822,7 @@
         const room = snapshot.val();
         const players = room.players || {};
         const numImpostors = room.numImpostors || 1;
+        const currentRound = (room.currentRound || 0) + 1;
 
         if (!players || Object.keys(players).length < 3) {
           showMessage('❌ Potrzeba co najmniej 3 graczy!');
@@ -736,6 +865,7 @@
         }
         const starterId = playerIds[starterIndex];
         updates['starterId'] = starterId;
+        updates['currentRound'] = currentRound;
 
         roomRef.update({
           gameStarted: true,
@@ -743,7 +873,7 @@
           resetMessage: null,
           ...updates
         }).then(() => {
-          console.log('Gra rozpoczęta, słowo:', word, 'Startuje:', starterId);
+          console.log('Gra rozpoczęta, słowo:', word, 'Startuje:', starterId, 'Runda:', currentRound);
         }).catch(error => {
           console.error('Błąd rozpoczynania gry:', error);
           showMessage('❌ Błąd rozpoczynania gry!');
@@ -762,16 +892,21 @@
       }
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
 
-      roomRef.update({
-        gameStarted: false,
-        currentWord: null,
-        resetMessage: 'Runda zakończona',
-        starterId: null
-      }).then(() => {
-        console.log('Runda zakończona');
-      }).catch(error => {
-        console.error('Błąd kończenia rundy:', error);
-        showMessage('❌ Błąd kończenia rundy!');
+      roomRef.once('value').then(snapshot => {
+        const room = snapshot.val();
+        const currentRound = (room.currentRound || 0) + 1;
+        roomRef.update({
+          gameStarted: false,
+          currentWord: null,
+          resetMessage: 'Runda zakończona',
+          starterId: null,
+          currentRound: currentRound
+        }).then(() => {
+          console.log('Runda zakończona, nowa runda:', currentRound);
+        }).catch(error => {
+          console.error('Błąd kończenia rundy:', error);
+          showMessage('❌ Błąd kończenia rundy!');
+        });
       });
     });
 
@@ -814,9 +949,11 @@
       roomCodeDisplay.textContent = '';
       impostorCountDisplay.textContent = '';
       playerCountDisplay.textContent = '';
+      roundCounter.textContent = '';
       statusMessage.textContent = '';
       impostorSelectionBox.style.display = 'none';
       rulesBox.style.display = 'none';
+      rulesBtn.classList.remove('hidden');
     }
 
     function listenToRoom(roomCode) {
@@ -839,6 +976,7 @@
 
         impostorCountDisplay.textContent = room.numImpostors ? `Liczba impostorów: ${room.numImpostors}` : '';
         playerCountDisplay.textContent = players ? `Gracze: ${Object.keys(players).length}` : '';
+        roundCounter.textContent = room.currentRound >= 1 ? `Runda ${room.currentRound}` : '';
 
         startGameBtn.style.display = isHost && !room.gameStarted ? 'block' : 'none';
         endRoundBtn.style.display = isHost && room.gameStarted ? 'block' : 'none';
