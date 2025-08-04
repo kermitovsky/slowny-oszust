@@ -294,7 +294,7 @@
     }
     #playersList li {
       position: relative;
-      padding: 0.8rem 4rem 0.8rem 3.5rem;
+      padding: 0.8rem 4.5rem 0.8rem 3.5rem;
       margin: 0.5rem 0;
       border-radius: 1rem;
       background-color: rgba(255, 255, 255, 0.8);
@@ -1222,7 +1222,7 @@
       }, duration);
     }
 
-    function showRoleMessage(text, duration = 7000) {
+    function showRoleMessage(text, duration = 5000) {
       roleMessageBox.textContent = text;
       roleMessageBox.style.display = 'block';
       setTimeout(() => {
@@ -1470,10 +1470,12 @@
         if (room.gameStarted && room.currentWord && players[currentPlayerId]) {
           const isImpostor = players[currentPlayerId].role === 'impostor';
           const message = isImpostor ? 'Jesteś oszustem!' : `Słowo: ${room.currentWord}`;
-          showRoleMessage(message);
+          showRoleMessage(message, 5000);
           if (room.starterId && !hasShownStartMessage && players[room.starterId]) {
-            showMessage(`<strong>${players[room.starterId].name}</strong> zaczyna opisywać słowo!`, 5000);
-            hasShownStartMessage = true;
+            setTimeout(() => {
+              showMessage(`Zaczyna mówić: <strong>${players[room.starterId].name}</strong>`, 5000);
+              hasShownStartMessage = true;
+            }, 5000);
           }
         } else {
           hasShownStartMessage = false;
@@ -1567,7 +1569,7 @@
         updates.gameStarted = false;
         updates.currentWord = null;
         updates.starterId = null;
-        updates.resetMessage = 'Runda zakończona! Omówcie, kto był impostorem, i zacznijcie nową rundę!';
+        updates.resetMessage = 'Runda zakończona';
 
         roomRef.update(updates).then(() => {
           console.log('Runda zakończona');
