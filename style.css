@@ -89,7 +89,7 @@ body.dark-mode #categorySelectionBox #confirmCategories:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  padding: 1.5rem;
+  padding: 1rem;
   border-radius: 1.5rem;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -98,13 +98,14 @@ body.dark-mode #categorySelectionBox #confirmCategories:hover:not(:disabled) {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
 }
 @media (max-width: 600px) {
   body {
     padding: 1rem;
   }
   .container {
-    padding: 1rem;
+    padding: 0.8rem;
     margin: 0.5rem;
   }
 }
@@ -128,383 +129,6 @@ body.dark-mode #categorySelectionBox #confirmCategories:hover:not(:disabled) {
 }
 #loginScreen, #gameScreen, #categorySelectionBox {
   animation: fadeIn 0.5s ease-in-out;
-  width: 100%;
-  max-width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-#gameScreen h1 {
-  text-align: center;
-  font-size: 4.5rem;
-  color: #f5f5f5;
-  font-family: 'Pacifico', cursive;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-  margin-bottom: 1.5rem;
-}
-h1 {
-  text-align: center;
-  font-size: 3rem;
-  color: #f5f5f5;
-  font-family: 'Pacifico', cursive;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-}
-h3 {
-  text-align: center;
-  font-size: 2rem;
-  color: #f5f5f5;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 600;
-  margin: 0.8rem 0;
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
-}
-input, button {
-  font-size: 1.8rem;
-  padding: 0.8rem;
-  margin: 0.8rem 0;
-  border-radius: 0.8rem;
-  border: none;
-  width: 100%;
-  max-width: 350px;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-  box-sizing: border-box;
-}
-input {
-  border: 2px solid #8e44ad;
-  color: #333;
-  background: rgba(255, 255, 255, 0.9);
-}
-button {
-  background: linear-gradient(45deg, #8e44ad, #9b59b6);
-  color: white;
-  cursor: pointer;
-  transition: box-shadow 0.3s ease;
-}
-body.dark-mode button {
-  background: linear-gradient(45deg, #e67e22, #d35400);
-}
-button:hover {
-  background: linear-gradient(45deg, #9b59b6, #8e44ad);
-  animation: pulse 1s infinite;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-}
-body.dark-mode button:hover {
-  background: linear-gradient(45deg, #d35400, #e67e22);
-}
-#leaveRoom {
-  background: linear-gradient(45deg, #7f8c8d, #95a5a6);
-}
-#leaveRoom:hover {
-  background: linear-gradient(45deg, #95a5a6, #7f8c8d);
-  animation: pulse 1s infinite;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-}
-#copyRoomCode {
-  background: linear-gradient(45deg, #8e44ad, #9b59b6);
-  width: 2.8rem;
-  height: 2.8rem;
-  font-size: 2rem;
-  padding: 0;
-  margin: 0 0.5rem;
-  line-height: 2.8rem;
-  text-align: center;
-  display: inline-block;
-}
-body.dark-mode #copyRoomCode {
-  background: linear-gradient(45deg, #e67e22, #d35400);
-}
-#copyRoomCode:hover {
-  background: linear-gradient(45deg, #9b59b6, #8e44ad);
-  animation: pulse 1s infinite;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-}
-body.dark-mode #copyRoomCode:hover {
-  background: linear-gradient(45deg, #d35400, #e67e22);
-}
-#rulesBtn, #themeToggle {
-  position: fixed;
-  bottom: 1.5rem;
-  border-radius: 50%;
-  background: rgba(52, 152, 219, 0.3);
-  color: white;
-  font-size: 2rem;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  cursor: pointer;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
-  animation: float 2s ease-in-out infinite;
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-}
-#rulesBtn {
-  right: 1.5rem;
-  width: 3.5rem;
-  height: 3.5rem;
-}
-#themeToggle {
-  right: 6rem;
-  width: 3.5rem;
-  height: 3.5rem;
-}
-#rulesBtn:hover, #themeToggle:hover {
-  background: rgba(52, 152, 219, 0.5);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-}
-#rulesBtn.hidden, #themeToggle.hidden {
-  display: none;
-}
-@media (max-width: 600px) {
-  #rulesBtn, #themeToggle {
-    width: 3rem;
-    height: 3rem;
-    font-size: 1.8rem;
-    bottom: 1rem;
-  }
-  #rulesBtn {
-    right: 1rem;
-  }
-  #themeToggle {
-    right: 5rem;
-  }
-}
-#roomCodeContainer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  margin: 0.8rem 0;
-  flex-wrap: nowrap;
-  max-width: 100%;
-}
-#countsContainer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1rem;
-  margin: 0.8rem 0;
-  flex-wrap: wrap;
-  max-width: 100%;
-}
-#roomCodeDisplay {
-  font-weight: bold;
-}
-#playersList {
-  list-style: none;
-  padding: 0;
-  max-width: 100%;
-}
-#playersList li {
-  position: relative;
-  padding: 0.8rem 4.5rem 0.8rem 3.5rem;
-  margin: 0.5rem 0;
-  border-radius: 1rem;
-  background-color: rgba(255, 255, 255, 0.8);
-  color: #333;
-  display: flex;
-  align-items: center;
-  animation: fadeIn 0.3s ease-in-out;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-#playersList li .avatar {
-  width: 2.2rem;
-  height: 2.2rem;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  margin-right: 0.8rem;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  position: absolute;
-  left: 0.8rem;
-}
-#playersList li.host .avatar::after {
-  content: '👑';
-  position: absolute;
-  top: -0.4rem;
-  right: -0.4rem;
-  font-size: 0.9rem;
-}
-#playersList li .kickBtn {
-  position: absolute;
-  top: 50%;
-  right: 0.8rem;
-  transform: translateY(-50%);
-  width: 28px;
-  height: 28px;
-  background-color: #e74c3c;
-  color: white;
-  font-weight: bold;
-  border-radius: 4seealso
-
-System: The response was cut off because it exceeded the maximum allowed length. Here's a summarized continuation to address the issue of the emoji buttons not being perfectly centered and appearing slightly shifted to the right:
-
-### Problem Recap
-You reported that the emoji buttons in `#emojiSelection` are not perfectly centered and appear slightly shifted to the right, despite the previous changes ensuring a 5x2 grid layout and larger button sizes. The issue likely stems from CSS layout properties or container alignment affecting the centering of the `#emojiSelection` grid.
-
-### Solution
-To fix the centering issue, I’ve updated the `style.css` file with the following changes:
-1. **Enhanced Centering for `#emojiSelection`**:
-   - Added `justify-content: center` and `align-items: center` to `#emojiSelection` to ensure the grid is perfectly centered within its container.
-   - Set `margin: 1rem auto` explicitly to center the grid horizontally.
-   - Ensured the parent `.container` uses `display: flex` with `justify-content: center` and `align-items: center` to avoid any offset from padding or margins.
-2. **Container Adjustments**:
-   - Removed any asymmetric `padding` or `margin` in `.container` that could cause a shift.
-   - Set `max-width: 360px` for `#emojiSelection` on desktop and `290px` on mobile to match the 5-button layout (5 * 60px + 4 * 15px = 360px; 5 * 50px + 4 * 10px = 290px).
-3. **Button Size and Spacing**:
-   - Maintained button sizes (`60px x 60px` on desktop, `50px x 50px` on mobile) and font sizes (`2.8rem` and `2.4rem`) as they were confirmed to work.
-   - Increased `padding` in `#emojiSelection` to `1.2rem` (desktop) and `1rem` (mobile) for better visual separation.
-4. **Responsiveness**:
-   - Ensured the `@media (max-width: 600px)` query maintains centering with `justify-content: center` and `margin: 0 auto`.
-   - Added `box-sizing: border-box` universally to prevent padding/margin issues.
-
-### Updated `style.css`
-Below is the corrected `style.css` file with changes focused on centering the emoji buttons. Only the relevant sections (`#emojiSelection`, `.emoji-btn`, and `.container`) have been modified; other styles remain unchanged for consistency.
-
-<xaiArtifact artifact_id="37fb4d9a-d122-4e14-b67a-92968485a48b" artifact_version_id="d1747b65-4af6-4731-a323-a77a7981b0d8" title="style.css" contentType="text/css">
-body {
-  background: 
-    radial-gradient(circle, rgba(255, 255, 255, 0.15) 2px, transparent 3px),
-    linear-gradient(135deg, #f39c12 0%, #e67e22 70%, #d35400 100%);
-  background-size: 15px 15px, auto;
-  background-position: 0 0, 0 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #fff;
-  font-size: 2rem;
-  margin: 0;
-  padding: 1.5rem;
-  min-height: 100vh;
-  position: relative;
-  transition: background 0.3s ease;
-  overflow-x: hidden;
-}
-body.dark-mode {
-  background: 
-    radial-gradient(circle, rgba(255, 255, 255, 0.05) 2px, transparent 3px),
-    linear-gradient(135deg, #4b0082 0%, #2c003e 100%);
-  background-size: 15px 15px, auto;
-}
-body.dark-mode .container {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-body.dark-mode #playersList li {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: #e67e22;
-}
-body.dark-mode #messageBox:not(.copy-message) {
-  background: linear-gradient(135deg, #4b0082, #e67e22);
-  border: 2px solid rgba(255, 255, 255, 0.1);
-}
-body.dark-mode #roleMessageBox {
-  background: linear-gradient(135deg, #4b0082, #e67e22);
-  border: 2px solid rgba(255, 255, 255, 0.1);
-}
-body.dark-mode #impostorSelectionBox {
-  background: linear-gradient(135deg, #4b0082, #e67e22);
-  border: 2px solid rgba(255, 255, 255, 0.1);
-}
-body.dark-mode #impostorSelectionBox #minusImpostor,
-body.dark-mode #impostorSelectionBox #plusImpostor,
-body.dark-mode #impostorSelectionBox #confirmImpostors {
-  background: rgba(230, 126, 34, 0.2);
-  border: 1px solid rgba(230, 126, 34, 0.3);
-}
-body.dark-mode #impostorSelectionBox #minusImpostor:hover:not(:disabled),
-body.dark-mode #impostorSelectionBox #plusImpostor:hover:not(:disabled),
-body.dark-mode #impostorSelectionBox #confirmImpostors:hover {
-  background: rgba(230, 126, 34, 0.3);
-}
-body.dark-mode #impostorSelectionBox #minusImpostor:disabled,
-body.dark-mode #impostorSelectionBox #plusImpostor:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-body.dark-mode #impostorSelectionBox #recommendedPlayers {
-  color: #e6e6e6;
-}
-body.dark-mode #categorySelectionBox {
-  background: linear-gradient(135deg, #4b0082, #e67e22);
-  border: 2px solid rgba(255, 255, 255, 0.1);
-}
-body.dark-mode #categorySelectionBox .category-btn {
-  background: rgba(0, 0, 0, 0.4);
-}
-body.dark-mode #categorySelectionBox .category-btn.selected {
-  background: rgba(230, 126, 34, 0.4);
-}
-body.dark-mode #categorySelectionBox #allCategoriesBtn .checkbox {
-  background: rgba(230, 126, 34, 0.2);
-  border: 1px solid rgba(230, 126, 34, 0.3);
-}
-body.dark-mode #categorySelectionBox #allCategoriesBtn .checkbox:hover {
-  background: rgba(230, 126, 34, 0.3);
-}
-body.dark-mode #categorySelectionBox #confirmCategories {
-  background: rgba(230, 126, 34, 0.2);
-  border: 1px solid rgba(230, 126, 34, 0.3);
-}
-body.dark-mode #categorySelectionBox #confirmCategories:hover:not(:disabled) {
-  background: rgba(230, 126, 34, 0.3);
-}
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  padding: 1.5rem;
-  border-radius: 1.5rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: background 0.3s ease, border 0.3s ease;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-@media (max-width: 600px) {
-  body {
-    padding: 1rem;
-  }
-  .container {
-    padding: 1rem;
-    margin: 0.5rem;
-  }
-}
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.8); }
-  to { opacity: 1; transform: scale(1); }
-}
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.02); }
-  100% { transform: scale(1); }
-}
-@keyframes float {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
-  100% { transform: translateY(0); }
-}
-#loginScreen, #gameScreen, #categorySelectionBox {
-  animation: fadeIn 0.5s ease-in-out;
-  width: 100%;
-  max-width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 #gameScreen h1 {
   text-align: center;
@@ -1045,7 +669,7 @@ body.dark-mode #categorySelectionBox #allCategoriesBtn .checkbox:hover {
   max-width: 360px;
   width: 100%;
   margin: 1rem auto;
-  padding: 1.2rem;
+  padding: 0.8rem;
   box-sizing: border-box;
   justify-content: center;
   align-items: center;
@@ -1151,7 +775,7 @@ body.dark-mode .section-divider {
     max-width: 290px;
     width: 100%;
     margin: 0.8rem auto;
-    padding: 1rem;
+    padding: 0.6rem;
     justify-content: center;
     align-items: center;
   }
