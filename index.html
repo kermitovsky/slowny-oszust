@@ -22,6 +22,7 @@
       min-height: 100vh;
       position: relative;
       transition: background 0.3s ease;
+      overflow-x: hidden; /* Zapobiega poziomemu paskowi przewijania */
     }
     body.dark-mode {
       background: 
@@ -103,6 +104,7 @@
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
       border: 1px solid rgba(255, 255, 255, 0.2);
       transition: background 0.3s ease, border 0.3s ease;
+      box-sizing: border-box;
     }
     @media (max-width: 600px) {
       body {
@@ -160,6 +162,7 @@
       display: block;
       margin-left: auto;
       margin-right: auto;
+      box-sizing: border-box;
     }
     input {
       border: 2px solid #8e44ad;
@@ -270,6 +273,7 @@
       text-align: center;
       margin: 0.8rem 0;
       flex-wrap: nowrap;
+      max-width: 100%;
     }
     #countsContainer {
       display: flex;
@@ -278,6 +282,7 @@
       gap: 1rem;
       margin: 0.8rem 0;
       flex-wrap: wrap;
+      max-width: 100%;
     }
     #roomCodeDisplay {
       font-weight: bold;
@@ -285,6 +290,7 @@
     #playersList {
       list-style: none;
       padding: 0;
+      max-width: 100%;
     }
     #playersList li {
       position: relative;
@@ -296,6 +302,8 @@
       display: flex;
       align-items: center;
       animation: fadeIn 0.3s ease-in-out;
+      max-width: 100%;
+      box-sizing: border-box;
     }
     #playersList li .avatar {
       width: 2.2rem;
@@ -372,6 +380,7 @@
       font-family: 'Poppins', sans-serif;
       font-weight: 600;
       animation: scaleIn 0.3s ease-in-out;
+      box-sizing: border-box;
     }
     #messageBox:not(.copy-message) {
       font-size: 2.8rem;
@@ -409,6 +418,7 @@
       font-weight: bold;
       font-family: 'Segoe UI Black', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       animation: scaleIn 0.3s ease-in-out;
+      box-sizing: border-box;
     }
     #impostorSelectionBox {
       position: fixed;
@@ -431,6 +441,7 @@
       -webkit-backdrop-filter: blur(5px);
       font-size: 2rem;
       animation: scaleIn 0.3s ease-in-out;
+      box-sizing: border-box;
     }
     #impostorSelectionBox p {
       margin: 0 0 1.5rem 0;
@@ -521,6 +532,7 @@
       -webkit-backdrop-filter: blur(5px);
       font-size: 2rem;
       animation: scaleIn 0.3s ease-in-out;
+      box-sizing: border-box;
     }
     #categorySelectionBox p {
       margin: 0 0 1.5rem 0;
@@ -538,6 +550,8 @@
       margin-bottom: 1.5rem;
       max-height: 300px;
       overflow-y: auto;
+      overflow-x: hidden;
+      box-sizing: border-box;
     }
     #categorySelectionBox .category-btn {
       background: rgba(0, 0, 0, 0.4);
@@ -551,6 +565,7 @@
       cursor: pointer;
       opacity: 0.5;
       transition: opacity 0.3s ease, background 0.3s ease;
+      box-sizing: border-box;
     }
     #categorySelectionBox .category-btn.selected {
       background: rgba(142, 68, 173, 0.4);
@@ -583,6 +598,7 @@
       cursor: pointer;
       background: rgba(142, 68, 173, 0.2);
       transition: background 0.3s ease;
+      box-sizing: border-box;
     }
     #categorySelectionBox #allCategoriesBtn .checkbox:hover {
       background: rgba(142, 68, 173, 0.3);
@@ -604,6 +620,7 @@
       font-weight: bold;
       border-radius: 0.8rem;
       transition: background 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+      box-sizing: border-box;
     }
     #categorySelectionBox #confirmCategories:hover:not(:disabled) {
       background: rgba(142, 68, 173, 0.3);
@@ -679,6 +696,7 @@
       max-width: 90vw;
       max-height: 80vh;
       overflow-y: auto;
+      overflow-x: hidden;
       word-wrap: break-word;
       white-space: pre-line;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
@@ -690,6 +708,7 @@
       font-weight: 600;
       animation: scaleIn 0.3s ease-in-out;
       position: relative;
+      box-sizing: border-box;
     }
     #rulesBox h2 {
       font-size: 3.2rem;
@@ -805,6 +824,7 @@
       font-family: 'Poppins', sans-serif;
       font-weight: 600;
       text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+      max-width: 100%;
     }
     #roundCounter {
       margin-top: 0.8rem;
@@ -850,7 +870,7 @@
   <div id="roleMessageBox"></div>
   <div id="categorySelectionBox" style="display:none;">
     <p>Wybierz kategorie:</p>
-    <span id="allCategoriesBtn"><span class="checkbox">□</span> Wszystkie</span>
+    <span id="allCategoriesBtn"><span class="checkbox"></span> Wszystkie</span>
     <div class="category-grid"></div>
     <button id="confirmCategories">Dalej</button>
   </div>
@@ -950,6 +970,7 @@
     let words = [];
     let impostorCount = 1;
     let selectedCategories = [];
+    let hasShownStartMessage = false; // Flaga dla komunikatu startowego
 
     // Lista kategorii
     const categories = [
@@ -1042,7 +1063,7 @@
 
     function updateAllCategoriesCheckbox() {
       const allSelected = categories.every(c => selectedCategories.includes(c.file)) || selectedCategories.includes('all');
-      allCategoriesBtn.querySelector('.checkbox').textContent = allSelected ? '✔' : '□';
+      allCategoriesBtn.querySelector('.checkbox').textContent = allSelected ? '✔' : '';
     }
 
     function updateConfirmCategoriesButton() {
@@ -1223,6 +1244,7 @@
       impostorCount = 1;
       impostorCountDisplaySelector.textContent = impostorCount;
       selectedCategories = [];
+      hasShownStartMessage = false; // Reset flagi
       updateImpostorButtons();
       updateRecommendedPlayers();
     }
@@ -1448,9 +1470,12 @@
           const isImpostor = players[currentPlayerId].role === 'impostor';
           const message = isImpostor ? 'Jesteś oszustem!' : `Słowo: ${room.currentWord}`;
           showRoleMessage(message);
-          if (room.starterId === currentPlayerId) {
+          if (room.starterId === currentPlayerId && !hasShownStartMessage) {
             showMessage('Zacznij opisywać słowo!', 5000);
+            hasShownStartMessage = true;
           }
+        } else {
+          hasShownStartMessage = false; // Reset flagi, gdy gra się nie toczy
         }
 
         if (room.resetMessage) {
