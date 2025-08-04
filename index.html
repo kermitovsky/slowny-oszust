@@ -169,9 +169,16 @@
     const wordsBaseUrl = 'https://raw.githubusercontent.com/kermitovsky/slowny-oszust/main/words/';
 
     // Lista emoji
-    const emojiList = ['🐱', '🦁', '🐘', '🐶', '🐻', '🦊', '🐷', '🐰', '🐼', '🦒'];
+    const emojiList = ['🐱', '🦁', '🐭', '🐶', '🐻', '🦊', '🐨', '🐰', '🐼', '🦒'];
     // Kolory dla awatarów
     const avatarColors = ['#8e44ad', '#e67e22', '#3498db', '#e74c3c', '#2ecc71', '#f1c40f', '#9b59b6', '#d35400'];
+
+    // Wbudowana lista słów jako ostateczny fallback
+    const fallbackWords = [
+      "kot", "pies", "słoń", "lew", "pizza", "hamburger", "krzesło", "lampa", "park", "szkoła",
+      "lekarz", "nauczyciel", "piłka nożna", "koszykówka", "samochód", "motocykl", "drzewo", "kwiat",
+      "rzeka", "góra", "film", "serial", "człowiek", "muzyka"
+    ];
 
     // Inicjalizacja wyboru emotek
     function initializeEmojiSelection() {
@@ -313,26 +320,41 @@
     async function loadWords() {
       words = [];
       const filesToLoad = selectedCategories.includes('all') ? categories.map(c => c.file) : selectedCategories;
+      let loadedAnyFile = false;
+
       try {
         for (const file of filesToLoad) {
-          const response = await fetch(`${wordsBaseUrl}${file}`);
-          if (!response.ok) throw new Error(`Błąd ładowania ${file}`);
-          const categoryWords = await response.json();
-          words = [...words, ...categoryWords];
-          console.log(`Załadowano ${categoryWords.length} słów z ${file}`);
+          try {
+            const response = await fetch(`${wordsBaseUrl}${file}`);
+            if (!response.ok) throw new Error(`Błąd ładowania ${file}: ${response.status}`);
+            const categoryWords = await response.json();
+            words = [...words, ...categoryWords];
+            loadedAnyFile = true;
+            console.log(`Załadowano ${categoryWords.length} słów z ${file}`);
+          } catch (error) {
+            console.error(`Błąd ładowania pliku ${file}:`, error);
+            showMessage(`❌ Błąd ładowania kategorii ${file}! Pomijam.`);
+          }
         }
+
+        if (!loadedAnyFile) {
+          throw new Error('Nie udało się załadować żadnego pliku kategorii.');
+        }
+
         console.log('Łącznie załadowano słów:', words.length);
       } catch (error) {
         console.error('Błąd ładowania słów:', error);
         showMessage('❌ Błąd ładowania kategorii! Używam domyślnych słów.');
         try {
           const response = await fetch('words.json');
-          if (!response.ok) throw new Error('Błąd ładowania words.json');
+          if (!response.ok) throw new Error('Błąd ładowania words.json: ' + response.status);
           words = await response.json();
           console.log('Załadowano domyślne słowa:', words.length);
         } catch (err) {
           console.error('Błąd ładowania domyślnych słów:', err);
-          showMessage('❌ Błąd ładowania słów gry!');
+          showMessage('❌ Błąd ładowania słów gry! Używam wbudowanej listy.');
+          words = fallbackWords;
+          console.log('Użyto wbudowanej listy słów:', words.length);
         }
       }
     }
@@ -349,7 +371,9 @@
       })
       .catch(error => {
         console.error('Błąd ładowania words.json:', error);
-        showMessage('❌ Błąd ładowania słów gry!');
+        showMessage('❌ Błąd ładowania słów gry! Używam wbudowanej listy.');
+        words = fallbackWords;
+        console.log('Użyto wbudowanej listy słów:', words.length);
       });
 
     function generateRoomCode() {
