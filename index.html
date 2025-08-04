@@ -22,7 +22,7 @@
       min-height: 100vh;
       position: relative;
       transition: background 0.3s ease;
-      overflow-x: hidden; /* Zapobiega poziomemu paskowi przewijania */
+      overflow-x: hidden;
     }
     body.dark-mode {
       background: 
@@ -294,7 +294,7 @@
     }
     #playersList li {
       position: relative;
-      padding: 0.8rem 3rem 0.8rem 3.5rem;
+      padding: 0.8rem 4rem 0.8rem 3.5rem;
       margin: 0.5rem 0;
       border-radius: 1rem;
       background-color: rgba(255, 255, 255, 0.8);
@@ -343,9 +343,11 @@
       text-align: center;
       padding: 0;
       user-select: none;
+      transition: transform 0.2s ease, background-color 0.2s ease;
     }
     #playersList li .kickBtn:hover {
       background-color: #c0392b;
+      transform: scale(1.1);
     }
     .host {
       color: #3498db !important;
@@ -707,7 +709,6 @@
       font-family: 'Poppins', sans-serif;
       font-weight: 600;
       animation: scaleIn 0.3s ease-in-out;
-      position: relative;
       box-sizing: border-box;
     }
     #rulesBox h2 {
@@ -970,7 +971,7 @@
     let words = [];
     let impostorCount = 1;
     let selectedCategories = [];
-    let hasShownStartMessage = false; // Flaga dla komunikatu startowego
+    let hasShownStartMessage = false;
 
     // Lista kategorii
     const categories = [
@@ -1244,7 +1245,7 @@
       impostorCount = 1;
       impostorCountDisplaySelector.textContent = impostorCount;
       selectedCategories = [];
-      hasShownStartMessage = false; // Reset flagi
+      hasShownStartMessage = false;
       updateImpostorButtons();
       updateRecommendedPlayers();
     }
@@ -1470,12 +1471,12 @@
           const isImpostor = players[currentPlayerId].role === 'impostor';
           const message = isImpostor ? 'Jesteś oszustem!' : `Słowo: ${room.currentWord}`;
           showRoleMessage(message);
-          if (room.starterId === currentPlayerId && !hasShownStartMessage) {
-            showMessage('Zacznij opisywać słowo!', 5000);
+          if (room.starterId && !hasShownStartMessage && players[room.starterId]) {
+            showMessage(`<strong>${players[room.starterId].name}</strong> zaczyna opisywać słowo!`, 5000);
             hasShownStartMessage = true;
           }
         } else {
-          hasShownStartMessage = false; // Reset flagi, gdy gra się nie toczy
+          hasShownStartMessage = false;
         }
 
         if (room.resetMessage) {
@@ -1513,17 +1514,29 @@
           playerIds.splice(randomIndex, 1);
         }
 
-        const updates = {};
-        playerIds.forEach(id => {
-          updates[`players/${id}/role`] = 'normal';
+        // Ważone losowanie startera
+        const weightedPlayers = [];
+        Object.entries(players).forEach(([id, player]) => {
+          const weight = impostorIds.includes(id) ? 0.5 : 1;
+          weightedPlayers.push({ id, weight });
         });
-        impostorIds.forEach(id => {
-          updates[`players/${id}/role`] = 'impostor';
+        const totalWeight = weightedPlayers.reduce((sum, p) => sum + p.weight, 0);
+        let randomWeight = Math.random() * totalWeight;
+        let starterId = weightedPlayers[0].id;
+        for (const player of weightedPlayers) {
+          randomWeight -= player.weight;
+          if (randomWeight <= 0) {
+            starterId = player.id;
+            break;
+          }
+        }
+
+        const updates = {};
+        Object.keys(players).forEach(id => {
+          updates[`players/${id}/role`] = impostorIds.includes(id) ? 'impostor' : 'normal';
         });
 
         const currentWord = words[Math.floor(Math.random() * words.length)];
-        const nonImpostorIds = Object.keys(players).filter(id => !impostorIds.includes(id));
-        const starterId = nonImpostorIds.length > 0 ? nonImpostorIds[Math.floor(Math.random() * nonImpostorIds.length)] : playerIds[Math.floor(Math.random() * playerIds.length)];
 
         updates.gameStarted = true;
         updates.currentWord = currentWord;
