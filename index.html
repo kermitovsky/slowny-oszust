@@ -9,15 +9,20 @@
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@600;800&display=swap" rel="stylesheet" />
   <style>
     body {
-      background: linear-gradient(135deg, #f39c12 0%, #e67e22 70%, #d35400 100%), 
-                  radial-gradient(circle, rgba(255, 255, 255, 0.1) 2px, transparent 2px);
-      background-size: auto, 20px 20px;
+      background: 
+        /* Wzór szlaczków (rombów) */
+        radial-gradient(circle, rgba(255, 255, 255, 0.15) 2px, transparent 3px),
+        /* Istniejący gradient liniowy */
+        linear-gradient(135deg, #f39c12 0%, #e67e22 70%, #d35400 100%);
+      background-size: 15px 15px, auto; /* Rozmiar wzoru i gradientu */
+      background-position: 0 0, 0 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       color: #fff;
       font-size: 2rem;
       margin: 0;
       padding: 2rem;
       min-height: 100vh;
+      position: relative;
     }
     .container {
       max-width: 800px;
@@ -352,6 +357,9 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+
+    // Test połączenia z Firebase
+    db.ref('test').set({ test: 'hello' }).then(() => console.log('Firebase działa')).catch(err => console.error('Błąd Firebase:', err));
 
     const playerNameInput = document.getElementById('playerName');
     const createRoomBtn = document.getElementById('createRoom');
