@@ -14,6 +14,28 @@
     <h1 class="fancy-title">Słowny Impostor</h1>
     <div id="loginScreen">
       <input type="text" id="playerName" placeholder="Podaj swój nick" />
+      <select id="playerEmoji">
+        <option value="🐱">🐱</option>
+        <option value="🦁">🦁</option>
+        <option value="🐘">🐘</option>
+        <option value="🐶">🐶</option>
+        <option value="🐻">🐻</option>
+        <option value="🦊">🦊</option>
+        <option value="🐷">🐷</option>
+        <option value="🐰">🐰</option>
+        <option value="🐼">🐼</option>
+        <option value="🦒">🦒</option>
+      </select>
+      <select id="playerColor">
+        <option value="#8e44ad">Fioletowy</option>
+        <option value="#e67e22">Pomarańczowy</option>
+        <option value="#3498db">Niebieski</option>
+        <option value="#e74c3c">Czerwony</option>
+        <option value="#2ecc71">Zielony</option>
+        <option value="#f1c40f">Żółty</option>
+        <option value="#9b59b6">Jasny fiolet</option>
+        <option value="#d35400">Ciemny pomarańcz</option>
+      </select>
       <button id="createRoom">Stwórz pokój</button>
       <input type="text" id="roomCodeInput" placeholder="Kod pokoju" maxlength="4" />
       <button id="joinRoom">Dołącz do pokoju</button>
@@ -103,6 +125,8 @@
     db.ref('test').set({ test: 'hello' }).then(() => console.log('Firebase działa')).catch(err => console.error('Błąd Firebase:', err));
 
     const playerNameInput = document.getElementById('playerName');
+    const playerEmojiSelect = document.getElementById('playerEmoji');
+    const playerColorSelect = document.getElementById('playerColor');
     const createRoomBtn = document.getElementById('createRoom');
     const joinRoomBtn = document.getElementById('joinRoom');
     const roomCodeInput = document.getElementById('roomCodeInput');
@@ -162,9 +186,8 @@
     ];
     const wordsBaseUrl = 'https://raw.githubusercontent.com/kermitovsky/slowny-oszust/main/words/';
 
-    // Lista emoji (tylko zwierzęta)
+    // Lista emoji i kolorów (używane w dropdownach)
     const emojiList = ['🐱', '🦁', '🐘', '🐶', '🐻', '🦊', '🐷', '🐰', '🐼', '🦒'];
-    // Kolory dla awatarów
     const avatarColors = ['#8e44ad', '#e67e22', '#3498db', '#e74c3c', '#2ecc71', '#f1c40f', '#9b59b6', '#d35400'];
 
     // Wykrywanie zamknięcia przeglądarki lub odświeżenia
@@ -331,30 +354,6 @@
       return Math.random().toString(36).substr(2, 4).toUpperCase();
     }
 
-    function assignUniqueEmoji(players) {
-      const usedEmojis = Object.values(players || {}).map(p => p.emoji).filter(e => e);
-      const availableEmojis = emojiList.filter(e => !usedEmojis.includes(e));
-      if (availableEmojis.length === 0) {
-        console.warn('Brak dostępnych emoji, przypisuję losowe');
-        return emojiList[Math.floor(Math.random() * emojiList.length)];
-      }
-      const selectedEmoji = availableEmojis[Math.floor(Math.random() * availableEmojis.length)];
-      console.log('Przypisano emoji:', selectedEmoji);
-      return selectedEmoji;
-    }
-
-    function assignUniqueColor(players) {
-      const usedColors = Object.values(players || {}).map(p => p.avatarColor).filter(c => c);
-      const availableColors = avatarColors.filter(c => !usedColors.includes(c));
-      if (availableColors.length === 0) {
-        console.warn('Brak dostępnych kolorów, przypisuję losowy');
-        return avatarColors[Math.floor(Math.random() * avatarColors.length)];
-      }
-      const selectedColor = availableColors[Math.floor(Math.random() * availableColors.length)];
-      console.log('Przypisano kolor:', selectedColor);
-      return selectedColor;
-    }
-
     function updatePlayersList(players) {
       console.log('Dane players:', players);
       if (!players || !Object.keys(players).length) {
@@ -409,11 +408,13 @@
       }, duration);
     }
 
-    function showRoleMessage(text, duration = 5000) {
-      roleMessageBox.textContent = text;
+    function showRoleMessage(text, duration = 5000, role = null) {
+      roleMessageBox.textContent = role === 'impostor' ? `🕵️ ${text}` : `🔍 ${text}`;
+      roleMessageBox.className = role ? `${role}-role` : '';
       roleMessageBox.style.display = 'block';
       setTimeout(() => {
         roleMessageBox.style.display = 'none';
+        roleMessageBox.className = '';
       }, duration);
     }
 
@@ -469,6 +470,8 @@
     createRoomBtn.addEventListener('click', () => {
       console.log('Kliknięto Stwórz pokój');
       const name = playerNameInput.value.trim();
+      const emoji = playerEmojiSelect.value;
+      const color = playerColorSelect.value;
       if (!name) {
         showMessage('❌ Wpisz nick!');
         console.log('Brak nicku');
@@ -476,7 +479,7 @@
       }
       currentPlayerName = name;
       isHost = true;
-      console.log('Ustawiono hosta, imię:', currentPlayerName);
+      console.log('Ustawiono hosta, imię:', currentPlayerName, 'emoji:', emoji, 'kolor:', color);
       categorySelectionBox.style.display = 'block';
       console.log('Wyświetlono categorySelectionBox');
       initializeCategorySelection();
@@ -513,8 +516,8 @@
       console.log('Tworzenie pokoju z', numImpostors, 'impostorami, kategorie:', selectedCategories);
       currentRoomCode = generateRoomCode();
       currentPlayerId = db.ref().push().key;
-      const emoji = assignUniqueEmoji({});
-      const avatarColor = assignUniqueColor({});
+      const emoji = playerEmojiSelect.value;
+      const avatarColor = playerColorSelect.value;
 
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
       const playerData = { name: currentPlayerName, isHost: true, role: null, emoji: emoji, avatarColor: avatarColor };
@@ -551,6 +554,8 @@
       console.log('Kliknięto Dołącz do pokoju');
       const name = playerNameInput.value.trim();
       const roomCode = roomCodeInput.value.trim().toUpperCase();
+      const emoji = playerEmojiSelect.value;
+      const color = playerColorSelect.value;
 
       if (!name || !roomCode) {
         showMessage('❌ Wpisz nick i kod pokoju!');
@@ -562,7 +567,7 @@
       currentPlayerName = name;
       currentRoomCode = roomCode;
       currentPlayerId = db.ref().push().key;
-      console.log('Dołączanie do pokoju:', roomCode, 'Nick:', name);
+      console.log('Dołączanie do pokoju:', roomCode, 'Nick:', name, 'emoji:', emoji, 'kolor:', color);
 
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
       roomRef.once('value').then(snapshot => {
@@ -582,9 +587,7 @@
           return;
         }
 
-        const emoji = assignUniqueEmoji(players);
-        const avatarColor = assignUniqueColor(players);
-        const playerData = { name: currentPlayerName, isHost: false, role: null, emoji: emoji, avatarColor: avatarColor };
+        const playerData = { name: currentPlayerName, isHost: false, role: null, emoji: emoji, avatarColor: color };
         roomRef.child('players').update({
           [currentPlayerId]: playerData
         }).then(() => {
@@ -651,6 +654,8 @@
           isHost = false;
           roomCodeInput.value = '';
           playerNameInput.value = '';
+          playerEmojiSelect.value = emojiList[0];
+          playerColorSelect.value = avatarColors[0];
         }).catch(error => {
           console.error('Błąd opuszczania pokoju:', error);
           showMessage('❌ Błąd opuszczania pokoju!');
@@ -687,7 +692,7 @@
         if (room.gameStarted && room.currentWord && players[currentPlayerId]) {
           const isImpostor = players[currentPlayerId].role === 'impostor';
           const message = isImpostor ? 'Jesteś oszustem!' : `Słowo: ${room.currentWord}`;
-          showRoleMessage(message, 5000);
+          showRoleMessage(message, 5000, isImpostor ? 'impostor' : 'normal');
           if (room.starterId && !hasShownStartMessage && players[room.starterId]) {
             setTimeout(() => {
               showMessage(`Zaczyna mówić: <strong>${players[room.starterId].name}</strong>`, 5000);
