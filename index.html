@@ -243,21 +243,29 @@
 
     // Inicjalizacja wyboru kategorii
     function initializeCategorySelection() {
-      console.log('Inicjalizacja wyboru kategorii');
+      console.log('Inicjalizacja wyboru kategorii, kategorie:', categories);
+      if (!categoryGrid) {
+        console.error('Błąd: categoryGrid nie znaleziony!');
+        showMessage('❌ Błąd ładowania kategorii!');
+        return;
+      }
       categoryGrid.innerHTML = '';
       categories.forEach(category => {
+        console.log('Tworzenie przycisku dla kategorii:', category.name);
         const btn = document.createElement('button');
         btn.classList.add('category-btn');
         btn.textContent = category.name;
         btn.dataset.file = category.file;
         btn.addEventListener('click', () => {
           toggleCategory(category.file);
+          console.log('Kliknięto kategorię:', category.name, 'selectedCategories:', selectedCategories);
         });
         categoryGrid.appendChild(btn);
       });
       updateCategoryButtons();
       updateAllCategoriesCheckbox();
       updateConfirmCategoriesButton();
+      console.log('Zakończono inicjalizację kategorii, liczba przycisków:', categoryGrid.children.length);
     }
 
     function toggleCategory(file) {
@@ -276,7 +284,9 @@
     }
 
     function updateCategoryButtons() {
-      document.querySelectorAll('.category-btn').forEach(btn => {
+      const buttons = document.querySelectorAll('.category-btn');
+      console.log('Aktualizacja przycisków kategorii, liczba przycisków:', buttons.length);
+      buttons.forEach(btn => {
         if (selectedCategories.includes('all') || selectedCategories.includes(btn.dataset.file)) {
           btn.classList.add('selected');
         } else {
@@ -288,6 +298,7 @@
     function updateAllCategoriesCheckbox() {
       const allSelected = categories.every(c => selectedCategories.includes(c.file)) || selectedCategories.includes('all');
       allCategoriesBtn.querySelector('.checkbox').textContent = allSelected ? '✔' : '';
+      console.log('Zaktualizowano checkbox Wszystkie, allSelected:', allSelected);
     }
 
     function updateConfirmCategoriesButton() {
@@ -367,6 +378,7 @@
           impostorSelectionBox.style.display = 'none';
           gameScreen.style.display = 'block';
           loginScreen.style.display = 'none';
+          roomCodeDisplay.textContent = currentRoomCode;
           startGameBtn.style.display = isHost ? 'block' : 'none';
           showMessage(`Ustawiono ${impostorCount} impostorów. Czekaj na graczy!`);
         }).catch(error => {
@@ -640,6 +652,7 @@
         console.log('Pokój utworzony:', currentRoomCode, 'Gracz:', playerData);
         loginScreen.style.display = 'none';
         categorySelectionBox.style.display = 'block';
+        initializeCategorySelection();
         rulesBtn.classList.add('hidden');
         themeToggle.classList.add('hidden');
         db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).onDisconnect().remove();
