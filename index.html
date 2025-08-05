@@ -13,21 +13,21 @@
   <div class="container">
     <h1 class="fancy-title">Słowny Impostor</h1>
     <div id="loginScreen">
-      <input type="text" id="playerName" placeholder="Podaj swój nick" />
+      <input type="text" id="playerName" placeholder="Podaj swój nick" aria-label="Wpisz swój nick" required />
       <h3>Wybierz awatar</h3>
-      <div id="emojiSelection"></div>
+      <div id="emojiSelection" role="radiogroup" aria-label="Wybierz awatar"></div>
       <hr class="section-divider" />
-      <button id="createRoom">Stwórz pokój</button>
+      <button id="createRoom" aria-label="Stwórz nowy pokój">Stwórz pokój</button>
       <hr class="section-divider" />
-      <input type="text" id="roomCodeInput" placeholder="Kod pokoju" maxlength="4" />
-      <button id="joinRoom">Dołącz do pokoju</button>
+      <input type="text" id="roomCodeInput" placeholder="Kod pokoju" maxlength="4" aria-label="Wpisz kod pokoju" />
+      <button id="joinRoom" aria-label="Dołącz do pokoju">Dołącz do pokoju</button>
       <p id="statusMessage"></p>
     </div>
 
     <div id="gameScreen" style="display:none;">
       <div id="roomCodeContainer">
         <p>Kod pokoju: <span id="roomCodeDisplay"></span></p>
-        <button id="copyRoomCode" title="Kopiuj kod">📋</button>
+        <button id="copyRoomCode" title="Kopiuj kod" aria-label="Kopiuj kod pokoju">📋</button>
       </div>
       <p id="roundCounter"></p>
       <p id="wordDisplay"></p>
@@ -36,35 +36,35 @@
         <p id="impostorCountDisplay"></p>
       </div>
       <ul id="playersList"></ul>
-      <button id="startGame" style="display:none;">Start gry</button>
-      <button id="endRound" style="display:none; margin-top: 0.8rem; background-color: #c0392b;">Zakończ rundę</button>
-      <button id="leaveRoom" style="margin-top: 0.8rem;">Opuść pokój</button>
+      <button id="startGame" style="display:none;" aria-label="Rozpocznij grę">Start gry</button>
+      <button id="endRound" style="display:none; margin-top: 0.8rem; background-color: #c0392b;" aria-label="Zakończ rundę">Zakończ rundę</button>
+      <button id="leaveRoom" style="margin-top: 0.8rem;" aria-label="Opuść pokój">Opuść pokój</button>
     </div>
   </div>
 
-  <button id="rulesBtn" title="Zasady gry">i</button>
-  <button id="themeToggle" title="Przełącz tryb"></button>
+  <button id="rulesBtn" title="Zasady gry" aria-label="Pokaż zasady gry">i</button>
+  <button id="themeToggle" title="Przełącz tryb" aria-label="Przełącz tryb jasny lub ciemny"></button>
   <div id="messageBox"></div>
   <div id="roleMessageBox"></div>
   <div id="categorySelectionBox" style="display:none;">
     <p>Wybierz kategorie:</p>
     <span id="allCategoriesBtn"><span class="checkbox"></span> Wszystkie</span>
     <div class="category-grid"></div>
-    <button id="confirmCategories">Dalej</button>
+    <button id="confirmCategories" aria-label="Potwierdź wybór kategorii">Dalej</button>
   </div>
   <div id="impostorSelectionBox" style="display:none;">
     <p>Wybierz liczbę impostorów</p>
     <p id="loadingMessage" style="display: none;">Ładowanie kategorii...</p>
     <div class="impostor-selector">
-      <button id="minusImpostor" title="Zmniejsz">-</button>
+      <button id="minusImpostor" title="Zmniejsz" aria-label="Zmniejsz liczbę impostorów">-</button>
       <span id="impostorCount">1</span>
-      <button id="plusImpostor" title="Zwiększ">+</button>
+      <button id="plusImpostor" title="Zwiększ" aria-label="Zwiększ liczbę impostorów">+</button>
     </div>
-    <button id="confirmImpostors" disabled>Stwórz</button>
+    <button id="confirmImpostors" disabled aria-label="Potwierdź liczbę impostorów">Stwórz</button>
     <p id="recommendedPlayers"></p>
   </div>
   <div id="rulesBox">
-    <button id="closeRulesTop" title="Zamknij">X</button>
+    <button id="closeRulesTop" title="Zamknij" aria-label="Zamknij zasady">X</button>
     <h2>Zasady gry Słowny Impostor</h2>
     <h3>Cel gry</h3>
     <p>Wciel się w detektywa słów! Twoim zadaniem jest opisanie tajemniczego słowa, nie zdradzając go, lub blefowanie jako impostor, który słowa nie zna. Celem jest zidentyfikowanie impostora przed końcem rundy!</p>
@@ -88,7 +88,7 @@
       <li>Obserwuj, czy opisy innych graczy są spójne – impostorzy mogą się zdradzić!</li>
       <li>Graj w grupie do 10 osób dla najlepszej zabawy.</li>
     </ul>
-    <button id="closeRules">X</button>
+    <button id="closeRules" title="Zamknij" aria-label="Zamknij zasady">X</button>
   </div>
 
   <script>
@@ -191,9 +191,16 @@
         const btn = document.createElement('button');
         btn.classList.add('emoji-btn');
         btn.textContent = emoji;
+        btn.setAttribute('aria-label', `Wybierz awatar ${emoji}`);
+        btn.setAttribute('role', 'radio');
+        btn.setAttribute('aria-checked', 'false');
         btn.addEventListener('click', () => {
-          document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
+          document.querySelectorAll('.emoji-btn').forEach(b => {
+            b.classList.remove('selected');
+            b.setAttribute('aria-checked', 'false');
+          });
           btn.classList.add('selected');
+          btn.setAttribute('aria-checked', 'true');
           selectedEmoji = emoji;
           console.log('Wybrano emotkę:', selectedEmoji);
         });
@@ -365,40 +372,17 @@
         await Promise.all(fetchPromises);
 
         if (!loadedAnyFile) {
-          throw new Error('Nie udało się załadować żadnego pliku kategorii.');
+          console.warn('Nie załadowano żadnych kategorii, używam lokalnego fallbacku');
+          words = fallbackWords;
+          showMessage('⚠️ Używam domyślnej listy słów!');
         }
-
-        console.log('Łącznie załadowano słów:', words.length);
       } catch (error) {
         console.error('Błąd ładowania słów:', error);
-        try {
-          const response = await fetchWithTimeout('words.json');
-          words = response;
-          console.log('Załadowano domyślne słowa:', words.length);
-        } catch (err) {
-          console.error('Błąd ładowania domyślnych słów:', err);
-          showMessage('❌ Błąd ładowania słów gry! Używam wbudowanej listy.');
-          words = fallbackWords;
-          console.log('Użyto wbudowanej listy słów:', words.length);
-        }
-      }
-    }
-
-    fetch('words.json')
-      .then(response => {
-        if (!response.ok) throw new Error('Błąd ładowania words.json: ' + response.status);
-        return response.json();
-      })
-      .then(data => {
-        words = data;
-        console.log('Załadowano domyślne słowa:', words.length);
-      })
-      .catch(error => {
-        console.error('Błąd ładowania words.json:', error);
-        showMessage('❌ Błąd ładowania słów gry! Używam wbudowanej listy.');
         words = fallbackWords;
-        console.log('Użyto wbudowanej listy słów:', words.length);
-      });
+        showMessage('⚠️ Używam domyślnej listy słów!');
+      }
+      console.log('Łącznie załadowano słów:', words.length);
+    }
 
     function generateRoomCode() {
       return Math.random().toString(36).substr(2, 4).toUpperCase();
@@ -460,6 +444,7 @@
           kickBtn.textContent = '×';
           kickBtn.title = 'Wyrzuć gracza';
           kickBtn.classList.add('kickBtn');
+          kickBtn.setAttribute('aria-label', `Wyrzuć gracza ${player.name}`);
           kickBtn.addEventListener('click', () => {
             kickPlayer(id);
           });
@@ -488,9 +473,11 @@
 
     function showRoleMessage(text, duration = 5000) {
       roleMessageBox.textContent = text;
+      roleMessageBox.classList.toggle('impostor', text.includes('oszustem'));
       roleMessageBox.style.display = 'block';
       setTimeout(() => {
         roleMessageBox.style.display = 'none';
+        roleMessageBox.classList.remove('impostor');
       }, duration);
     }
 
@@ -554,6 +541,16 @@
         console.log('Brak nicku');
         return;
       }
+      if (name.length < 2 || name.length > 15) {
+        showMessage('❌ Nick musi mieć od 2 do 15 znaków!');
+        console.log('Nieprawidłowa długość nicku');
+        return;
+      }
+      if (!/^[a-zA-Z0-9ąęłńóśźżĄĘŁŃÓŚŹŻ]+$/.test(name)) {
+        showMessage('❌ Nick może zawierać tylko litery i cyfry!');
+        console.log('Nieprawidłowe znaki w nicku');
+        return;
+      }
       if (!selectedEmoji) {
         showMessage('❌ Wybierz awatar!');
         console.log('Brak wybranej emotki');
@@ -569,69 +566,6 @@
       themeToggle.classList.add('hidden');
     });
 
-    minusImpostor.addEventListener('click', () => {
-      if (impostorCount > 1) {
-        impostorCount--;
-        impostorCountDisplaySelector.textContent = impostorCount;
-        updateImpostorButtons();
-        updateRecommendedPlayers();
-        console.log('Zmniejszono liczbę impostorów:', impostorCount);
-      }
-    });
-
-    plusImpostor.addEventListener('click', () => {
-      if (impostorCount < 5) {
-        impostorCount++;
-        impostorCountDisplaySelector.textContent = impostorCount;
-        updateImpostorButtons();
-        updateRecommendedPlayers();
-        console.log('Zwiększono liczbę impostorów:', impostorCount);
-      }
-    });
-
-    confirmImpostors.addEventListener('click', () => {
-      console.log('Potwierdzono liczbę impostorów:', impostorCount);
-      createRoom(impostorCount);
-    });
-
-    function createRoom(numImpostors) {
-      console.log('Tworzenie pokoju z', numImpostors, 'impostorami, kategorie:', selectedCategories);
-      currentRoomCode = generateRoomCode();
-      currentPlayerId = db.ref().push().key;
-      const emoji = assignUniqueEmoji({});
-      const avatarColor = assignUniqueColor({});
-
-      const roomRef = db.ref(`rooms/${currentRoomCode}`);
-      const playerData = { name: currentPlayerName, isHost: true, role: null, emoji: emoji, avatarColor: avatarColor };
-      roomRef.set({
-        players: {
-          [currentPlayerId]: playerData
-        },
-        gameStarted: false,
-        currentWord: null,
-        resetMessage: null,
-        starterId: null,
-        numImpostors: numImpostors,
-        categories: selectedCategories,
-        currentRound: 0
-      }).then(() => {
-        console.log('Pokój utworzony:', currentRoomCode, 'Gracz:', playerData, 'Kategorie:', selectedCategories);
-        loginScreen.style.display = 'none';
-        gameScreen.style.display = 'block';
-        roomCodeDisplay.textContent = currentRoomCode;
-        impostorSelectionBox.style.display = 'none';
-        rulesBtn.classList.remove('hidden');
-        themeToggle.classList.remove('hidden');
-        db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).onDisconnect().remove();
-        listenToRoom(currentRoomCode);
-      }).catch(error => {
-        console.error('Błąd tworzenia pokoju:', error);
-        showMessage('❌ Błąd tworzenia pokoju!');
-        rulesBtn.classList.remove('hidden');
-        themeToggle.classList.remove('hidden');
-      });
-    }
-
     joinRoomBtn.addEventListener('click', () => {
       console.log('Kliknięto Dołącz do pokoju');
       const name = playerNameInput.value.trim();
@@ -640,6 +574,18 @@
       if (!name || !roomCode) {
         showMessage('❌ Wpisz nick i kod pokoju!');
         console.log('Brak nicku lub kodu pokoju');
+        roomCodeInput.value = '';
+        return;
+      }
+      if (name.length < 2 || name.length > 15) {
+        showMessage('❌ Nick musi mieć od 2 do 15 znaków!');
+        console.log('Nieprawidłowa długość nicku');
+        roomCodeInput.value = '';
+        return;
+      }
+      if (!/^[a-zA-Z0-9ąęłńóśźżĄĘŁŃÓŚŹŻ]+$/.test(name)) {
+        showMessage('❌ Nick może zawierać tylko litery i cyfry!');
+        console.log('Nieprawidłowe znaki w nicku');
         roomCodeInput.value = '';
         return;
       }
@@ -782,6 +728,7 @@
         if (room.gameStarted && room.currentWord && players[currentPlayerId]) {
           const isImpostor = players[currentPlayerId].role === 'impostor';
           const message = isImpostor ? 'Jesteś oszustem!' : `Słowo: ${room.currentWord}`;
+          roleMessageBox.classList.toggle('impostor', isImpostor);
           showRoleMessage(message, 5000);
           if (room.starterId && !hasShownStartMessage && players[room.starterId]) {
             setTimeout(() => {
