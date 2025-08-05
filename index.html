@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="pl">
 <head>
   <meta charset="UTF-8" />
@@ -60,7 +60,7 @@
       <span id="impostorCount">1</span>
       <button id="plusImpostor" title="Zwiększ" aria-label="Zwiększ liczbę impostorów">+</button>
     </div>
-    <button id="confirmImpostors" disabled aria-label="Potwierdź liczbę impostorów">Stwórz</button>
+    <button id="confirmImpostors" aria-label="Potwierdź liczbę impostorów">Stwórz</button>
     <p id="recommendedPlayers"></p>
   </div>
   <div id="rulesBox">
@@ -294,8 +294,87 @@
       confirmCategories.disabled = selectedCategories.length === 0;
       confirmCategories.style.opacity = selectedCategories.length === 0 ? '0.5' : '1';
       confirmCategories.style.cursor = selectedCategories.length === 0 ? 'not-allowed' : 'pointer';
-      console.log('Zaktualizowano przycisk Dalej, disabled:', confirmCategories.disabled);
+      console.log('Zaktualizowano przycisk Dalej (kategorie), disabled:', confirmCategories.disabled);
     }
+
+    // Funkcja aktualizacji liczby impostorów
+    function updateImpostorCount(change) {
+      const numPlayers = Object.keys(playersList.children).length || 1;
+      const minImpostors = 1;
+      const maxImpostors = Math.min(5, Math.floor(numPlayers / 2));
+      impostorCount = Math.max(minImpostors, Math.min(maxImpostors, impostorCount + change));
+      impostorCountDisplaySelector.textContent = impostorCount;
+      updateImpostorButtons();
+      updateConfirmImpostorsButton();
+      updateRecommendedPlayers();
+      console.log('Zaktualizowano liczbę impostorów:', impostorCount, 'min:', minImpostors, 'max:', maxImpostors, 'gracze:', numPlayers);
+    }
+
+    // Funkcja aktualizacji przycisków impostorów
+    function updateImpostorButtons() {
+      const numPlayers = Object.keys(playersList.children).length || 1;
+      const maxImpostors = Math.min(5, Math.floor(numPlayers / 2));
+      minusImpostor.disabled = impostorCount <= 1;
+      plusImpostor.disabled = impostorCount >= maxImpostors;
+      minusImpostor.style.opacity = impostorCount <= 1 ? '0.5' : '1';
+      plusImpostor.style.opacity = impostorCount >= maxImpostors ? '0.5' : '1';
+      minusImpostor.style.cursor = impostorCount <= 1 ? 'not-allowed' : 'pointer';
+      plusImpostor.style.cursor = impostorCount >= maxImpostors ? 'not-allowed' : 'pointer';
+      console.log('Zaktualizowano przyciski impostorów:', { impostorCount, maxImpostors });
+    }
+
+    // Funkcja aktualizacji przycisku potwierdzenia impostorów
+    function updateConfirmImpostorsButton() {
+      const numPlayers = Object.keys(playersList.children).length || 1;
+      const minPlayers = impostorCount + 2;
+      confirmImpostors.disabled = numPlayers < minPlayers || impostorCount === 0;
+      confirmImpostors.style.opacity = confirmImpostors.disabled ? '0.5' : '1';
+      confirmImpostors.style.cursor = confirmImpostors.disabled ? 'not-allowed' : 'pointer';
+      console.log('Zaktualizowano przycisk Stwórz (impostorzy), disabled:', confirmImpostors.disabled, 'impostorCount:', impostorCount, 'gracze:', numPlayers);
+    }
+
+    // Funkcja aktualizacji zalecanej liczby graczy
+    function updateRecommendedPlayers() {
+      const minPlayers = impostorCount + 2;
+      const maxPlayers = Math.min(impostorCount + 4, 10);
+      recommendedPlayers.textContent = `Zalecana liczba graczy: ${minPlayers}–${maxPlayers}`;
+      console.log('Zaktualizowano zalecaną liczbę graczy:', recommendedPlayers.textContent);
+    }
+
+    // Obsługa przycisków wyboru impostorów
+    minusImpostor.addEventListener('click', () => {
+      if (!minusImpostor.disabled) {
+        updateImpostorCount(-1);
+      }
+    });
+
+    plusImpostor.addEventListener('click', () => {
+      if (!plusImpostor.disabled) {
+        updateImpostorCount(1);
+      }
+    });
+
+    // Obsługa potwierdzenia liczby impostorów
+    confirmImpostors.addEventListener('click', () => {
+      if (!confirmImpostors.disabled) {
+        console.log('Potwierdzono liczbę impostorów:', impostorCount);
+        const roomRef = db.ref(`rooms/${currentRoomCode}`);
+        roomRef.update({
+          numImpostors: impostorCount,
+          categories: selectedCategories
+        }).then(() => {
+          console.log('Zapisano impostorCount i kategorie w Firebase:', { impostorCount, selectedCategories });
+          impostorSelectionBox.style.display = 'none';
+          gameScreen.style.display = 'block';
+          loginScreen.style.display = 'none';
+          startGameBtn.style.display = isHost ? 'block' : 'none';
+          showMessage(`Ustawiono ${impostorCount} impostorów. Czekaj na graczy!`);
+        }).catch(error => {
+          console.error('Błąd zapisu impostorCount do Firebase:', error);
+          showMessage('❌ Błąd zapisu ustawień gry!');
+        });
+      }
+    });
 
     allCategoriesBtn.querySelector('.checkbox').addEventListener('click', () => {
       if (selectedCategories.includes('all')) {
@@ -322,10 +401,10 @@
       confirmImpostors.disabled = true;
       loadWords().then(() => {
         document.getElementById('loadingMessage').style.display = 'none';
-        confirmImpostors.disabled = false;
         impostorCount = 1;
         impostorCountDisplaySelector.textContent = impostorCount;
         updateImpostorButtons();
+        updateConfirmImpostorsButton();
         updateRecommendedPlayers();
         console.log('Przełączono na wybór impostorów');
       }).catch(error => {
@@ -504,21 +583,6 @@
       updateRecommendedPlayers();
     }
 
-    function updateImpostorButtons() {
-      minusImpostor.disabled = impostorCount <= 1;
-      plusImpostor.disabled = impostorCount >= 5;
-      minusImpostor.style.opacity = impostorCount <= 1 ? '0.5' : '1';
-      plusImpostor.style.opacity = impostorCount >= 5 ? '0.5' : '1';
-      console.log('Zaktualizowano przyciski impostorów:', { impostorCount });
-    }
-
-    function updateRecommendedPlayers() {
-      const minPlayers = impostorCount + 2;
-      const maxPlayers = Math.min(impostorCount + 4, 10);
-      recommendedPlayers.textContent = `Zalecana liczba graczy: ${minPlayers}–${maxPlayers}`;
-      console.log('Zaktualizowano zalecaną liczbę graczy:', recommendedPlayers.textContent);
-    }
-
     closeRulesBtn.addEventListener('click', closeRules);
     closeRulesTopBtn.addEventListener('click', closeRules);
 
@@ -558,12 +622,32 @@
       }
       currentPlayerName = name;
       isHost = true;
-      console.log('Ustawiono hosta, imię:', currentPlayerName);
-      categorySelectionBox.style.display = 'block';
-      console.log('Wyświetlono categorySelectionBox');
-      initializeCategorySelection();
-      rulesBtn.classList.add('hidden');
-      themeToggle.classList.add('hidden');
+      currentRoomCode = generateRoomCode();
+      currentPlayerId = db.ref().push().key;
+      console.log('Tworzenie pokoju:', currentRoomCode, 'Nick:', currentPlayerName);
+
+      const roomRef = db.ref(`rooms/${currentRoomCode}`);
+      const emoji = assignUniqueEmoji({});
+      const avatarColor = assignUniqueColor({});
+      const playerData = { name: currentPlayerName, isHost: true, role: null, emoji: emoji, avatarColor: avatarColor };
+      roomRef.set({
+        players: { [currentPlayerId]: playerData },
+        numImpostors: 0,
+        categories: [],
+        gameStarted: false,
+        currentRound: 0
+      }).then(() => {
+        console.log('Pokój utworzony:', currentRoomCode, 'Gracz:', playerData);
+        loginScreen.style.display = 'none';
+        categorySelectionBox.style.display = 'block';
+        rulesBtn.classList.add('hidden');
+        themeToggle.classList.add('hidden');
+        db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).onDisconnect().remove();
+        listenToRoom(currentRoomCode);
+      }).catch(error => {
+        console.error('Błąd tworzenia pokoju:', error);
+        showMessage('❌ Błąd tworzenia pokoju!');
+      });
     });
 
     joinRoomBtn.addEventListener('click', () => {
