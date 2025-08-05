@@ -330,7 +330,7 @@
           showMessage('❌ Błąd ładowania kategorii! Używam domyślnych słów.');
           console.error('Błąd w confirmCategories:', error);
         });
-      }, 500);
+      }, 700);
     });
 
     async function loadWords() {
@@ -566,13 +566,16 @@
       currentPlayerName = name;
       isHost = true;
       console.log('Ustawiono hosta, imię:', currentPlayerName);
+      loginScreen.classList.add('slide-out');
       setTimeout(() => {
+        loginScreen.style.display = 'none';
         categorySelectionBox.style.display = 'block';
+        loginScreen.classList.remove('slide-out');
         console.log('Wyświetlono categorySelectionBox');
         initializeCategorySelection();
         rulesBtn.classList.add('hidden');
         themeToggle.classList.add('hidden');
-      }, 500);
+      }, 600);
     });
 
     minusImpostor.addEventListener('click', () => {
@@ -602,7 +605,7 @@
         impostorSelectionBox.style.display = 'none';
         impostorSelectionBox.classList.remove('slide-out');
         createRoom(impostorCount);
-      }, 500);
+      }, 700);
     });
 
     function createRoom(numImpostors) {
@@ -627,16 +630,18 @@
         currentRound: 0
       }).then(() => {
         console.log('Pokój utworzony:', currentRoomCode, 'Gracz:', playerData, 'Kategorie:', selectedCategories);
-        loginScreen.style.display = 'none';
+        loginScreen.classList.add('slide-out');
         setTimeout(() => {
+          loginScreen.style.display = 'none';
           gameScreen.style.display = 'block';
-        }, 500);
-        roomCodeDisplay.textContent = currentRoomCode;
-        impostorSelectionBox.style.display = 'none';
-        rulesBtn.classList.remove('hidden');
-        themeToggle.classList.remove('hidden');
-        db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).onDisconnect().remove();
-        listenToRoom(currentRoomCode);
+          loginScreen.classList.remove('slide-out');
+          roomCodeDisplay.textContent = currentRoomCode;
+          impostorSelectionBox.style.display = 'none';
+          rulesBtn.classList.remove('hidden');
+          themeToggle.classList.remove('hidden');
+          db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).onDisconnect().remove();
+          listenToRoom(currentRoomCode);
+        }, 600);
       }).catch(error => {
         console.error('Błąd tworzenia pokoju:', error);
         showMessage('❌ Błąd tworzenia pokoju!');
@@ -692,13 +697,17 @@
           [currentPlayerId]: playerData
         }).then(() => {
           console.log('Dołączono do pokoju:', roomCode, 'Gracz:', playerData);
-          loginScreen.style.display = 'none';
-          gameScreen.style.display = 'block';
-          roomCodeDisplay.textContent = currentRoomCode;
-          selectedCategories = room.categories || ['all'];
-          loadWords();
-          db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).onDisconnect().remove();
-          listenToRoom(currentRoomCode);
+          loginScreen.classList.add('slide-out');
+          setTimeout(() => {
+            loginScreen.style.display = 'none';
+            gameScreen.style.display = 'block';
+            loginScreen.classList.remove('slide-out');
+            roomCodeDisplay.textContent = currentRoomCode;
+            selectedCategories = room.categories || ['all'];
+            loadWords();
+            db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).onDisconnect().remove();
+            listenToRoom(currentRoomCode);
+          }, 600);
         }).catch(error => {
           console.error('Błąd dołączania do pokoju:', error);
           showMessage('❌ Błąd dołączania do pokoju!');
@@ -741,16 +750,20 @@
             db.ref(`rooms/${currentRoomCode}`).remove();
             console.log('Pokój usunięty przez hosta:', currentRoomCode);
           }
-          loginScreen.style.display = 'block';
-          gameScreen.style.display = 'none';
-          resetToLobby();
-          currentRoomCode = null;
-          currentPlayerId = null;
-          currentPlayerName = null;
-          isHost = false;
-          playerNameInput.value = '';
-          roomCodeInput.value = '';
-          db.ref(`rooms/${currentRoomCode}`).off();
+          loginScreen.classList.add('slide-out');
+          setTimeout(() => {
+            loginScreen.style.display = 'block';
+            gameScreen.style.display = 'none';
+            loginScreen.classList.remove('slide-out');
+            resetToLobby();
+            currentRoomCode = null;
+            currentPlayerId = null;
+            currentPlayerName = null;
+            isHost = false;
+            playerNameInput.value = '';
+            roomCodeInput.value = '';
+            db.ref(`rooms/${currentRoomCode}`).off();
+          }, 600);
         }).catch(error => {
           console.error('Błąd opuszczania pokoju:', error);
           showMessage('❌ Błąd opuszczania pokoju!');
@@ -849,16 +862,20 @@
         if (!snapshot.exists()) {
           console.log('Pokój nie istnieje, powrót do lobby:', roomCode);
           showMessage('❌ Pokój został zamknięty!');
-          loginScreen.style.display = 'block';
-          gameScreen.style.display = 'none';
-          resetToLobby();
-          currentRoomCode = null;
-          currentPlayerId = null;
-          currentPlayerName = null;
-          isHost = false;
-          playerNameInput.value = '';
-          roomCodeInput.value = '';
-          roomRef.off();
+          loginScreen.classList.add('slide-out');
+          setTimeout(() => {
+            loginScreen.style.display = 'block';
+            gameScreen.style.display = 'none';
+            loginScreen.classList.remove('slide-out');
+            resetToLobby();
+            currentRoomCode = null;
+            currentPlayerId = null;
+            currentPlayerName = null;
+            isHost = false;
+            playerNameInput.value = '';
+            roomCodeInput.value = '';
+            roomRef.off();
+          }, 600);
           return;
         }
 
