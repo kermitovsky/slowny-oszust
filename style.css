@@ -6,12 +6,12 @@ body {
   background-position: 0 0, 0 0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: #fff;
-  font-size: 1.6rem;
+  font-size: 2rem;
   margin: 0;
-  padding: 1rem;
+  padding: 1.5rem;
   min-height: 100vh;
   position: relative;
-  transition: background 0.3s ease;
+  transition: background 0.6s ease;
   overflow-x: hidden;
 }
 body.dark-mode {
@@ -19,6 +19,7 @@ body.dark-mode {
     radial-gradient(circle, rgba(255, 255, 255, 0.05) 2px, transparent 3px),
     linear-gradient(135deg, #4b0082 0%, #2c003e 100%);
   background-size: 15px 15px, auto;
+  transition: background 0.6s ease;
 }
 body.dark-mode .container {
   background: rgba(255, 255, 255, 0.03);
@@ -36,10 +37,6 @@ body.dark-mode #roleMessageBox {
   background: linear-gradient(135deg, #4b0082, #e67e22);
   border: 2px solid rgba(255, 255, 255, 0.1);
 }
-body.dark-mode #roleMessageBox.impostor {
-  background: linear-gradient(135deg, #e74c3c, #c0392b);
-  animation: pulse 1.5s infinite;
-}
 body.dark-mode #impostorSelectionBox {
   background: linear-gradient(135deg, #4b0082, #e67e22);
   border: 2px solid rgba(255, 255, 255, 0.1);
@@ -47,19 +44,18 @@ body.dark-mode #impostorSelectionBox {
 body.dark-mode #impostorSelectionBox #minusImpostor,
 body.dark-mode #impostorSelectionBox #plusImpostor,
 body.dark-mode #impostorSelectionBox #confirmImpostors {
-  background: linear-gradient(45deg, #e67e22, #d35400);
-  border: 1px solid rgba(230, 126, 34, 0.5);
+  background: rgba(230, 126, 34, 0.2);
+  border: 1px solid rgba(230, 126, 34, 0.3);
 }
 body.dark-mode #impostorSelectionBox #minusImpostor:hover:not(:disabled),
 body.dark-mode #impostorSelectionBox #plusImpostor:hover:not(:disabled),
 body.dark-mode #impostorSelectionBox #confirmImpostors:hover:not(:disabled) {
-  background: linear-gradient(45deg, #d35400, #e67e22);
+  background: rgba(230, 126, 34, 0.3);
 }
 body.dark-mode #impostorSelectionBox #minusImpostor:disabled,
 body.dark-mode #impostorSelectionBox #plusImpostor:disabled,
 body.dark-mode #impostorSelectionBox #confirmImpostors:disabled {
-  background: rgba(230, 126, 34, 0.2);
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 body.dark-mode #impostorSelectionBox #recommendedPlayers {
@@ -83,14 +79,11 @@ body.dark-mode #categorySelectionBox #allCategoriesBtn .checkbox:hover {
   background: rgba(230, 126, 34, 0.3);
 }
 body.dark-mode #categorySelectionBox #confirmCategories {
-  background: linear-gradient(45deg, #e67e22, #d35400);
+  background: rgba(230, 126, 34, 0.2);
+  border: 1px solid rgba(230, 126, 34, 0.3);
 }
 body.dark-mode #categorySelectionBox #confirmCategories:hover:not(:disabled) {
-  background: linear-gradient(45deg, #d35400, #e67e22);
-}
-body.dark-mode #categorySelectionBox #confirmCategories:disabled {
-  background: rgba(230, 126, 34, 0.2);
-  opacity: 0.6;
+  background: rgba(230, 126, 34, 0.3);
 }
 .container {
   max-width: 800px;
@@ -111,22 +104,11 @@ body.dark-mode #categorySelectionBox #confirmCategories:disabled {
 }
 @media (max-width: 600px) {
   body {
+    padding: 1rem;
+  }
+  .container {
     padding: 0.8rem;
-    font-size: 1.4rem;
-  }
-  .container {
-    padding: 0.6rem;
-    margin: 0.4rem;
-  }
-}
-@media (max-width: 400px) {
-  body {
-    padding: 0.5rem;
-    font-size: 1.2rem;
-  }
-  .container {
-    padding: 0.5rem;
-    margin: 0.3rem;
+    margin: 0.5rem;
   }
 }
 @keyframes fadeIn {
@@ -147,41 +129,190 @@ body.dark-mode #categorySelectionBox #confirmCategories:disabled {
   50% { transform: translateY(-5px); }
   100% { transform: translateY(0); }
 }
-#loginScreen, #gameScreen, #categorySelectionBox, #impostorSelectionBox {
+@keyframes slideUpIn {
+  from { opacity: 0; transform: translateY(100vh); }
+  to { opacity: 1; transform: translateY(-50%); }
+}
+@keyframes slideUpOut {
+  from { opacity: 1; transform: translateY(-50%); }
+  to { opacity: 0; transform: translateY(-100vh); }
+}
+#loginScreen {
   animation: fadeIn 0.5s ease-in-out;
+}
+#gameScreen {
+  animation: slideUpIn 0.5s ease-in-out;
+}
+#categorySelectionBox {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(135deg, #8e44ad, #d35400);
+  color: white;
+  padding: 2rem 3rem;
+  border-radius: 1.5rem;
+  text-align: center;
+  z-index: 1002;
+  display: none;
+  max-width: 90vw;
+  word-wrap: break-word;
+  white-space: pre-line;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  font-size: 2rem;
+  animation: slideUpIn 0.5s ease-in-out;
+  box-sizing: border-box;
+  will-change: transform, opacity;
+}
+#categorySelectionBox.slide-out {
+  animation: slideUpOut 0.5s ease-in-out forwards;
+}
+#categorySelectionBox p {
+  margin: 0 0 1.5rem 0;
+  font-size: 3rem;
+  color: #f5f5f5;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+}
+#impostorSelectionBox {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(135deg, #8e44ad, #d35400);
+  color: white;
+  padding: 2rem 3rem;
+  border-radius: 1.5rem;
+  text-align: center;
+  z-index: 1001;
+  display: none;
+  max-width: 90vw;
+  word-wrap: break-word;
+  white-space: pre-line;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  font-size: 2rem;
+  animation: slideUpIn 0.5s ease-in-out;
+  box-sizing: border-box;
+  will-change: transform, opacity;
+}
+#impostorSelectionBox.slide-out {
+  animation: slideUpOut 0.5s ease-in-out forwards;
+}
+#impostorSelectionBox p {
+  margin: 0 0 1.5rem 0;
+  font-size: 3rem;
+  color: #f5f5f5;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+}
+#impostorSelectionBox #loadingMessage {
+  font-size: 1.8rem;
+  color: #e6e6e6;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  margin: 0.5rem 0;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+#impostorSelectionBox #recommendedPlayers {
+  font-size: 1.4rem;
+  font-weight: 400;
+  font-family: 'Poppins', sans-serif;
+  color: #f5f5f5;
+  opacity: 0.8;
+  margin-top: 1rem;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+#impostorSelectionBox .impostor-selector {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+#impostorSelectionBox #minusImpostor,
+#impostorSelectionBox #plusImpostor {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  font-size: 2.5rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: opacity 0.3s ease, background 0.3s ease;
+}
+#impostorSelectionBox #minusImpostor:hover:not(:disabled),
+#impostorSelectionBox #plusImpostor:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+#impostorSelectionBox #minusImpostor:disabled,
+#impostorSelectionBox #plusImpostor:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+#impostorSelectionBox #confirmImpostors {
+  width: 150px;
+  margin: 0 auto;
+  background: rgba(142, 68, 173, 0.2);
+  border: 1px solid rgba(142, 68, 173, 0.3);
+  color: white;
+  font-size: 2rem;
+  font-weight: bold;
+  border-radius: 0.8rem;
+  transition: background 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+}
+#impostorSelectionBox #confirmImpostors:hover:not(:disabled) {
+  background: rgba(142, 68, 173, 0.3);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+}
+#impostorSelectionBox #confirmImpostors:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 #gameScreen h1 {
   text-align: center;
-  font-size: 3.5rem;
+  font-size: 4.5rem;
   color: #f5f5f5;
   font-family: 'Pacifico', cursive;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-  margin-bottom: 1.2rem;
+  margin-bottom: 1.5rem;
 }
 h1 {
   text-align: center;
-  font-size: 2.5rem;
+  font-size: 3rem;
   color: #f5f5f5;
   font-family: 'Pacifico', cursive;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 h3 {
   text-align: center;
-  font-size: 1.8rem;
+  font-size: 2rem;
   color: #f5f5f5;
   font-family: 'Poppins', sans-serif;
   font-weight: 600;
-  margin: 0.6rem 0;
+  margin: 0.8rem 0;
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
 }
 input, button {
-  font-size: 1.6rem;
-  padding: 0.6rem;
-  margin: 0.6rem 0;
+  font-size: 1.8rem;
+  padding: 0.8rem;
+  margin: 0.8rem 0;
   border-radius: 0.8rem;
   border: none;
   width: 100%;
-  max-width: 320px;
+  max-width: 350px;
   display: block;
   margin-left: auto;
   margin-right: auto;
@@ -191,9 +322,6 @@ input {
   border: 2px solid #8e44ad;
   color: #333;
   background: rgba(255, 255, 255, 0.9);
-}
-input:invalid {
-  border: 2px solid #e74c3c;
 }
 button {
   background: linear-gradient(45deg, #8e44ad, #9b59b6);
@@ -222,12 +350,12 @@ body.dark-mode button:hover {
 }
 #copyRoomCode {
   background: linear-gradient(45deg, #8e44ad, #9b59b6);
-  width: 2.5rem;
-  height: 2.5rem;
-  font-size: 1.8rem;
+  width: 2.8rem;
+  height: 2.8rem;
+  font-size: 2rem;
   padding: 0;
-  margin: 0 0.4rem;
-  line-height: 2.5rem;
+  margin: 0 0.5rem;
+  line-height: 2.8rem;
   text-align: center;
   display: inline-block;
 }
@@ -244,11 +372,11 @@ body.dark-mode #copyRoomCode:hover {
 }
 #rulesBtn, #themeToggle {
   position: fixed;
-  bottom: 1.2rem;
+  bottom: 1.5rem;
   border-radius: 50%;
   background: rgba(52, 152, 219, 0.3);
   color: white;
-  font-size: 1.8rem;
+  font-size: 2rem;
   font-weight: bold;
   display: flex;
   align-items: center;
@@ -262,14 +390,14 @@ body.dark-mode #copyRoomCode:hover {
   -webkit-backdrop-filter: blur(5px);
 }
 #rulesBtn {
-  right: 1.2rem;
-  width: 3rem;
-  height: 3rem;
+  right: 1.5rem;
+  width: 3.5rem;
+  height: 3.5rem;
 }
 #themeToggle {
-  right: 5rem;
-  width: 3rem;
-  height: 3rem;
+  right: 6rem;
+  width: 3.5rem;
+  height: 3.5rem;
 }
 #rulesBtn:hover, #themeToggle:hover {
   background: rgba(52, 152, 219, 0.5);
@@ -280,30 +408,16 @@ body.dark-mode #copyRoomCode:hover {
 }
 @media (max-width: 600px) {
   #rulesBtn, #themeToggle {
-    width: 2.8rem;
-    height: 2.8rem;
-    font-size: 1.6rem;
-    bottom: 0.8rem;
+    width: 3rem;
+    height: 3rem;
+    font-size: 1.8rem;
+    bottom: 1rem;
   }
   #rulesBtn {
-    right: 0.8rem;
+    right: 1rem;
   }
   #themeToggle {
-    right: 4.5rem;
-  }
-}
-@media (max-width: 400px) {
-  #rulesBtn, #themeToggle {
-    width: 2.5rem;
-    height: 2.5rem;
-    font-size: 1.4rem;
-    bottom: 0.6rem;
-  }
-  #rulesBtn {
-    right: 0.6rem;
-  }
-  #themeToggle {
-    right: 4rem;
+    right: 5rem;
   }
 }
 #roomCodeContainer {
@@ -311,7 +425,7 @@ body.dark-mode #copyRoomCode:hover {
   align-items: center;
   justify-content: center;
   text-align: center;
-  margin: 0.6rem 0;
+  margin: 0.8rem 0;
   flex-wrap: nowrap;
   max-width: 100%;
 }
@@ -319,12 +433,12 @@ body.dark-mode #copyRoomCode:hover {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 2rem;
-  margin: 0.6rem 0;
+  gap: 3rem;
+  margin: 0.8rem 0;
   max-width: 100%;
 }
 #playerCountDisplay, #impostorCountDisplay {
-  font-size: 1.6rem;
+  font-size: 1.8rem;
   font-family: 'Poppins', sans-serif;
   color: #f5f5f5;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
@@ -340,13 +454,13 @@ body.dark-mode #playerCountDisplay, body.dark-mode #impostorCountDisplay {
   font-weight: 800;
 }
 #roundCounter {
-  font-size: 1.8rem;
+  font-size: 2rem;
   font-family: 'Poppins', sans-serif;
   font-weight: 600;
   color: #f5f5f5;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
   text-align: center;
-  margin: 0.8rem 0;
+  margin: 1rem 0;
 }
 #roundCounter strong {
   font-weight: 800;
@@ -355,13 +469,13 @@ body.dark-mode #roundCounter {
   color: #e6e6e6;
 }
 #wordDisplay {
-  font-size: 1.8rem;
+  font-size: 2rem;
   font-family: 'Poppins', sans-serif;
   font-weight: 600;
   color: #f5f5f5;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
   text-align: center;
-  margin: 0.4rem 0;
+  margin: 0.5rem 0;
 }
 body.dark-mode #wordDisplay {
   color: #e6e6e6;
@@ -386,8 +500,8 @@ body.dark-mode #wordDisplay {
 }
 #playersList li {
   position: relative;
-  padding: 0.6rem 4rem 0.6rem 3rem;
-  margin: 0.4rem 0;
+  padding: 0.8rem 4.5rem 0.8rem 3.5rem;
+  margin: 0.5rem 0;
   border-radius: 1rem;
   background-color: rgba(255, 255, 255, 0.8);
   color: #333;
@@ -398,39 +512,39 @@ body.dark-mode #wordDisplay {
   box-sizing: border-box;
 }
 #playersList li .avatar {
-  width: 2rem;
-  height: 2rem;
+  width: 2.2rem;
+  height: 2.2rem;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.4rem;
-  margin-right: 0.6rem;
+  font-size: 1.5rem;
+  margin-right: 0.8rem;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   position: absolute;
-  left: 0.6rem;
+  left: 0.8rem;
 }
 #playersList li.host .avatar::after {
   content: '👑';
   position: absolute;
-  top: -0.3rem;
-  right: -0.3rem;
-  font-size: 0.8rem;
+  top: -0.4rem;
+  right: -0.4rem;
+  font-size: 0.9rem;
 }
 #playersList li .kickBtn {
   position: absolute;
   top: 50%;
-  right: 0.6rem;
+  right: 0.8rem;
   transform: translateY(-50%);
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   background-color: #e74c3c;
   color: white;
   font-weight: bold;
   border-radius: 4px;
   border: none;
   cursor: pointer;
-  font-size: 1.4rem;
+  font-size: 1.6rem;
   line-height: 1;
   text-align: center;
   padding: 0;
@@ -460,7 +574,7 @@ body.dark-mode .self {
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
   color: #333;
-  padding: 1rem;
+  padding: 1.2rem;
   border-radius: 1rem;
   text-align: center;
   z-index: 1001;
@@ -469,25 +583,21 @@ body.dark-mode .self {
   word-wrap: break-word;
   white-space: pre-line;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  font-size: 1.6rem;
+  font-size: 1.8rem;
   font-family: 'Poppins', sans-serif;
   font-weight: 600;
   animation: scaleIn 0.3s ease-in-out;
   box-sizing: border-box;
 }
 #messageBox:not(.copy-message) {
-  font-size: 2.4rem;
+  font-size: 2.8rem;
   background: linear-gradient(135deg, #8e44ad, #d35400);
   color: white;
-  padding: 1.8rem;
-  border-radius: 1.2rem;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  padding: 2rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   border: 2px solid rgba(255, 255, 255, 0.2);
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
-}
-#messageBox:not(.copy-message)[data-error="nick"] {
-  background: linear-gradient(135deg, #e74c3c, #c0392b);
-  font-weight: 700;
 }
 #messageBox strong {
   font-weight: 800;
@@ -499,176 +609,31 @@ body.dark-mode .self {
   transform: translate(-50%, -50%);
   background: linear-gradient(135deg, #8e44ad, #d35400);
   color: white;
-  padding: 1.8rem;
-  border-radius: 1.2rem;
+  padding: 2rem;
+  border-radius: 1.5rem;
   text-align: center;
   z-index: 1001;
   display: none;
   max-width: 90vw;
   word-wrap: break-word;
   white-space: pre-line;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   border: 2px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
-  font-size: 3rem;
+  font-size: 3.5rem;
   font-weight: bold;
   font-family: 'Segoe UI Black', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   animation: scaleIn 0.3s ease-in-out;
   box-sizing: border-box;
 }
-#roleMessageBox.impostor {
-  background: linear-gradient(135deg, #e74c3c, #c0392b);
-  animation: pulse 1.5s infinite;
-}
-#impostorSelectionBox {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: linear-gradient(135deg, #8e44ad, #d35400);
-  color: white;
-  padding: 2rem 2.5rem;
-  border-radius: 1.2rem;
-  text-align: center;
-  z-index: 1001;
-  display: none;
-  max-width: 90vw;
-  word-wrap: break-word;
-  white-space: normal;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  font-size: 1.8rem;
-  animation: scaleIn 0.2s ease-in-out;
-  box-sizing: border-box;
-  will-change: transform, opacity;
-}
-#impostorSelectionBox p {
-  margin: 0 0 1.5rem 0;
-  font-size: 2.8rem;
-  color: #f5f5f5;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 600;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-  white-space: normal;
-  line-height: 1.2;
-}
-#impostorSelectionBox #loadingMessage {
-  font-size: 1.6rem;
-  color: #e6e6e6;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 500;
-  margin: 0.4rem 0;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-}
-#impostorSelectionBox #recommendedPlayers {
-  font-size: 1.2rem;
-  font-weight: 400;
-  font-family: 'Poppins', sans-serif;
-  color: #f5f5f5;
-  opacity: 0.8;
-  margin-top: 0.8rem;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-  text-align: center;
-}
-#impostorSelectionBox .impostor-selector {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1.2rem;
-  margin-bottom: 1.5rem;
-}
-#impostorSelectionBox #minusImpostor,
-#impostorSelectionBox #plusImpostor {
-  width: 45px;
-  height: 45px;
-  border-radius: 50%;
-  background: linear-gradient(45deg, #8e44ad, #9b59b6);
-  border: 1px solid rgba(142, 68, 173, 0.5);
-  color: white;
-  font-size: 2.2rem;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
-  opacity: 1;
-  pointer-events: auto;
-}
-#impostorSelectionBox #minusImpostor:hover:not(:disabled),
-#impostorSelectionBox #plusImpostor:hover:not(:disabled) {
-  background: linear-gradient(45deg, #9b59b6, #8e44ad);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-}
-#impostorSelectionBox #minusImpostor:disabled,
-#impostorSelectionBox #plusImpostor:disabled {
-  background: rgba(142, 68, 173, 0.2);
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-#impostorSelectionBox #confirmImpostors {
-  width: 140px;
-  margin: 0 auto;
-  background: linear-gradient(45deg, #8e44ad, #9b59b6);
-  border: 1px solid rgba(142, 68, 173, 0.5);
-  color: white;
-  font-size: 1.8rem;
-  font-weight: bold;
-  border-radius: 0.8rem;
-  padding: 0.8rem;
-  transition: background 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
-  opacity: 1;
-  pointer-events: auto;
-}
-#impostorSelectionBox #confirmImpostors:hover:not(:disabled) {
-  background: linear-gradient(45deg, #9b59b6, #8e44ad);
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
-}
-#impostorSelectionBox #confirmImpostors:disabled {
-  background: rgba(142, 68, 173, 0.2);
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-#categorySelectionBox {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: linear-gradient(135deg, #8e44ad, #d35400);
-  color: white;
-  padding: 2rem 2.5rem;
-  border-radius: 1.2rem;
-  text-align: center;
-  z-index: 1002;
-  display: none;
-  max-width: 90vw;
-  word-wrap: break-word;
-  white-space: normal;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  font-size: 1.8rem;
-  animation: scaleIn 0.2s ease-in-out;
-  box-sizing: border-box;
-  will-change: transform, opacity;
-}
-#categorySelectionBox p {
-  margin: 0 0 1.5rem 0;
-  font-size: 2.8rem;
-  color: #f5f5f5;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 600;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-  white-space: normal;
-  line-height: 1.2;
-}
 #categorySelectionBox .category-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 0.8rem;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
   margin-bottom: 1.5rem;
-  padding: 0.8rem;
-  max-height: min(80vh, fit-content);
+  margin-right: 30px;
+  max-height: 300px;
   overflow-y: auto;
   overflow-x: hidden;
   box-sizing: border-box;
@@ -676,7 +641,7 @@ body.dark-mode .self {
   scrollbar-color: #9b59b6 rgba(255, 255, 255, 0.1);
 }
 #categorySelectionBox .category-grid::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
 }
 #categorySelectionBox .category-grid::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.1);
@@ -702,13 +667,13 @@ body.dark-mode #categorySelectionBox .category-grid::-webkit-scrollbar-thumb:hov
   background: rgba(0, 0, 0, 0.4);
   border: none;
   border-radius: 0.8rem;
-  padding: 0.8rem;
-  font-size: 1.6rem;
+  padding: 1rem;
+  font-size: 1.8rem;
   font-family: 'Poppins', sans-serif;
   font-weight: 600;
   color: #f5f5f5;
   cursor: pointer;
-  opacity: 0.8;
+  opacity: 0.5;
   transition: opacity 0.3s ease, background 0.3s ease;
   box-sizing: border-box;
 }
@@ -718,28 +683,28 @@ body.dark-mode #categorySelectionBox .category-grid::-webkit-scrollbar-thumb:hov
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 #categorySelectionBox .category-btn:hover:not(.selected) {
-  opacity: 0.9;
+  opacity: 0.7;
 }
 #categorySelectionBox #allCategoriesBtn {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.4rem;
+  gap: 0.5rem;
   margin: 0.8rem auto;
-  font-size: 1.8rem;
+  font-size: 2rem;
   font-family: 'Poppins', sans-serif;
   font-weight: 600;
   color: #f5f5f5;
 }
 #categorySelectionBox #allCategoriesBtn .checkbox {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   border: 2px solid #f5f5f5;
   border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.4rem;
+  font-size: 1.6rem;
   cursor: pointer;
   background: rgba(142, 68, 173, 0.2);
   transition: background 0.3s ease;
@@ -756,47 +721,34 @@ body.dark-mode #categorySelectionBox #allCategoriesBtn .checkbox:hover {
   background: rgba(230, 126, 34, 0.3);
 }
 #categorySelectionBox #confirmCategories {
-  width: 140px;
+  width: 150px;
   margin: 1.5rem auto 0;
-  background: linear-gradient(45deg, #8e44ad, #9b59b6);
-  border: 1px solid rgba(142, 68, 173, 0.5);
+  background: rgba(142, 68, 173, 0.2);
+  border: 1px solid rgba(142, 68, 173, 0.3);
   color: white;
-  font-size: 1.8rem;
+  font-size: 2rem;
   font-weight: bold;
   border-radius: 0.8rem;
-  padding: 0.8rem;
   transition: background 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
   display: block;
   box-sizing: border-box;
-  opacity: 1;
 }
 #categorySelectionBox #confirmCategories:hover:not(:disabled) {
-  background: linear-gradient(45deg, #9b59b6, #8e44ad);
+  background: rgba(142, 68, 173, 0.3);
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
 }
 #categorySelectionBox #confirmCategories:disabled {
-  background: rgba(142, 68, 173, 0.2);
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
-}
-body.dark-mode #categorySelectionBox #confirmCategories {
-  background: linear-gradient(45deg, #e67e22, #d35400);
-}
-body.dark-mode #categorySelectionBox #confirmCategories:hover:not(:disabled) {
-  background: linear-gradient(45deg, #d35400, #e67e22);
-}
-body.dark-mode #categorySelectionBox #confirmCategories:disabled {
-  background: rgba(230, 126, 34, 0.2);
-  opacity: 0.6;
 }
 #emojiSelection {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
-  gap: 10px;
-  max-width: 320px;
+  grid-template-columns: repeat(5, 1fr) !important;
+  gap: 15px;
+  max-width: 360px;
   width: 100%;
-  margin: 0.8rem auto;
-  padding: 0.6rem;
+  margin: 1rem auto;
+  padding: 0.8rem;
   box-sizing: border-box;
   justify-content: center;
   align-items: center;
@@ -805,10 +757,10 @@ body.dark-mode #categorySelectionBox #confirmCategories:disabled {
   background: rgba(255, 255, 255, 0.2);
   border: none;
   border-radius: 0.8rem;
-  width: 50px;
-  height: 50px;
-  min-width: 50px;
-  font-size: 2.4rem;
+  width: 60px;
+  height: 60px;
+  min-width: 60px;
+  font-size: 2.8rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -826,18 +778,13 @@ body.dark-mode #categorySelectionBox #confirmCategories:disabled {
   border: 2px solid #9b59b6;
   transform: scale(1.1);
 }
-.emoji-btn[aria-checked="true"] {
-  background: rgba(142, 68, 173, 0.4);
-  border: 2px solid #9b59b6;
-}
 body.dark-mode .emoji-btn {
   background: rgba(230, 126, 34, 0.2);
 }
 body.dark-mode .emoji-btn:hover {
   background: rgba(230, 126, 34, 0.3);
 }
-body.dark-mode .emoji-btn.selected,
-body.dark-mode .emoji-btn[aria-checked="true"] {
+body.dark-mode .emoji-btn.selected {
   background: rgba(230, 126, 34, 0.4);
   border: 2px solid #e67e22;
 }
@@ -845,9 +792,9 @@ body.dark-mode .emoji-btn[aria-checked="true"] {
   border: 0;
   height: 1px;
   background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.5), transparent);
-  margin: 0.8rem 0;
+  margin: 1rem 0;
   width: 100%;
-  max-width: 320px;
+  max-width: 350px;
 }
 #rulesBox {
   position: fixed;
@@ -856,17 +803,17 @@ body.dark-mode .emoji-btn[aria-checked="true"] {
   transform: translate(-50%, -50%);
   background: linear-gradient(135deg, #8e44ad, #d35400);
   color: white;
-  padding: 1.8rem;
-  border-radius: 1.2rem;
+  padding: 2rem;
+  border-radius: 1.5rem;
   text-align: left;
   z-index: 1002;
   display: none;
   max-width: 90vw;
   max-height: 80vh;
   overflow-y: auto;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   border: 2px solid rgba(255, 255, 255, 0.2);
-  font-size: 1.4rem;
+  font-size: 1.6rem;
   font-family: 'Poppins', sans-serif;
   box-sizing: border-box;
   scrollbar-width: thin;
@@ -900,41 +847,41 @@ body.dark-mode #rulesBox::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(45deg, #d35400, #e67e22);
 }
 #rulesBox h2 {
-  font-size: 2.2rem;
+  font-size: 2.5rem;
   font-family: 'Poppins', sans-serif;
   font-weight: 600;
-  margin: 0 0 0.8rem 0;
+  margin: 0 0 1rem 0;
   text-align: center;
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
 }
 #rulesBox h3 {
-  font-size: 1.8rem;
+  font-size: 2rem;
   font-weight: 600;
-  margin: 0.8rem 0 0.4rem 0;
+  margin: 1rem 0 0.5rem 0;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
 #rulesBox p {
-  font-size: 1.4rem;
-  margin: 0.4rem 0;
+  font-size: 1.6rem;
+  margin: 0.5rem 0;
   line-height: 1.5;
 }
 #rulesBox ul {
-  padding-left: 1.8rem;
-  margin: 0.4rem 0;
+  padding-left: 2rem;
+  margin: 0.5rem 0;
 }
 #rulesBox li {
-  font-size: 1.4rem;
-  margin-bottom: 0.4rem;
+  font-size: 1.6rem;
+  margin-bottom: 0.5rem;
   line-height: 1.5;
 }
 #rulesBox #closeRules, #rulesBox #closeRulesTop {
   position: absolute;
-  top: 0.8rem;
-  right: 0.8rem;
+  top: 1rem;
+  right: 1rem;
   background: transparent;
   border: none;
   color: white;
-  font-size: 1.8rem;
+  font-size: 2rem;
   font-weight: bold;
   cursor: pointer;
   transition: transform 0.2s ease;
@@ -943,157 +890,22 @@ body.dark-mode #rulesBox::-webkit-scrollbar-thumb:hover {
   transform: scale(1.2);
 }
 #rulesBox #closeRulesTop {
-  top: 0.4rem;
-  right: 0.4rem;
+  top: 0.5rem;
+  right: 0.5rem;
 }
 @media (max-width: 600px) {
   #rulesBox {
-    padding: 1.2rem;
+    padding: 1.5rem;
     max-height: 85vh;
-    font-size: 1.2rem;
+    font-size: 1.4rem;
   }
   #rulesBox h2 {
-    font-size: 1.8rem;
+    font-size: 2rem;
   }
   #rulesBox h3 {
-    font-size: 1.6rem;
-  }
-  #rulesBox p, #rulesBox li {
-    font-size: 1.2rem;
-  }
-}
-@media (max-width: 400px) {
-  #rulesBox {
-    padding: 1rem;
-    font-size: 1rem;
-  }
-  #rulesBox h2 {
-    font-size: 1.6rem;
-  }
-  #rulesBox h3 {
-    font-size: 1.4rem;
-  }
-  #rulesBox p, #rulesBox li {
-    font-size: 1rem;
-  }
-}
-@media (max-width: 600px) {
-  #categorySelectionBox {
-    padding: 1.5rem 2rem;
-    font-size: 1.6rem;
-  }
-  #categorySelectionBox p {
-    font-size: 2.2rem;
-    margin-bottom: 1rem;
-  }
-  #categorySelectionBox .category-grid {
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 0.6rem;
-    padding: 0.6rem;
-  }
-  #categorySelectionBox .category-btn {
-    font-size: 1.4rem;
-    padding: 0.6rem;
-  }
-  #categorySelectionBox #allCategoriesBtn {
-    font-size: 1.6rem;
-  }
-  #categorySelectionBox #allCategoriesBtn .checkbox {
-    width: 20px;
-    height: 20px;
-    font-size: 1.2rem;
-  }
-  #categorySelectionBox #confirmCategories {
-    width: 120px;
-    font-size: 1.6rem;
-    padding: 0.6rem;
-  }
-}
-@media (max-width: 400px) {
-  #categorySelectionBox {
-    padding: 1.2rem 1.5rem;
-    font-size: 1.4rem;
-  }
-  #categorySelectionBox p {
-    font-size: 2rem;
-    margin-bottom: 0.8rem;
-  }
-  #categorySelectionBox .category-grid {
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-    gap: 0.5rem;
-    padding: 0.5rem;
-  }
-  #categorySelectionBox .category-btn {
-    font-size: 1.2rem;
-    padding: 0.5rem;
-  }
-  #categorySelectionBox #allCategoriesBtn {
-    font-size: 1.4rem;
-  }
-  #categorySelectionBox #allCategoriesBtn .checkbox {
-    width: 18px;
-    height: 18px;
-    font-size: 1rem;
-  }
-  #categorySelectionBox #confirmCategories {
-    width: 100px;
-    font-size: 1.4rem;
-    padding: 0.5rem;
-  }
-}
-@media (max-width: 600px) {
-  #impostorSelectionBox {
-    padding: 1.5rem 2rem;
-    font-size: 1.6rem;
-  }
-  #impostorSelectionBox p {
-    font-size: 2.2rem;
-    margin-bottom: 1rem;
-  }
-  #impostorSelectionBox .impostor-selector {
-    gap: 0.8rem;
-    margin-bottom: 1rem;
-  }
-  #impostorSelectionBox #minusImpostor,
-  #impostorSelectionBox #plusImpostor {
-    width: 40px;
-    height: 40px;
-    font-size: 2rem;
-  }
-  #impostorSelectionBox #confirmImpostors {
-    width: 120px;
-    font-size: 1.6rem;
-    padding: 0.6rem;
-  }
-  #impostorSelectionBox #recommendedPlayers {
-    font-size: 1rem;
-  }
-}
-@media (max-width: 400px) {
-  #impostorSelectionBox {
-    padding: 1.2rem 1.5rem;
-    font-size: 1.4rem;
-  }
-  #impostorSelectionBox p {
-    font-size: 2rem;
-    margin-bottom: 0.8rem;
-  }
-  #impostorSelectionBox .impostor-selector {
-    gap: 0.6rem;
-    margin-bottom: 0.8rem;
-  }
-  #impostorSelectionBox #minusImpostor,
-  #impostorSelectionBox #plusImpostor {
-    width: 35px;
-    height: 35px;
     font-size: 1.8rem;
   }
-  #impostorSelectionBox #confirmImpostors {
-    width: 100px;
+  #rulesBox p, #rulesBox li {
     font-size: 1.4rem;
-    padding: 0.5rem;
-  }
-  #impostorSelectionBox #recommendedPlayers {
-    font-size: 0.9rem;
   }
 }
