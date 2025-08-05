@@ -131,23 +131,24 @@ body.dark-mode #categorySelectionBox #confirmCategories:hover:not(:disabled) {
 }
 @keyframes slideUpIn {
   from { opacity: 0; transform: translateY(100vh); }
-  to { opacity: 1; transform: translateY(-50%); }
+  to { opacity: 1; transform: translateY(0); }
 }
 @keyframes slideUpOut {
-  from { opacity: 1; transform: translateY(-50%); }
+  from { opacity: 1; transform: translateY(0); }
   to { opacity: 0; transform: translateY(-100vh); }
 }
 #loginScreen {
-  animation: fadeIn 0.5s ease-in-out;
+  animation: fadeIn 0.6s ease-in-out;
 }
 #gameScreen {
-  animation: slideUpIn 0.5s ease-in-out;
+  animation: slideUpIn 0.6s ease-in-out;
+  will-change: transform, opacity;
 }
 #categorySelectionBox {
   position: fixed;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, 0);
   background: linear-gradient(135deg, #8e44ad, #d35400);
   color: white;
   padding: 2rem 3rem;
@@ -161,12 +162,12 @@ body.dark-mode #categorySelectionBox #confirmCategories:hover:not(:disabled) {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   border: 2px solid rgba(255, 255, 255, 0.2);
   font-size: 2rem;
-  animation: slideUpIn 0.5s ease-in-out;
+  animation: slideUpIn 0.6s ease-in-out;
   box-sizing: border-box;
   will-change: transform, opacity;
 }
 #categorySelectionBox.slide-out {
-  animation: slideUpOut 0.5s ease-in-out forwards;
+  animation: slideUpOut 0.6s ease-in-out forwards;
 }
 #categorySelectionBox p {
   margin: 0 0 1.5rem 0;
@@ -181,7 +182,7 @@ body.dark-mode #categorySelectionBox #confirmCategories:hover:not(:disabled) {
   position: fixed;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, 0);
   background: linear-gradient(135deg, #8e44ad, #d35400);
   color: white;
   padding: 2rem 3rem;
@@ -195,12 +196,12 @@ body.dark-mode #categorySelectionBox #confirmCategories:hover:not(:disabled) {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   border: 2px solid rgba(255, 255, 255, 0.2);
   font-size: 2rem;
-  animation: slideUpIn 0.5s ease-in-out;
+  animation: slideUpIn 0.6s ease-in-out;
   box-sizing: border-box;
   will-change: transform, opacity;
 }
 #impostorSelectionBox.slide-out {
-  animation: slideUpOut 0.5s ease-in-out forwards;
+  animation: slideUpOut 0.6s ease-in-out forwards;
 }
 #impostorSelectionBox p {
   margin: 0 0 1.5rem 0;
