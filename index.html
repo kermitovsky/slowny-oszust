@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="pl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Słowny Impostor</title>
+  <title>S艂owny Impostor</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet" />
@@ -11,23 +11,23 @@
 </head>
 <body>
   <div class="container">
-    <h1 class="fancy-title">Słowny Impostor</h1>
+    <h1 class="fancy-title">S艂owny Impostor</h1>
     <div id="loginScreen">
-      <input type="text" id="playerName" placeholder="Podaj swój nick" />
+      <input type="text" id="playerName" placeholder="Podaj sw贸j nick" />
       <h3>Wybierz awatar</h3>
       <div id="emojiSelection"></div>
       <hr class="section-divider" />
-      <button id="createRoom">Stwórz pokój</button>
+      <button id="createRoom">Stw贸rz pok贸j</button>
       <hr class="section-divider" />
       <input type="text" id="roomCodeInput" placeholder="Kod pokoju" maxlength="4" />
-      <button id="joinRoom">Dołącz do pokoju</button>
+      <button id="joinRoom">Do艂膮cz do pokoju</button>
       <p id="statusMessage"></p>
     </div>
 
     <div id="gameScreen" style="display:none;">
       <div id="roomCodeContainer">
         <p>Kod pokoju: <span id="roomCodeDisplay"></span></p>
-        <button id="copyRoomCode" title="Kopiuj kod">📋</button>
+        <button id="copyRoomCode" title="Kopiuj kod">馃搵</button>
       </div>
       <p id="roundCounter"></p>
       <p id="wordDisplay"></p>
@@ -37,13 +37,13 @@
       </div>
       <ul id="playersList"></ul>
       <button id="startGame" style="display:none;">Start gry</button>
-      <button id="endRound" style="display:none; margin-top: 0.8rem; background-color: #c0392b;">Zakończ rundę</button>
-      <button id="leaveRoom" style="margin-top: 0.8rem;">Opuść pokój</button>
+      <button id="endRound" style="display:none; margin-top: 0.8rem; background-color: #c0392b;">Zako艅cz rund臋</button>
+      <button id="leaveRoom" style="margin-top: 0.8rem;">Opu艣膰 pok贸j</button>
     </div>
   </div>
 
   <button id="rulesBtn" title="Zasady gry">i</button>
-  <button id="themeToggle" title="Przełącz tryb"></button>
+  <button id="themeToggle" title="Prze艂膮cz tryb"></button>
   <div id="messageBox"></div>
   <div id="roleMessageBox"></div>
   <div id="categorySelectionBox" style="display:none;">
@@ -53,40 +53,40 @@
     <button id="confirmCategories">Dalej</button>
   </div>
   <div id="impostorSelectionBox" style="display:none;">
-    <p>Wybierz liczbę impostorów</p>
-    <p id="loadingMessage" style="display: none;">Ładowanie kategorii...</p>
+    <p>Wybierz liczb臋 impostor贸w</p>
+    <p id="loadingMessage" style="display: none;">艁adowanie kategorii...</p>
     <div class="impostor-selector">
       <button id="minusImpostor" title="Zmniejsz">-</button>
       <span id="impostorCount">1</span>
-      <button id="plusImpostor" title="Zwiększ">+</button>
+      <button id="plusImpostor" title="Zwi臋ksz">+</button>
     </div>
-    <button id="confirmImpostors" disabled>Stwórz</button>
+    <button id="confirmImpostors" disabled>Stw贸rz</button>
     <p id="recommendedPlayers"></p>
   </div>
   <div id="rulesBox">
     <button id="closeRulesTop" title="Zamknij">X</button>
-    <h2>Zasady gry Słowny Impostor</h2>
+    <h2>Zasady gry S艂owny Impostor</h2>
     <h3>Cel gry</h3>
-    <p>Wciel się w detektywa słów! Twoim zadaniem jest opisanie tajemniczego słowa, nie zdradzając go, lub blefowanie jako impostor, który słowa nie zna. Celem jest zidentyfikowanie impostora przed końcem rundy!</p>
+    <p>Wciel si臋 w detektywa s艂贸w! Twoim zadaniem jest opisanie tajemniczego s艂owa, nie zdradzaj膮c go, lub blefowanie jako impostor, kt贸ry s艂owa nie zna. Celem jest zidentyfikowanie impostora przed ko艅cem rundy!</p>
     <h3>Przebieg gry</h3>
     <ul>
-      <li><strong>Tworzenie pokoju:</strong> Host tworzy pokój, wybierając kategorie słów i liczbę impostorów (1–5). Gracze dołączają, wpisując kod pokoju.</li>
-      <li><strong>Start gry:</strong> Host uruchamia grę, gdy w pokoju jest odpowiednia liczba graczy (min. 3 dla 1 impostora, 4 dla 2, itd., maks. 10).</li>
-      <li><strong>Losowanie słowa:</strong> Gra losuje jedno słowo z wybranych kategorii. Normalni gracze znają słowo, impostorzy muszą blefować.</li>
-      <li><strong>Opisywanie:</strong> Gracze po kolei opisują słowo w kreatywny sposób, unikając jego bezpośredniego użycia. Losowy gracz zaczyna, z mniejszą szansą na impostora.</li>
-      <li><strong>Zakończenie rundy:</strong> Host może zakończyć rundę, gdy podejrzewa impostora. Omówcie, kto był impostorem, i zacznijcie nową rundę!</li>
+      <li><strong>Tworzenie pokoju:</strong> Host tworzy pok贸j, wybieraj膮c kategorie s艂贸w i liczb臋 impostor贸w (1鈥?). Gracze do艂膮czaj膮, wpisuj膮c kod pokoju.</li>
+      <li><strong>Start gry:</strong> Host uruchamia gr臋, gdy w pokoju jest odpowiednia liczba graczy (min. 3 dla 1 impostora, 4 dla 2, itd., maks. 10).</li>
+      <li><strong>Losowanie s艂owa:</strong> Gra losuje jedno s艂owo z wybranych kategorii. Normalni gracze znaj膮 s艂owo, impostorzy musz膮 blefowa膰.</li>
+      <li><strong>Opisywanie:</strong> Gracze po kolei opisuj膮 s艂owo w kreatywny spos贸b, unikaj膮c jego bezpo艣redniego u偶ycia. Losowy gracz zaczyna, z mniejsz膮 szans膮 na impostora.</li>
+      <li><strong>Zako艅czenie rundy:</strong> Host mo偶e zako艅czy膰 rund臋, gdy podejrzewa impostora. Om贸wcie, kto by艂 impostorem, i zacznijcie now膮 rund臋!</li>
     </ul>
     <h3>Role w grze</h3>
     <ul>
-      <li><strong>Normalny gracz:</strong> Zna słowo i opisuje je, aby pomóc innym graczom, jednocześnie obserwując, kto może blefować.</li>
-      <li><strong>Impostor:</strong> Nie zna słowa i musi sprytnie udawać, że je zna, aby nie zostać zdemaskowanym.</li>
-      <li><strong>Host:</strong> Tworzy pokój, wybiera kategorie i liczbę impostorów, rozpoczyna i kończy rundy. Może też wyrzucać graczy z pokoju.</li>
+      <li><strong>Normalny gracz:</strong> Zna s艂owo i opisuje je, aby pom贸c innym graczom, jednocze艣nie obserwuj膮c, kto mo偶e blefowa膰.</li>
+      <li><strong>Impostor:</strong> Nie zna s艂owa i musi sprytnie udawa膰, 偶e je zna, aby nie zosta膰 zdemaskowanym.</li>
+      <li><strong>Host:</strong> Tworzy pok贸j, wybiera kategorie i liczb臋 impostor贸w, rozpoczyna i ko艅czy rundy. Mo偶e te偶 wyrzuca膰 graczy z pokoju.</li>
     </ul>
     <h3>Porady</h3>
     <ul>
-      <li>Bądź kreatywny w opisach, ale uważaj, by nie zdradzić słowa!</li>
-      <li>Obserwuj, czy opisy innych graczy są spójne – impostorzy mogą się zdradzić!</li>
-      <li>Graj w grupie do 10 osób dla najlepszej zabawy.</li>
+      <li>B膮d藕 kreatywny w opisach, ale uwa偶aj, by nie zdradzi膰 s艂owa!</li>
+      <li>Obserwuj, czy opisy innych graczy s膮 sp贸jne 鈥?impostorzy mog膮 si臋 zdradzi膰!</li>
+      <li>Graj w grupie do 10 os贸b dla najlepszej zabawy.</li>
     </ul>
     <button id="closeRules">X</button>
   </div>
@@ -105,8 +105,8 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Test połączenia z Firebase
-    db.ref('test').set({ test: 'hello' }).then(() => console.log('Firebase działa')).catch(err => console.error('Błąd Firebase:', err));
+    // Test po艂膮czenia z Firebase
+    db.ref('test').set({ test: 'hello' }).then(() => console.log('Firebase dzia艂a')).catch(err => console.error('B艂膮d Firebase:', err));
 
     const playerNameInput = document.getElementById('playerName');
     const createRoomBtn = document.getElementById('createRoom');
@@ -156,31 +156,31 @@
 
     // Lista kategorii
     const categories = [
-      { name: 'Zwierzęta', file: 'animals.json' },
+      { name: 'Zwierz臋ta', file: 'animals.json' },
       { name: 'Jedzenie', file: 'food.json' },
       { name: 'Przedmioty', file: 'objects.json' },
       { name: 'Miejsca', file: 'places.json' },
       { name: 'Zawody', file: 'jobs.json' },
       { name: 'Sport', file: 'sports.json' },
       { name: 'Motoryzacja', file: 'automotive.json' },
-      { name: 'Rośliny', file: 'plants.json' },
+      { name: 'Ro艣liny', file: 'plants.json' },
       { name: 'Geografia', file: 'geography.json' },
       { name: 'Filmy i seriale', file: 'movies_series.json' },
-      { name: 'Człowiek', file: 'people.json' },
+      { name: 'Cz艂owiek', file: 'people.json' },
       { name: 'Muzyka', file: 'music.json' }
     ];
     const wordsBaseUrl = 'https://raw.githubusercontent.com/kermitovsky/slowny-oszust/main/words/';
 
     // Lista emoji
-    const emojiList = ['🐱', '🦁', '🐭', '🐶', '🐻', '🦊', '🐨', '🐰', '🐼', '🐹'];
-    // Kolory dla awatarów
+    const emojiList = ['馃惐', '馃', '馃惌', '馃惗', '馃惢', '馃', '馃惃', '馃惏', '馃惣', '馃惞'];
+    // Kolory dla awatar贸w
     const avatarColors = ['#8e44ad', '#e67e22', '#3498db', '#e74c3c', '#2ecc71', '#f1c40f', '#9b59b6', '#d35400'];
 
-    // Wbudowana lista słów jako ostateczny fallback
+    // Wbudowana lista s艂贸w jako ostateczny fallback
     const fallbackWords = [
-      "kot", "pies", "słoń", "lew", "pizza", "hamburger", "krzesło", "lampa", "park", "szkoła",
-      "lekarz", "nauczyciel", "piłka nożna", "koszykówka", "samochód", "motocykl", "drzewo", "kwiat",
-      "rzeka", "góra", "film", "serial", "człowiek", "muzyka"
+      "kot", "pies", "s艂o艅", "lew", "pizza", "hamburger", "krzes艂o", "lampa", "park", "szko艂a",
+      "lekarz", "nauczyciel", "pi艂ka no偶na", "koszyk贸wka", "samoch贸d", "motocykl", "drzewo", "kwiat",
+      "rzeka", "g贸ra", "film", "serial", "cz艂owiek", "muzyka"
     ];
 
     // Inicjalizacja wyboru emotek
@@ -195,43 +195,43 @@
           document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
           btn.classList.add('selected');
           selectedEmoji = emoji;
-          console.log('Wybrano emotkę:', selectedEmoji);
+          console.log('Wybrano emotk臋:', selectedEmoji);
         });
         emojiSelection.appendChild(btn);
       });
     }
     initializeEmojiSelection();
 
-    // Wykrywanie zamknięcia przeglądarki lub odświeżenia
+    // Wykrywanie zamkni臋cia przegl膮darki lub od艣wie偶enia
     window.addEventListener('beforeunload', () => {
       if (currentRoomCode && currentPlayerId) {
-        console.log('Wykryto zamknięcie/odświeżenie, usuwanie gracza:', currentPlayerId);
+        console.log('Wykryto zamkni臋cie/od艣wie偶enie, usuwanie gracza:', currentPlayerId);
         db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).remove();
       }
     });
 
     // Funkcja zamykania zasad
     function closeRules() {
-      console.log('Kliknięto Zamknij zasady');
+      console.log('Klikni臋to Zamknij zasady');
       rulesBox.style.display = 'none';
       rulesBtn.classList.remove('hidden');
       themeToggle.classList.remove('hidden');
     }
 
-    // Funkcja przełączania trybu
+    // Funkcja prze艂膮czania trybu
     function toggleTheme() {
       const isDark = document.body.classList.toggle('dark-mode');
-      themeToggle.textContent = isDark ? '☀️' : '🌙';
+      themeToggle.textContent = isDark ? '鈽€锔? : '馃寵';
       localStorage.setItem('theme', isDark ? 'dark' : 'light');
-      console.log('Przełączono na tryb:', isDark ? 'ciemny' : 'jasny');
+      console.log('Prze艂膮czono na tryb:', isDark ? 'ciemny' : 'jasny');
     }
 
     // Inicjalizacja trybu
     if (localStorage.getItem('theme') === 'dark') {
       document.body.classList.add('dark-mode');
-      themeToggle.textContent = '☀️';
+      themeToggle.textContent = '鈽€锔?;
     } else {
-      themeToggle.textContent = '🌙';
+      themeToggle.textContent = '馃寵';
     }
 
     // Inicjalizacja wyboru kategorii
@@ -280,7 +280,7 @@
 
     function updateAllCategoriesCheckbox() {
       const allSelected = categories.every(c => selectedCategories.includes(c.file)) || selectedCategories.includes('all');
-      allCategoriesBtn.querySelector('.checkbox').textContent = allSelected ? '✔' : '';
+      allCategoriesBtn.querySelector('.checkbox').textContent = allSelected ? '鉁? : '';
     }
 
     function updateConfirmCategoriesButton() {
@@ -299,38 +299,34 @@
       updateCategoryButtons();
       updateAllCategoriesCheckbox();
       updateConfirmCategoriesButton();
-      console.log('Kliknięto Wszystkie, kategorie:', selectedCategories);
+      console.log('Klikni臋to Wszystkie, kategorie:', selectedCategories);
     });
 
     confirmCategories.addEventListener('click', () => {
       if (selectedCategories.length === 0) {
-        showMessage('❌ Wybierz przynajmniej jedną kategorię!');
+        showMessage('鉂?Wybierz przynajmniej jedn膮 kategori臋!');
         console.log('Brak wybranych kategorii');
         return;
       }
       console.log('Potwierdzono kategorie:', selectedCategories);
-      categorySelectionBox.classList.add('slide-out');
-      setTimeout(() => {
-        categorySelectionBox.style.display = 'none';
-        categorySelectionBox.classList.remove('slide-out');
-        impostorSelectionBox.style.display = 'block';
-        document.getElementById('loadingMessage').style.display = 'block';
-        confirmImpostors.disabled = true;
-        loadWords().then(() => {
-          document.getElementById('loadingMessage').style.display = 'none';
-          confirmImpostors.disabled = false;
-          impostorCount = 1;
-          impostorCountDisplaySelector.textContent = impostorCount;
-          updateImpostorButtons();
-          updateRecommendedPlayers();
-          console.log('Przełączono na wybór impostorów');
-        }).catch(error => {
-          document.getElementById('loadingMessage').style.display = 'none';
-          confirmImpostors.disabled = false;
-          showMessage('❌ Błąd ładowania kategorii! Używam domyślnych słów.');
-          console.error('Błąd w confirmCategories:', error);
-        });
-      }, 700);
+      categorySelectionBox.style.display = 'none';
+      impostorSelectionBox.style.display = 'block';
+      document.getElementById('loadingMessage').style.display = 'block';
+      confirmImpostors.disabled = true;
+      loadWords().then(() => {
+        document.getElementById('loadingMessage').style.display = 'none';
+        confirmImpostors.disabled = false;
+        impostorCount = 1;
+        impostorCountDisplaySelector.textContent = impostorCount;
+        updateImpostorButtons();
+        updateRecommendedPlayers();
+        console.log('Prze艂膮czono na wyb贸r impostor贸w');
+      }).catch(error => {
+        document.getElementById('loadingMessage').style.display = 'none';
+        confirmImpostors.disabled = false;
+        showMessage('鉂?B艂膮d 艂adowania kategorii! U偶ywam domy艣lnych s艂贸w.');
+        console.error('B艂膮d w confirmCategories:', error);
+      });
     });
 
     async function loadWords() {
@@ -344,7 +340,7 @@
         try {
           const response = await fetch(url, { signal: controller.signal });
           clearTimeout(id);
-          if (!response.ok) throw new Error(`Błąd ładowania ${url}: ${response.status}`);
+          if (!response.ok) throw new Error(`B艂膮d 艂adowania ${url}: ${response.status}`);
           return await response.json();
         } catch (error) {
           clearTimeout(id);
@@ -358,50 +354,50 @@
             .then(categoryWords => {
               words = [...words, ...categoryWords];
               loadedAnyFile = true;
-              console.log(`Załadowano ${categoryWords.length} słów z ${file}`);
+              console.log(`Za艂adowano ${categoryWords.length} s艂贸w z ${file}`);
             })
             .catch(error => {
-              console.error(`Błąd ładowania pliku ${file}:`, error);
-              showMessage(`❌ Błąd ładowania kategorii ${file}! Pomijam.`);
+              console.error(`B艂膮d 艂adowania pliku ${file}:`, error);
+              showMessage(`鉂?B艂膮d 艂adowania kategorii ${file}! Pomijam.`);
             })
         );
 
         await Promise.all(fetchPromises);
 
         if (!loadedAnyFile) {
-          throw new Error('Nie udało się załadować żadnego pliku kategorii.');
+          throw new Error('Nie uda艂o si臋 za艂adowa膰 偶adnego pliku kategorii.');
         }
 
-        console.log('Łącznie załadowano słów:', words.length);
+        console.log('艁膮cznie za艂adowano s艂贸w:', words.length);
       } catch (error) {
-        console.error('Błąd ładowania słów:', error);
+        console.error('B艂膮d 艂adowania s艂贸w:', error);
         try {
           const response = await fetchWithTimeout('words.json');
           words = response;
-          console.log('Załadowano domyślne słowa:', words.length);
+          console.log('Za艂adowano domy艣lne s艂owa:', words.length);
         } catch (err) {
-          console.error('Błąd ładowania domyślnych słów:', err);
-          showMessage('❌ Błąd ładowania słów gry! Używam wbudowanej listy.');
+          console.error('B艂膮d 艂adowania domy艣lnych s艂贸w:', err);
+          showMessage('鉂?B艂膮d 艂adowania s艂贸w gry! U偶ywam wbudowanej listy.');
           words = fallbackWords;
-          console.log('Użyto wbudowanej listy słów:', words.length);
+          console.log('U偶yto wbudowanej listy s艂贸w:', words.length);
         }
       }
     }
 
     fetch('words.json')
       .then(response => {
-        if (!response.ok) throw new Error('Błąd ładowania words.json: ' + response.status);
+        if (!response.ok) throw new Error('B艂膮d 艂adowania words.json: ' + response.status);
         return response.json();
       })
       .then(data => {
         words = data;
-        console.log('Załadowano domyślne słowa:', words.length);
+        console.log('Za艂adowano domy艣lne s艂owa:', words.length);
       })
       .catch(error => {
-        console.error('Błąd ładowania words.json:', error);
-        showMessage('❌ Błąd ładowania słów gry! Używam wbudowanej listy.');
+        console.error('B艂膮d 艂adowania words.json:', error);
+        showMessage('鉂?B艂膮d 艂adowania s艂贸w gry! U偶ywam wbudowanej listy.');
         words = fallbackWords;
-        console.log('Użyto wbudowanej listy słów:', words.length);
+        console.log('U偶yto wbudowanej listy s艂贸w:', words.length);
       });
 
     function generateRoomCode() {
@@ -412,15 +408,15 @@
       const usedEmojis = Object.values(players || {}).map(p => p.emoji).filter(e => e);
       const availableEmojis = emojiList.filter(e => !usedEmojis.includes(e));
       if (selectedEmoji && !usedEmojis.includes(selectedEmoji)) {
-        console.log('Użyto wybranej emotki:', selectedEmoji);
+        console.log('U偶yto wybranej emotki:', selectedEmoji);
         return selectedEmoji;
       }
       if (availableEmojis.length === 0) {
-        console.warn('Brak dostępnych emoji, przypisuję losowe');
+        console.warn('Brak dost臋pnych emoji, przypisuj臋 losowe');
         return emojiList[Math.floor(Math.random() * emojiList.length)];
       }
       const randomEmoji = availableEmojis[Math.floor(Math.random() * availableEmojis.length)];
-      console.log('Przypisano losową emotkę:', randomEmoji);
+      console.log('Przypisano losow膮 emotk臋:', randomEmoji);
       return randomEmoji;
     }
 
@@ -428,7 +424,7 @@
       const usedColors = Object.values(players || {}).map(p => p.avatarColor).filter(c => c);
       const availableColors = avatarColors.filter(c => !usedColors.includes(c));
       if (availableColors.length === 0) {
-        console.warn('Brak dostępnych kolorów, przypisuję losowy');
+        console.warn('Brak dost臋pnych kolor贸w, przypisuj臋 losowy');
         return avatarColors[Math.floor(Math.random() * avatarColors.length)];
       }
       const selectedColor = availableColors[Math.floor(Math.random() * availableColors.length)];
@@ -447,7 +443,7 @@
         const li = document.createElement('li');
         const avatar = document.createElement('span');
         avatar.classList.add('avatar');
-        avatar.textContent = player.emoji || '❓';
+        avatar.textContent = player.emoji || '鉂?;
         avatar.style.backgroundColor = player.avatarColor || avatarColors[0];
         li.appendChild(avatar);
         li.appendChild(document.createTextNode(` ${player.name || 'Nieznany gracz'}`));
@@ -461,8 +457,8 @@
 
         if (isHost && id !== currentPlayerId) {
           const kickBtn = document.createElement('button');
-          kickBtn.textContent = '×';
-          kickBtn.title = 'Wyrzuć gracza';
+          kickBtn.textContent = '脳';
+          kickBtn.title = 'Wyrzu膰 gracza';
           kickBtn.classList.add('kickBtn');
           kickBtn.addEventListener('click', () => {
             kickPlayer(id);
@@ -478,7 +474,7 @@
       console.log('showMessage:', text);
       messageBox.innerHTML = text;
       messageBox.style.display = 'block';
-      if (text === '✅ Kod skopiowany!' || text === '❌ Nie udało się skopiować kodu') {
+      if (text === '鉁?Kod skopiowany!' || text === '鉂?Nie uda艂o si臋 skopiowa膰 kodu') {
         messageBox.classList.add('copy-message');
         duration = 1500;
       } else {
@@ -526,21 +522,21 @@
       plusImpostor.disabled = impostorCount >= 5;
       minusImpostor.style.opacity = impostorCount <= 1 ? '0.5' : '1';
       plusImpostor.style.opacity = impostorCount >= 5 ? '0.5' : '1';
-      console.log('Zaktualizowano przyciski impostorów:', { impostorCount });
+      console.log('Zaktualizowano przyciski impostor贸w:', { impostorCount });
     }
 
     function updateRecommendedPlayers() {
       const minPlayers = impostorCount + 2;
       const maxPlayers = Math.min(impostorCount + 4, 10);
-      recommendedPlayers.textContent = `Zalecana liczba graczy: ${minPlayers}–${maxPlayers}`;
-      console.log('Zaktualizowano zalecaną liczbę graczy:', recommendedPlayers.textContent);
+      recommendedPlayers.textContent = `Zalecana liczba graczy: ${minPlayers}鈥?{maxPlayers}`;
+      console.log('Zaktualizowano zalecan膮 liczb臋 graczy:', recommendedPlayers.textContent);
     }
 
     closeRulesBtn.addEventListener('click', closeRules);
     closeRulesTopBtn.addEventListener('click', closeRules);
 
     rulesBtn.addEventListener('click', () => {
-      console.log('Kliknięto Zasady gry');
+      console.log('Klikni臋to Zasady gry');
       rulesBox.style.display = 'block';
       rulesBtn.classList.add('hidden');
       themeToggle.classList.add('hidden');
@@ -551,31 +547,26 @@
     });
 
     createRoomBtn.addEventListener('click', () => {
-      console.log('Kliknięto Stwórz pokój');
+      console.log('Klikni臋to Stw贸rz pok贸j');
       const name = playerNameInput.value.trim();
       if (!name) {
-        showMessage('❌ Wpisz nick!');
+        showMessage('鉂?Wpisz nick!');
         console.log('Brak nicku');
         return;
       }
       if (!selectedEmoji) {
-        showMessage('❌ Wybierz awatar!');
+        showMessage('鉂?Wybierz awatar!');
         console.log('Brak wybranej emotki');
         return;
       }
       currentPlayerName = name;
       isHost = true;
-      console.log('Ustawiono hosta, imię:', currentPlayerName);
-      loginScreen.classList.add('slide-out');
-      setTimeout(() => {
-        loginScreen.style.display = 'none';
-        categorySelectionBox.style.display = 'block';
-        loginScreen.classList.remove('slide-out');
-        console.log('Wyświetlono categorySelectionBox');
-        initializeCategorySelection();
-        rulesBtn.classList.add('hidden');
-        themeToggle.classList.add('hidden');
-      }, 600);
+      console.log('Ustawiono hosta, imi臋:', currentPlayerName);
+      categorySelectionBox.style.display = 'block';
+      console.log('Wy艣wietlono categorySelectionBox');
+      initializeCategorySelection();
+      rulesBtn.classList.add('hidden');
+      themeToggle.classList.add('hidden');
     });
 
     minusImpostor.addEventListener('click', () => {
@@ -584,7 +575,7 @@
         impostorCountDisplaySelector.textContent = impostorCount;
         updateImpostorButtons();
         updateRecommendedPlayers();
-        console.log('Zmniejszono liczbę impostorów:', impostorCount);
+        console.log('Zmniejszono liczb臋 impostor贸w:', impostorCount);
       }
     });
 
@@ -594,18 +585,13 @@
         impostorCountDisplaySelector.textContent = impostorCount;
         updateImpostorButtons();
         updateRecommendedPlayers();
-        console.log('Zwiększono liczbę impostorów:', impostorCount);
+        console.log('Zwi臋kszono liczb臋 impostor贸w:', impostorCount);
       }
     });
 
     confirmImpostors.addEventListener('click', () => {
-      console.log('Potwierdzono liczbę impostorów:', impostorCount);
-      impostorSelectionBox.classList.add('slide-out');
-      setTimeout(() => {
-        impostorSelectionBox.style.display = 'none';
-        impostorSelectionBox.classList.remove('slide-out');
-        createRoom(impostorCount);
-      }, 700);
+      console.log('Potwierdzono liczb臋 impostor贸w:', impostorCount);
+      createRoom(impostorCount);
     });
 
     function createRoom(numImpostors) {
@@ -629,40 +615,36 @@
         categories: selectedCategories,
         currentRound: 0
       }).then(() => {
-        console.log('Pokój utworzony:', currentRoomCode, 'Gracz:', playerData, 'Kategorie:', selectedCategories);
-        loginScreen.classList.add('slide-out');
-        setTimeout(() => {
-          loginScreen.style.display = 'none';
-          gameScreen.style.display = 'block';
-          loginScreen.classList.remove('slide-out');
-          roomCodeDisplay.textContent = currentRoomCode;
-          impostorSelectionBox.style.display = 'none';
-          rulesBtn.classList.remove('hidden');
-          themeToggle.classList.remove('hidden');
-          db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).onDisconnect().remove();
-          listenToRoom(currentRoomCode);
-        }, 600);
+        console.log('Pok贸j utworzony:', currentRoomCode, 'Gracz:', playerData, 'Kategorie:', selectedCategories);
+        loginScreen.style.display = 'none';
+        gameScreen.style.display = 'block';
+        roomCodeDisplay.textContent = currentRoomCode;
+        impostorSelectionBox.style.display = 'none';
+        rulesBtn.classList.remove('hidden');
+        themeToggle.classList.remove('hidden');
+        db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).onDisconnect().remove();
+        listenToRoom(currentRoomCode);
       }).catch(error => {
-        console.error('Błąd tworzenia pokoju:', error);
-        showMessage('❌ Błąd tworzenia pokoju!');
+        console.error('B艂膮d tworzenia pokoju:', error);
+        showMessage('鉂?B艂膮d tworzenia pokoju!');
         rulesBtn.classList.remove('hidden');
         themeToggle.classList.remove('hidden');
       });
     }
 
     joinRoomBtn.addEventListener('click', () => {
-      console.log('Kliknięto Dołącz do pokoju');
+      console.log('Klikni臋to Do艂膮cz do pokoju');
       const name = playerNameInput.value.trim();
       const roomCode = roomCodeInput.value.trim().toUpperCase();
 
       if (!name || !roomCode) {
-        showMessage('❌ Wpisz nick i kod pokoju!');
+        showMessage('鉂?Wpisz nick i kod pokoju!');
         console.log('Brak nicku lub kodu pokoju');
         roomCodeInput.value = '';
         return;
       }
       if (!selectedEmoji) {
-        showMessage('❌ Wybierz awatar!');
+        showMessage('鉂?Wybierz awatar!');
         console.log('Brak wybranej emotki');
         return;
       }
@@ -670,13 +652,13 @@
       currentPlayerName = name;
       currentRoomCode = roomCode;
       currentPlayerId = db.ref().push().key;
-      console.log('Dołączanie do pokoju:', roomCode, 'Nick:', name);
+      console.log('Do艂膮czanie do pokoju:', roomCode, 'Nick:', name);
 
       const roomRef = db.ref(`rooms/${currentRoomCode}`);
       roomRef.once('value').then(snapshot => {
         if (!snapshot.exists()) {
-          showMessage('❌ Pokój nie istnieje!');
-          console.log('Pokój nie istnieje:', roomCode);
+          showMessage('鉂?Pok贸j nie istnieje!');
+          console.log('Pok贸j nie istnieje:', roomCode);
           roomCodeInput.value = '';
           return;
         }
@@ -684,8 +666,8 @@
         const room = snapshot.val();
         const players = room.players || {};
         if (Object.keys(players).length >= 10) {
-          showMessage('❌ Pokój jest pełny! Maksymalnie 10 graczy.');
-          console.log('Pokój pełny:', roomCode);
+          showMessage('鉂?Pok贸j jest pe艂ny! Maksymalnie 10 graczy.');
+          console.log('Pok贸j pe艂ny:', roomCode);
           roomCodeInput.value = '';
           return;
         }
@@ -696,37 +678,33 @@
         roomRef.child('players').update({
           [currentPlayerId]: playerData
         }).then(() => {
-          console.log('Dołączono do pokoju:', roomCode, 'Gracz:', playerData);
-          loginScreen.classList.add('slide-out');
-          setTimeout(() => {
-            loginScreen.style.display = 'none';
-            gameScreen.style.display = 'block';
-            loginScreen.classList.remove('slide-out');
-            roomCodeDisplay.textContent = currentRoomCode;
-            selectedCategories = room.categories || ['all'];
-            loadWords();
-            db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).onDisconnect().remove();
-            listenToRoom(currentRoomCode);
-          }, 600);
+          console.log('Do艂膮czono do pokoju:', roomCode, 'Gracz:', playerData);
+          loginScreen.style.display = 'none';
+          gameScreen.style.display = 'block';
+          roomCodeDisplay.textContent = currentRoomCode;
+          selectedCategories = room.categories || ['all'];
+          loadWords();
+          db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).onDisconnect().remove();
+          listenToRoom(currentRoomCode);
         }).catch(error => {
-          console.error('Błąd dołączania do pokoju:', error);
-          showMessage('❌ Błąd dołączania do pokoju!');
+          console.error('B艂膮d do艂膮czania do pokoju:', error);
+          showMessage('鉂?B艂膮d do艂膮czania do pokoju!');
           roomCodeInput.value = '';
         });
       }).catch(error => {
-        console.error('Błąd sprawdzania pokoju:', error);
-        showMessage('❌ Błąd sprawdzania pokoju!');
+        console.error('B艂膮d sprawdzania pokoju:', error);
+        showMessage('鉂?B艂膮d sprawdzania pokoju!');
         roomCodeInput.value = '';
       });
     });
 
     copyRoomCodeBtn.addEventListener('click', () => {
-      console.log('Kliknięto Kopiuj kod');
+      console.log('Klikni臋to Kopiuj kod');
       const roomCode = roomCodeDisplay.textContent;
       navigator.clipboard.writeText(roomCode).then(() => {
-        showMessage('✅ Kod skopiowany!');
+        showMessage('鉁?Kod skopiowany!');
       }).catch(() => {
-        showMessage('❌ Nie udało się skopiować kodu');
+        showMessage('鉂?Nie uda艂o si臋 skopiowa膰 kodu');
       });
     });
 
@@ -736,207 +714,196 @@
       db.ref(`rooms/${currentRoomCode}/players/${playerId}`).remove().then(() => {
         console.log('Gracz wyrzucony:', playerId);
       }).catch(error => {
-        console.error('Błąd wyrzucania gracza:', error);
-        showMessage('❌ Błąd wyrzucania gracza!');
+        console.error('B艂膮d wyrzucania gracza:', error);
+        showMessage('鉂?B艂膮d wyrzucania gracza!');
       });
     }
 
     leaveRoomBtn.addEventListener('click', () => {
-      console.log('Kliknięto Opuść pokój');
+      console.log('Klikni臋to Opu艣膰 pok贸j');
       if (currentRoomCode && currentPlayerId) {
-        db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).remove().then(() => {
-          console.log('Gracz opuścił pokój:', currentPlayerId);
+        const roomRef = db.ref(`rooms/${currentRoomCode}`);
+        roomRef.child(`players/${currentPlayerId}`).remove().then(() => {
+          console.log('Gracz opu艣ci艂 pok贸j:', currentPlayerId);
           if (isHost) {
-            db.ref(`rooms/${currentRoomCode}`).remove();
-            console.log('Pokój usunięty przez hosta:', currentRoomCode);
+            roomRef.remove().then(() => {
+              console.log('Pok贸j usuni臋ty przez hosta:', currentRoomCode);
+            }).catch(error => {
+              console.error('B艂膮d usuwania pokoju:', error);
+              showMessage('鉂?B艂膮d usuwania pokoju!');
+            });
           }
-          loginScreen.classList.add('slide-out');
-          setTimeout(() => {
-            loginScreen.style.display = 'block';
-            gameScreen.style.display = 'none';
-            loginScreen.classList.remove('slide-out');
-            resetToLobby();
-            currentRoomCode = null;
-            currentPlayerId = null;
-            currentPlayerName = null;
-            isHost = false;
-            playerNameInput.value = '';
-            roomCodeInput.value = '';
-            db.ref(`rooms/${currentRoomCode}`).off();
-          }, 600);
+          resetToLobby();
+          loginScreen.style.display = 'block';
+          gameScreen.style.display = 'none';
+          currentRoomCode = null;
+          currentPlayerId = null;
+          isHost = false;
+          roomCodeInput.value = '';
+          playerNameInput.value = '';
         }).catch(error => {
-          console.error('Błąd opuszczania pokoju:', error);
-          showMessage('❌ Błąd opuszczania pokoju!');
+          console.error('B艂膮d opuszczania pokoju:', error);
+          showMessage('鉂?B艂膮d opuszczania pokoju!');
         });
       }
-    });
-
-    function assignRolesAndStart(players, numImpostors, currentWord, round) {
-      const playerIds = Object.keys(players);
-      const impostors = [];
-      const availableIds = [...playerIds];
-      for (let i = 0; i < numImpostors; i++) {
-        if (availableIds.length === 0) break;
-        const randomIndex = Math.floor(Math.random() * availableIds.length);
-        impostors.push(availableIds[randomIndex]);
-        availableIds.splice(randomIndex, 1);
-      }
-
-      const updates = {};
-      playerIds.forEach(id => {
-        updates[`players/${id}/role`] = impostors.includes(id) ? 'impostor' : 'normal';
-      });
-
-      let starterId = playerIds[Math.floor(Math.random() * playerIds.length)];
-      if (impostors.length > 0 && playerIds.length > numImpostors) {
-        const nonImpostors = playerIds.filter(id => !impostors.includes(id));
-        starterId = nonImpostors[Math.floor(Math.random() * nonImpostors.length)];
-      }
-
-      updates['starterId'] = starterId;
-      updates['currentWord'] = currentWord;
-      updates['currentRound'] = round;
-      updates['gameStarted'] = true;
-
-      db.ref(`rooms/${currentRoomCode}`).update(updates).then(() => {
-        console.log('Role przydzielone, gra rozpoczęta:', { impostors, starterId, currentWord, round });
-      }).catch(error => {
-        console.error('Błąd rozpoczynania gry:', error);
-        showMessage('❌ Błąd rozpoczynania gry!');
-      });
-    }
-
-    startGameBtn.addEventListener('click', () => {
-      console.log('Kliknięto Start gry');
-      const roomRef = db.ref(`rooms/${currentRoomCode}`);
-      roomRef.once('value').then(snapshot => {
-        const room = snapshot.val();
-        const players = room.players || {};
-        const numImpostors = room.numImpostors || 1;
-        const playerCount = Object.keys(players).length;
-
-        if (playerCount < numImpostors + 2) {
-          showMessage(`❌ Za mało graczy! Potrzeba minimum ${numImpostors + 2}.`);
-          console.log('Za mało graczy:', playerCount, 'potrzeba:', numImpostors + 2);
-          return;
-        }
-
-        const currentWord = words[Math.floor(Math.random() * words.length)];
-        const newRound = (room.currentRound || 0) + 1;
-        assignRolesAndStart(players, numImpostors, currentWord, newRound);
-      }).catch(error => {
-        console.error('Błąd pobierania danych pokoju:', error);
-        showMessage('❌ Błąd rozpoczynania gry!');
-      });
-    });
-
-    endRoundBtn.addEventListener('click', () => {
-      console.log('Kliknięto Zakończ rundę');
-      const roomRef = db.ref(`rooms/${currentRoomCode}`);
-      roomRef.once('value').then(snapshot => {
-        const room = snapshot.val();
-        const players = room.players || {};
-        const currentWord = room.currentWord || 'brak';
-        let message = `Runda zakończona! Słowo: <strong>${currentWord}</strong><br>Impostorzy: `;
-        const impostors = Object.entries(players).filter(([id, p]) => p.role === 'impostor');
-        if (impostors.length === 0) {
-          message += 'Brak impostorów';
-        } else {
-          message += impostors.map(([id, p]) => p.name).join(', ');
-        }
-        roomRef.update({ resetMessage: message }).then(() => {
-          console.log('Runda zakończona, wysłano resetMessage:', message);
-        }).catch(error => {
-          console.error('Błąd kończenia rundy:', error);
-          showMessage('❌ Błąd kończenia rundy!');
-        });
-      }).catch(error => {
-        console.error('Błąd pobierania danych pokoju:', error);
-        showMessage('❌ Błąd kończenia rundy!');
-      });
     });
 
     function listenToRoom(roomCode) {
       const roomRef = db.ref(`rooms/${roomCode}`);
       roomRef.on('value', snapshot => {
-        if (!snapshot.exists()) {
-          console.log('Pokój nie istnieje, powrót do lobby:', roomCode);
-          showMessage('❌ Pokój został zamknięty!');
-          loginScreen.classList.add('slide-out');
-          setTimeout(() => {
-            loginScreen.style.display = 'block';
-            gameScreen.style.display = 'none';
-            loginScreen.classList.remove('slide-out');
-            resetToLobby();
-            currentRoomCode = null;
-            currentPlayerId = null;
-            currentPlayerName = null;
-            isHost = false;
-            playerNameInput.value = '';
-            roomCodeInput.value = '';
-            roomRef.off();
-          }, 600);
+        const room = snapshot.val();
+        if (!room) {
+          console.log('Pok贸j usuni臋ty:', roomCode);
+          showMessage('鉂?Pok贸j zosta艂 usuni臋ty!');
+          resetToLobby();
+          loginScreen.style.display = 'block';
+          gameScreen.style.display = 'none';
+          currentRoomCode = null;
+          currentPlayerId = null;
+          isHost = false;
           return;
         }
 
-        const room = snapshot.val();
         const players = room.players || {};
-        const playerCount = Object.keys(players).length;
-        const numImpostors = room.numImpostors || 1;
-        const gameStarted = room.gameStarted || false;
-        const currentWord = room.currentWord || '';
-        const resetMessage = room.resetMessage || null;
-        const starterId = room.starterId || null;
-        const currentRound = room.currentRound || 0;
-
         updatePlayersList(players);
-        playerCountDisplay.innerHTML = `Gracze: <span>${playerCount}/10</span>`;
-        impostorCountDisplay.innerHTML = `Impostorzy: <span>${numImpostors}</span>`;
-        roundCounter.innerHTML = currentRound > 0 ? `Runda: <strong>${currentRound}</strong>` : '';
+        playerCountDisplay.innerHTML = `Gracze: <span class="bold">${Object.keys(players).length}</span>`;
+        impostorCountDisplay.innerHTML = `Impostorzy: <span class="bold">${room.numImpostors || 0}</span>`;
+        roundCounter.innerHTML = room.currentRound > 0 ? `Runda: <strong>${room.currentRound}</strong>` : '';
+        wordDisplay.innerHTML = room.gameStarted && room.currentWord && players[currentPlayerId] 
+          ? (players[currentPlayerId].role === 'impostor' 
+            ? `Twoje s艂owo: <span class="word-impostor">OSZUST!</span>` 
+            : `Twoje s艂owo: <span class="word-normal">${room.currentWord}</span>`) 
+          : '';
 
-        startGameBtn.style.display = isHost && !gameStarted ? 'block' : 'none';
-        endRoundBtn.style.display = isHost && gameStarted ? 'block' : 'none';
+        isHost = players[currentPlayerId]?.isHost || false;
+        startGameBtn.style.display = isHost && !room.gameStarted ? 'block' : 'none';
+        endRoundBtn.style.display = isHost && room.gameStarted ? 'block' : 'none';
 
-        if (gameStarted && !hasShownStartMessage) {
-          const player = players[currentPlayerId];
-          if (player) {
-            if (player.role === 'impostor') {
-              showRoleMessage('Jesteś <strong>IMPOSTOREM</strong>!');
-              wordDisplay.innerHTML = '<span class="word-impostor">IMPOSTOR</span>';
-            } else {
-              showRoleMessage('Jesteś <strong>normalnym graczem</strong>!');
-              wordDisplay.innerHTML = `Słowo: <span class="word-normal">${currentWord}</span>`;
-            }
-            if (starterId === currentPlayerId) {
-              showMessage('Zaczynasz! Opisz słowo jako pierwszy.');
-            }
-            hasShownStartMessage = true;
-            console.log('Gra rozpoczęta, rola:', player.role, 'słowo:', currentWord, 'starter:', starterId);
+        if (room.gameStarted && room.currentWord && players[currentPlayerId]) {
+          const isImpostor = players[currentPlayerId].role === 'impostor';
+          const message = isImpostor ? 'Jeste艣 oszustem!' : `S艂owo: ${room.currentWord}`;
+          showRoleMessage(message, 5000);
+          if (room.starterId && !hasShownStartMessage && players[room.starterId]) {
+            setTimeout(() => {
+              showMessage(`Zaczyna m贸wi膰: <strong>${players[room.starterId].name}</strong>`, 5000);
+              hasShownStartMessage = true;
+            }, 5000);
           }
+        } else {
+          hasShownStartMessage = false;
         }
 
-        if (resetMessage && gameStarted) {
-          showMessage(resetMessage, 10000);
-          const updates = {
-            gameStarted: false,
-            currentWord: null,
-            resetMessage: null,
-            starterId: null
-          };
-          Object.keys(players).forEach(id => {
-            updates[`players/${id}/role`] = null;
-          });
-          roomRef.update(updates).then(() => {
-            console.log('Zresetowano stan gry po rundzie');
-            hasShownStartMessage = false;
-            wordDisplay.innerHTML = '';
-          }).catch(error => {
-            console.error('Błąd resetowania gry:', error);
-            showMessage('❌ Błąd resetowania gry!');
-          });
+        if (room.resetMessage) {
+          showMessage(room.resetMessage);
+          if (isHost) {
+            db.ref(`rooms/${currentRoomCode}/resetMessage`).remove();
+          }
         }
       });
     }
+
+    startGameBtn.addEventListener('click', () => {
+      console.log('Klikni臋to Start gry');
+      if (!isHost) {
+        console.log('Tylko host mo偶e rozpocz膮膰 gr臋');
+        return;
+      }
+
+      const roomRef = db.ref(`rooms/${currentRoomCode}`);
+      roomRef.once('value').then(snapshot => {
+        const room = snapshot.val();
+        const players = room.players || {};
+        const numPlayers = Object.keys(players).length;
+        const minPlayers = room.numImpostors + 2;
+
+        if (numPlayers < minPlayers) {
+          showMessage(`鉂?Za ma艂o graczy! Minimum ${minPlayers}.`);
+          console.log('Za ma艂o graczy:', numPlayers, 'Minimum:', minPlayers);
+          return;
+        }
+
+        if (words.length === 0) {
+          showMessage('鉂?Brak s艂贸w do gry!');
+          console.log('Brak s艂贸w do gry');
+          return;
+        }
+
+        const word = words[Math.floor(Math.random() * words.length)];
+        const playerIds = Object.keys(players);
+        const impostorIds = [];
+        const shuffledIds = playerIds.sort(() => Math.random() - 0.5);
+        for (let i = 0; i < room.numImpostors; i++) {
+          if (shuffledIds[i]) impostorIds.push(shuffledIds[i]);
+        }
+
+        const updates = {};
+        playerIds.forEach(id => {
+          updates[`players/${id}/role`] = impostorIds.includes(id) ? 'impostor' : 'normal';
+        });
+
+        const nonImpostorIds = playerIds.filter(id => !impostorIds.includes(id));
+        let starterId;
+        if (nonImpostorIds.length > 0) {
+          starterId = nonImpostorIds[Math.floor(Math.random() * nonImpostorIds.length)];
+        } else {
+          starterId = playerIds[Math.floor(Math.random() * playerIds.length)];
+        }
+
+        updates.gameStarted = true;
+        updates.currentWord = word;
+        updates.starterId = starterId;
+        updates.currentRound = (room.currentRound || 0) + 1;
+
+        roomRef.update(updates).then(() => {
+          console.log('Gra rozpocz臋ta:', { word, impostorIds, starterId });
+          showMessage('Gra rozpocz臋ta!', 3000);
+        }).catch(error => {
+          console.error('B艂膮d rozpoczynania gry:', error);
+          showMessage('鉂?B艂膮d rozpoczynania gry!');
+        });
+      }).catch(error => {
+        console.error('B艂膮d pobierania danych pokoju:', error);
+        showMessage('鉂?B艂膮d pobierania danych pokoju!');
+      });
+    });
+
+    endRoundBtn.addEventListener('click', () => {
+      console.log('Klikni臋to Zako艅cz rund臋');
+      if (!isHost) {
+        console.log('Tylko host mo偶e zako艅czy膰 rund臋');
+        return;
+      }
+
+      const roomRef = db.ref(`rooms/${currentRoomCode}`);
+      roomRef.once('value').then(snapshot => {
+        const room = snapshot.val();
+        const players = room.players || {};
+        const currentWord = room.currentWord;
+        const impostorIds = Object.keys(players).filter(id => players[id].role === 'impostor');
+        const impostorNames = impostorIds.map(id => players[id].name).join(', ');
+
+        const updates = {
+          gameStarted: false,
+          currentWord: null,
+          starterId: null,
+          resetMessage: `Runda zako艅czona! S艂owo: <strong>${currentWord}</strong><br>Impostorzy: <strong>${impostorNames || 'Brak'}</strong>`
+        };
+        Object.keys(players).forEach(id => {
+          updates[`players/${id}/role`] = null;
+        });
+
+        roomRef.update(updates).then(() => {
+          console.log('Runda zako艅czona:', { word: currentWord, impostorIds });
+          hasShownStartMessage = false;
+        }).catch(error => {
+          console.error('B艂膮d ko艅czenia rundy:', error);
+          showMessage('鉂?B艂膮d ko艅czenia rundy!');
+        });
+      }).catch(error => {
+        console.error('B艂膮d pobierania danych pokoju:', error);
+        showMessage('鉂?B艂膮d pobierania danych pokoju!');
+      });
+    });
   </script>
 </body>
 </html>
