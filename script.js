@@ -61,7 +61,6 @@ const categories = [
   { name: 'Człowiek', file: 'people.json' },
   { name: 'Muzyka', file: 'music.json' }
 ];
-// TA ŚCIEŻKA JEST TERAZ JEDYNYM ŹRÓDŁEM SŁÓW
 const wordsBaseUrl = 'https://raw.githubusercontent.com/kermitovsky/slowny-oszust/main/words/';
 
 // Awatary
@@ -75,7 +74,7 @@ const fallbackWords = [
   "rzeka", "góra", "film", "serial", "człowiek", "muzyka"
 ];
 
-// --- Funkcja do pobierania z limitem czasu (zostaje bez zmian) ---
+// --- Funkcja do pobierania z limitem czasu ---
 const fetchWithTimeout = async (url, timeout = 5000) => {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeout);
@@ -113,6 +112,7 @@ initializeEmojiSelection();
 window.addEventListener('beforeunload', () => {
   if (currentRoomCode && currentPlayerId) {
     console.log('Wykryto zamknięcie/odświeżenie, usuwanie gracza:', currentPlayerId);
+    // onDisconnect() w createRoom/joinRoom zajmie się resztą
     db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).remove();
   }
 });
@@ -243,7 +243,7 @@ async function loadWords() {
 
   try {
     const fetchPromises = filesToLoad.map(file =>
-      fetchWithTimeout(`${wordsBaseUrl}${file}`) // ZAWSZE UŻYWA wordsBaseUrl
+      fetchWithTimeout(`${wordsBaseUrl}${file}`)
         .then(categoryWords => {
           words = [...words, ...categoryWords];
           loadedAnyFile = true;
@@ -265,8 +265,6 @@ async function loadWords() {
   } catch (error) {
     console.error('Błąd ładowania słów:', error);
     try {
-      // *** POPRAWKA #1 TUTAJ ***
-      // Awaryjne ładowanie JEDNEJ kategorii, też z wordsBaseUrl
       const response = await fetchWithTimeout(`${wordsBaseUrl}animals.json`);
       words = response;
       console.log('Załadowano domyślne słowa (animals.json):', words.length);
@@ -279,8 +277,7 @@ async function loadWords() {
   }
 }
 
-// *** POPRAWKA #2 TUTAJ ***
-// Początkowe ładowanie słów też używa wordsBaseUrl
+// Początkowe ładowanie słów
 fetchWithTimeout(`${wordsBaseUrl}animals.json`)
   .then(data => {
     words = data;
@@ -516,6 +513,7 @@ function createRoom(numImpostors) {
     impostorSelectionBox.style.display = 'none';
     rulesBtn.classList.remove('hidden');
     themeToggle.classList.remove('hidden');
+    // Ustaw onDisconnect() TYLKO na usunięcie gracza, a nie całego pokoju
     db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).onDisconnect().remove();
     listenToRoom(currentRoomCode);
   }).catch(error => {
@@ -577,7 +575,7 @@ joinRoomBtn.addEventListener('click', () => {
       gameScreen.style.display = 'block';
       roomCodeDisplay.textContent = currentRoomCode;
       selectedCategories = room.categories || ['all'];
-      loadWords(); // Tutaj też użyje 'loadWords' które teraz jest poprawne
+      loadWords();
       db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).onDisconnect().remove();
       listenToRoom(currentRoomCode);
     }).catch(error => {
@@ -613,20 +611,19 @@ function kickPlayer(playerId) {
   });
 }
 
+// *** ZMIANA #1 ***
 leaveRoomBtn.addEventListener('click', () => {
   console.log('Kliknięto Opuść pokój');
   if (currentRoomCode && currentPlayerId) {
     const roomRef = db.ref(`rooms/${currentRoomCode}`);
+    
+    // TYLKO usuń gracza. Nie usuwaj całego pokoju, nawet jeśli jesteś hostem.
+    // Funkcja listenToRoom zajmie się resztą (wybraniem nowego hosta).
     roomRef.child(`players/${currentPlayerId}`).remove().then(() => {
       console.log('Gracz opuścił pokój:', currentPlayerId);
-      if (isHost) {
-        roomRef.remove().then(() => {
-          console.log('Pokój usunięty przez hosta:', currentRoomCode);
-        }).catch(error => {
-          console.error('Błąd usuwania pokoju:', error);
-          showMessage('❌ Błąd usuwania pokoju!');
-        });
-      }
+      
+      // CAŁY BLOK 'if (isHost)' ZOSTAŁ USUNIĘTY STĄD
+      
       resetToLobby();
       loginScreen.style.display = 'block';
       gameScreen.style.display = 'none';
@@ -642,6 +639,7 @@ leaveRoomBtn.addEventListener('click', () => {
   }
 });
 
+// *** ZMIANA #2 ***
 function listenToRoom(roomCode) {
   const roomRef = db.ref(`rooms/${roomCode}`);
   roomRef.on('value', snapshot => {
@@ -659,8 +657,32 @@ function listenToRoom(roomCode) {
     }
 
     const players = room.players || {};
+    const playerIds = Object.keys(players);
+    
+    // --- NOWA LOGIKA MIGRACJI HOSTA ---
+    const hostExists = Object.values(players).some(p => p.isHost);
+    const iAmInRoom = players[currentPlayerId]; // Sprawdza, czy nadal jestem w pokoju
+
+    if (!hostExists && iAmInRoom && playerIds.length > 0) {
+      // Jeśli nie ma hosta, a ja jestem w pokoju i są jacyś gracze
+      console.warn('Brak hosta! Wybieranie nowego...');
+      
+      // Żeby uniknąć wyścigu (race condition), wszyscy gracze zgadzają się,
+      // że nowym hostem zostanie gracz pierwszy na posortowanej liście ID.
+      const sortedPlayerIds = playerIds.sort();
+      const newHostId = sortedPlayerIds[0];
+      
+      if (newHostId === currentPlayerId) {
+        // To ja! Muszę się mianować na hosta.
+        console.log('To ja! Promuję się na nowego hosta.');
+        db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).update({ isHost: true });
+        // To wywoła ponowne uruchomienie tej funkcji, ale wtedy hostExists będzie true.
+      }
+    }
+    // --- KONIEC NOWEJ LOGIKI ---
+
     updatePlayersList(players);
-    playerCountDisplay.innerHTML = `Gracze: <span class="bold">${Object.keys(players).length}</span>`;
+    playerCountDisplay.innerHTML = `Gracze: <span class="bold">${playerIds.length}</span>`;
     impostorCountDisplay.innerHTML = `Impostorzy: <span class="bold">${room.numImpostors || 0}</span>`;
     roundCounter.innerHTML = room.currentRound > 0 ? `Runda: <strong>${room.currentRound}</strong>` : '';
     wordDisplay.innerHTML = room.gameStarted && room.currentWord && players[currentPlayerId]
@@ -669,7 +691,9 @@ function listenToRoom(roomCode) {
         : `Twoje słowo: <span class="word-normal">${room.currentWord}</span>`)
       : '';
 
-    isHost = players[currentPlayerId]?.isHost || false;
+    // Ta linijka jest kluczowa - zaktualizuje status 'isHost' dla nowego hosta
+    isHost = players[currentPlayerId]?.isHost || false; 
+    
     startGameBtn.style.display = isHost && !room.gameStarted ? 'block' : 'none';
     endRoundBtn.style.display = isHost && room.gameStarted ? 'block' : 'none';
 
