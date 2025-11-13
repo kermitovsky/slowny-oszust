@@ -61,6 +61,7 @@ const categories = [
   { name: 'Człowiek', file: 'people.json' },
   { name: 'Muzyka', file: 'music.json' }
 ];
+// TA ŚCIEŻKA JEST TERAZ JEDYNYM ŹRÓDŁEM SŁÓW
 const wordsBaseUrl = 'https://raw.githubusercontent.com/kermitovsky/slowny-oszust/main/words/';
 
 // Awatary
@@ -73,6 +74,21 @@ const fallbackWords = [
   "lekarz", "nauczyciel", "piłka nożna", "koszykówka", "samochód", "motocykl", "drzewo", "kwiat",
   "rzeka", "góra", "film", "serial", "człowiek", "muzyka"
 ];
+
+// --- Funkcja do pobierania z limitem czasu (zostaje bez zmian) ---
+const fetchWithTimeout = async (url, timeout = 5000) => {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    clearTimeout(id);
+    if (!response.ok) throw new Error(`Błąd ładowania ${url}: ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    clearTimeout(id);
+    throw error;
+  }
+};
 
 // Inicjalizacja wyboru emotek
 function initializeEmojiSelection() {
@@ -225,23 +241,9 @@ async function loadWords() {
   const filesToLoad = selectedCategories.includes('all') ? categories.map(c => c.file) : selectedCategories;
   let loadedAnyFile = false;
 
-  const fetchWithTimeout = async (url, timeout = 5000) => {
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), timeout);
-    try {
-      const response = await fetch(url, { signal: controller.signal });
-      clearTimeout(id);
-      if (!response.ok) throw new Error(`Błąd ładowania ${url}: ${response.status}`);
-      return await response.json();
-    } catch (error) {
-      clearTimeout(id);
-      throw error;
-    }
-  };
-
   try {
     const fetchPromises = filesToLoad.map(file =>
-      fetchWithTimeout(`${wordsBaseUrl}${file}`)
+      fetchWithTimeout(`${wordsBaseUrl}${file}`) // ZAWSZE UŻYWA wordsBaseUrl
         .then(categoryWords => {
           words = [...words, ...categoryWords];
           loadedAnyFile = true;
@@ -264,8 +266,8 @@ async function loadWords() {
     console.error('Błąd ładowania słów:', error);
     try {
       // *** POPRAWKA #1 TUTAJ ***
-      // Próba załadowania domyślnej kategorii (np. zwierzęta) zamiast nieistniejącego words.json
-      const response = await fetchWithTimeout('words/animals.json');
+      // Awaryjne ładowanie JEDNEJ kategorii, też z wordsBaseUrl
+      const response = await fetchWithTimeout(`${wordsBaseUrl}animals.json`);
       words = response;
       console.log('Załadowano domyślne słowa (animals.json):', words.length);
     } catch (err) {
@@ -278,13 +280,8 @@ async function loadWords() {
 }
 
 // *** POPRAWKA #2 TUTAJ ***
-// Ładujemy jedną, domyślną kategorię (np. zwierzęta) jako startowy fallback
-// To naprawia błąd "Błąd ładowania słów gry!" przy starcie
-fetch('words/animals.json')
-  .then(response => {
-    if (!response.ok) throw new Error('Błąd ładowania words/animals.json: ' + response.status);
-    return response.json();
-  })
+// Początkowe ładowanie słów też używa wordsBaseUrl
+fetchWithTimeout(`${wordsBaseUrl}animals.json`)
   .then(data => {
     words = data;
     console.log('Załadowano domyślne słowa (animals.json):', words.length);
@@ -295,6 +292,7 @@ fetch('words/animals.json')
     words = fallbackWords;
     console.log('Użyto wbudowanej listy słów:', words.length);
   });
+
 
 function generateRoomCode() {
   return Math.random().toString(36).substr(2, 4).toUpperCase();
@@ -579,7 +577,7 @@ joinRoomBtn.addEventListener('click', () => {
       gameScreen.style.display = 'block';
       roomCodeDisplay.textContent = currentRoomCode;
       selectedCategories = room.categories || ['all'];
-      loadWords();
+      loadWords(); // Tutaj też użyje 'loadWords' które teraz jest poprawne
       db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).onDisconnect().remove();
       listenToRoom(currentRoomCode);
     }).catch(error => {
