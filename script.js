@@ -53,7 +53,7 @@ let currentRoomCode = null;
 let currentPlayerId = null;
 let currentPlayerName = null;
 let isHost = false;
-let words = []; // TERAZ BĘDZIE ZAWIERAĆ OBIEKTY: { word: "Kot", category: "Zwierzęta" }
+let words = []; // OBIEKTY: { word: "Kot", category: "Zwierzęta" }
 let impostorCount = 1;
 let selectedCategories = [];
 let hasShownStartMessage = false;
@@ -87,7 +87,7 @@ const wordsBaseUrl = 'https://raw.githubusercontent.com/kermitovsky/slowny-oszus
 const emojiList = ['🐱', '🦁', '🐭', '🐶', '🐻', '🦊', '🐨', '🐰', '🐼', '🐹'];
 const avatarColors = ['#8e44ad', '#e67e22', '#3498db', '#e74c3c', '#2ecc71', '#f1c40f', '#9b59b6', '#d35400'];
 
-// Fallback słów - TERAZ JAKO OBIEKTY
+// Fallback słów
 const fallbackWords = [
   { word: "kot", category: "Zwierzęta" },
   { word: "pies", category: "Zwierzęta" },
@@ -178,9 +178,9 @@ function initializeCategorySelection() {
     btn.classList.add('category-btn');
     btn.textContent = category.name;
     btn.dataset.file = category.file;
-    btn.dataset.categoryName = category.name; // Zapiszmy nazwę kategorii
+    btn.dataset.categoryName = category.name; 
     btn.addEventListener('click', () => {
-      toggleCategory(category); // Przekaż cały obiekt
+      toggleCategory(category); 
     });
     categoryGrid.appendChild(btn);
   });
@@ -197,9 +197,9 @@ function toggleCategory(category) {
   const index = selectedCategories.findIndex(c => c.file === category.file);
   
   if (index > -1) {
-    selectedCategories.splice(index, 1); // Usuń
+    selectedCategories.splice(index, 1);
   } else {
-    selectedCategories.push(category); // Dodaj
+    selectedCategories.push(category);
   }
   
   updateCategoryButtons();
@@ -269,7 +269,6 @@ confirmCategories.addEventListener('click', () => {
   });
 });
 
-// *** DUŻA ZMIANA - Ładowanie słów jako obiekty {word, category} ***
 async function loadWords() {
   words = [];
   const categoriesToLoad = selectedCategories.some(c => c.file === 'all') ? categories : selectedCategories;
@@ -279,7 +278,6 @@ async function loadWords() {
     const fetchPromises = categoriesToLoad.map(category =>
       fetchWithTimeout(`${wordsBaseUrl}${category.file}`)
         .then(categoryWords => {
-          // Mapujemy słowa do obiektów
           const mappedWords = categoryWords.map(word => ({
             word: word,
             category: category.name 
@@ -304,20 +302,19 @@ async function loadWords() {
   } catch (error) {
     console.error('Błąd ładowania słów:', error);
     try {
-      // Awaryjne ładowanie (też jako obiekty)
       const response = await fetchWithTimeout(`${wordsBaseUrl}animals.json`);
       words = response.map(word => ({ word: word, category: 'Zwierzęta' }));
       console.log('Załadowano domyślne słowa (animals.json):', words.length);
     } catch (err) {
       console.error('Błąd ładowania domyślnych słów (animals.json):', err);
       showMessage('❌ Błąd ładowania słów gry! Używam wbudowanej listy.');
-      words = fallbackWords; // fallbackWords to już obiekty
+      words = fallbackWords; 
       console.log('Użyto wbudowanej listy słów:', words.length);
     }
   }
 }
 
-// Początkowe ładowanie słów (też jako obiekty)
+// Początkowe ładowanie słów
 fetchWithTimeout(`${wordsBaseUrl}animals.json`)
   .then(data => {
     words = data.map(word => ({ word: word, category: 'Zwierzęta' }));
@@ -419,7 +416,7 @@ function showMessage(text, duration = 3500) {
 }
 
 function showRoleMessage(text, duration = 5000) {
-  roleMessageBox.textContent = text;
+  roleMessageBox.innerHTML = text.replace('\n', '<br>'); // Pozwól na nową linię
   roleMessageBox.style.display = 'block';
   setTimeout(() => {
     roleMessageBox.style.display = 'none';
@@ -434,13 +431,13 @@ function resetToLobby() {
   roleMessageBox.style.display = 'none';
   categorySelectionBox.style.display = 'none';
   impostorSelectionBox.style.display = 'none';
-  impostorHintBox.style.display = 'none'; // Ukryj też nowy modal
+  impostorHintBox.style.display = 'none';
   rulesBox.style.display = 'none';
   rulesBtn.classList.remove('hidden');
   themeToggle.classList.remove('hidden');
   impostorCountDisplay.innerHTML = '';
   playerCountDisplay.innerHTML = '';
-  hintChanceInfoDisplay.innerHTML = ''; // Wyczyść info o podpowiedzi
+  hintChanceInfoDisplay.innerHTML = '';
   roundCounter.innerHTML = '';
   wordDisplay.innerHTML = '';
   impostorCount = 1;
@@ -448,9 +445,8 @@ function resetToLobby() {
   selectedCategories = [];
   hasShownStartMessage = false;
   selectedEmoji = null;
-  selectedPlayerId = null;
+  selectedPlayerId = null; 
   
-  // Zresetuj ustawienia podpowiedzi
   hintChance = 0;
   hintOnStart = false;
   hintChanceSlider.value = 0;
@@ -534,7 +530,7 @@ plusImpostor.addEventListener('click', () => {
   }
 });
 
-// ZMIANA PRZEPŁYWU: Ten przycisk teraz prowadzi do EKRANU PODPOWIEDZI
+// TEN PRZYCISK TERAZ PROWADZI DO EKRANU PODPOWIEDZI
 confirmImpostors.addEventListener('click', () => {
   console.log('Potwierdzono liczbę impostorów:', impostorCount);
   impostorSelectionBox.style.display = 'none';
@@ -558,7 +554,6 @@ confirmHintSettingsBtn.addEventListener('click', () => {
   createRoom(impostorCount, hintChance, hintOnStart);
 });
 
-// *** ZMIANA: createRoom() przyjmuje nowe argumenty ***
 function createRoom(numImpostors, chanceIndex, onStart) {
   console.log('Tworzenie pokoju z', numImpostors, 'impostorami, kategorie:', selectedCategories.map(c => c.name));
   console.log('Ustawienia podpowiedzi:', hintChanceValues[chanceIndex], 'na starcie:', onStart);
@@ -577,13 +572,12 @@ function createRoom(numImpostors, chanceIndex, onStart) {
     gameStarted: false,
     votingActive: false,
     currentWord: null,
-    currentCategory: null, // NOWE
-    impostorHint: null, // NOWE
+    currentCategory: null, 
+    impostorHint: null, 
     resetMessage: null,
     starterId: null,
     numImpostors: numImpostors,
-    categories: selectedCategories.map(c => c.name), // Zapisz tylko nazwy
-    // NOWE USTAWIENIA GRY
+    categories: selectedCategories.map(c => c.name), 
     hintChance: chanceIndex,
     hintOnStart: onStart
   }).then(() => {
@@ -591,7 +585,7 @@ function createRoom(numImpostors, chanceIndex, onStart) {
     loginScreen.style.display = 'none';
     gameScreen.style.display = 'block';
     roomCodeDisplay.textContent = currentRoomCode;
-    impostorHintBox.style.display = 'none'; // Ukryj modal podpowiedzi
+    impostorHintBox.style.display = 'none';
     rulesBtn.classList.remove('hidden');
     themeToggle.classList.remove('hidden');
     db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).onDisconnect().remove();
@@ -662,10 +656,6 @@ joinRoomBtn.addEventListener('click', () => {
       loginScreen.style.display = 'none';
       gameScreen.style.display = 'block';
       roomCodeDisplay.textContent = currentRoomCode;
-      
-      // Dołączający gracz nie musi ładować słów, bo i tak nie jest hostem
-      // loadWords(); 
-      
       db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).onDisconnect().remove();
       listenToRoom(currentRoomCode);
     }).catch(error => {
@@ -819,8 +809,8 @@ function tallyVotes(room) {
   const updates = {
     votingActive: false,
     resetMessage: null,
-    impostorHint: null, // Wyczyść podpowiedź
-    currentCategory: null, // Wyczyść kategorię
+    impostorHint: null, 
+    currentCategory: null, 
   };
 
   playerIds.forEach(id => {
@@ -829,7 +819,6 @@ function tallyVotes(room) {
 
   if (isTie || !ejectedPlayerId) {
     updates.resetMessage = `REMIS! Nikt nie odpada.<br>Kontynuujcie dyskusję!`;
-    // Nie resetujemy gry, więc nie czyścimy ról ani słowa
   } else {
     const ejectedPlayer = players[ejectedPlayerId];
     
@@ -908,7 +897,8 @@ function listenToRoom(roomCode) {
     
     // NOWY WYŚWIETLACZ PODPOWIEDZI
     const hintChanceText = hintChanceValues[room.hintChance || 0];
-    hintChanceInfoDisplay.innerHTML = `Podpowiedź: <span class="bold">${hintChanceText}</span>`;
+    const hintOnStartText = room.hintOnStart ? " (Start)" : "";
+    hintChanceInfoDisplay.innerHTML = `Podpowiedź: <span class="bold">${hintChanceText}${hintOnStartText}</span>`;
 
     if (!votingActive) {
       wordDisplay.innerHTML = room.gameStarted && room.currentWord && iAmInRoom
@@ -924,19 +914,24 @@ function listenToRoom(roomCode) {
     confirmVoteBtn.style.display = votingActive && !myVote ? 'block' : 'none';
     endRoundBtn.style.display = 'none';
 
-    // *** ZMIENIONA LOGIKA POKAZYWANIA ROLI (Z PODPOWIEDZIĄ) ***
+    // ZMIENIONA LOGIKA POKAZYWANIA ROLI (Z PODPOWIEDZIĄ)
     if (room.gameStarted && !votingActive && room.currentWord && iAmInRoom) {
       const isImpostor = iAmInRoom.role === 'impostor';
-      const hint = room.impostorHint;
+      const hint = room.impostorHint; // Odczytaj podpowiedź z pokoju
       
       let message;
       if (isImpostor) {
+        // \n jest zamieniane na <br> w showRoleMessage
         const hintText = hint ? `\n(Podpowiedź: ${hint})` : '';
         message = `Jesteś oszustem!${hintText}`;
       } else {
         message = `Słowo: ${room.currentWord}`;
       }
-      showRoleMessage(message, 5000);
+
+      // Pokaż wiadomość tylko raz na początku rundy
+      if (!hasShownStartMessage) {
+        showRoleMessage(message, 5000);
+      }
       
       if (room.starterId && !hasShownStartMessage && players[room.starterId]) {
         hasShownStartMessage = true; 
@@ -969,7 +964,6 @@ function listenToRoom(roomCode) {
   });
 }
 
-// *** MOCNO ZMIENIONA FUNKCJA STARTU (LOGIKA PODPOWIEDZI) ***
 startGameBtn.addEventListener('click', () => {
   console.log('Kliknięto Start gry');
   if (!isHost) {
@@ -990,13 +984,15 @@ startGameBtn.addEventListener('click', () => {
       return;
     }
 
+    // Host musi mieć załadowane słowa. Jeśli dołączył do pokoju i został hostem,
+    // a nie tworzył pokoju, jego 'words' będzie puste.
     if (words.length === 0) {
-      showMessage('❌ Brak słów do gry!');
-      console.log('Brak słów do gry');
+      showMessage('Ładowanie słów... Spróbuj ponownie za chwilę.');
+      console.log('Host próbował wystartować grę, ale nie miał załadowanych słów. Ładuję...');
+      loadWords(); // Spróbuj załadować na wszelki wypadek
       return;
     }
 
-    // --- NOWA LOGIKA LOSOWANIA SŁOWA (OBIEKT) ---
     const wordObject = words[Math.floor(Math.random() * words.length)];
     const word = wordObject.word;
     const category = wordObject.category;
@@ -1015,7 +1011,6 @@ startGameBtn.addEventListener('click', () => {
       updates[`players/${id}/votedFor`] = null;
     });
 
-    // Logika losowania startera (z mniejszą szansą dla impostora)
     const nonImpostorIds = playerIds.filter(id => !impostorIds.includes(id));
     let selectionPool = [...playerIds];
     selectionPool = selectionPool.concat(nonImpostorIds);
@@ -1027,11 +1022,9 @@ startGameBtn.addEventListener('click', () => {
     const impostorStarted = impostorIds.includes(starterId);
 
     if (room.hintOnStart && impostorStarted) {
-      // 1. Priorytet: Checkbox "Gdy zaczyna mówić" jest włączony i impostor zaczyna
       hint = category;
       console.log('Przyznano podpowiedź (Impostor zaczyna)');
     } else if (Math.random() < hintChanceValue) {
-      // 2. Normalny rzut procentowy
       hint = category;
       console.log('Przyznano podpowiedź (Rzut procentowy)');
     } else {
@@ -1041,8 +1034,8 @@ startGameBtn.addEventListener('click', () => {
     updates.gameStarted = true;
     updates.votingActive = false; 
     updates.currentWord = word;
-    updates.currentCategory = category; // Zapisz kategorię
-    updates.impostorHint = hint; // Zapisz podpowiedź (lub null)
+    updates.currentCategory = category;
+    updates.impostorHint = hint; 
     updates.starterId = starterId;
     updates.currentRound = (room.currentRound || 0) + 1;
 
@@ -1098,8 +1091,8 @@ endRoundBtn.addEventListener('click', () => {
       gameStarted: false,
       votingActive: false, 
       currentWord: null,
-      currentCategory: null, // Wyczyść
-      impostorHint: null, // Wyczyść
+      currentCategory: null,
+      impostorHint: null, 
       starterId: null,
       resetMessage: `Runda zakończona! Słowo: <strong>${currentWord}</strong><br>Impostorzy: <strong>${impostorNames || 'Brak'}</strong>`
     };
