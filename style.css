@@ -1,1037 +1,822 @@
-// Elementy DOM
-const playerNameInput = document.getElementById('playerName');
-const createRoomBtn = document.getElementById('createRoom');
-const joinRoomBtn = document.getElementById('joinRoom');
-const roomCodeInput = document.getElementById('roomCodeInput');
-const statusMessage = document.getElementById('statusMessage');
-const loginScreen = document.getElementById('loginScreen');
-const gameScreen = document.getElementById('gameScreen');
-const roomCodeDisplay = document.getElementById('roomCodeDisplay');
-const copyRoomCodeBtn = document.getElementById('copyRoomCode');
-const impostorCountDisplay = document.getElementById('impostorCountDisplay');
-const playerCountDisplay = document.getElementById('playerCountDisplay');
-const roundCounter = document.getElementById('roundCounter');
-const wordDisplay = document.getElementById('wordDisplay');
-const playersList = document.getElementById('playersList');
-const startGameBtn = document.getElementById('startGame');
-const endRoundBtn = document.getElementById('endRound');
-const leaveRoomBtn = document.getElementById('leaveRoom');
-const messageBox = document.getElementById('messageBox');
-const roleMessageBox = document.getElementById('roleMessageBox');
-const categorySelectionBox = document.getElementById('categorySelectionBox');
-const allCategoriesBtn = document.getElementById('allCategoriesBtn');
-const categoryGrid = document.querySelector('#categorySelectionBox .category-grid');
-const confirmCategories = document.getElementById('confirmCategories');
-const impostorSelectionBox = document.getElementById('impostorSelectionBox');
-const minusImpostor = document.getElementById('minusImpostor');
-const plusImpostor = document.getElementById('plusImpostor');
-const impostorCountDisplaySelector = document.getElementById('impostorCount');
-const confirmImpostors = document.getElementById('confirmImpostors');
-const rulesBtn = document.getElementById('rulesBtn');
-const themeToggle = document.getElementById('themeToggle');
-const rulesBox = document.getElementById('rulesBox');
-const closeRulesBtn = document.getElementById('closeRules');
-const closeRulesTopBtn = document.getElementById('closeRulesTop');
-const recommendedPlayers = document.getElementById('recommendedPlayers');
-const emojiSelection = document.getElementById('emojiSelection');
+/* =================================================================== */
+/* 1. ZMIENNE GLOBALNE (Paleta kolorów) */
+/* =================================================================== */
+:root {
+  /* Kolory trybu jasnego */
+  --c-bg-1: #f39c12;
+  --c-bg-2: #e67e22;
+  --c-bg-3: #d35400;
+  --c-primary: #8e44ad; /* Główny fiolet */
+  --c-primary-light: #9b59b6;
+  --c-accent: #3498db;  /* Akcent niebieski */
+  --c-accent-light: rgba(52, 152, 219, 0.5);
+  --c-danger: #e74c3c;
+  --c-danger-dark: #c0392b;
+  --c-success: #2ecc71;
+  --c-neutral: #7f8c8d;
+  --c-neutral-light: #95a5a6;
+  --c-text-light: #fff;
+  --c-text-light-alt: #f5f5f5;
+  --c-text-dark: #333;
+  --c-glass-bg: rgba(255, 255, 255, 0.1);
+  --c-glass-border: rgba(255, 255, 255, 0.2);
+  --c-glass-bg-darker: rgba(0, 0, 0, 0.4);
+  --c-glass-highlight: rgba(255, 255, 255, 0.2);
+  --c-glass-highlight-hover: rgba(255, 255, 255, 0.3);
+  --c-shadow: rgba(0, 0, 0, 0.2);
+  --c-shadow-heavy: rgba(0, 0, 0, 0.3);
+  --c-shadow-modal: rgba(0, 0, 0, 0.5);
 
-// NOWE ELEMENTY DOM DLA GŁOSOWANIA
-const startVoteBtn = document.getElementById('startVoteBtn');
-const confirmVoteBtn = document.getElementById('confirmVoteBtn');
-const voteResultDisplay = document.getElementById('voteResultDisplay');
+  /* Czcionki */
+  --font-body: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --font-display: 'Pacifico', cursive;
+  --font-heading: 'Poppins', sans-serif;
+}
 
-// Zmienne stanu gry
-let currentRoomCode = null;
-let currentPlayerId = null;
-let currentPlayerName = null;
-let isHost = false;
-let words = [];
-let impostorCount = 1;
-let selectedCategories = [];
-let hasShownStartMessage = false;
-let selectedEmoji = null;
-let selectedPlayerId = null; // NOWA ZMIENNA: Kogo zaznaczyłem do głosowania
+/* =================================================================== */
+/* 2. TRYB CIEMNY (Tylko podmiana zmiennych) */
+/* =================================================================== */
+body.dark-mode {
+  --c-bg-1: #4b0082;
+  --c-bg-2: #2c003e;
+  --c-bg-3: #2c003e; 
+  --c-primary: #e67e22; 
+  --c-primary-light: #d35400;
+  --c-accent: #e67e22; 
+  --c-accent-light: rgba(230, 126, 34, 0.5);
+  --c-text-light: #e6e6e6;
+  --c-text-light-alt: #e6e6e6;
+  --c-glass-bg: rgba(255, 255, 255, 0.03);
+  --c-glass-border: rgba(255, 255, 255, 0.1);
+  --c-glass-highlight: rgba(230, 126, 34, 0.2);
+  --c-glass-highlight-hover: rgba(230, 126, 34, 0.3);
+  --c-glass-bg-darker: rgba(0, 0, 0, 0.4);
+}
 
-// Kategorie
-const categories = [
-  { name: 'Zwierzęta', file: 'animals.json' },
-  { name: 'Jedzenie', file: 'food.json' },
-  { name: 'Przedmioty', file: 'objects.json' },
-  { name: 'Miejsca', file: 'places.json' },
-  { name: 'Zawody', file: 'jobs.json' },
-  { name: 'Sport', file: 'sports.json' },
-  { name: 'Motoryzacja', file: 'automotive.json' },
-  { name: 'Rośliny', file: 'plants.json' },
-  { name: 'Geografia', file: 'geography.json' },
-  { name: 'Filmy i seriale', file: 'movies_series.json' },
-  { name: 'Człowiek', file: 'people.json' },
-  { name: 'Muzyka', file: 'music.json' }
-];
-const wordsBaseUrl = 'https://raw.githubusercontent.com/kermitovsky/slowny-oszust/main/words/';
+/* =================================================================== */
+/* 3. STYLE GŁÓWNE (Body, Tagi) */
+/* =================================================================== */
+body {
+  background: 
+    radial-gradient(circle, rgba(255, 255, 255, 0.15) 2px, transparent 3px),
+    linear-gradient(135deg, var(--c-bg-1) 0%, var(--c-bg-2) 70%, var(--c-bg-3) 100%);
+  background-size: 15px 15px, auto;
+  font-family: var(--font-body);
+  color: var(--c-text-light);
+  font-size: 2rem;
+  margin: 0;
+  padding: 1.5rem;
+  min-height: 100vh;
+  position: relative;
+  transition: background 0.3s ease;
+  overflow-x: hidden;
+}
 
-// Awatary
-const emojiList = ['🐱', '🦁', '🐭', '🐶', '🐻', '🦊', '🐨', '🐰', '🐼', '🐹'];
-const avatarColors = ['#8e44ad', '#e67e22', '#3498db', '#e74c3c', '#2ecc71', '#f1c40f', '#9b59b6', '#d35400'];
+body.dark-mode {
+  background: 
+    radial-gradient(circle, rgba(255, 255, 255, 0.05) 2px, transparent 3px),
+    linear-gradient(135deg, var(--c-bg-1) 0%, var(--c-bg-2) 100%);
+  background-size: 15px 15px, auto;
+}
 
-// Fallback słów
-const fallbackWords = [
-  "kot", "pies", "słoń", "lew", "pizza", "hamburger", "krzesło", "lampa", "park", "szkoła",
-  "lekarz", "nauczyciel", "piłka nożna", "koszykówka", "samochód", "motocykl", "drzewo", "kwiat",
-  "rzeka", "góra", "film", "serial", "człowiek", "muzyka"
-];
+h1 {
+  text-align: center;
+  font-size: 3rem;
+  color: var(--c-text-light-alt);
+  font-family: var(--font-display);
+  text-shadow: 2px 2px 4px var(--c-shadow-heavy);
+}
 
-// --- Funkcja do pobierania z limitem czasu ---
-const fetchWithTimeout = async (url, timeout = 5000) => {
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeout);
-  try {
-    const response = await fetch(url, { signal: controller.signal });
-    clearTimeout(id);
-    if (!response.ok) throw new Error(`Błąd ładowania ${url}: ${response.status}`);
-    return await response.json();
-  } catch (error) {
-    clearTimeout(id);
-    throw error;
+#gameScreen h1 {
+  font-size: 4.5rem;
+  margin-bottom: 1.5rem;
+}
+
+h3 {
+  text-align: center;
+  font-size: 2rem;
+  color: var(--c-text-light-alt);
+  font-family: var(--font-heading);
+  font-weight: 600;
+  margin: 0.8rem 0;
+  text-shadow: 1px 1px 3px var(--c-shadow);
+}
+
+input, button {
+  font-size: 1.8rem;
+  padding: 0.8rem;
+  margin: 0.8rem 0;
+  border-radius: 0.8rem;
+  border: none;
+  width: 100%;
+  max-width: 350px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+}
+
+input {
+  border: 2px solid var(--c-primary);
+  color: var(--c-text-dark);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+button {
+  background: linear-gradient(45deg, var(--c-primary), var(--c-primary-light));
+  color: var(--c-text-light);
+  cursor: pointer;
+  transition: box-shadow 0.3s ease, background 0.3s ease;
+}
+
+button:hover:not(:disabled) {
+  background: linear-gradient(45deg, var(--c-primary-light), var(--c-primary));
+  animation: pulse 1s infinite;
+  box-shadow: 0 4px 15px var(--c-shadow-heavy);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* =================================================================== */
+/* 4. KLASY UŻYTKOWE (Nowe, posprzątane) */
+/* =================================================================== */
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  background: var(--c-glass-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 1rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 32px var(--c-shadow);
+  border: 1px solid var(--c-glass-border);
+  transition: background 0.3s ease, border 0.3s ease;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-box {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(135deg, var(--c-primary), var(--c-bg-3));
+  color: var(--c-text-light);
+  padding: 2rem 3rem;
+  border-radius: 1.5rem;
+  text-align: center;
+  z-index: 1001;
+  display: none;
+  max-width: 90vw;
+  box-shadow: 0 10px 30px var(--c-shadow-modal);
+  border: 2px solid var(--c-glass-border);
+  font-family: var(--font-heading);
+  animation: scaleIn 0.2s ease-in-out;
+  box-sizing: border-box;
+  will-change: transform, opacity;
+}
+
+body.dark-mode .modal-box {
+  background: linear-gradient(135deg, var(--c-bg-1), var(--c-primary));
+  border: 2px solid var(--c-glass-border);
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-primary-light) var(--c-glass-bg);
+}
+.custom-scrollbar::-webkit-scrollbar {
+  width: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--c-glass-bg);
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, var(--c-primary), var(--c-primary-light));
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, var(--c-primary-light), var(--c-primary));
+}
+body.dark-mode .custom-scrollbar {
+  scrollbar-color: var(--c-primary-light) rgba(255, 255, 255, 0.05);
+}
+body.dark-mode .custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+body.dark-mode .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, var(--c-primary), var(--c-primary-light));
+}
+body.dark-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, var(--c-primary-light), var(--c-primary));
+}
+
+.section-divider {
+  border: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.5), transparent);
+  margin: 1rem 0;
+  width: 100%;
+  max-width: 350px;
+}
+
+.bold {
+  font-family: var(--font-heading);
+  font-weight: 800;
+}
+
+.word-normal {
+  color: var(--c-success);
+  font-family: var(--font-heading);
+  font-weight: 800;
+}
+.word-impostor {
+  color: var(--c-danger);
+  font-family: var(--font-heading);
+  font-weight: 800;
+}
+
+/* =================================================================== */
+/* 5. STYLE KOMPONENTÓW (ID, klasy) */
+/* =================================================================== */
+
+#loginScreen, #gameScreen, #categorySelectionBox {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* --- Ekrany Gry --- */
+#leaveRoom {
+  background: linear-gradient(45deg, var(--c-neutral), var(--c-neutral-light));
+}
+#leaveRoom:hover {
+  background: linear-gradient(45deg, var(--c-neutral-light), var(--c-neutral));
+}
+#endRound {
+  background-color: var(--c-danger-dark);
+}
+#startVoteBtn {
+  background-color: var(--c-success);
+}
+#startVoteBtn:hover:not(:disabled) {
+  background: linear-gradient(45deg, var(--c-success), #25a25a);
+}
+
+
+#copyRoomCode {
+  background: linear-gradient(45deg, var(--c-primary), var(--c-primary-light));
+  width: 2.8rem;
+  height: 2.8rem;
+  font-size: 2rem;
+  padding: 0;
+  margin: 0 0.5rem;
+  line-height: 2.8rem;
+  text-align: center;
+  display: inline-block;
+}
+#copyRoomCode:hover {
+  background: linear-gradient(45deg, var(--c-primary-light), var(--c-primary));
+}
+
+#roomCodeContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0.8rem 0;
+  flex-wrap: nowrap;
+}
+#roomCodeDisplay {
+  font-weight: bold;
+}
+
+#countsContainer {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  margin: 0.8rem 0;
+}
+#playerCountDisplay, #impostorCountDisplay {
+  font-size: 1.8rem;
+  font-family: var(--font-heading);
+  color: var(--c-text-light-alt);
+  text-shadow: 1px 1px 2px var(--c-shadow);
+}
+#playerCountDisplay span, #impostorCountDisplay span {
+  font-weight: 800;
+}
+
+#roundCounter, #wordDisplay {
+  font-size: 2rem;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  color: var(--c-text-light-alt);
+  text-shadow: 1px 1px 2px var(--c-shadow);
+  text-align: center;
+  margin: 0.5rem 0;
+}
+#roundCounter strong {
+  font-weight: 800;
+}
+
+#voteResultDisplay {
+  font-size: 1.8rem;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  color: var(--c-success);
+  text-shadow: 1px 1px 2px var(--c-shadow);
+  text-align: center;
+  margin: 1rem 0;
+}
+
+/* --- Lista Graczy --- */
+#playersList {
+  list-style: none;
+  padding: 0;
+  width: 100%;
+}
+#playersList li {
+  position: relative;
+  padding: 0.8rem 4.5rem 0.8rem 3.5rem;
+  margin: 0.5rem 0;
+  border-radius: 1rem;
+  background-color: rgba(255, 255, 255, 0.8);
+  color: var(--c-text-dark);
+  display: flex;
+  align-items: center;
+  animation: fadeIn 0.3s ease-in-out;
+  box-sizing: border-box;
+  transition: background-color 0.2s ease, opacity 0.2s ease, border 0.2s ease;
+  border: 2px solid transparent; /* Dodajemy przezroczystą ramkę dla płynnej animacji */
+}
+body.dark-mode #playersList li {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--c-primary); 
+}
+
+#playersList li .avatar {
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin-right: 0.8rem;
+  box-shadow: 0 2px 5px var(--c-shadow);
+  position: absolute;
+  left: 0.8rem;
+  transition: transform 0.2s ease;
+}
+#playersList li.host .avatar::after {
+  content: '👑';
+  position: absolute;
+  top: -0.4rem;
+  right: -0.4rem;
+  font-size: 0.9rem;
+}
+
+#playersList li .kickBtn {
+  position: absolute;
+  top: 50%;
+  right: 0.8rem;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  background-color: var(--c-danger);
+  color: var(--c-text-light);
+  font-weight: bold;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-size: 1.6rem;
+  line-height: 1;
+  text-align: center;
+  padding: 0;
+  user-select: none;
+  transition: background-color 0.2s ease;
+}
+#playersList li .kickBtn:hover {
+  background-color: var(--c-danger-dark);
+}
+
+#playersList li.host {
+  color: #3498db;
+  font-weight: bold;
+}
+#playersList li.self {
+  color: black;
+  font-weight: bold;
+}
+body.dark-mode #playersList li.self {
+  color: var(--c-primary);
+}
+
+/* =================================================================== */
+/* 5.5. STYLE GŁOSOWANIA (NOWA SEKCJA) */
+/* =================================================================== */
+
+/* Cel do głosowania, który można kliknąć */
+body.voting-active #playersList li.vote-target {
+  cursor: pointer;
+}
+
+/* NOWY STYL: Podświetlenie WYBRANEGO gracza (przed zatwierdzeniem) */
+body.voting-active #playersList li.player-selected {
+  border: 2px solid var(--c-primary);
+  background-color: rgba(255, 255, 255, 0.9);
+}
+body.dark-mode #playersList li.player-selected {
+  border: 2px solid var(--c-primary);
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Zablokowany (nie można głosować) */
+body.voting-active #playersList li.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Pokazuje "ptaszek" przy awatarze, gdy gracz ZATWIERDZIŁ głos */
+body.voting-active #playersList li.has-voted .avatar::after {
+  content: '✔';
+  position: absolute;
+  bottom: -0.4rem;
+  right: -0.4rem;
+  font-size: 0.9rem;
+  background-color: var(--c-success);
+  color: white;
+  border-radius: 50%;
+  width: 1rem;
+  height: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+body.voting-active #playersList li.host.has-voted .avatar::after {
+  right: 1.2rem;
+}
+
+
+/* --- Przyciski Pływające (Zasady, Tryb) --- */
+#rulesBtn, #themeToggle {
+  position: fixed;
+  bottom: 1.5rem;
+  border-radius: 50%;
+  background: rgba(52, 152, 219, 0.3);
+  color: var(--c-text-light);
+  font-size: 2rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 10px var(--c-shadow);
+  z-index: 1000;
+  animation: float 2s ease-in-out infinite;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  width: 3.5rem;
+  height: 3.5rem;
+}
+#rulesBtn {
+  right: 1.5rem;
+}
+#themeToggle {
+  right: 6rem;
+}
+#rulesBtn:hover, #themeToggle:hover {
+  background: var(--c-accent-light);
+  box-shadow: 0 4px 15px var(--c-shadow-heavy);
+}
+#rulesBtn.hidden, #themeToggle.hidden {
+  display: none;
+}
+
+/* --- Okienka Modalne (Tylko unikalne style) --- */
+
+#messageBox {
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--c-text-dark);
+  padding: 1.2rem;
+  font-size: 1.8rem;
+  font-weight: 600;
+  box-shadow: 0 5px 15px var(--c-shadow-heavy);
+  animation: scaleIn 0.3s ease-in-out;
+}
+#messageBox:not(.copy-message) {
+  font-size: 2.8rem;
+  background: linear-gradient(135deg, var(--c-primary), var(--c-bg-3));
+  color: var(--c-text-light);
+  padding: 2rem;
+  border: 2px solid var(--c-glass-border);
+  text-shadow: 1px 1px 3px var(--c-shadow);
+}
+body.dark-mode #messageBox:not(.copy-message) {
+  background: linear-gradient(135deg, var(--c-bg-1), var(--c-primary));
+}
+
+#roleMessageBox {
+  font-size: 3.5rem;
+  font-weight: bold;
+  font-family: 'Segoe UI Black', var(--font-body);
+}
+
+#impostorSelectionBox p {
+  margin: 0 0 1.5rem 0;
+  font-size: 3rem;
+  color: var(--c-text-light-alt);
+  font-weight: 600;
+  text-shadow: 2px 2px 4px var(--c-shadow-heavy);
+  white-space: nowrap;
+}
+#impostorSelectionBox #loadingMessage {
+  font-size: 1.8rem;
+  font-weight: 500;
+  margin: 0.5rem 0;
+  text-shadow: 1px 1px 2px var(--c-shadow);
+}
+#impostorSelectionBox #recommendedPlayers {
+  font-size: 1.4rem;
+  font-weight: 400;
+  opacity: 0.8;
+  margin-top: 1rem;
+}
+#impostorSelectionBox .impostor-selector {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+#impostorSelectionBox #minusImpostor,
+#impostorSelectionBox #plusImpostor {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--c-glass-highlight);
+  border: 1px solid var(--c-glass-border);
+  font-size: 2.5rem;
+  font-weight: bold;
+  transition: opacity 0.3s ease, background 0.3s ease;
+}
+#impostorSelectionBox #minusImpostor:hover:not(:disabled),
+#impostorSelectionBox #plusImpostor:hover:not(:disabled) {
+  background: var(--c-glass-highlight-hover);
+  box-shadow: 0 4px 10px var(--c-shadow-heavy);
+}
+#impostorSelectionBox #confirmImpostors {
+  width: 150px;
+  margin: 0 auto;
+  background: var(--c-glass-highlight);
+  border: 1px solid var(--c-glass-border);
+  font-weight: bold;
+}
+#impostorSelectionBox #confirmImpostors:hover:not(:disabled) {
+  background: var(--c-glass-highlight-hover);
+  box-shadow: 0 6px 15px var(--c-shadow-heavy);
+}
+
+#categorySelectionBox {
+  z-index: 1002;
+}
+#categorySelectionBox p {
+  margin: 0 0 1.5rem 0;
+  font-size: 3rem;
+  color: var(--c-text-light-alt);
+  font-weight: 600;
+  text-shadow: 2px 2px 4px var(--c-shadow-heavy);
+  white-space: nowrap;
+}
+#categorySelectionBox .category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  margin-right: 30px;
+  max-height: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+#categorySelectionBox .category-btn {
+  background: var(--c-glass-bg-darker);
+  border: none;
+  border-radius: 0.8rem;
+  padding: 1rem;
+  font-size: 1.8rem;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  color: var(--c-text-light-alt);
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.3s ease, background 0.3s ease;
+}
+#categorySelectionBox .category-btn.selected {
+  background: var(--c-glass-highlight-hover);
+  opacity: 1;
+  box-shadow: 0 4px 10px var(--c-shadow-heavy);
+}
+#categorySelectionBox .category-btn:hover:not(.selected) {
+  opacity: 0.7;
+}
+#categorySelectionBox #allCategoriesBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0.8rem auto;
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--c-text-light-alt);
+}
+#categorySelectionBox #allCategoriesBtn .checkbox {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--c-text-light-alt);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  cursor: pointer;
+  background: var(--c-glass-highlight);
+  transition: background 0.3s ease;
+}
+#categorySelectionBox #allCategoriesBtn .checkbox:hover {
+  background: var(--c-glass-highlight-hover);
+}
+#categorySelectionBox #confirmCategories {
+  width: 150px;
+  margin: 1.5rem auto 0;
+  background: var(--c-glass-highlight);
+  border: 1px solid var(--c-glass-border);
+  font-weight: bold;
+  display: block;
+}
+#categorySelectionBox #confirmCategories:hover:not(:disabled) {
+  background: var(--c-glass-highlight-hover);
+  box-shadow: 0 6px 15px var(--c-shadow-heavy);
+}
+
+/* --- Wybór Emoji --- */
+#emojiSelection {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 15px;
+  max-width: 360px;
+  width: 100%;
+  margin: 1rem auto;
+  padding: 0.8rem;
+  justify-content: center;
+}
+.emoji-btn {
+  background: var(--c-glass-highlight);
+  border: none;
+  border-radius: 0.8rem;
+  width: 60px;
+  height: 60px;
+  min-width: 60px;
+  font-size: 2.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  transition: background 0.3s ease, transform 0.2s ease, width 0.3s ease, height 0.3s ease;
+}
+.emoji-btn:hover {
+  background: var(--c-glass-highlight-hover);
+  transform: scale(1.1);
+}
+.emoji-btn.selected {
+  background: var(--c-glass-highlight-hover);
+  border: 2px solid var(--c-primary-light);
+  transform: scale(1.1);
+}
+
+/* --- Okno Zasad (unikalne style) --- */
+#rulesBox {
+  text-align: left;
+  z-index: 1002;
+  max-height: 80vh;
+  overflow-y: auto;
+  font-size: 1.6rem;
+}
+#rulesBox h2 {
+  font-size: 2.5rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  text-align: center;
+  text-shadow: 1px 1px 3px var(--c-shadow);
+}
+#rulesBox h3 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 1rem 0 0.5rem 0;
+  text-shadow: 1px 1px 2px var(--c-shadow);
+}
+#rulesBox p, #rulesBox li {
+  font-size: 1.6rem;
+  line-height: 1.5;
+  margin: 0.5rem 0;
+}
+#rulesBox ul {
+  padding-left: 2rem;
+  margin: 0.5rem 0;
+}
+#rulesBox #closeRules, #rulesBox #closeRulesTop {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  color: var(--c-text-light);
+  font-size: 2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+#rulesBox #closeRules:hover, #rulesBox #closeRulesTop:hover {
+  transform: scale(1.2);
+}
+#rulesBox #closeRulesTop {
+  top: 0.5rem;
+  right: 0.5rem;
+}
+
+
+/* =================================================================== */
+/* 6. ANIMACJE */
+/* =================================================================== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+#messageBox { animation-name: scaleIn; }
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+@keyframes float {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+  100% { transform: translateY(0); }
+}
+
+/* =================================================================== */
+/* 7. MEDIA QUERIES (Responsywność) */
+/* =================================================================== */
+@media (max-width: 600px) {
+  body {
+    padding: 1rem;
   }
-};
-
-// Inicjalizacja wyboru emotek
-function initializeEmojiSelection() {
-  console.log('Inicjalizacja wyboru emotek');
-  emojiSelection.innerHTML = '';
-  emojiList.forEach(emoji => {
-    const btn = document.createElement('button');
-    btn.classList.add('emoji-btn');
-    btn.textContent = emoji;
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-      selectedEmoji = emoji;
-      console.log('Wybrano emotkę:', selectedEmoji);
-    });
-    emojiSelection.appendChild(btn);
-  });
-}
-initializeEmojiSelection();
-
-// Wykrywanie zamknięcia przeglądarki lub odświeżenia
-window.addEventListener('beforeunload', () => {
-  if (currentRoomCode && currentPlayerId) {
-    console.log('Wykryto zamknięcie/odświeżenie, usuwanie gracza:', currentPlayerId);
-    db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).remove();
-  }
-});
-
-// Funkcja zamykania zasad
-function closeRules() {
-  console.log('Kliknięto Zamknij zasady');
-  rulesBox.style.display = 'none';
-  rulesBtn.classList.remove('hidden');
-  themeToggle.classList.remove('hidden');
-}
-
-// Funkcja przełączania trybu
-function toggleTheme() {
-  const isDark = document.body.classList.toggle('dark-mode');
-  themeToggle.textContent = isDark ? '☀️' : '🌙';
-  localStorage.setItem('theme', isDark ? 'dark' : 'light');
-  console.log('Przełączono na tryb:', isDark ? 'ciemny' : 'jasny');
-}
-
-// Inicjalizacja trybu
-if (localStorage.getItem('theme') === 'dark') {
-  document.body.classList.add('dark-mode');
-  themeToggle.textContent = '☀️';
-} else {
-  themeToggle.textContent = '🌙';
-}
-
-// Inicjalizacja wyboru kategorii
-function initializeCategorySelection() {
-  console.log('Inicjalizacja wyboru kategorii');
-  categoryGrid.innerHTML = '';
-  categories.forEach(category => {
-    const btn = document.createElement('button');
-    btn.classList.add('category-btn');
-    btn.textContent = category.name;
-    btn.dataset.file = category.file;
-    btn.addEventListener('click', () => {
-      toggleCategory(category.file);
-    });
-    categoryGrid.appendChild(btn);
-  });
-  updateCategoryButtons();
-  updateAllCategoriesCheckbox();
-  updateConfirmCategoriesButton();
-}
-
-function toggleCategory(file) {
-  if (selectedCategories.includes('all')) {
-    selectedCategories = [];
-  }
-  if (selectedCategories.includes(file)) {
-    selectedCategories = selectedCategories.filter(c => c !== file);
-  } else {
-    selectedCategories.push(file);
-  }
-  updateCategoryButtons();
-  updateAllCategoriesCheckbox();
-  updateConfirmCategoriesButton();
-  console.log('Wybrano kategorie:', selectedCategories);
-}
-
-function updateCategoryButtons() {
-  document.querySelectorAll('.category-btn').forEach(btn => {
-    if (selectedCategories.includes('all') || selectedCategories.includes(btn.dataset.file)) {
-      btn.classList.add('selected');
-    } else {
-      btn.classList.remove('selected');
-    }
-  });
-}
-
-function updateAllCategoriesCheckbox() {
-  const allSelected = categories.every(c => selectedCategories.includes(c.file)) || selectedCategories.includes('all');
-  allCategoriesBtn.querySelector('.checkbox').textContent = allSelected ? '✔' : '';
-}
-
-function updateConfirmCategoriesButton() {
-  confirmCategories.disabled = selectedCategories.length === 0;
-  confirmCategories.style.opacity = selectedCategories.length === 0 ? '0.5' : '1';
-  confirmCategories.style.cursor = selectedCategories.length === 0 ? 'not-allowed' : 'pointer';
-  console.log('Zaktualizowano przycisk Dalej, disabled:', confirmCategories.disabled);
-}
-
-allCategoriesBtn.querySelector('.checkbox').addEventListener('click', () => {
-  if (selectedCategories.includes('all')) {
-    selectedCategories = [];
-  } else {
-    selectedCategories = ['all'];
-  }
-  updateCategoryButtons();
-  updateAllCategoriesCheckbox();
-  updateConfirmCategoriesButton();
-  console.log('Kliknięto Wszystkie, kategorie:', selectedCategories);
-});
-
-confirmCategories.addEventListener('click', () => {
-  if (selectedCategories.length === 0) {
-    showMessage('❌ Wybierz przynajmniej jedną kategorię!');
-    console.log('Brak wybranych kategorii');
-    return;
-  }
-  console.log('Potwierdzono kategorie:', selectedCategories);
-  categorySelectionBox.style.display = 'none';
-  impostorSelectionBox.style.display = 'block';
-  document.getElementById('loadingMessage').style.display = 'block';
-  confirmImpostors.disabled = true;
-  loadWords().then(() => {
-    document.getElementById('loadingMessage').style.display = 'none';
-    confirmImpostors.disabled = false;
-    impostorCount = 1;
-    impostorCountDisplaySelector.textContent = impostorCount;
-    updateImpostorButtons();
-    updateRecommendedPlayers();
-    console.log('Przełączono na wybór impostorów');
-  }).catch(error => {
-    document.getElementById('loadingMessage').style.display = 'none';
-    confirmImpostors.disabled = false;
-    showMessage('❌ Błąd ładowania kategorii! Używam domyślnych słów.');
-    console.error('Błąd w confirmCategories:', error);
-  });
-});
-
-async function loadWords() {
-  words = [];
-  const filesToLoad = selectedCategories.includes('all') ? categories.map(c => c.file) : selectedCategories;
-  let loadedAnyFile = false;
-
-  try {
-    const fetchPromises = filesToLoad.map(file =>
-      fetchWithTimeout(`${wordsBaseUrl}${file}`)
-        .then(categoryWords => {
-          words = [...words, ...categoryWords];
-          loadedAnyFile = true;
-          console.log(`Załadowano ${categoryWords.length} słów z ${file}`);
-        })
-        .catch(error => {
-          console.error(`Błąd ładowania pliku ${file}:`, error);
-          showMessage(`❌ Błąd ładowania kategorii ${file}! Pomijam.`);
-        })
-    );
-
-    await Promise.all(fetchPromises);
-
-    if (!loadedAnyFile) {
-      throw new Error('Nie udało się załadować żadnego pliku kategorii.');
-    }
-
-    console.log('Łącznie załadowano słów:', words.length);
-  } catch (error) {
-    console.error('Błąd ładowania słów:', error);
-    try {
-      const response = await fetchWithTimeout(`${wordsBaseUrl}animals.json`);
-      words = response;
-      console.log('Załadowano domyślne słowa (animals.json):', words.length);
-    } catch (err) {
-      console.error('Błąd ładowania domyślnych słów (animals.json):', err);
-      showMessage('❌ Błąd ładowania słów gry! Używam wbudowanej listy.');
-      words = fallbackWords;
-      console.log('Użyto wbudowanej listy słów:', words.length);
-    }
-  }
-}
-
-// Początkowe ładowanie słów
-fetchWithTimeout(`${wordsBaseUrl}animals.json`)
-  .then(data => {
-    words = data;
-    console.log('Załadowano domyślne słowa (animals.json):', words.length);
-  })
-  .catch(error => {
-    console.error('Błąd ładowania domyślnych słów (animals.json):', error);
-    showMessage('❌ Błąd ładowania słów gry! Używam wbudowanej listy.');
-    words = fallbackWords;
-    console.log('Użyto wbudowanej listy słów:', words.length);
-  });
-
-
-function generateRoomCode() {
-  return Math.random().toString(36).substr(2, 4).toUpperCase();
-}
-
-function assignUniqueEmoji(players) {
-  const usedEmojis = Object.values(players || {}).map(p => p.emoji).filter(e => e);
-  const availableEmojis = emojiList.filter(e => !usedEmojis.includes(e));
-  if (selectedEmoji && !usedEmojis.includes(selectedEmoji)) {
-    console.log('Użyto wybranej emotki:', selectedEmoji);
-    return selectedEmoji;
-  }
-  if (availableEmojis.length === 0) {
-    console.warn('Brak dostępnych emoji, przypisuję losowe');
-    return emojiList[Math.floor(Math.random() * emojiList.length)];
-  }
-  const randomEmoji = availableEmojis[Math.floor(Math.random() * availableEmojis.length)];
-  console.log('Przypisano losową emotkę:', randomEmoji);
-  return randomEmoji;
-}
-
-function assignUniqueColor(players) {
-  const usedColors = Object.values(players || {}).map(p => p.avatarColor).filter(c => c);
-  const availableColors = avatarColors.filter(c => !usedColors.includes(c));
-  if (availableColors.length === 0) {
-    console.warn('Brak dostępnych kolorów, przypisuję losowy');
-    return avatarColors[Math.floor(Math.random() * avatarColors.length)];
-  }
-  const selectedColor = availableColors[Math.floor(Math.random() * availableColors.length)];
-  console.log('Przypisano kolor:', selectedColor);
-  return selectedColor;
-}
-
-function updatePlayersList(players) {
-  playersList.innerHTML = '';
-  if (!players || !Object.keys(players).length) {
-    playersList.innerHTML = '<li>Brak graczy</li>';
-    return;
+  .container {
+    padding: 0.8rem;
+    margin: 0.5rem;
   }
   
-  for (const [id, player] of Object.entries(players)) {
-    const li = document.createElement('li');
-    li.dataset.playerId = id; // Dodajemy ID gracza do elementu
-    const avatar = document.createElement('span');
-    avatar.classList.add('avatar');
-    avatar.textContent = player.emoji || '❓';
-    avatar.style.backgroundColor = player.avatarColor || avatarColors[0];
-    li.appendChild(avatar);
-    li.appendChild(document.createTextNode(` ${player.name || 'Nieznany gracz'}`));
-    if (player.isHost) {
-      li.classList.add('host');
-      li.appendChild(document.createTextNode(' (host)'));
-    }
-    if (id === currentPlayerId) {
-      li.classList.add('self');
-    }
+  #rulesBtn, #themeToggle {
+    width: 3rem;
+    height: 3rem;
+    font-size: 1.8rem;
+    bottom: 1rem;
+  }
+  #rulesBtn {
+    right: 1rem;
+  }
+  #themeToggle {
+    right: 5rem;
+  }
 
-    if (isHost && id !== currentPlayerId) {
-      const kickBtn = document.createElement('button');
-      kickBtn.textContent = '×';
-      kickBtn.title = 'Wyrzuć gracza';
-      kickBtn.classList.add('kickBtn');
-      kickBtn.addEventListener('click', () => {
-        kickPlayer(id);
-      });
-      li.appendChild(kickBtn);
-    }
+  .modal-box {
+    padding: 1.5rem;
+    max-height: 85vh;
+    font-size: 1.4rem;
+  }
+  #rulesBox h2 {
+    font-size: 2rem;
+  }
+  #rulesBox h3 {
+    font-size: 1.8rem;
+  }
+  #rulesBox p, #rulesBox li {
+    font-size: 1.4rem;
+  }
 
-    playersList.appendChild(li);
+  #impostorSelectionBox p, #categorySelectionBox p {
+    font-size: 2.2rem;
   }
 }
-
-function showMessage(text, duration = 3500) {
-  console.log('showMessage:', text);
-  messageBox.innerHTML = text;
-  messageBox.style.display = 'block';
-  if (text === '✅ Kod skopiowany!' || text === '❌ Nie udało się skopiować kodu') {
-    messageBox.classList.add('copy-message');
-    duration = 1500;
-  } else {
-    messageBox.classList.remove('copy-message');
-  }
-  setTimeout(() => {
-    messageBox.style.display = 'none';
-    messageBox.classList.remove('copy-message');
-  }, duration);
-}
-
-function showRoleMessage(text, duration = 5000) {
-  roleMessageBox.textContent = text;
-  roleMessageBox.style.display = 'block';
-  setTimeout(() => {
-    roleMessageBox.style.display = 'none';
-  }, duration);
-}
-
-function resetToLobby() {
-  startGameBtn.style.display = isHost ? 'block' : 'none';
-  startVoteBtn.style.display = 'none';
-  confirmVoteBtn.style.display = 'none'; // Ukryj też przycisk potwierdzenia
-  endRoundBtn.style.display = 'none';
-  roleMessageBox.style.display = 'none';
-  categorySelectionBox.style.display = 'none';
-  impostorSelectionBox.style.display = 'none';
-  rulesBox.style.display = 'none';
-  rulesBtn.classList.remove('hidden');
-  themeToggle.classList.remove('hidden');
-  impostorCountDisplay.innerHTML = '';
-  playerCountDisplay.innerHTML = '';
-  roundCounter.innerHTML = '';
-  wordDisplay.innerHTML = '';
-  impostorCount = 1;
-  impostorCountDisplaySelector.textContent = impostorCount;
-  selectedCategories = [];
-  hasShownStartMessage = false;
-  selectedEmoji = null;
-  selectedPlayerId = null; // Zresetuj wybór
-  document.querySelectorAll('.emoji-btn').forEach(btn => btn.classList.remove('selected'));
-  updateImpostorButtons();
-  updateRecommendedPlayers();
-}
-
-function updateImpostorButtons() {
-  minusImpostor.disabled = impostorCount <= 1;
-  plusImpostor.disabled = impostorCount >= 5;
-  minusImpostor.style.opacity = impostorCount <= 1 ? '0.5' : '1';
-  plusImpostor.style.opacity = impostorCount >= 5 ? '0.5' : '1';
-  console.log('Zaktualizowano przyciski impostorów:', { impostorCount });
-}
-
-function updateRecommendedPlayers() {
-  const minPlayers = impostorCount + 2;
-  const maxPlayers = Math.min(impostorCount + 4, 10);
-  recommendedPlayers.textContent = `Zalecana liczba graczy: ${minPlayers}–${maxPlayers}`;
-  console.log('Zaktualizowano zalecaną liczbę graczy:', recommendedPlayers.textContent);
-}
-
-closeRulesBtn.addEventListener('click', closeRules);
-closeRulesTopBtn.addEventListener('click', closeRules);
-
-rulesBtn.addEventListener('click', () => {
-  console.log('Kliknięto Zasady gry');
-  rulesBox.style.display = 'block';
-  rulesBtn.classList.add('hidden');
-  themeToggle.classList.add('hidden');
-});
-
-themeToggle.addEventListener('click', () => {
-  toggleTheme();
-});
-
-createRoomBtn.addEventListener('click', () => {
-  console.log('Kliknięto Stwórz pokój');
-  const name = playerNameInput.value.trim();
-  if (!name) {
-    showMessage('❌ Wpisz nick!');
-    console.log('Brak nicku');
-    return;
-  }
-  if (!selectedEmoji) {
-    showMessage('❌ Wybierz awatar!');
-    console.log('Brak wybranej emotki');
-    return;
-  }
-  currentPlayerName = name;
-  isHost = true;
-  console.log('Ustawiono hosta, imię:', currentPlayerName);
-  categorySelectionBox.style.display = 'block';
-  console.log('Wyświetlono categorySelectionBox');
-  initializeCategorySelection();
-  rulesBtn.classList.add('hidden');
-  themeToggle.classList.add('hidden');
-});
-
-minusImpostor.addEventListener('click', () => {
-  if (impostorCount > 1) {
-    impostorCount--;
-    impostorCountDisplaySelector.textContent = impostorCount;
-    updateImpostorButtons();
-    updateRecommendedPlayers();
-    console.log('Zmniejszono liczbę impostorów:', impostorCount);
-  }
-});
-
-plusImpostor.addEventListener('click', () => {
-  if (impostorCount < 5) {
-    impostorCount++;
-    impostorCountDisplaySelector.textContent = impostorCount;
-    updateImpostorButtons();
-    updateRecommendedPlayers();
-    console.log('Zwiększono liczbę impostorów:', impostorCount);
-  }
-});
-
-confirmImpostors.addEventListener('click', () => {
-  console.log('Potwierdzono liczbę impostorów:', impostorCount);
-  createRoom(impostorCount);
-});
-
-function createRoom(numImpostors) {
-  console.log('Tworzenie pokoju z', numImpostors, 'impostorami, kategorie:', selectedCategories);
-  currentRoomCode = generateRoomCode();
-  currentPlayerId = db.ref().push().key;
-  const emoji = assignUniqueEmoji({});
-  const avatarColor = assignUniqueColor({});
-
-  const roomRef = db.ref(`rooms/${currentRoomCode}`);
-  const playerData = { name: currentPlayerName, isHost: true, role: null, emoji: emoji, avatarColor: avatarColor };
-  roomRef.set({
-    players: {
-      [currentPlayerId]: playerData
-    },
-    gameStarted: false,
-    votingActive: false, // NOWY STAN
-    currentWord: null,
-    resetMessage: null,
-    starterId: null,
-    numImpostors: numImpostors,
-    categories: selectedCategories,
-    currentRound: 0
-  }).then(() => {
-    console.log('Pokój utworzony:', currentRoomCode, 'Gracz:', playerData, 'Kategorie:', selectedCategories);
-    loginScreen.style.display = 'none';
-    gameScreen.style.display = 'block';
-    roomCodeDisplay.textContent = currentRoomCode;
-    impostorSelectionBox.style.display = 'none';
-    rulesBtn.classList.remove('hidden');
-    themeToggle.classList.remove('hidden');
-    db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).onDisconnect().remove();
-    listenToRoom(currentRoomCode);
-  }).catch(error => {
-    console.error('Błąd tworzenia pokoju:', error);
-    showMessage('❌ Błąd tworzenia pokoju!');
-    rulesBtn.classList.remove('hidden');
-    themeToggle.classList.remove('hidden');
-  });
-}
-
-joinRoomBtn.addEventListener('click', () => {
-  console.log('Kliknięto Dołącz do pokoju');
-  const name = playerNameInput.value.trim();
-  const roomCode = roomCodeInput.value.trim().toUpperCase();
-
-  if (!name || !roomCode) {
-    showMessage('❌ Wpisz nick i kod pokoju!');
-    console.log('Brak nicku lub kodu pokoju');
-    roomCodeInput.value = '';
-    return;
-  }
-  if (!selectedEmoji) {
-    showMessage('❌ Wybierz awatar!');
-    console.log('Brak wybranej emotki');
-    return;
-  }
-
-  currentPlayerName = name;
-  currentRoomCode = roomCode;
-  currentPlayerId = db.ref().push().key;
-  console.log('Dołączanie do pokoju:', roomCode, 'Nick:', name);
-
-  const roomRef = db.ref(`rooms/${currentRoomCode}`);
-  roomRef.once('value').then(snapshot => {
-    if (!snapshot.exists()) {
-      showMessage('❌ Pokój nie istnieje!');
-      console.log('Pokój nie istnieje:', roomCode);
-      roomCodeInput.value = '';
-      return;
-    }
-
-    const room = snapshot.val();
-
-    if (room.gameStarted) {
-      showMessage('❌ Gra już się rozpoczęła! Poczekaj na koniec rundy.');
-      console.log('Próba dołączenia do trwającej gry:', roomCode);
-      roomCodeInput.value = '';
-      return;
-    }
-
-    const players = room.players || {};
-    if (Object.keys(players).length >= 10) {
-      showMessage('❌ Pokój jest pełny! Maksymalnie 10 graczy.');
-      console.log('Pokój pełny:', roomCode);
-      roomCodeInput.value = '';
-      return;
-    }
-
-    const emoji = assignUniqueEmoji(players);
-    const avatarColor = assignUniqueColor(players);
-    const playerData = { name: currentPlayerName, isHost: false, role: null, emoji: emoji, avatarColor: avatarColor };
-    roomRef.child('players').update({
-      [currentPlayerId]: playerData
-    }).then(() => {
-      console.log('Dołączono do pokoju:', roomCode, 'Gracz:', playerData);
-      loginScreen.style.display = 'none';
-      gameScreen.style.display = 'block';
-      roomCodeDisplay.textContent = currentRoomCode;
-      selectedCategories = room.categories || ['all'];
-      loadWords();
-      db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).onDisconnect().remove();
-      listenToRoom(currentRoomCode);
-    }).catch(error => {
-      console.error('Błąd dołączania do pokoju:', error);
-      showMessage('❌ Błąd dołączania do pokoju!');
-      roomCodeInput.value = '';
-    });
-  }).catch(error => {
-    console.error('Błąd sprawdzania pokoju:', error);
-    showMessage('❌ Błąd sprawdzania pokoju!');
-    roomCodeInput.value = '';
-  });
-});
-
-copyRoomCodeBtn.addEventListener('click', () => {
-  console.log('Kliknięto Kopiuj kod');
-  const roomCode = roomCodeDisplay.textContent;
-  navigator.clipboard.writeText(roomCode).then(() => {
-    showMessage('✅ Kod skopiowany!');
-  }).catch(() => {
-    showMessage('❌ Nie udało się skopiować kodu');
-  });
-});
-
-function kickPlayer(playerId) {
-  if (!isHost || playerId === currentPlayerId) return;
-  console.log('Wyrzucanie gracza:', playerId);
-  db.ref(`rooms/${currentRoomCode}/players/${playerId}`).remove().then(() => {
-    console.log('Gracz wyrzucony:', playerId);
-  }).catch(error => {
-    console.error('Błąd wyrzucania gracza:', error);
-    showMessage('❌ Błąd wyrzucania gracza!');
-  });
-}
-
-leaveRoomBtn.addEventListener('click', () => {
-  console.log('Kliknięto Opuść pokój');
-  if (currentRoomCode && currentPlayerId) {
-    const roomRef = db.ref(`rooms/${currentRoomCode}`);
-    roomRef.child(`players/${currentPlayerId}`).remove().then(() => {
-      console.log('Gracz opuścił pokój:', currentPlayerId);
-      resetToLobby();
-      loginScreen.style.display = 'block';
-      gameScreen.style.display = 'none';
-      currentRoomCode = null;
-      currentPlayerId = null;
-      isHost = false;
-      roomCodeInput.value = '';
-      playerNameInput.value = '';
-    }).catch(error => {
-      console.error('Błąd opuszczania pokoju:', error);
-      showMessage('❌ Błąd opuszczania pokoju!');
-    });
-  }
-});
-
-// *** NOWA FUNKCJA DO RYSOWANIA LISTY GRACZY POD GŁOSOWANIE ***
-function updatePlayersListForVoting(players) {
-  playersList.innerHTML = '';
-  if (!players || !Object.keys(players).length) {
-    playersList.innerHTML = '<li>Brak graczy</li>';
-    return;
-  }
-
-  const myVote = players[currentPlayerId]?.votedFor;
-
-  for (const [id, player] of Object.entries(players)) {
-    const li = document.createElement('li');
-    li.dataset.playerId = id; // Dodajemy ID gracza do elementu
-    const avatar = document.createElement('span');
-    avatar.classList.add('avatar');
-    avatar.textContent = player.emoji || '❓';
-    avatar.style.backgroundColor = player.avatarColor || avatarColors[0];
-    li.appendChild(avatar);
-    li.appendChild(document.createTextNode(` ${player.name || 'Nieznany gracz'}`));
-    
-    if (player.isHost) {
-      li.classList.add('host');
-    }
-
-    if (player.votedFor) {
-      li.classList.add('has-voted');
-    }
-
-    // Obsługa logiki klikania
-    if (myVote) {
-      // Już zagłosowałem, zablokuj wszystko
-      li.classList.add('disabled');
-    } else {
-      // Jeszcze nie zagłosowałem
-      if (id === currentPlayerId) {
-        li.classList.add('self', 'disabled'); // Zablokuj siebie
-      } else {
-        li.classList.add('vote-target'); // Inni to cele
-        
-        // Podświetl, jeśli jest aktualnie wybrany
-        if (selectedPlayerId === id) {
-          li.classList.add('player-selected');
-        }
-
-        // Event listener do ZAZNACZANIA
-        li.addEventListener('click', () => {
-          selectedPlayerId = id;
-          // Prerysuj listę, żeby pokazać "zaznaczenie"
-          updatePlayersListForVoting(players); 
-        });
-      }
-    }
-    playersList.appendChild(li);
-  }
-}
-
-// *** NOWA FUNKCJA DO ZAPISYWANIA GŁOSU ***
-function voteForPlayer(targetId) {
-  console.log(`Głosuję na: ${targetId}`);
-  db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).update({
-    votedFor: targetId
-  });
-  selectedPlayerId = null; // Zresetuj wybór po zagłosowaniu
-}
-
-// *** NOWA FUNKCJA DO PODLICZANIA GŁOSÓW (Z LOGIKĄ REMISU) ***
-function tallyVotes(room) {
-  console.log('Podliczanie głosów...');
-  const players = room.players;
-  const playerIds = Object.keys(players);
-  const votes = {}; // Obiekt do liczenia głosów: { playerId: count }
-  let totalVotes = 0;
-
-  for (const playerId of playerIds) {
-    const votedFor = players[playerId].votedFor;
-    if (votedFor) {
-      totalVotes++;
-      votes[votedFor] = (votes[votedFor] || 0) + 1;
-    }
-  }
-
-  // Sprawdź, czy wszyscy zagłosowali
-  if (totalVotes < playerIds.length) {
-    console.log('Jeszcze nie wszyscy zagłosowali.');
-    return; // Przerwij
-  }
-
-  let maxVotes = 0;
-  let ejectedPlayerId = null;
-  let isTie = false;
-
-  for (const [playerId, count] of Object.entries(votes)) {
-    if (count > maxVotes) {
-      maxVotes = count;
-      ejectedPlayerId = playerId;
-      isTie = false;
-    } else if (count === maxVotes && maxVotes > 0) {
-      isTie = true; // Mamy remis!
-    }
-  }
-  
-  console.log('Wyniki głosowania:', votes, 'Wyrzucony:', ejectedPlayerId, 'Remis:', isTie);
-
-  const updates = {
-    votingActive: false,
-    resetMessage: null,
-  };
-
-  // Wyczyść głosy u wszystkich graczy
-  playerIds.forEach(id => {
-    updates[`players/${id}/votedFor`] = null;
-  });
-
-  if (isTie || !ejectedPlayerId) {
-    // *** NOWA LOGIKA: REMIS - KONTUNUUJ GRĘ ***
-    updates.resetMessage = `REMIS! Nikt nie odpada.<br>Kontynuujcie dyskusję!`;
-    // WAŻNE: *Nie* resetujemy gameStarted, currentWord, ani ról!
-  } else {
-    // *** NOWA LOGIKA: KTOŚ WYLECIAŁ - ZAKOŃCZ RUNDĘ ***
-    const ejectedPlayer = players[ejectedPlayerId];
-    const ejectedRole = ejectedPlayer.role;
-    
-    // Resetujemy grę do lobby
-    updates.gameStarted = false;
-    updates.currentWord = null;
-    updates.starterId = null;
-    
-    // Wyczyść role
-    playerIds.forEach(id => {
-      updates[`players/${id}/role`] = null;
-    });
-
-    if (ejectedRole === 'impostor') {
-      updates.resetMessage = `Impostor został wykryty!<br>(Był nim <strong>${ejectedPlayer.name}</strong>)<br>Słowo: <strong>${room.currentWord}</strong>`;
-    } else {
-      updates.resetMessage = `Impostor wygrał rundę!<br>(Wyrzucono niewinnego <strong>${ejectedPlayer.name}</strong>)<br>Słowo: <strong>${room.currentWord}</strong>`;
-    }
-  }
-
-  // Wyślij zmiany do Firebase
-  db.ref(`rooms/${currentRoomCode}`).update(updates);
-}
-
-
-function listenToRoom(roomCode) {
-  const roomRef = db.ref(`rooms/${roomCode}`);
-  roomRef.on('value', snapshot => {
-    const room = snapshot.val();
-    if (!room) {
-      console.log('Pokój usunięty:', roomCode);
-      showMessage('❌ Pokój został usunięty!');
-      resetToLobby();
-      loginScreen.style.display = 'block';
-      gameScreen.style.display = 'none';
-      currentRoomCode = null;
-      currentPlayerId = null;
-      isHost = false;
-      return;
-    }
-
-    const players = room.players || {};
-    const playerIds = Object.keys(players);
-    const hostExists = Object.values(players).some(p => p.isHost);
-    const iAmInRoom = players[currentPlayerId];
-    const votingActive = room.votingActive || false;
-    const myVote = players[currentPlayerId]?.votedFor;
-
-    // --- Logika Migracji Hosta (bez zmian) ---
-    if (!hostExists && iAmInRoom && playerIds.length > 0) {
-      console.warn('Brak hosta! Wybieranie nowego...');
-      const sortedPlayerIds = playerIds.sort();
-      const newHostId = sortedPlayerIds[0];
-      
-      if (newHostId === currentPlayerId) {
-        console.log('To ja! Promuję się na nowego hosta.');
-        db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).update({ isHost: true });
-      }
-    }
-
-    // --- NOWA LOGIKA RYSO WANIA LISTY GRACZY ---
-    if (votingActive) {
-      document.body.classList.add('voting-active');
-      wordDisplay.innerHTML = "<strong>Czas na głosowanie! Kto jest oszustem?</strong>";
-      updatePlayersListForVoting(players);
-    } else {
-      document.body.classList.remove('voting-active');
-      selectedPlayerId = null; // Zresetuj wybór, gdy głosowanie się kończy
-      updatePlayersList(players);
-    }
-
-    // --- Logika "Kopniaka" (bez zmian) ---
-    document.querySelectorAll('.kickBtn').forEach(btn => {
-      btn.disabled = room.gameStarted || votingActive;
-      btn.style.opacity = (room.gameStarted || votingActive) ? '0.5' : '1';
-      btn.style.cursor = (room.gameStarted || votingActive) ? 'not-allowed' : 'pointer';
-    });
-
-    playerCountDisplay.innerHTML = `Gracze: <span class="bold">${playerIds.length}</span>`;
-    impostorCountDisplay.innerHTML = `Impostorzy: <span class="bold">${room.numImpostors || 0}</span>`;
-    roundCounter.innerHTML = room.currentRound > 0 ? `Runda: <strong>${room.currentRound}</strong>` : '';
-    
-    if (!votingActive) {
-      wordDisplay.innerHTML = room.gameStarted && room.currentWord && players[currentPlayerId]
-        ? (players[currentPlayerId].role === 'impostor'
-          ? `Twoje słowo: <span class="word-impostor">OSZUST!</span>`
-          : `Twoje słowo: <span class="word-normal">${room.currentWord}</span>`)
-        : '';
-    }
-
-    // --- Zarządzanie widocznością przycisków ---
-    isHost = players[currentPlayerId]?.isHost || false; 
-    startGameBtn.style.display = isHost && !room.gameStarted && !votingActive ? 'block' : 'none';
-    startVoteBtn.style.display = isHost && room.gameStarted && !votingActive ? 'block' : 'none';
-    // Pokaż przycisk "Zagłosuj", jeśli głosowanie jest aktywne i jeszcze nie zagłosowałem
-    confirmVoteBtn.style.display = votingActive && !myVote ? 'block' : 'none';
-    
-    endRoundBtn.style.display = 'none';
-
-    // --- Logika "Zaczyna mówić" (bez zmian) ---
-    if (room.gameStarted && !votingActive && room.currentWord && players[currentPlayerId]) {
-      const isImpostor = players[currentPlayerId].role === 'impostor';
-      const message = isImpostor ? 'Jesteś oszustem!' : `Słowo: ${room.currentWord}`;
-      showRoleMessage(message, 5000);
-      
-      if (room.starterId && !hasShownStartMessage && players[room.starterId]) {
-        hasShownStartMessage = true; 
-        setTimeout(() => {
-          showMessage(`Zaczyna mówić: <strong>${players[room.starterId].name}</strong>`, 5000);
-        }, 5000);
-      }
-    } else {
-      hasShownStartMessage = false;
-    }
-
-    // --- Komunikat resetu rundy (teraz pokaże wynik głosowania) ---
-    if (room.resetMessage) {
-      showMessage(room.resetMessage);
-      if (isHost) {
-        db.ref(`rooms/${currentRoomCode}/resetMessage`).remove();
-      }
-    }
-    
-    // --- NOWA LOGIKA: SPRAWDŹ CZY JUŻ KONIEC GŁOSOWANIA ---
-    if (votingActive) {
-      const totalPlayers = playerIds.length;
-      const votes = playerIds.map(id => players[id].votedFor).filter(Boolean);
-      
-      if (votes.length === totalPlayers) {
-        if (isHost) {
-          tallyVotes(room);
-        }
-      }
-    }
-    
-  });
-}
-
-startGameBtn.addEventListener('click', () => {
-  console.log('Kliknięto Start gry');
-  if (!isHost) {
-    console.log('Tylko host może rozpocząć grę');
-    return;
-  }
-
-  const roomRef = db.ref(`rooms/${currentRoomCode}`);
-  roomRef.once('value').then(snapshot => {
-    const room = snapshot.val();
-    const players = room.players || {};
-    const numPlayers = Object.keys(players).length;
-    const minPlayers = room.numImpostors + 2;
-
-    if (numPlayers < minPlayers) {
-      showMessage(`❌ Za mało graczy! Minimum ${minPlayers}.`);
-      console.log('Za mało graczy:', numPlayers, 'Minimum:', minPlayers);
-      return;
-    }
-
-    if (words.length === 0) {
-      showMessage('❌ Brak słów do gry!');
-      console.log('Brak słów do gry');
-      return;
-    }
-
-    const word = words[Math.floor(Math.random() * words.length)];
-    const playerIds = Object.keys(players);
-    const impostorIds = [];
-    const shuffledIds = playerIds.sort(() => Math.random() - 0.5);
-    for (let i = 0; i < room.numImpostors; i++) {
-      if (shuffledIds[i]) impostorIds.push(shuffledIds[i]);
-    }
-
-    const updates = {};
-    playerIds.forEach(id => {
-      updates[`players/${id}/role`] = impostorIds.includes(id) ? 'impostor' : 'normal';
-      updates[`players/${id}/votedFor`] = null; // Wyczyść głosy z poprzedniej rundy
-    });
-
-    const nonImpostorIds = playerIds.filter(id => !impostorIds.includes(id));
-    let starterId;
-    if (nonImpostorIds.length > 0) {
-      starterId = nonImpostorIds[Math.floor(Math.random() * nonImpostorIds.length)];
-    } else {
-      starterId = playerIds[Math.floor(Math.random() * playerIds.length)];
-    }
-
-    updates.gameStarted = true;
-    updates.votingActive = false; 
-    updates.currentWord = word;
-    updates.starterId = starterId;
-    updates.currentRound = (room.currentRound || 0) + 1;
-
-    roomRef.update(updates).then(() => {
-      console.log('Gra rozpoczęta:', { word, impostorIds, starterId });
-      showMessage('Gra rozpoczęta!', 3000);
-    }).catch(error => {
-      console.error('Błąd rozpoczynania gry:', error);
-      showMessage('❌ Błąd rozpoczynania gry!');
-    });
-  }).catch(error => {
-    console.error('Błąd pobierania danych pokoju:', error);
-    showMessage('❌ Błąd pobierania danych pokoju!');
-  });
-});
-
-// *** NOWY PRZYCISK ROZPOCZĘCIA GŁOSOWANIA ***
-startVoteBtn.addEventListener('click', () => {
-  console.log('Kliknięto Rozpocznij głosowanie');
-  if (!isHost) {
-    console.log('Tylko host może rozpocząć głosowanie');
-    return;
-  }
-  db.ref(`rooms/${currentRoomCode}`).update({ 
-    votingActive: true 
-  });
-});
-
-// *** NOWY PRZYCISK POTWIERDZENIA GŁOSU ***
-confirmVoteBtn.addEventListener('click', () => {
-  if (!selectedPlayerId) {
-    showMessage('❌ Najpierw wybierz gracza, na którego chcesz zagłosować!', 2500);
-    return;
-  }
-  voteForPlayer(selectedPlayerId);
-});
-
-
-// Przycisk "Zakończ rundę" (DEBUG)
-endRoundBtn.addEventListener('click', () => {
-  console.log('Kliknięto Zakończ rundę (PRZYCISK PANIKI)');
-  if (!isHost) {
-    console.log('Tylko host może zakończyć rundę');
-    return;
-  }
-
-  const roomRef = db.ref(`rooms/${currentRoomCode}`);
-  roomRef.once('value').then(snapshot => {
-    const room = snapshot.val();
-    const players = room.players || {};
-    const currentWord = room.currentWord;
-    const impostorIds = Object.keys(players).filter(id => players[id].role === 'impostor');
-    const impostorNames = impostorIds.map(id => players[id].name).join(', ');
-
-    const updates = {
-      gameStarted: false,
-      votingActive: false, 
-      currentWord: null,
-      starterId: null,
-      resetMessage: `Runda zakończona! Słowo: <strong>${currentWord}</strong><br>Impostorzy: <strong>${impostorNames || 'Brak'}</strong>`
-    };
-    Object.keys(players).forEach(id => {
-      updates[`players/${id}/role`] = null;
-      updates[`players/${id}/votedFor`] = null;
-    });
-
-    roomRef.update(updates).then(() => {
-      console.log('Runda zakończona:', { word: currentWord, impostorIds });
-      hasShownStartMessage = false;
-    }).catch(error => {
-      console.error('Błąd kończenia rundy:', error);
-      showMessage('❌ Błąd kończenia rundy!');
-    });
-  }).catch(error => {
-    console.error('Błąd pobierania danych pokoju:', error);
-    showMessage('❌ Błąd pobierania danych pokoju!');
-  });
-});
