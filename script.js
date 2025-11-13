@@ -234,6 +234,7 @@ allCategoriesBtn.querySelector('.checkbox').addEventListener('click', () => {
   if (selectedCategories.some(c => c.file === 'all')) {
     selectedCategories = [];
   } else {
+    // "Wszystkie" to teraz specjalny obiekt
     selectedCategories = [{ name: 'Wszystkie', file: 'all' }];
   }
   updateCategoryButtons();
@@ -271,6 +272,7 @@ confirmCategories.addEventListener('click', () => {
 
 async function loadWords() {
   words = [];
+  // Jeśli wybrano 'all', załaduj wszystkie kategorie z 'categories'
   const categoriesToLoad = selectedCategories.some(c => c.file === 'all') ? categories : selectedCategories;
   let loadedAnyFile = false;
 
@@ -278,6 +280,7 @@ async function loadWords() {
     const fetchPromises = categoriesToLoad.map(category =>
       fetchWithTimeout(`${wordsBaseUrl}${category.file}`)
         .then(categoryWords => {
+          // Mapujemy słowa do obiektów
           const mappedWords = categoryWords.map(word => ({
             word: word,
             category: category.name 
@@ -288,7 +291,10 @@ async function loadWords() {
         })
         .catch(error => {
           console.error(`Błąd ładowania pliku ${category.file}:`, error);
-          showMessage(`❌ Błąd ładowania kategorii ${category.name}! Pomijam.`);
+          // Użyj category.name (np. "Wszystkie") w komunikacie o błędzie
+          if (category.file !== 'all') { // Nie pokazuj błędu dla "Wszystkie"
+             showMessage(`❌ Błąd ładowania kategorii ${category.name}! Pomijam.`);
+          }
         })
     );
 
@@ -302,6 +308,7 @@ async function loadWords() {
   } catch (error) {
     console.error('Błąd ładowania słów:', error);
     try {
+      // Awaryjne ładowanie
       const response = await fetchWithTimeout(`${wordsBaseUrl}animals.json`);
       words = response.map(word => ({ word: word, category: 'Zwierzęta' }));
       console.log('Załadowano domyślne słowa (animals.json):', words.length);
@@ -416,7 +423,7 @@ function showMessage(text, duration = 3500) {
 }
 
 function showRoleMessage(text, duration = 5000) {
-  roleMessageBox.innerHTML = text.replace('\n', '<br>'); // Pozwól na nową linię
+  roleMessageBox.innerHTML = text.replace('\n', '<br>');
   roleMessageBox.style.display = 'block';
   setTimeout(() => {
     roleMessageBox.style.display = 'none';
@@ -530,14 +537,12 @@ plusImpostor.addEventListener('click', () => {
   }
 });
 
-// TEN PRZYCISK TERAZ PROWADZI DO EKRANU PODPOWIEDZI
 confirmImpostors.addEventListener('click', () => {
   console.log('Potwierdzono liczbę impostorów:', impostorCount);
   impostorSelectionBox.style.display = 'none';
   impostorHintBox.style.display = 'block';
 });
 
-// *** NOWE LISTENERY DLA EKRANU PODPOWIEDZI ***
 hintChanceSlider.addEventListener('input', (e) => {
   hintChance = parseInt(e.target.value, 10);
   hintChanceDisplay.textContent = hintChanceValues[hintChance];
@@ -598,6 +603,7 @@ function createRoom(numImpostors, chanceIndex, onStart) {
   });
 }
 
+// *** FUNKCJA JOINROOM ZOSTAŁA NAPRAWIONA ***
 joinRoomBtn.addEventListener('click', () => {
   console.log('Kliknięto Dołącz do pokoju');
   const name = playerNameInput.value.trim();
@@ -656,6 +662,17 @@ joinRoomBtn.addEventListener('click', () => {
       loginScreen.style.display = 'none';
       gameScreen.style.display = 'block';
       roomCodeDisplay.textContent = currentRoomCode;
+      
+      // *** POPRAWKA BŁĘDU #1: Prawidłowe ustawienie kategorii dla dołączającego gracza ***
+      const categoryNames = room.categories || ['Wszystkie']; // Pobierz nazwy z pokoju
+      if (categoryNames.includes('Wszystkie')) {
+        selectedCategories = [{ name: 'Wszystkie', file: 'all' }];
+      } else {
+        // Mapuj nazwy z powrotem na pełne obiekty kategorii
+        selectedCategories = categories.filter(c => categoryNames.includes(c.name));
+      }
+      loadWords(); // Teraz to zadziała i załaduje słowa (potrzebne, jeśli zostanie hostem)
+      
       db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).onDisconnect().remove();
       listenToRoom(currentRoomCode);
     }).catch(error => {
@@ -895,7 +912,7 @@ function listenToRoom(roomCode) {
     impostorCountDisplay.innerHTML = `Impostorzy: <span class="bold">${room.numImpostors || 0}</span>`;
     roundCounter.innerHTML = room.currentRound > 0 ? `Runda: <strong>${room.currentRound}</strong>` : '';
     
-    // NOWY WYŚWIETLACZ PODPOWIEDZI
+    // *** POPRAWKA BŁĘDU #2: Ta linia teraz zadziała dla wszystkich ***
     const hintChanceText = hintChanceValues[room.hintChance || 0];
     const hintOnStartText = room.hintOnStart ? " (Start)" : "";
     hintChanceInfoDisplay.innerHTML = `Podpowiedź: <span class="bold">${hintChanceText}${hintOnStartText}</span>`;
@@ -914,21 +931,18 @@ function listenToRoom(roomCode) {
     confirmVoteBtn.style.display = votingActive && !myVote ? 'block' : 'none';
     endRoundBtn.style.display = 'none';
 
-    // ZMIENIONA LOGIKA POKAZYWANIA ROLI (Z PODPOWIEDZIĄ)
     if (room.gameStarted && !votingActive && room.currentWord && iAmInRoom) {
       const isImpostor = iAmInRoom.role === 'impostor';
-      const hint = room.impostorHint; // Odczytaj podpowiedź z pokoju
+      const hint = room.impostorHint; 
       
       let message;
       if (isImpostor) {
-        // \n jest zamieniane na <br> w showRoleMessage
         const hintText = hint ? `\n(Podpowiedź: ${hint})` : '';
         message = `Jesteś oszustem!${hintText}`;
       } else {
         message = `Słowo: ${room.currentWord}`;
       }
 
-      // Pokaż wiadomość tylko raz na początku rundy
       if (!hasShownStartMessage) {
         showRoleMessage(message, 5000);
       }
@@ -984,12 +998,10 @@ startGameBtn.addEventListener('click', () => {
       return;
     }
 
-    // Host musi mieć załadowane słowa. Jeśli dołączył do pokoju i został hostem,
-    // a nie tworzył pokoju, jego 'words' będzie puste.
     if (words.length === 0) {
       showMessage('Ładowanie słów... Spróbuj ponownie za chwilę.');
       console.log('Host próbował wystartować grę, ale nie miał załadowanych słów. Ładuję...');
-      loadWords(); // Spróbuj załadować na wszelki wypadek
+      loadWords(); 
       return;
     }
 
@@ -1016,7 +1028,6 @@ startGameBtn.addEventListener('click', () => {
     selectionPool = selectionPool.concat(nonImpostorIds);
     let starterId = selectionPool[Math.floor(Math.random() * selectionPool.length)];
 
-    // --- NOWA LOGIKA PRZYZNAWANIA PODPOWIEDZI ---
     let hint = null;
     const hintChanceValue = hintChanceNumeric[room.hintChance || 0];
     const impostorStarted = impostorIds.includes(starterId);
