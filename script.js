@@ -234,7 +234,6 @@ allCategoriesBtn.querySelector('.checkbox').addEventListener('click', () => {
   if (selectedCategories.some(c => c.file === 'all')) {
     selectedCategories = [];
   } else {
-    // "Wszystkie" to teraz specjalny obiekt
     selectedCategories = [{ name: 'Wszystkie', file: 'all' }];
   }
   updateCategoryButtons();
@@ -272,7 +271,6 @@ confirmCategories.addEventListener('click', () => {
 
 async function loadWords() {
   words = [];
-  // Jeśli wybrano 'all', załaduj wszystkie kategorie z 'categories'
   const categoriesToLoad = selectedCategories.some(c => c.file === 'all') ? categories : selectedCategories;
   let loadedAnyFile = false;
 
@@ -280,7 +278,6 @@ async function loadWords() {
     const fetchPromises = categoriesToLoad.map(category =>
       fetchWithTimeout(`${wordsBaseUrl}${category.file}`)
         .then(categoryWords => {
-          // Mapujemy słowa do obiektów
           const mappedWords = categoryWords.map(word => ({
             word: word,
             category: category.name 
@@ -291,8 +288,7 @@ async function loadWords() {
         })
         .catch(error => {
           console.error(`Błąd ładowania pliku ${category.file}:`, error);
-          // Użyj category.name (np. "Wszystkie") w komunikacie o błędzie
-          if (category.file !== 'all') { // Nie pokazuj błędu dla "Wszystkie"
+          if (category.file !== 'all') {
              showMessage(`❌ Błąd ładowania kategorii ${category.name}! Pomijam.`);
           }
         })
@@ -308,7 +304,6 @@ async function loadWords() {
   } catch (error) {
     console.error('Błąd ładowania słów:', error);
     try {
-      // Awaryjne ładowanie
       const response = await fetchWithTimeout(`${wordsBaseUrl}animals.json`);
       words = response.map(word => ({ word: word, category: 'Zwierzęta' }));
       console.log('Załadowano domyślne słowa (animals.json):', words.length);
@@ -603,7 +598,6 @@ function createRoom(numImpostors, chanceIndex, onStart) {
   });
 }
 
-// *** FUNKCJA JOINROOM ZOSTAŁA NAPRAWIONA ***
 joinRoomBtn.addEventListener('click', () => {
   console.log('Kliknięto Dołącz do pokoju');
   const name = playerNameInput.value.trim();
@@ -663,15 +657,13 @@ joinRoomBtn.addEventListener('click', () => {
       gameScreen.style.display = 'block';
       roomCodeDisplay.textContent = currentRoomCode;
       
-      // *** POPRAWKA BŁĘDU #1: Prawidłowe ustawienie kategorii dla dołączającego gracza ***
-      const categoryNames = room.categories || ['Wszystkie']; // Pobierz nazwy z pokoju
+      const categoryNames = room.categories || ['Wszystkie'];
       if (categoryNames.includes('Wszystkie')) {
         selectedCategories = [{ name: 'Wszystkie', file: 'all' }];
       } else {
-        // Mapuj nazwy z powrotem na pełne obiekty kategorii
         selectedCategories = categories.filter(c => categoryNames.includes(c.name));
       }
-      loadWords(); // Teraz to zadziała i załaduje słowa (potrzebne, jeśli zostanie hostem)
+      loadWords(); 
       
       db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).onDisconnect().remove();
       listenToRoom(currentRoomCode);
@@ -912,7 +904,6 @@ function listenToRoom(roomCode) {
     impostorCountDisplay.innerHTML = `Impostorzy: <span class="bold">${room.numImpostors || 0}</span>`;
     roundCounter.innerHTML = room.currentRound > 0 ? `Runda: <strong>${room.currentRound}</strong>` : '';
     
-    // *** POPRAWKA BŁĘDU #2: Ta linia teraz zadziała dla wszystkich ***
     const hintChanceText = hintChanceValues[room.hintChance || 0];
     const hintOnStartText = room.hintOnStart ? " (Start)" : "";
     hintChanceInfoDisplay.innerHTML = `Podpowiedź: <span class="bold">${hintChanceText}${hintOnStartText}</span>`;
