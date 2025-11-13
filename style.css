@@ -298,8 +298,8 @@ body.dark-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
 #countsContainer {
   display: flex;
   justify-content: center;
-  flex-wrap: wrap; /* Pozwól na zawijanie */
-  gap: 1.5rem 3rem; /* 1.5rem w pionie, 3rem w poziomie */
+  flex-wrap: wrap; 
+  gap: 1.5rem 3rem; 
   margin: 0.8rem 0;
 }
 #playerCountDisplay, #impostorCountDisplay, #hintChanceInfoDisplay {
@@ -307,7 +307,7 @@ body.dark-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   font-family: var(--font-heading);
   color: var(--c-text-light-alt);
   text-shadow: 1px 1px 2px var(--c-shadow);
-  margin: 0; /* Usuń domyślny margines <p> */
+  margin: 0; 
 }
 #playerCountDisplay span, #impostorCountDisplay span, #hintChanceInfoDisplay span {
   font-weight: 800;
@@ -569,11 +569,16 @@ body.dark-mode #hintChanceSlider::-moz-range-thumb {
   background: var(--c-glass-highlight-hover);
 }
 .checkbox-container input[type="checkbox"]:checked + label .checkbox {
-  content: '✔';
+  content: '✔'; /* Nie działa w input, ale w label/span tak */
   background: var(--c-primary);
   border-color: var(--c-primary-light);
   color: var(--c-text-light);
 }
+/* Poprawka dla checkboxa, aby pokazywał "ptaszek" */
+.checkbox-container input[type="checkbox"]:checked + label .checkbox::before {
+  content: '✔';
+}
+
 
 /* --- Przyciski Pływające (Zasady, Tryb) --- */
 #rulesBtn, #themeToggle {
@@ -762,6 +767,15 @@ body.dark-mode #messageBox:not(.copy-message) {
 #categorySelectionBox #allCategoriesBtn .checkbox:hover {
   background: var(--c-glass-highlight-hover);
 }
+#categorySelectionBox #allCategoriesBtn .checkbox::before {
+  content: ''; /* Domyślnie pusty */
+}
+.checkbox-container input[type="checkbox"]:checked + label .checkbox::before,
+#categorySelectionBox #allCategoriesBtn .checkbox:checked::before {
+  content: '✔'; /* Pokazuje ptaszek */
+}
+
+
 #categorySelectionBox #confirmCategories {
   width: 150px;
   margin: 1.5rem auto 0;
@@ -931,7 +945,6 @@ body.dark-mode #messageBox:not(.copy-message) {
     font-size: 2.2rem;
   }
   
-  /* Poprawka dla nowego modala na małych ekranach */
   #impostorHintBox p {
     font-size: 2.2rem;
   }
