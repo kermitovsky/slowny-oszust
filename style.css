@@ -477,33 +477,42 @@ body.voting-active #playersList li.host.has-voted .avatar::after {
   position: relative;
   width: 100%;
   max-width: 350px;
-  margin: 3rem auto 3.5rem auto; /* Zwiększony dolny margines na etykiety */
-  padding: 0 5px;
+  margin: 3rem auto 3.5rem auto; 
+  padding: 0; /* Usunięty padding boczny */
   box-sizing: border-box;
 }
 
+/* Kontener na etykiety pod sliderem */
 .slider-labels {
-  display: flex;
-  justify-content: space-between;
-  position: absolute;
+  position: relative;
   width: 100%;
-  left: 0;
-  top: 15px; /* Odsuń etykiety pod slider */
-  padding: 0 5px;
-  box-sizing: border-box;
+  height: 20px; /* Daj mu wysokość, żeby było miejsce */
+  margin-top: 10px; /* Odsuń od slidera */
 }
-/* Etykieta pod sliderem */
+
+/* Etykieta (0%, 25%, itd.) */
 .slider-labels .slider-label {
   font-size: 1.6rem;
   color: var(--c-text-light-alt);
   opacity: 0.7; /* "Lekkoszary" */
-  position: relative;
-  width: 0;
   white-space: nowrap;
-  transform: translateX(-50%);
+  
+  /* Pozycjonowanie absolutne względem .slider-labels */
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%); /* Magia centrowania */
+  
   transition: opacity 0.2s, transform 0.2s, font-weight 0.2s;
 }
-/* Aktywna etykieta */
+
+/* Pozycjonowanie każdej etykiety */
+.slider-labels .slider-label:nth-child(1) { left: 0%; }
+.slider-labels .slider-label:nth-child(2) { left: 25%; }
+.slider-labels .slider-label:nth-child(3) { left: 50%; }
+.slider-labels .slider-label:nth-child(4) { left: 75%; }
+.slider-labels .slider-label:nth-child(5) { left: 100%; }
+
+/* Aktywna, podświetlona etykieta */
 .slider-labels .slider-label.label-active {
   opacity: 1;
   font-weight: 800;
@@ -511,11 +520,12 @@ body.voting-active #playersList li.host.has-voted .avatar::after {
   color: #fff;
 }
 
-/* Wyświetlacz procentów (usunięty) */
+/* Ukryty osobny wyświetlacz procentów */
 .slider-value-display {
   display: none;
 }
 
+/* Sam suwak */
 #hintChanceSlider {
   -webkit-appearance: none;
   appearance: none;
@@ -526,14 +536,16 @@ body.voting-active #playersList li.host.has-voted .avatar::after {
   outline: none;
   padding: 0;
   margin: 0;
+  /* Kropki na sliderze */
   background-image: 
     radial-gradient(circle at center, var(--c-primary-light) 4px, transparent 4px),
     radial-gradient(circle at center, var(--c-primary-light) 4px, transparent 4px),
     radial-gradient(circle at center, var(--c-primary-light) 4px, transparent 4px),
     radial-gradient(circle at center, var(--c-primary-light) 4px, transparent 4px),
     radial-gradient(circle at center, var(--c-primary-light) 4px, transparent 4px);
-  background-size: 4px 4px;
+  background-size: 4px 4px; /* Rozmiar kropki */
   background-repeat: no-repeat;
+  /* Pozycje kropek */
   background-position: 0% 50%, 25% 50%, 50% 50%, 75% 50%, 100% 50%;
 }
 
@@ -541,19 +553,19 @@ body.voting-active #playersList li.host.has-voted .avatar::after {
 #hintChanceSlider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 28px; /* Zwiększona z 24px */
-  height: 28px; /* Zwiększona z 24px */
+  width: 28px; /* Powiększona */
+  height: 28px; /* Powiększona */
   border-radius: 50%;
   background: var(--c-primary);
   border: 4px solid var(--c-text-light);
   cursor: pointer;
-  margin-top: -10px; /* Dopasowanie do nowej wysokości ( (28/2) - (8/2) = 10) */
+  margin-top: -10px; /* (28/2) - (8/2) = 10 */
   box-shadow: 0 2px 5px var(--c-shadow-heavy);
 }
 
 #hintChanceSlider::-moz-range-thumb {
-  width: 28px; /* Zwiększona z 24px */
-  height: 28px; /* Zwiększona z 24px */
+  width: 28px; /* Powiększona */
+  height: 28px; /* Powiększona */
   border-radius: 50%;
   background: var(--c-primary);
   border: 4px solid var(--c-text-light);
@@ -998,8 +1010,9 @@ body.dark-mode #messageBox:not(.copy-message) {
   .slider-container {
     padding-bottom: 25px;
     margin-bottom: 2.5rem;
+    margin-top: 2rem; /* Dopasowanie góry */
   }
   .slider-labels {
-    top: 25px;
+    margin-top: 5px; /* Dopasuj pozycję etykiet na mobilce */
   }
 }
