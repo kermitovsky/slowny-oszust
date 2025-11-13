@@ -43,7 +43,7 @@ const voteResultDisplay = document.getElementById('voteResultDisplay');
 // NOWE ELEMENTY DOM DLA PODPOWIEDZI
 const impostorHintBox = document.getElementById('impostorHintBox');
 const hintChanceSlider = document.getElementById('hintChanceSlider');
-// USUNIĘTY: const hintChanceDisplay = document.getElementById('hintChanceDisplay');
+// USUNIĘTY: hintChanceDisplay
 const hintOnStartCheckbox = document.getElementById('hintOnStartCheckbox');
 const confirmHintSettingsBtn = document.getElementById('confirmHintSettingsBtn');
 const hintChanceInfoDisplay = document.getElementById('hintChanceInfoDisplay');
@@ -52,7 +52,7 @@ const hintChanceInfoDisplay = document.getElementById('hintChanceInfoDisplay');
 let currentRoomCode = null;
 let currentPlayerId = null;
 let currentPlayerName = null;
-let isHost = false;
+let isHost = false; // To jest teraz aktualizowane we właściwym momencie
 let words = []; // OBIEKTY: { word: "Kot", category: "Zwierzęta" }
 let impostorCount = 1;
 let selectedCategories = [];
@@ -362,7 +362,8 @@ function assignUniqueColor(players) {
   return selectedColor;
 }
 
-function updatePlayersList(players) {
+// *** POPRAWKA #1: Funkcja przyjmuje teraz 'localIsHost' ***
+function updatePlayersList(players, localIsHost) {
   playersList.innerHTML = '';
   if (!players || !Object.keys(players).length) {
     playersList.innerHTML = '<li>Brak graczy</li>';
@@ -378,6 +379,8 @@ function updatePlayersList(players) {
     avatar.style.backgroundColor = player.avatarColor || avatarColors[0];
     li.appendChild(avatar);
     li.appendChild(document.createTextNode(` ${player.name || 'Nieznany gracz'}`));
+    
+    // Ta logika (rysowanie tekstu) jest poprawna, bo czyta z obiektu 'player'
     if (player.isHost) {
       li.classList.add('host');
       li.appendChild(document.createTextNode(' (host)'));
@@ -386,7 +389,8 @@ function updatePlayersList(players) {
       li.classList.add('self');
     }
 
-    if (isHost && id !== currentPlayerId) {
+    // *** POPRAWKA #2: Użyj 'localIsHost' zamiast globalnej 'isHost' ***
+    if (localIsHost && id !== currentPlayerId) {
       const kickBtn = document.createElement('button');
       kickBtn.textContent = '×';
       kickBtn.title = 'Wyrzuć gracza';
@@ -452,12 +456,13 @@ function resetToLobby() {
   hintChance = 0;
   hintOnStart = false;
   hintChanceSlider.value = 0;
-  // ZMIANA: Zresetuj etykiety slidera
-  document.querySelectorAll('.slider-labels .slider-label').forEach(label => label.classList.remove('label-active'));
-  const firstLabel = document.querySelector('.slider-labels .slider-label:first-child');
-  if (firstLabel) {
-    firstLabel.classList.add('label-active');
-  }
+  document.querySelectorAll('.slider-labels .slider-label').forEach((label, index) => {
+    if (index === 0) {
+      label.classList.add('label-active');
+    } else {
+      label.classList.remove('label-active');
+    }
+  });
 
   hintOnStartCheckbox.checked = false;
   
@@ -544,17 +549,19 @@ confirmImpostors.addEventListener('click', () => {
   impostorHintBox.style.display = 'block';
 });
 
-// ZMIANA: Logika slidera
 hintChanceSlider.addEventListener('input', (e) => {
   hintChance = parseInt(e.target.value, 10);
   console.log('Szansa na podpowiedź:', hintChanceValues[hintChance]);
   
   // Zaktualizuj etykiety
   const labels = document.querySelectorAll('.slider-labels .slider-label');
-  labels.forEach(label => label.classList.remove('label-active'));
-  if (labels[hintChance]) {
-      labels[hintChance].classList.add('label-active');
-  }
+  labels.forEach((label, index) => {
+    if (index === hintChance) {
+      label.classList.add('label-active');
+    } else {
+      label.classList.remove('label-active');
+    }
+  });
 });
 
 hintOnStartCheckbox.addEventListener('change', (e) => {
@@ -863,6 +870,7 @@ function tallyVotes(room) {
 }
 
 
+// *** NAJWAŻNIEJSZA ZMIANA JEST TUTAJ ***
 function listenToRoom(roomCode) {
   const roomRef = db.ref(`rooms/${roomCode}`);
   roomRef.on('value', snapshot => {
@@ -894,17 +902,22 @@ function listenToRoom(roomCode) {
       if (newHostId === currentPlayerId) {
         console.log('To ja! Promuję się na nowego hosta.');
         db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).update({ isHost: true });
+        // Nie ma potrzeby ręcznej zmiany 'isHost', pętla 'listenToRoom' sama to wykryje
       }
     }
+
+    // *** POPRAWKA #3: Ustaw 'isHost' NA PODSTAWIE NAJNOWSZYCH DANYCH ***
+    isHost = iAmInRoom ? iAmInRoom.isHost : false; 
 
     if (votingActive) {
       document.body.classList.add('voting-active');
       wordDisplay.innerHTML = "<strong>Czas na głosowanie! Kto jest oszustem?</strong>";
-      updatePlayersListForVoting(players);
+      updatePlayersListForVoting(players); // Ta funkcja nie potrzebuje 'isHost'
     } else {
       document.body.classList.remove('voting-active');
       selectedPlayerId = null;
-      updatePlayersList(players);
+      // *** POPRAWKA #4: Przekaż zaktualizowany 'isHost' do funkcji rysującej ***
+      updatePlayersList(players, isHost); 
     }
 
     document.querySelectorAll('.kickBtn').forEach(btn => {
@@ -929,7 +942,7 @@ function listenToRoom(roomCode) {
         : '';
     }
 
-    isHost = iAmInRoom ? iAmInRoom.isHost : false; 
+    // *** Usunięto zduplikowane ustawienie 'isHost' stąd ***
     startGameBtn.style.display = isHost && !room.gameStarted && !votingActive ? 'block' : 'none';
     startVoteBtn.style.display = isHost && room.gameStarted && !votingActive ? 'block' : 'none';
     confirmVoteBtn.style.display = votingActive && !myVote ? 'block' : 'none';
