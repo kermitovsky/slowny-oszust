@@ -782,9 +782,9 @@ function tallyVotes(room) {
     });
 
     if (ejectedRole === 'impostor') {
-      updates.resetMessage = `Impostor został wykryty!<br>(Był nim <strong>${ejectedPlayer.name}</strong>)<br>Słowo: <strong>${room.currentWord}</strong>`;
+      updates.resetMessage = `Impostor został wykryty!<br>(Oszust: <strong>${ejectedPlayer.name}</strong>)<br>Słowo: <strong>${room.currentWord}</strong>`;
     } else {
-      updates.resetMessage = `Impostor wygrał rundę!<br>(Wyrzucono niewinnego <strong>${ejectedPlayer.name}</strong>)<br>Słowo: <strong>${room.currentWord}</strong>`;
+      updates.resetMessage = `Impostor wygrał rundę!<br>(Wygłosowano <strong>${ejectedPlayer.name}</strong>)<br>Słowo: <strong>${room.currentWord}</strong>`;
     }
   }
 
@@ -1035,3 +1035,4 @@ endRoundBtn.addEventListener('click', () => {
     showMessage('❌ Błąd pobierania danych pokoju!');
   });
 });
+
