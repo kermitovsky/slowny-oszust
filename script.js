@@ -43,7 +43,7 @@ const voteResultDisplay = document.getElementById('voteResultDisplay');
 // NOWE ELEMENTY DOM DLA PODPOWIEDZI
 const impostorHintBox = document.getElementById('impostorHintBox');
 const hintChanceSlider = document.getElementById('hintChanceSlider');
-const hintChanceDisplay = document.getElementById('hintChanceDisplay');
+// USUNIĘTY: const hintChanceDisplay = document.getElementById('hintChanceDisplay');
 const hintOnStartCheckbox = document.getElementById('hintOnStartCheckbox');
 const confirmHintSettingsBtn = document.getElementById('confirmHintSettingsBtn');
 const hintChanceInfoDisplay = document.getElementById('hintChanceInfoDisplay');
@@ -452,7 +452,13 @@ function resetToLobby() {
   hintChance = 0;
   hintOnStart = false;
   hintChanceSlider.value = 0;
-  hintChanceDisplay.textContent = hintChanceValues[0];
+  // ZMIANA: Zresetuj etykiety slidera
+  document.querySelectorAll('.slider-labels .slider-label').forEach(label => label.classList.remove('label-active'));
+  const firstLabel = document.querySelector('.slider-labels .slider-label:first-child');
+  if (firstLabel) {
+    firstLabel.classList.add('label-active');
+  }
+
   hintOnStartCheckbox.checked = false;
   
   document.querySelectorAll('.emoji-btn').forEach(btn => btn.classList.remove('selected'));
@@ -538,10 +544,17 @@ confirmImpostors.addEventListener('click', () => {
   impostorHintBox.style.display = 'block';
 });
 
+// ZMIANA: Logika slidera
 hintChanceSlider.addEventListener('input', (e) => {
   hintChance = parseInt(e.target.value, 10);
-  hintChanceDisplay.textContent = hintChanceValues[hintChance];
   console.log('Szansa na podpowiedź:', hintChanceValues[hintChance]);
+  
+  // Zaktualizuj etykiety
+  const labels = document.querySelectorAll('.slider-labels .slider-label');
+  labels.forEach(label => label.classList.remove('label-active'));
+  if (labels[hintChance]) {
+      labels[hintChance].classList.add('label-active');
+  }
 });
 
 hintOnStartCheckbox.addEventListener('change', (e) => {
