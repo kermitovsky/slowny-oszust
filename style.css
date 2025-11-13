@@ -37,6 +37,7 @@
 /* 2. TRYB CIEMNY (Tylko podmiana zmiennych) */
 /* =================================================================== */
 body.dark-mode {
+  /* Po prostu podmień wartości zmiennych, a reszta stylów sama się zaktualizuje! */
   --c-bg-1: #4b0082;
   --c-bg-2: #2c003e;
   --c-bg-3: #2c003e; /* Zastąpienie pomarańczowego tła */
@@ -88,7 +89,6 @@ h1 {
 }
 
 #gameScreen h1 {
-  /* Ten styl był u Ciebie - zostawiam, na wypadek gdybyś go używał */
   font-size: 4.5rem;
   margin-bottom: 1.5rem;
 }
@@ -162,7 +162,6 @@ button:disabled {
   justify-content: center;
 }
 
-/* NOWA WSPÓLNA KLASA DLA WSZYSTKICH OKIEN POPUP */
 .modal-box {
   position: fixed;
   top: 50%;
@@ -189,7 +188,6 @@ body.dark-mode .modal-box {
   border: 2px solid var(--c-glass-border);
 }
 
-/* NOWA WSPÓLNA KLASA DLA SCROLLBARÓW */
 .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: var(--c-primary-light) var(--c-glass-bg);
@@ -264,6 +262,13 @@ body.dark-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
 #endRound {
   background-color: var(--c-danger-dark);
 }
+#startVoteBtn {
+  background-color: var(--c-success);
+}
+#startVoteBtn:hover:not(:disabled) {
+  background: linear-gradient(45deg, var(--c-success), #25a25a);
+}
+
 
 #copyRoomCode {
   background: linear-gradient(45deg, var(--c-primary), var(--c-primary-light));
@@ -320,7 +325,17 @@ body.dark-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   font-weight: 800;
 }
 
-/* --- Lista Graczy (z usuniętym !important) --- */
+#voteResultDisplay {
+  font-size: 1.8rem;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  color: var(--c-success);
+  text-shadow: 1px 1px 2px var(--c-shadow);
+  text-align: center;
+  margin: 1rem 0;
+}
+
+/* --- Lista Graczy --- */
 #playersList {
   list-style: none;
   padding: 0;
@@ -337,6 +352,7 @@ body.dark-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   align-items: center;
   animation: fadeIn 0.3s ease-in-out;
   box-sizing: border-box;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
 }
 body.dark-mode #playersList li {
   background-color: rgba(255, 255, 255, 0.1);
@@ -355,6 +371,7 @@ body.dark-mode #playersList li {
   box-shadow: 0 2px 5px var(--c-shadow);
   position: absolute;
   left: 0.8rem;
+  transition: transform 0.2s ease;
 }
 #playersList li.host .avatar::after {
   content: '👑';
@@ -388,9 +405,8 @@ body.dark-mode #playersList li {
   background-color: var(--c-danger-dark);
 }
 
-/* Zwiększona szczegółowość selektora = brak !important */
 #playersList li.host {
-  color: #3498db; /* Inny kolor niż paleta, zostawiam */
+  color: #3498db;
   font-weight: bold;
 }
 #playersList li.self {
@@ -398,15 +414,67 @@ body.dark-mode #playersList li {
   font-weight: bold;
 }
 body.dark-mode #playersList li.self {
-  color: var(--c-primary); /* Używa pomarańczowego w dark mode */
+  color: var(--c-primary);
 }
+
+/* =================================================================== */
+/* 5.5. STYLE GŁOSOWANIA (NOWA SEKCJA) */
+/* =================================================================== */
+body.voting-active #playersList li.vote-target {
+  cursor: pointer;
+}
+body.voting-active #playersList li.vote-target:hover {
+  background-color: rgba(255, 255, 255, 1);
+}
+body.dark-mode #playersList li.vote-target:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Styl dla gracza, na którego zagłosowałem */
+body.voting-active #playersList li.voted-for {
+  background-color: var(--c-success);
+  color: var(--c-text-light);
+  font-weight: bold;
+}
+body.dark-mode #playersList li.voted-for {
+  color: var(--c-text-dark);
+}
+
+/* Styl dla samego siebie (nie można na siebie głosować) */
+body.voting-active #playersList li.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Pokazuje "ptaszek" przy awatarze, gdy gracz zagłosował */
+body.voting-active #playersList li.has-voted .avatar::after {
+  content: '✔';
+  position: absolute;
+  bottom: -0.4rem;
+  right: -0.4rem;
+  font-size: 0.9rem;
+  background-color: var(--c-success);
+  color: white;
+  border-radius: 50%;
+  width: 1rem;
+  height: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+body.voting-active #playersList li.host.has-voted .avatar::after {
+  /* Naprawia konflikt z koroną hosta */
+  right: 1.2rem;
+}
+
 
 /* --- Przyciski Pływające (Zasady, Tryb) --- */
 #rulesBtn, #themeToggle {
   position: fixed;
   bottom: 1.5rem;
   border-radius: 50%;
-  background: rgba(52, 152, 219, 0.3); /* Używa --c-accent, ale z inną alfą */
+  background: rgba(52, 152, 219, 0.3);
   color: var(--c-text-light);
   font-size: 2rem;
   font-weight: bold;
@@ -438,7 +506,6 @@ body.dark-mode #playersList li.self {
 
 /* --- Okienka Modalne (Tylko unikalne style) --- */
 
-/* #messageBox ma unikalny styl (mniejszy, inny) */
 #messageBox {
   background: rgba(255, 255, 255, 0.8);
   color: var(--c-text-dark);
@@ -447,10 +514,8 @@ body.dark-mode #playersList li.self {
   font-weight: 600;
   box-shadow: 0 5px 15px var(--c-shadow-heavy);
   animation: scaleIn 0.3s ease-in-out;
-  /* Reszta stylów (position, transform, etc.) jest w .modal-box */
 }
 #messageBox:not(.copy-message) {
-  /* Nadpisuje style, gdy jest to "duża" wiadomość */
   font-size: 2.8rem;
   background: linear-gradient(135deg, var(--c-primary), var(--c-bg-3));
   color: var(--c-text-light);
@@ -539,7 +604,7 @@ body.dark-mode #messageBox:not(.copy-message) {
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 1rem;
   margin-bottom: 1.5rem;
-  margin-right: 30px; /* Dziwny margines, ale zostawiam */
+  margin-right: 30px;
   max-height: 300px;
   overflow-y: auto;
   overflow-x: hidden;
@@ -742,7 +807,6 @@ body.dark-mode #messageBox:not(.copy-message) {
     right: 5rem;
   }
 
-  /* Style dla modali na małych ekranach */
   .modal-box {
     padding: 1.5rem;
     max-height: 85vh;
