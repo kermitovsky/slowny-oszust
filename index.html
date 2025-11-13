@@ -34,6 +34,7 @@
       <div id="countsContainer">
         <p id="playerCountDisplay"></p>
         <p id="impostorCountDisplay"></p>
+        <p id="hintChanceInfoDisplay"></p>
       </div>
       
       <p id="voteResultDisplay" style="display:none;"></p>
@@ -72,8 +73,26 @@
       <span id="impostorCount">1</span>
       <button id="plusImpostor" title="Zwiększ">+</button>
     </div>
-    <button id="confirmImpostors" disabled>Stwórz</button>
-    <p id="recommendedPlayers"></p>
+    <button id="confirmImpostors" disabled>Dalej</button> <p id="recommendedPlayers"></p>
+  </div>
+
+  <div id="impostorHintBox" class="modal-box" style="display:none;">
+    <p>Szansa podpowiedzi dla impostora</p>
+    
+    <div class="slider-container">
+      <input type="range" min="0" max="4" value="0" step="1" id="hintChanceSlider" />
+      <span id="hintChanceDisplay">0%</span>
+    </div>
+
+    <div class="checkbox-container">
+      <input type="checkbox" id="hintOnStartCheckbox" />
+      <label for="hintOnStartCheckbox">
+        <span class="checkbox"></span>
+        Gdy zaczyna mówić
+      </label>
+    </div>
+    
+    <button id="confirmHintSettingsBtn">Stwórz pokój</button>
   </div>
   
   <div id="rulesBox" class="modal-box custom-scrollbar">
