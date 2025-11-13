@@ -50,7 +50,7 @@ let impostorCount = 1;
 let selectedCategories = [];
 let hasShownStartMessage = false;
 let selectedEmoji = null;
-let selectedPlayerId = null; // NOWA ZMIENNA: Kogo zaznaczyłem do głosowania
+let selectedPlayerId = null; // Kogo zaznaczyłem do głosowania
 
 // Kategorie
 const categories = [
@@ -394,7 +394,7 @@ function showRoleMessage(text, duration = 5000) {
 function resetToLobby() {
   startGameBtn.style.display = isHost ? 'block' : 'none';
   startVoteBtn.style.display = 'none';
-  confirmVoteBtn.style.display = 'none'; // Ukryj też przycisk potwierdzenia
+  confirmVoteBtn.style.display = 'none';
   endRoundBtn.style.display = 'none';
   roleMessageBox.style.display = 'none';
   categorySelectionBox.style.display = 'none';
@@ -411,7 +411,7 @@ function resetToLobby() {
   selectedCategories = [];
   hasShownStartMessage = false;
   selectedEmoji = null;
-  selectedPlayerId = null; // Zresetuj wybór
+  selectedPlayerId = null;
   document.querySelectorAll('.emoji-btn').forEach(btn => btn.classList.remove('selected'));
   updateImpostorButtons();
   updateRecommendedPlayers();
@@ -508,7 +508,7 @@ function createRoom(numImpostors) {
       [currentPlayerId]: playerData
     },
     gameStarted: false,
-    votingActive: false, // NOWY STAN
+    votingActive: false,
     currentWord: null,
     resetMessage: null,
     starterId: null,
@@ -649,7 +649,7 @@ leaveRoomBtn.addEventListener('click', () => {
   }
 });
 
-// *** NOWA FUNKCJA DO RYSOWANIA LISTY GRACZY POD GŁOSOWANIE ***
+// --- ZMODYFIKOWANA FUNKCJA GŁOSOWANIA ---
 function updatePlayersListForVoting(players) {
   playersList.innerHTML = '';
   if (!players || !Object.keys(players).length) {
@@ -661,7 +661,7 @@ function updatePlayersListForVoting(players) {
 
   for (const [id, player] of Object.entries(players)) {
     const li = document.createElement('li');
-    li.dataset.playerId = id; // Dodajemy ID gracza do elementu
+    li.dataset.playerId = id;
     const avatar = document.createElement('span');
     avatar.classList.add('avatar');
     avatar.textContent = player.emoji || '❓';
@@ -677,10 +677,14 @@ function updatePlayersListForVoting(players) {
       li.classList.add('has-voted');
     }
 
-    // Obsługa logiki klikania
+    // Logika klikania ZMIENIONA
     if (myVote) {
       // Już zagłosowałem, zablokuj wszystko
       li.classList.add('disabled');
+      // Pokaż, na kogo zagłosowałem (jeśli to ten)
+      if (myVote === id) {
+        li.classList.add('player-selected'); // Używamy tego samego stylu co do zaznaczania
+      }
     } else {
       // Jeszcze nie zagłosowałem
       if (id === currentPlayerId) {
@@ -688,7 +692,6 @@ function updatePlayersListForVoting(players) {
       } else {
         li.classList.add('vote-target'); // Inni to cele
         
-        // Podświetl, jeśli jest aktualnie wybrany
         if (selectedPlayerId === id) {
           li.classList.add('player-selected');
         }
@@ -697,6 +700,7 @@ function updatePlayersListForVoting(players) {
         li.addEventListener('click', () => {
           selectedPlayerId = id;
           // Prerysuj listę, żeby pokazać "zaznaczenie"
+          // To jest trochę nieefektywne, ale proste i działa
           updatePlayersListForVoting(players); 
         });
       }
@@ -705,7 +709,7 @@ function updatePlayersListForVoting(players) {
   }
 }
 
-// *** NOWA FUNKCJA DO ZAPISYWANIA GŁOSU ***
+// --- ZMODYFIKOWANA FUNKCJA DO ZAPISYWANIA GŁOSU ---
 function voteForPlayer(targetId) {
   console.log(`Głosuję na: ${targetId}`);
   db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).update({
@@ -714,12 +718,12 @@ function voteForPlayer(targetId) {
   selectedPlayerId = null; // Zresetuj wybór po zagłosowaniu
 }
 
-// *** NOWA FUNKCJA DO PODLICZANIA GŁOSÓW (Z LOGIKĄ REMISU) ***
+// --- ZMODYFIKOWANA FUNKCJA DO PODLICZANIA GŁOSÓW (Z LOGIKĄ REMISU) ---
 function tallyVotes(room) {
   console.log('Podliczanie głosów...');
   const players = room.players;
   const playerIds = Object.keys(players);
-  const votes = {}; // Obiekt do liczenia głosów: { playerId: count }
+  const votes = {};
   let totalVotes = 0;
 
   for (const playerId of playerIds) {
@@ -730,10 +734,9 @@ function tallyVotes(room) {
     }
   }
 
-  // Sprawdź, czy wszyscy zagłosowali
   if (totalVotes < playerIds.length) {
     console.log('Jeszcze nie wszyscy zagłosowali.');
-    return; // Przerwij
+    return;
   }
 
   let maxVotes = 0;
@@ -746,7 +749,7 @@ function tallyVotes(room) {
       ejectedPlayerId = playerId;
       isTie = false;
     } else if (count === maxVotes && maxVotes > 0) {
-      isTie = true; // Mamy remis!
+      isTie = true;
     }
   }
   
@@ -763,32 +766,29 @@ function tallyVotes(room) {
   });
 
   if (isTie || !ejectedPlayerId) {
-    // *** NOWA LOGIKA: REMIS - KONTUNUUJ GRĘ ***
+    // REMIS - KONTUNUUJ GRĘ
     updates.resetMessage = `REMIS! Nikt nie odpada.<br>Kontynuujcie dyskusję!`;
-    // WAŻNE: *Nie* resetujemy gameStarted, currentWord, ani ról!
+    // Nie resetujemy gameStarted, currentWord, ani ról!
   } else {
-    // *** NOWA LOGIKA: KTOŚ WYLECIAŁ - ZAKOŃCZ RUNDĘ ***
+    // KTOŚ WYLECIAŁ - ZAKOŃCZ RUNDĘ
     const ejectedPlayer = players[ejectedPlayerId];
-    const ejectedRole = ejectedPlayer.role;
     
-    // Resetujemy grę do lobby
     updates.gameStarted = false;
     updates.currentWord = null;
     updates.starterId = null;
     
-    // Wyczyść role
     playerIds.forEach(id => {
       updates[`players/${id}/role`] = null;
     });
 
-    if (ejectedRole === 'impostor') {
+    // Twoje spersonalizowane komunikaty!
+    if (ejectedPlayer.role === 'impostor') {
       updates.resetMessage = `Impostor został wykryty!<br>(Oszust: <strong>${ejectedPlayer.name}</strong>)<br>Słowo: <strong>${room.currentWord}</strong>`;
     } else {
       updates.resetMessage = `Impostor wygrał rundę!<br>(Wygłosowano <strong>${ejectedPlayer.name}</strong>)<br>Słowo: <strong>${room.currentWord}</strong>`;
     }
   }
 
-  // Wyślij zmiany do Firebase
   db.ref(`rooms/${currentRoomCode}`).update(updates);
 }
 
@@ -814,7 +814,7 @@ function listenToRoom(roomCode) {
     const hostExists = Object.values(players).some(p => p.isHost);
     const iAmInRoom = players[currentPlayerId];
     const votingActive = room.votingActive || false;
-    const myVote = players[currentPlayerId]?.votedFor;
+    const myVote = iAmInRoom ? iAmInRoom.votedFor : null; // Poprawka błędu
 
     // --- Logika Migracji Hosta (bez zmian) ---
     if (!hostExists && iAmInRoom && playerIds.length > 0) {
@@ -828,15 +828,15 @@ function listenToRoom(roomCode) {
       }
     }
 
-    // --- NOWA LOGIKA RYSO WANIA LISTY GRACZY ---
+    // --- Logika Rysowania Listy Graczy ---
     if (votingActive) {
       document.body.classList.add('voting-active');
       wordDisplay.innerHTML = "<strong>Czas na głosowanie! Kto jest oszustem?</strong>";
-      updatePlayersListForVoting(players);
+      updatePlayersListForVoting(players); // Użyj nowej funkcji
     } else {
       document.body.classList.remove('voting-active');
-      selectedPlayerId = null; // Zresetuj wybór, gdy głosowanie się kończy
-      updatePlayersList(players);
+      selectedPlayerId = null;
+      updatePlayersList(players); // Użyj starej funkcji
     }
 
     // --- Logika "Kopniaka" (bez zmian) ---
@@ -851,25 +851,25 @@ function listenToRoom(roomCode) {
     roundCounter.innerHTML = room.currentRound > 0 ? `Runda: <strong>${room.currentRound}</strong>` : '';
     
     if (!votingActive) {
-      wordDisplay.innerHTML = room.gameStarted && room.currentWord && players[currentPlayerId]
-        ? (players[currentPlayerId].role === 'impostor'
+      wordDisplay.innerHTML = room.gameStarted && room.currentWord && iAmInRoom
+        ? (iAmInRoom.role === 'impostor'
           ? `Twoje słowo: <span class="word-impostor">OSZUST!</span>`
           : `Twoje słowo: <span class="word-normal">${room.currentWord}</span>`)
         : '';
     }
 
     // --- Zarządzanie widocznością przycisków ---
-    isHost = players[currentPlayerId]?.isHost || false; 
+    isHost = iAmInRoom ? iAmInRoom.isHost : false; 
     startGameBtn.style.display = isHost && !room.gameStarted && !votingActive ? 'block' : 'none';
     startVoteBtn.style.display = isHost && room.gameStarted && !votingActive ? 'block' : 'none';
-    // Pokaż przycisk "Zagłosuj", jeśli głosowanie jest aktywne i jeszcze nie zagłosowałem
+    // Pokaż "Zagłosuj" jeśli głosowanie jest aktywne I jeszcze nie zagłosowałem
     confirmVoteBtn.style.display = votingActive && !myVote ? 'block' : 'none';
     
-    endRoundBtn.style.display = 'none';
+    endRoundBtn.style.display = 'none'; // Ukryty
 
     // --- Logika "Zaczyna mówić" (bez zmian) ---
-    if (room.gameStarted && !votingActive && room.currentWord && players[currentPlayerId]) {
-      const isImpostor = players[currentPlayerId].role === 'impostor';
+    if (room.gameStarted && !votingActive && room.currentWord && iAmInRoom) {
+      const isImpostor = iAmInRoom.role === 'impostor';
       const message = isImpostor ? 'Jesteś oszustem!' : `Słowo: ${room.currentWord}`;
       showRoleMessage(message, 5000);
       
@@ -883,7 +883,6 @@ function listenToRoom(roomCode) {
       hasShownStartMessage = false;
     }
 
-    // --- Komunikat resetu rundy (teraz pokaże wynik głosowania) ---
     if (room.resetMessage) {
       showMessage(room.resetMessage);
       if (isHost) {
@@ -891,7 +890,7 @@ function listenToRoom(roomCode) {
       }
     }
     
-    // --- NOWA LOGIKA: SPRAWDŹ CZY JUŻ KONIEC GŁOSOWANIA ---
+    // --- Sprawdź czy koniec głosowania ---
     if (votingActive) {
       const totalPlayers = playerIds.length;
       const votes = playerIds.map(id => players[id].votedFor).filter(Boolean);
@@ -943,21 +942,24 @@ startGameBtn.addEventListener('click', () => {
     const updates = {};
     playerIds.forEach(id => {
       updates[`players/${id}/role`] = impostorIds.includes(id) ? 'impostor' : 'normal';
-      updates[`players/${id}/votedFor`] = null; // Wyczyść głosy z poprzedniej rundy
+      updates[`players/${id}/votedFor`] = null;
     });
 
+    // *** JEDYNA ZMIANA TUTAJ: NOWA LOGIKA LOSOWANIA STARTU ***
     const nonImpostorIds = playerIds.filter(id => !impostorIds.includes(id));
-    let starterId;
-    if (nonImpostorIds.length > 0) {
-      starterId = nonImpostorIds[Math.floor(Math.random() * nonImpostorIds.length)];
-    } else {
-      starterId = playerIds[Math.floor(Math.random() * playerIds.length)];
-    }
+
+    // 1. Stwórz pulę ze wszystkimi graczami
+    let selectionPool = [...playerIds];
+    // 2. Dodaj niewinnych graczy jeszcze raz, aby podwoić ich szansę
+    selectionPool = selectionPool.concat(nonImpostorIds);
+    
+    // 3. Losuj startera z nowej, "ważonej" puli
+    let starterId = selectionPool[Math.floor(Math.random() * selectionPool.length)];
 
     updates.gameStarted = true;
     updates.votingActive = false; 
     updates.currentWord = word;
-    updates.starterId = starterId;
+    updates.starterId = starterId; // Użyj nowo wylosowanego startera
     updates.currentRound = (room.currentRound || 0) + 1;
 
     roomRef.update(updates).then(() => {
@@ -973,7 +975,6 @@ startGameBtn.addEventListener('click', () => {
   });
 });
 
-// *** NOWY PRZYCISK ROZPOCZĘCIA GŁOSOWANIA ***
 startVoteBtn.addEventListener('click', () => {
   console.log('Kliknięto Rozpocznij głosowanie');
   if (!isHost) {
@@ -985,12 +986,13 @@ startVoteBtn.addEventListener('click', () => {
   });
 });
 
-// *** NOWY PRZYCISK POTWIERDZENIA GŁOSU ***
+// --- NOWY PRZYCISK POTWIERDZENIA GŁOSU ---
 confirmVoteBtn.addEventListener('click', () => {
   if (!selectedPlayerId) {
     showMessage('❌ Najpierw wybierz gracza, na którego chcesz zagłosować!', 2500);
     return;
   }
+  // Zapisz głos w Firebase
   voteForPlayer(selectedPlayerId);
 });
 
@@ -1035,4 +1037,3 @@ endRoundBtn.addEventListener('click', () => {
     showMessage('❌ Błąd pobierania danych pokoju!');
   });
 });
-
