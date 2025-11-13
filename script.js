@@ -37,6 +37,7 @@ const emojiSelection = document.getElementById('emojiSelection');
 
 // NOWE ELEMENTY DOM DLA GŁOSOWANIA
 const startVoteBtn = document.getElementById('startVoteBtn');
+const confirmVoteBtn = document.getElementById('confirmVoteBtn');
 const voteResultDisplay = document.getElementById('voteResultDisplay');
 
 // Zmienne stanu gry
@@ -49,6 +50,7 @@ let impostorCount = 1;
 let selectedCategories = [];
 let hasShownStartMessage = false;
 let selectedEmoji = null;
+let selectedPlayerId = null; // NOWA ZMIENNA: Kogo zaznaczyłem do głosowania
 
 // Kategorie
 const categories = [
@@ -335,6 +337,7 @@ function updatePlayersList(players) {
   
   for (const [id, player] of Object.entries(players)) {
     const li = document.createElement('li');
+    li.dataset.playerId = id; // Dodajemy ID gracza do elementu
     const avatar = document.createElement('span');
     avatar.classList.add('avatar');
     avatar.textContent = player.emoji || '❓';
@@ -391,6 +394,7 @@ function showRoleMessage(text, duration = 5000) {
 function resetToLobby() {
   startGameBtn.style.display = isHost ? 'block' : 'none';
   startVoteBtn.style.display = 'none';
+  confirmVoteBtn.style.display = 'none'; // Ukryj też przycisk potwierdzenia
   endRoundBtn.style.display = 'none';
   roleMessageBox.style.display = 'none';
   categorySelectionBox.style.display = 'none';
@@ -407,6 +411,7 @@ function resetToLobby() {
   selectedCategories = [];
   hasShownStartMessage = false;
   selectedEmoji = null;
+  selectedPlayerId = null; // Zresetuj wybór
   document.querySelectorAll('.emoji-btn').forEach(btn => btn.classList.remove('selected'));
   updateImpostorButtons();
   updateRecommendedPlayers();
@@ -656,6 +661,7 @@ function updatePlayersListForVoting(players) {
 
   for (const [id, player] of Object.entries(players)) {
     const li = document.createElement('li');
+    li.dataset.playerId = id; // Dodajemy ID gracza do elementu
     const avatar = document.createElement('span');
     avatar.classList.add('avatar');
     avatar.textContent = player.emoji || '❓';
@@ -667,28 +673,34 @@ function updatePlayersListForVoting(players) {
       li.classList.add('host');
     }
 
-    // Pokaż, kto już zagłosował
     if (player.votedFor) {
       li.classList.add('has-voted');
     }
 
-    if (id === currentPlayerId) {
-      li.classList.add('self', 'disabled'); // Dodajemy 'disabled' do siebie
+    // Obsługa logiki klikania
+    if (myVote) {
+      // Już zagłosowałem, zablokuj wszystko
+      li.classList.add('disabled');
     } else {
-      li.classList.add('vote-target'); // Inni gracze to cele
-      // Podświetl, na kogo zagłosowałem
-      if (myVote === id) {
-        li.classList.add('voted-for');
-      }
-
-      // Dodaj event listener tylko dla celów
-      li.addEventListener('click', () => {
-        if (!myVote) { // Pozwól na głosowanie tylko jeśli jeszcze nie zagłosowałem
-          voteForPlayer(id);
+      // Jeszcze nie zagłosowałem
+      if (id === currentPlayerId) {
+        li.classList.add('self', 'disabled'); // Zablokuj siebie
+      } else {
+        li.classList.add('vote-target'); // Inni to cele
+        
+        // Podświetl, jeśli jest aktualnie wybrany
+        if (selectedPlayerId === id) {
+          li.classList.add('player-selected');
         }
-      });
-    }
 
+        // Event listener do ZAZNACZANIA
+        li.addEventListener('click', () => {
+          selectedPlayerId = id;
+          // Prerysuj listę, żeby pokazać "zaznaczenie"
+          updatePlayersListForVoting(players); 
+        });
+      }
+    }
     playersList.appendChild(li);
   }
 }
@@ -696,13 +708,13 @@ function updatePlayersListForVoting(players) {
 // *** NOWA FUNKCJA DO ZAPISYWANIA GŁOSU ***
 function voteForPlayer(targetId) {
   console.log(`Głosuję na: ${targetId}`);
-  // Używamy 'set' zamiast 'update', aby nadpisać ewentualny poprzedni głos (choć UI blokuje)
   db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).update({
     votedFor: targetId
   });
+  selectedPlayerId = null; // Zresetuj wybór po zagłosowaniu
 }
 
-// *** NOWA FUNKCJA DO PODLICZANIA GŁOSÓW ***
+// *** NOWA FUNKCJA DO PODLICZANIA GŁOSÓW (Z LOGIKĄ REMISU) ***
 function tallyVotes(room) {
   console.log('Podliczanie głosów...');
   const players = room.players;
@@ -710,7 +722,6 @@ function tallyVotes(room) {
   const votes = {}; // Obiekt do liczenia głosów: { playerId: count }
   let totalVotes = 0;
 
-  // Zlicz głosy
   for (const playerId of playerIds) {
     const votedFor = players[playerId].votedFor;
     if (votedFor) {
@@ -722,10 +733,9 @@ function tallyVotes(room) {
   // Sprawdź, czy wszyscy zagłosowali
   if (totalVotes < playerIds.length) {
     console.log('Jeszcze nie wszyscy zagłosowali.');
-    return; // Przerwij, jeśli jeszcze nie ma wszystkich głosów
+    return; // Przerwij
   }
 
-  // Znajdź gracza z największą liczbą głosów
   let maxVotes = 0;
   let ejectedPlayerId = null;
   let isTie = false;
@@ -734,43 +744,55 @@ function tallyVotes(room) {
     if (count > maxVotes) {
       maxVotes = count;
       ejectedPlayerId = playerId;
-      isTie = false; // Resetuj remis
-    } else if (count === maxVotes) {
+      isTie = false;
+    } else if (count === maxVotes && maxVotes > 0) {
       isTie = true; // Mamy remis!
     }
   }
-
+  
   console.log('Wyniki głosowania:', votes, 'Wyrzucony:', ejectedPlayerId, 'Remis:', isTie);
 
-  // Przygotuj aktualizację pokoju (reset rundy)
   const updates = {
-    gameStarted: false,
     votingActive: false,
-    currentWord: null,
-    starterId: null,
+    resetMessage: null,
   };
 
-  // Wyczyść głosy i role u wszystkich graczy
+  // Wyczyść głosy u wszystkich graczy
   playerIds.forEach(id => {
-    updates[`players/${id}/role`] = null;
     updates[`players/${id}/votedFor`] = null;
   });
 
   if (isTie || !ejectedPlayerId) {
-    // REMIS lub nikt nie dostał głosów
-    updates.resetMessage = `GŁOSOWANIE NIEUDANE (REMIS)!<br>Nikt nie został wyrzucony.<br>Słowo: <strong>${room.currentWord}</strong>`;
+    // *** NOWA LOGIKA: REMIS - KONTUNUUJ GRĘ ***
+    updates.resetMessage = `REMIS! Nikt nie odpada.<br>Kontynuujcie dyskusję!`;
+    // WAŻNE: *Nie* resetujemy gameStarted, currentWord, ani ról!
   } else {
-    // KTOŚ WYLECIAŁ
+    // *** NOWA LOGIKA: KTOŚ WYLECIAŁ - ZAKOŃCZ RUNDĘ ***
     const ejectedPlayer = players[ejectedPlayerId];
-    const ejectedRole = ejectedPlayer.role === 'impostor' ? '...IMPOSTOREM!' : '...NIEWINNYM!';
-    updates.resetMessage = `Gracz <strong>${ejectedPlayer.name}</strong> został wyrzucony!<br>Był ${ejectedRole}<br>Słowo: <strong>${room.currentWord}</strong>`;
+    const ejectedRole = ejectedPlayer.role;
+    
+    // Resetujemy grę do lobby
+    updates.gameStarted = false;
+    updates.currentWord = null;
+    updates.starterId = null;
+    
+    // Wyczyść role
+    playerIds.forEach(id => {
+      updates[`players/${id}/role`] = null;
+    });
+
+    if (ejectedRole === 'impostor') {
+      updates.resetMessage = `Impostor został wykryty!<br>(Był nim <strong>${ejectedPlayer.name}</strong>)<br>Słowo: <strong>${room.currentWord}</strong>`;
+    } else {
+      updates.resetMessage = `Impostor wygrał rundę!<br>(Wyrzucono niewinnego <strong>${ejectedPlayer.name}</strong>)<br>Słowo: <strong>${room.currentWord}</strong>`;
+    }
   }
 
   // Wyślij zmiany do Firebase
   db.ref(`rooms/${currentRoomCode}`).update(updates);
 }
 
-// *** MOCNO ZMODYFIKOWANA FUNKCJA ***
+
 function listenToRoom(roomCode) {
   const roomRef = db.ref(`rooms/${roomCode}`);
   roomRef.on('value', snapshot => {
@@ -791,7 +813,8 @@ function listenToRoom(roomCode) {
     const playerIds = Object.keys(players);
     const hostExists = Object.values(players).some(p => p.isHost);
     const iAmInRoom = players[currentPlayerId];
-    const votingActive = room.votingActive || false; // NOWY STAN
+    const votingActive = room.votingActive || false;
+    const myVote = players[currentPlayerId]?.votedFor;
 
     // --- Logika Migracji Hosta (bez zmian) ---
     if (!hostExists && iAmInRoom && playerIds.length > 0) {
@@ -812,23 +835,21 @@ function listenToRoom(roomCode) {
       updatePlayersListForVoting(players);
     } else {
       document.body.classList.remove('voting-active');
-      // Rysuj normalną listę graczy
+      selectedPlayerId = null; // Zresetuj wybór, gdy głosowanie się kończy
       updatePlayersList(players);
     }
 
     // --- Logika "Kopniaka" (bez zmian) ---
     document.querySelectorAll('.kickBtn').forEach(btn => {
-      btn.disabled = room.gameStarted || votingActive; // Wyłącz też podczas głosowania
+      btn.disabled = room.gameStarted || votingActive;
       btn.style.opacity = (room.gameStarted || votingActive) ? '0.5' : '1';
       btn.style.cursor = (room.gameStarted || votingActive) ? 'not-allowed' : 'pointer';
     });
 
-    // --- Aktualizacja UI (bez zmian) ---
     playerCountDisplay.innerHTML = `Gracze: <span class="bold">${playerIds.length}</span>`;
     impostorCountDisplay.innerHTML = `Impostorzy: <span class="bold">${room.numImpostors || 0}</span>`;
     roundCounter.innerHTML = room.currentRound > 0 ? `Runda: <strong>${room.currentRound}</strong>` : '';
     
-    // Nie pokazuj słowa, jeśli głosujemy
     if (!votingActive) {
       wordDisplay.innerHTML = room.gameStarted && room.currentWord && players[currentPlayerId]
         ? (players[currentPlayerId].role === 'impostor'
@@ -841,7 +862,10 @@ function listenToRoom(roomCode) {
     isHost = players[currentPlayerId]?.isHost || false; 
     startGameBtn.style.display = isHost && !room.gameStarted && !votingActive ? 'block' : 'none';
     startVoteBtn.style.display = isHost && room.gameStarted && !votingActive ? 'block' : 'none';
-    endRoundBtn.style.display = 'none'; // Na razie wyłączamy ten przycisk całkowicie
+    // Pokaż przycisk "Zagłosuj", jeśli głosowanie jest aktywne i jeszcze nie zagłosowałem
+    confirmVoteBtn.style.display = votingActive && !myVote ? 'block' : 'none';
+    
+    endRoundBtn.style.display = 'none';
 
     // --- Logika "Zaczyna mówić" (bez zmian) ---
     if (room.gameStarted && !votingActive && room.currentWord && players[currentPlayerId]) {
@@ -863,7 +887,6 @@ function listenToRoom(roomCode) {
     if (room.resetMessage) {
       showMessage(room.resetMessage);
       if (isHost) {
-        // Wyczyść komunikat po pokazaniu
         db.ref(`rooms/${currentRoomCode}/resetMessage`).remove();
       }
     }
@@ -871,11 +894,9 @@ function listenToRoom(roomCode) {
     // --- NOWA LOGIKA: SPRAWDŹ CZY JUŻ KONIEC GŁOSOWANIA ---
     if (votingActive) {
       const totalPlayers = playerIds.length;
-      const votes = playerIds.map(id => players[id].votedFor).filter(Boolean); // Filtruj null/undefined
+      const votes = playerIds.map(id => players[id].votedFor).filter(Boolean);
       
       if (votes.length === totalPlayers) {
-        // Wszyscy zagłosowali!
-        // Tylko host podlicza głosy, aby uniknąć wielokrotnego wywołania
         if (isHost) {
           tallyVotes(room);
         }
@@ -934,7 +955,7 @@ startGameBtn.addEventListener('click', () => {
     }
 
     updates.gameStarted = true;
-    updates.votingActive = false; // Upewnij się, że głosowanie jest wyłączone
+    updates.votingActive = false; 
     updates.currentWord = word;
     updates.starterId = starterId;
     updates.currentRound = (room.currentRound || 0) + 1;
@@ -959,15 +980,22 @@ startVoteBtn.addEventListener('click', () => {
     console.log('Tylko host może rozpocząć głosowanie');
     return;
   }
-  // Po prostu ustawiamy flagę. Resztą zajmie się listenToRoom
   db.ref(`rooms/${currentRoomCode}`).update({ 
     votingActive: true 
   });
 });
 
+// *** NOWY PRZYCISK POTWIERDZENIA GŁOSU ***
+confirmVoteBtn.addEventListener('click', () => {
+  if (!selectedPlayerId) {
+    showMessage('❌ Najpierw wybierz gracza, na którego chcesz zagłosować!', 2500);
+    return;
+  }
+  voteForPlayer(selectedPlayerId);
+});
 
-// Przycisk "Zakończ rundę" na razie zostaje, jako "przycisk paniki"
-// Będzie działał tak jak dotychczas, siłowo kończąc rundę
+
+// Przycisk "Zakończ rundę" (DEBUG)
 endRoundBtn.addEventListener('click', () => {
   console.log('Kliknięto Zakończ rundę (PRZYCISK PANIKI)');
   if (!isHost) {
@@ -985,14 +1013,14 @@ endRoundBtn.addEventListener('click', () => {
 
     const updates = {
       gameStarted: false,
-      votingActive: false, // Wyczyść też stan głosowania
+      votingActive: false, 
       currentWord: null,
       starterId: null,
       resetMessage: `Runda zakończona! Słowo: <strong>${currentWord}</strong><br>Impostorzy: <strong>${impostorNames || 'Brak'}</strong>`
     };
     Object.keys(players).forEach(id => {
       updates[`players/${id}/role`] = null;
-      updates[`players/${id}/votedFor`] = null; // Wyczyść głosy
+      updates[`players/${id}/votedFor`] = null;
     });
 
     roomRef.update(updates).then(() => {
