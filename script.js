@@ -263,11 +263,13 @@ async function loadWords() {
   } catch (error) {
     console.error('Błąd ładowania słów:', error);
     try {
-      const response = await fetchWithTimeout('words.json');
+      // *** POPRAWKA #1 TUTAJ ***
+      // Próba załadowania domyślnej kategorii (np. zwierzęta) zamiast nieistniejącego words.json
+      const response = await fetchWithTimeout('words/animals.json');
       words = response;
-      console.log('Załadowano domyślne słowa:', words.length);
+      console.log('Załadowano domyślne słowa (animals.json):', words.length);
     } catch (err) {
-      console.error('Błąd ładowania domyślnych słów:', err);
+      console.error('Błąd ładowania domyślnych słów (animals.json):', err);
       showMessage('❌ Błąd ładowania słów gry! Używam wbudowanej listy.');
       words = fallbackWords;
       console.log('Użyto wbudowanej listy słów:', words.length);
@@ -275,17 +277,20 @@ async function loadWords() {
   }
 }
 
-fetch('words.json')
+// *** POPRAWKA #2 TUTAJ ***
+// Ładujemy jedną, domyślną kategorię (np. zwierzęta) jako startowy fallback
+// To naprawia błąd "Błąd ładowania słów gry!" przy starcie
+fetch('words/animals.json')
   .then(response => {
-    if (!response.ok) throw new Error('Błąd ładowania words.json: ' + response.status);
+    if (!response.ok) throw new Error('Błąd ładowania words/animals.json: ' + response.status);
     return response.json();
   })
   .then(data => {
     words = data;
-    console.log('Załadowano domyślne słowa:', words.length);
+    console.log('Załadowano domyślne słowa (animals.json):', words.length);
   })
   .catch(error => {
-    console.error('Błąd ładowania words.json:', error);
+    console.error('Błąd ładowania domyślnych słów (animals.json):', error);
     showMessage('❌ Błąd ładowania słów gry! Używam wbudowanej listy.');
     words = fallbackWords;
     console.log('Użyto wbudowanej listy słów:', words.length);
