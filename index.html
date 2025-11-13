@@ -44,15 +44,18 @@
 
   <button id="rulesBtn" title="Zasady gry">i</button>
   <button id="themeToggle" title="Przełącz tryb"></button>
-  <div id="messageBox"></div>
-  <div id="roleMessageBox"></div>
-  <div id="categorySelectionBox" style="display:none;">
+  
+  <div id="messageBox" class="modal-box"></div>
+  <div id="roleMessageBox" class="modal-box"></div>
+  
+  <div id="categorySelectionBox" class="modal-box custom-scrollbar" style="display:none;">
     <p>Wybierz kategorie:</p>
     <span id="allCategoriesBtn"><span class="checkbox"></span> Wszystkie</span>
     <div class="category-grid"></div>
     <button id="confirmCategories">Dalej</button>
   </div>
-  <div id="impostorSelectionBox" style="display:none;">
+  
+  <div id="impostorSelectionBox" class="modal-box" style="display:none;">
     <p>Wybierz liczbę impostorów</p>
     <p id="loadingMessage" style="display: none;">Ładowanie kategorii...</p>
     <div class="impostor-selector">
@@ -63,7 +66,8 @@
     <button id="confirmImpostors" disabled>Stwórz</button>
     <p id="recommendedPlayers"></p>
   </div>
-  <div id="rulesBox">
+  
+  <div id="rulesBox" class="modal-box custom-scrollbar">
     <button id="closeRulesTop" title="Zamknij">X</button>
     <h2>Zasady gry Słowny Impostor</h2>
     <h3>Cel gry</h3>
