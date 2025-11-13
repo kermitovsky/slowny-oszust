@@ -82,8 +82,16 @@
     
     <div class="slider-container">
       <input type="range" min="0" max="4" value="0" step="1" id="hintChanceSlider" />
-      <span id="hintChanceDisplay">0%</span>
+      <div class="slider-labels">
+        <span>0%</span>
+        <span>25%</span>
+        <span>50%</span>
+        <span>75%</span>
+        <span>100%</span>
+      </div>
     </div>
+    
+    <span id="hintChanceDisplay" class="slider-value-display">0%</span>
 
     <div class="checkbox-container">
       <input type="checkbox" id="hintOnStartCheckbox" />
@@ -97,7 +105,7 @@
   </div>
   
   <div id="rulesBox" class="modal-box custom-scrollbar">
-    <button id="closeRulesTop" title="Zamknij">X</button>
+    <button id="closeRulesTop" title="Zamknij">X</button> 
     <h2>Zasady gry Słowny Impostor</h2>
     <h3>Cel gry</h3>
     <p>Wciel się w detektywa słów! Twoim zadaniem jest opisanie tajemniczego słowa, nie zdradzając go, lub blefowanie jako impostor, który słowa nie zna. Celem jest zidentyfikowanie impostora przed końcem rundy!</p>
@@ -121,7 +129,7 @@
       <li>Obserwuj, czy opisy innych graczy są spójne – impostorzy mogą się zdradzić!</li>
       <li>Graj w grupie do 10 osób dla najlepszej zabawy.</li>
     </ul>
-    <button id="closeRules">X</button>
+    <button id="closeRules" title="Zamknij">X</button> 
   </div>
 
   <script src="config.js"></script>
