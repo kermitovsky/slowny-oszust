@@ -112,7 +112,6 @@ initializeEmojiSelection();
 window.addEventListener('beforeunload', () => {
   if (currentRoomCode && currentPlayerId) {
     console.log('Wykryto zamknięcie/odświeżenie, usuwanie gracza:', currentPlayerId);
-    // onDisconnect() w createRoom/joinRoom zajmie się resztą
     db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).remove();
   }
 });
@@ -439,7 +438,7 @@ themeToggle.addEventListener('click', () => {
 
 createRoomBtn.addEventListener('click', () => {
   console.log('Kliknięto Stwórz pokój');
-  const name = playerNameInput.value.trim();
+  const name = playerNameInput.value.trim(); // Usunąłem 'capitalize', bo tego nie chciałeś
   if (!name) {
     showMessage('❌ Wpisz nick!');
     console.log('Brak nicku');
@@ -513,7 +512,6 @@ function createRoom(numImpostors) {
     impostorSelectionBox.style.display = 'none';
     rulesBtn.classList.remove('hidden');
     themeToggle.classList.remove('hidden');
-    // Ustaw onDisconnect() TYLKO na usunięcie gracza, a nie całego pokoju
     db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).onDisconnect().remove();
     listenToRoom(currentRoomCode);
   }).catch(error => {
@@ -526,7 +524,7 @@ function createRoom(numImpostors) {
 
 joinRoomBtn.addEventListener('click', () => {
   console.log('Kliknięto Dołącz do pokoju');
-  const name = playerNameInput.value.trim();
+  const name = playerNameInput.value.trim(); // Usunąłem 'capitalize'
   const roomCode = roomCodeInput.value.trim().toUpperCase();
 
   if (!name || !roomCode) {
@@ -556,6 +554,16 @@ joinRoomBtn.addEventListener('click', () => {
     }
 
     const room = snapshot.val();
+
+    // *** POPRAWKA 1 ("Gracz-Duch") ***
+    // Blokujemy dołączanie do gry, która już trwa
+    if (room.gameStarted) {
+      showMessage('❌ Gra już się rozpoczęła! Poczekaj na koniec rundy.');
+      console.log('Próba dołączenia do trwającej gry:', roomCode);
+      roomCodeInput.value = '';
+      return; // PRZERWIJ
+    }
+
     const players = room.players || {};
     if (Object.keys(players).length >= 10) {
       showMessage('❌ Pokój jest pełny! Maksymalnie 10 graczy.');
@@ -611,19 +619,12 @@ function kickPlayer(playerId) {
   });
 }
 
-// *** ZMIANA #1 ***
 leaveRoomBtn.addEventListener('click', () => {
   console.log('Kliknięto Opuść pokój');
   if (currentRoomCode && currentPlayerId) {
     const roomRef = db.ref(`rooms/${currentRoomCode}`);
-    
-    // TYLKO usuń gracza. Nie usuwaj całego pokoju, nawet jeśli jesteś hostem.
-    // Funkcja listenToRoom zajmie się resztą (wybraniem nowego hosta).
     roomRef.child(`players/${currentPlayerId}`).remove().then(() => {
       console.log('Gracz opuścił pokój:', currentPlayerId);
-      
-      // CAŁY BLOK 'if (isHost)' ZOSTAŁ USUNIĘTY STĄD
-      
       resetToLobby();
       loginScreen.style.display = 'block';
       gameScreen.style.display = 'none';
@@ -639,7 +640,6 @@ leaveRoomBtn.addEventListener('click', () => {
   }
 });
 
-// *** ZMIANA #2 ***
 function listenToRoom(roomCode) {
   const roomRef = db.ref(`rooms/${roomCode}`);
   roomRef.on('value', snapshot => {
@@ -658,30 +658,31 @@ function listenToRoom(roomCode) {
 
     const players = room.players || {};
     const playerIds = Object.keys(players);
-    
-    // --- NOWA LOGIKA MIGRACJI HOSTA ---
     const hostExists = Object.values(players).some(p => p.isHost);
-    const iAmInRoom = players[currentPlayerId]; // Sprawdza, czy nadal jestem w pokoju
+    const iAmInRoom = players[currentPlayerId];
 
     if (!hostExists && iAmInRoom && playerIds.length > 0) {
-      // Jeśli nie ma hosta, a ja jestem w pokoju i są jacyś gracze
       console.warn('Brak hosta! Wybieranie nowego...');
-      
-      // Żeby uniknąć wyścigu (race condition), wszyscy gracze zgadzają się,
-      // że nowym hostem zostanie gracz pierwszy na posortowanej liście ID.
       const sortedPlayerIds = playerIds.sort();
       const newHostId = sortedPlayerIds[0];
       
       if (newHostId === currentPlayerId) {
-        // To ja! Muszę się mianować na hosta.
         console.log('To ja! Promuję się na nowego hosta.');
         db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).update({ isHost: true });
-        // To wywoła ponowne uruchomienie tej funkcji, ale wtedy hostExists będzie true.
       }
     }
-    // --- KONIEC NOWEJ LOGIKI ---
 
     updatePlayersList(players);
+
+    // *** POPRAWKA 2 ("Kopniak" w trakcie gry) ***
+    // Wyłączamy przyciski wyrzucania, jeśli gra trwa
+    document.querySelectorAll('.kickBtn').forEach(btn => {
+      btn.disabled = room.gameStarted;
+      // Dodajemy styl wyłączenia, bo sam ':disabled' może nie wystarczyć
+      btn.style.opacity = room.gameStarted ? '0.5' : '1';
+      btn.style.cursor = room.gameStarted ? 'not-allowed' : 'pointer';
+    });
+
     playerCountDisplay.innerHTML = `Gracze: <span class="bold">${playerIds.length}</span>`;
     impostorCountDisplay.innerHTML = `Impostorzy: <span class="bold">${room.numImpostors || 0}</span>`;
     roundCounter.innerHTML = room.currentRound > 0 ? `Runda: <strong>${room.currentRound}</strong>` : '';
@@ -691,9 +692,7 @@ function listenToRoom(roomCode) {
         : `Twoje słowo: <span class="word-normal">${room.currentWord}</span>`)
       : '';
 
-    // Ta linijka jest kluczowa - zaktualizuje status 'isHost' dla nowego hosta
     isHost = players[currentPlayerId]?.isHost || false; 
-    
     startGameBtn.style.display = isHost && !room.gameStarted ? 'block' : 'none';
     endRoundBtn.style.display = isHost && room.gameStarted ? 'block' : 'none';
 
@@ -701,11 +700,14 @@ function listenToRoom(roomCode) {
       const isImpostor = players[currentPlayerId].role === 'impostor';
       const message = isImpostor ? 'Jesteś oszustem!' : `Słowo: ${room.currentWord}`;
       showRoleMessage(message, 5000);
+      
       if (room.starterId && !hasShownStartMessage && players[room.starterId]) {
+        // *** POPRAWKA 3 (Spamujące powiadomienie) ***
+        // Ustawiamy flagę na 'true' OD RAZU, a nie wewnątrz 'setTimeout'
+        hasShownStartMessage = true; 
         setTimeout(() => {
           showMessage(`Zaczyna mówić: <strong>${players[room.starterId].name}</strong>`, 5000);
-          hasShownStartMessage = true;
-        }, 5000);
+        }, 5000); // Pokazuje się PO tym, jak zniknie rola
       }
     } else {
       hasShownStartMessage = false;
