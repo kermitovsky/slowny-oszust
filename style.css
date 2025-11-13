@@ -37,13 +37,12 @@
 /* 2. TRYB CIEMNY (Tylko podmiana zmiennych) */
 /* =================================================================== */
 body.dark-mode {
-  /* Po prostu podmień wartości zmiennych, a reszta stylów sama się zaktualizuje! */
   --c-bg-1: #4b0082;
   --c-bg-2: #2c003e;
-  --c-bg-3: #2c003e; /* Zastąpienie pomarańczowego tła */
-  --c-primary: #e67e22; /* Fiolet staje się pomarańczowy */
+  --c-bg-3: #2c003e; 
+  --c-primary: #e67e22; 
   --c-primary-light: #d35400;
-  --c-accent: #e67e22; /* Akcent też pomarańczowy */
+  --c-accent: #e67e22; 
   --c-accent-light: rgba(230, 126, 34, 0.5);
   --c-text-light: #e6e6e6;
   --c-text-light-alt: #e6e6e6;
@@ -352,11 +351,12 @@ body.dark-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   align-items: center;
   animation: fadeIn 0.3s ease-in-out;
   box-sizing: border-box;
-  transition: background-color 0.2s ease, opacity 0.2s ease;
+  transition: background-color 0.2s ease, opacity 0.2s ease, border 0.2s ease;
+  border: 2px solid transparent; /* Dodajemy przezroczystą ramkę dla płynnej animacji */
 }
 body.dark-mode #playersList li {
   background-color: rgba(255, 255, 255, 0.1);
-  color: var(--c-primary); /* Używa pomarańczowego w dark mode */
+  color: var(--c-primary); 
 }
 
 #playersList li .avatar {
@@ -420,33 +420,29 @@ body.dark-mode #playersList li.self {
 /* =================================================================== */
 /* 5.5. STYLE GŁOSOWANIA (NOWA SEKCJA) */
 /* =================================================================== */
+
+/* Cel do głosowania, który można kliknąć */
 body.voting-active #playersList li.vote-target {
   cursor: pointer;
 }
-body.voting-active #playersList li.vote-target:hover {
-  background-color: rgba(255, 255, 255, 1);
+
+/* NOWY STYL: Podświetlenie WYBRANEGO gracza (przed zatwierdzeniem) */
+body.voting-active #playersList li.player-selected {
+  border: 2px solid var(--c-primary);
+  background-color: rgba(255, 255, 255, 0.9);
 }
-body.dark-mode #playersList li.vote-target:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+body.dark-mode #playersList li.player-selected {
+  border: 2px solid var(--c-primary);
+  background-color: rgba(255, 255, 255, 0.15);
 }
 
-/* Styl dla gracza, na którego zagłosowałem */
-body.voting-active #playersList li.voted-for {
-  background-color: var(--c-success);
-  color: var(--c-text-light);
-  font-weight: bold;
-}
-body.dark-mode #playersList li.voted-for {
-  color: var(--c-text-dark);
-}
-
-/* Styl dla samego siebie (nie można na siebie głosować) */
+/* Zablokowany (nie można głosować) */
 body.voting-active #playersList li.disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-/* Pokazuje "ptaszek" przy awatarze, gdy gracz zagłosował */
+/* Pokazuje "ptaszek" przy awatarze, gdy gracz ZATWIERDZIŁ głos */
 body.voting-active #playersList li.has-voted .avatar::after {
   content: '✔';
   position: absolute;
@@ -464,7 +460,6 @@ body.voting-active #playersList li.has-voted .avatar::after {
   line-height: 1;
 }
 body.voting-active #playersList li.host.has-voted .avatar::after {
-  /* Naprawia konflikt z koroną hosta */
   right: 1.2rem;
 }
 
@@ -768,7 +763,6 @@ body.dark-mode #messageBox:not(.copy-message) {
   from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
   to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
-/* Poprawka dla #messageBox, który nie był wyśrodkowany w animacji */
 #messageBox { animation-name: scaleIn; }
 
 @keyframes pulse {
