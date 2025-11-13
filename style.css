@@ -462,7 +462,7 @@ body.voting-active #playersList li.host.has-voted .avatar::after {
 }
 
 /* =================================================================== */
-/* 5.6. STYLE EKRANU PODPOWIEDZI (NOWA SEKCJA) */
+/* 5.6. STYLE EKRANU PODPOWIEDZI (SEKCJA ZMIENIONA) */
 /* =================================================================== */
 #impostorHintBox p {
   margin: 0 0 1.5rem 0;
@@ -473,45 +473,93 @@ body.voting-active #playersList li.host.has-voted .avatar::after {
   white-space: nowrap;
 }
 
+/* Wrapper dla slidera i etykiet */
 .slider-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1.5rem;
+  position: relative;
   width: 100%;
   max-width: 350px;
-  margin: 2rem auto;
+  margin: 2rem auto 3rem auto; /* Zwiększony dolny margines na etykiety */
+  padding: 0 5px; /* Lekkie wcięcie, by kropki nie były na krawędzi */
+  box-sizing: border-box;
+}
+
+/* Etykiety 0% - 100% */
+.slider-labels {
+  display: flex;
+  justify-content: space-between;
+  position: absolute;
+  width: 100%;
+  left: 0;
+  top: 20px; /* Odsuń etykiety pod slider */
+  padding: 0 5px; /* Dopasuj do wcięcia slidera */
+  box-sizing: border-box;
+}
+.slider-labels span {
+  font-size: 1.6rem;
+  color: var(--c-text-light-alt);
+  opacity: 0.7;
+  /* Centrowanie każdej etykiety */
+  position: relative;
+  width: 0;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+/* Wyświetlanie wybranej wartości */
+.slider-value-display {
+  display: block;
+  text-align: center;
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: var(--c-text-light-alt);
+  margin-top: -1.5rem; /* Zbliż do slidera */
+  margin-bottom: 1.5rem;
 }
 
 #hintChanceSlider {
-  flex-grow: 1;
-  margin: 0;
   -webkit-appearance: none;
   appearance: none;
-  height: 10px;
+  width: 100%;
+  height: 8px; /* Grubość linii */
   background: var(--c-glass-bg-darker);
   border-radius: 5px;
   outline: none;
+  padding: 0;
+  margin: 0;
+  /* Kropki na sliderze */
+  background-image: 
+    radial-gradient(circle at center, var(--c-primary-light) 4px, transparent 4px),
+    radial-gradient(circle at center, var(--c-primary-light) 4px, transparent 4px),
+    radial-gradient(circle at center, var(--c-primary-light) 4px, transparent 4px),
+    radial-gradient(circle at center, var(--c-primary-light) 4px, transparent 4px),
+    radial-gradient(circle at center, var(--c-primary-light) 4px, transparent 4px);
+  background-size: 4px 4px; /* Rozmiar kropki */
+  background-repeat: no-repeat;
+  /* Pozycje kropek */
+  background-position: 0% 50%, 25% 50%, 50% 50%, 75% 50%, 100% 50%;
 }
 
 #hintChanceSlider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 25px;
-  height: 25px;
+  width: 24px; /* Kółko */
+  height: 24px; /* Kółko */
   border-radius: 50%;
   background: var(--c-primary);
-  border: 2px solid var(--c-text-light);
+  border: 4px solid var(--c-text-light);
   cursor: pointer;
+  margin-top: -8px; /* Wyśrodkowanie kółka na linii */
+  box-shadow: 0 2px 5px var(--c-shadow-heavy);
 }
 
 #hintChanceSlider::-moz-range-thumb {
-  width: 25px;
-  height: 25px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: var(--c-primary);
-  border: 2px solid var(--c-text-light);
+  border: 4px solid var(--c-text-light);
   cursor: pointer;
+  box-shadow: 0 2px 5px var(--c-shadow-heavy);
 }
 
 body.dark-mode #hintChanceSlider::-webkit-slider-thumb {
@@ -524,20 +572,13 @@ body.dark-mode #hintChanceSlider::-moz-range-thumb {
 }
 
 
-#hintChanceDisplay {
-  font-size: 2rem;
-  font-weight: 600;
-  color: var(--c-text-light-alt);
-  min-width: 60px; /* Stała szerokość, by slider nie skakał */
-  text-align: right;
-}
-
+/* Checkbox */
 .checkbox-container {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 1rem;
-  margin: 1.5rem auto;
+  margin: 2rem auto;
   font-size: 2rem;
   font-family: var(--font-heading);
   font-weight: 600;
@@ -545,7 +586,7 @@ body.dark-mode #hintChanceSlider::-moz-range-thumb {
   cursor: pointer;
 }
 .checkbox-container input[type="checkbox"] {
-  display: none; /* Ukryj domyślny checkbox */
+  display: none;
 }
 .checkbox-container label {
   display: flex;
@@ -569,12 +610,10 @@ body.dark-mode #hintChanceSlider::-moz-range-thumb {
   background: var(--c-glass-highlight-hover);
 }
 .checkbox-container input[type="checkbox"]:checked + label .checkbox {
-  content: '✔'; /* Nie działa w input, ale w label/span tak */
   background: var(--c-primary);
   border-color: var(--c-primary-light);
   color: var(--c-text-light);
 }
-/* Poprawka dla checkboxa, aby pokazywał "ptaszek" */
 .checkbox-container input[type="checkbox"]:checked + label .checkbox::before {
   content: '✔';
 }
@@ -768,11 +807,11 @@ body.dark-mode #messageBox:not(.copy-message) {
   background: var(--c-glass-highlight-hover);
 }
 #categorySelectionBox #allCategoriesBtn .checkbox::before {
-  content: ''; /* Domyślnie pusty */
+  content: '';
 }
 .checkbox-container input[type="checkbox"]:checked + label .checkbox::before,
-#categorySelectionBox #allCategoriesBtn .checkbox:checked::before {
-  content: '✔'; /* Pokazuje ptaszek */
+#categorySelectionBox .checkbox-container input[type="checkbox"]:checked + label .checkbox::before { /* Poprawka dla ptaszka */
+  content: '✔';
 }
 
 
@@ -856,24 +895,33 @@ body.dark-mode #messageBox:not(.copy-message) {
   padding-left: 2rem;
   margin: 0.5rem 0;
 }
+
+/* *** ZMIENIONE STYLE PRZYCISKÓW "X" *** */
 #rulesBox #closeRules, #rulesBox #closeRulesTop {
   position: absolute;
   top: 1rem;
   right: 1rem;
-  background: transparent;
+  width: 35px; /* Kwadrat */
+  height: 35px; /* Kwadrat */
+  background: rgba(0, 0, 0, 0.2);
   border: none;
+  border-radius: 8px;
   color: var(--c-text-light);
   font-size: 2rem;
   font-weight: bold;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  padding: 0; /* Usuń domyślny padding */
+  line-height: 35px; /* Wyśrodkuj 'X' w pionie */
+  text-align: center; /* Wyśrodkuj 'X' w poziomie */
 }
 #rulesBox #closeRules:hover, #rulesBox #closeRulesTop:hover {
-  transform: scale(1.2);
+  transform: scale(1.1);
+  background: rgba(0, 0, 0, 0.4);
 }
 #rulesBox #closeRulesTop {
-  top: 0.5rem;
-  right: 0.5rem;
+  top: 1rem; /* Ujednolicenie pozycji */
+  right: 1rem; /* Ujednolicenie pozycji */
 }
 
 
@@ -951,5 +999,12 @@ body.dark-mode #messageBox:not(.copy-message) {
   .slider-container {
     flex-direction: column;
     gap: 1rem;
+    padding-bottom: 25px;
+  }
+  .slider-labels {
+    top: 25px; /* Dopasuj pozycję etykiet na mobilce */
+  }
+  .slider-value-display {
+    margin-top: 1rem;
   }
 }
