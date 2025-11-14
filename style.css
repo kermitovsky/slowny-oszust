@@ -160,6 +160,15 @@ button:disabled {
   align-items: center;
   justify-content: center;
 }
+/* Logika ekranów */
+[data-screen] {
+  animation-duration: 0.4s;
+  animation-fill-mode: forwards; /* Pozostaw stan po animacji */
+}
+/* Domyślnie ukryte */
+#gameScreen[data-screen] {
+  display: none;
+}
 
 .modal-box {
   position: fixed;
@@ -172,15 +181,25 @@ button:disabled {
   border-radius: 1.5rem;
   text-align: center;
   z-index: 1001;
-  display: none;
+  display: none; /* Domyślnie ukryte */
   max-width: 90vw;
   box-shadow: 0 10px 30px var(--c-shadow-modal);
   border: 2px solid var(--c-glass-border);
   font-family: var(--font-heading);
-  animation: scaleIn 0.2s ease-in-out;
   box-sizing: border-box;
   will-change: transform, opacity;
+  animation-duration: 0.3s;
+  animation-fill-mode: forwards;
 }
+/* Klasa dodawana przez JS do pokazania modala */
+.modal-box.is-visible {
+  display: block;
+  animation-name: slideInUp;
+}
+.modal-box.is-hiding {
+  animation-name: slideOutDown;
+}
+
 
 body.dark-mode .modal-box {
   background: linear-gradient(135deg, var(--c-bg-1), var(--c-primary));
@@ -246,10 +265,6 @@ body.dark-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
 /* =================================================================== */
 /* 5. STYLE KOMPONENTÓW (ID, klasy) */
 /* =================================================================== */
-
-#loginScreen, #gameScreen, #categorySelectionBox {
-  animation: fadeIn 0.5s ease-in-out;
-}
 
 /* --- Ekrany Gry --- */
 #leaveRoom {
@@ -335,6 +350,33 @@ body.dark-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   text-align: center;
   margin: 1rem 0;
 }
+
+/* *** NOWY STYL DLA PODSUMOWANIA RUNDY *** */
+#lastRoundSummary {
+  font-size: 1.6rem;
+  font-family: var(--font-heading);
+  font-weight: 500;
+  color: var(--c-text-light-alt);
+  background: var(--c-glass-bg);
+  border: 1px solid var(--c-glass-border);
+  border-radius: 0.8rem;
+  padding: 0.8rem 1.2rem;
+  margin: 1rem 0.5rem;
+  width: 100%;
+  max-width: 350px;
+  box-sizing: border-box;
+  text-align: center;
+  line-height: 1.4;
+  display: none; /* Domyślnie ukryty */
+}
+#lastRoundSummary strong {
+  font-weight: 800;
+  color: #fff;
+}
+body.dark-mode #lastRoundSummary {
+  background: var(--c-glass-bg-darker);
+}
+
 
 /* --- Lista Graczy --- */
 #playersList {
@@ -645,15 +687,52 @@ body.dark-mode #hintChanceSlider::-moz-range-thumb {
 
 .category-btn.custom-category-btn {
   background: rgba(46, 204, 113, 0.4);
-  border: 2px solid rgba(46, 204, 113, 0.7); /* Dodanie ramki dla odróżnienia */
+  border: 2px solid rgba(46, 204, 113, 0.7);
   color: #fff;
-  opacity: 0.8; /* Lekka przezroczystość dla odróżnienia */
+  opacity: 0.8; 
+  position: relative; /* Potrzebne do pozycjonowania przycisków */
+  padding-right: 65px; /* Zrób miejsce na przyciski */
 }
 .category-btn.custom-category-btn.selected {
   background: rgba(46, 204, 113, 0.7);
   box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3);
   opacity: 1;
 }
+
+/* Wrapper na przyciski Edytuj/Usuń */
+.category-actions {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 5px;
+}
+.category-actions button {
+  width: 28px;
+  height: 28px;
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+  line-height: 28px;
+}
+.category-actions .edit-btn {
+  background-color: var(--c-accent);
+}
+.category-actions .delete-btn {
+  background-color: var(--c-danger);
+}
+.category-actions button:hover {
+  transform: scale(1.1);
+  animation: none; /* Wyłącz pulsowanie */
+}
+
 
 #customCategoryBox {
   z-index: 1003; 
@@ -728,7 +807,7 @@ body.dark-mode #hintChanceSlider::-moz-range-thumb {
   border-radius: 0.5rem;
   font-size: 1.8rem;
   color: var(--c-text-light-alt);
-  border: none; /* Resetowanie ramki z listy graczy */
+  border: none;
 }
 #customWordsList .delete-word-btn {
   width: 24px;
@@ -786,13 +865,12 @@ body.dark-mode #hintChanceSlider::-moz-range-thumb {
   border: 2px solid var(--c-glass-border);
 }
 .team-selector button.selected {
-  background: var(--c-success);
   opacity: 1;
   border-color: var(--c-text-light);
-  box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3);
 }
 .team-selector button:nth-of-type(1).selected { /* Przycisk TAK */
   background: var(--c-success);
+  box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3);
 }
 .team-selector button:nth-of-type(2).selected { /* Przycisk NIE */
   background: var(--c-danger);
@@ -859,7 +937,7 @@ body.dark-mode .team-selector button:nth-of-type(2).selected { /* NIE */
   font-size: 1.8rem;
   font-weight: 600;
   box-shadow: 0 5px 15px var(--c-shadow-heavy);
-  animation: scaleIn 0.3s ease-in-out;
+  animation-name: slideInUp; /* ZMIANA ANIMACJI */
 }
 #messageBox:not(.copy-message) {
   font-size: 2.8rem;
@@ -877,6 +955,7 @@ body.dark-mode #messageBox:not(.copy-message) {
   font-size: 3.5rem;
   font-weight: bold;
   font-family: 'Segoe UI Black', var(--font-body);
+  animation-name: slideInUp; /* ZMIANA ANIMACJI */
 }
 
 #impostorSelectionBox p {
@@ -1121,17 +1200,24 @@ body.dark-mode #messageBox:not(.copy-message) {
 
 
 /* =================================================================== */
-/* 6. ANIMACJE */
+/* 6. ANIMACJE (ZMIENIONE) */
 /* =================================================================== */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes slideInUp {
+  from { opacity: 0; transform: translate(-50%, -40%); }
+  to { opacity: 1; transform: translate(-50%, -50%); }
 }
-@keyframes scaleIn {
-  from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
-  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+@keyframes slideOutDown {
+  from { opacity: 1; transform: translate(-50%, -50%); }
+  to { opacity: 0; transform: translate(-50%, -40%); }
 }
-#messageBox { animation-name: scaleIn; }
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(50px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideOutLeft {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(-50px); }
+}
 
 @keyframes pulse {
   0% { transform: scale(1); }
