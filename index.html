@@ -10,55 +10,55 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
+  <div class="container" id="loginScreen" data-screen>
     <h1 class="fancy-title">Słowny Impostor</h1>
-    <div id="loginScreen">
-      <input type="text" id="playerName" placeholder="Podaj swój nick" />
-      <h3>Wybierz awatar</h3>
-      <div id="emojiSelection"></div>
-      <hr class="section-divider" />
-      <button id="createRoom">Stwórz pokój</button>
-      <hr class="section-divider" />
-      <input type="text" id="roomCodeInput" placeholder="Kod pokoju" maxlength="4" />
-      <button id="joinRoom">Dołącz do pokoju</button>
-      <p id="statusMessage"></p>
-    </div>
+    <input type="text" id="playerName" placeholder="Podaj swój nick" />
+    <h3>Wybierz awatar</h3>
+    <div id="emojiSelection"></div>
+    <hr class="section-divider" />
+    <button id="createRoom">Stwórz pokój</button>
+    <hr class="section-divider" />
+    <input type="text" id="roomCodeInput" placeholder="Kod pokoju" maxlength="4" />
+    <button id="joinRoom">Dołącz do pokoju</button>
+    <p id="statusMessage"></p>
+  </div>
 
-    <div id="gameScreen" style="display:none;">
-      <div id="roomCodeContainer">
-        <p>Kod pokoju: <span id="roomCodeDisplay"></span></p>
-        <button id="copyRoomCode" title="Kopiuj kod">📋</button>
-      </div>
-      <p id="roundCounter"></p>
-      <p id="wordDisplay"></p>
-      <div id="countsContainer">
-        <p id="playerCountDisplay"></p>
-        <p id="impostorCountDisplay"></p>
-        <p id="hintChanceInfoDisplay"></p>
-      </div>
-      
-      <p id="voteResultDisplay" style="display:none;"></p>
-      
-      <ul id="playersList"></ul>
-      
-      <button id="startGame" style="display:none;">Start gry</button>
-      
-      <button id="startVoteBtn" style="display:none; margin-top: 0.8rem; background-color: #2ecc71;">Rozpocznij głosowanie</button>
-      <button id="confirmVoteBtn" style="display:none; margin-top: 0.8rem;">Zagłosuj</button>
-      
-      <button id="endRound" style="display:none; margin-top: 0.8rem; background-color: #c0392b;">Zakończ rundę (DEBUG)</button>
-      
-      <button id="leaveRoom" style="margin-top: 0.8rem;">Opuść pokój</button>
+  <div class="container" id="gameScreen" data-screen style="display:none;">
+    <div id="roomCodeContainer">
+      <p>Kod pokoju: <span id="roomCodeDisplay"></span></p>
+      <button id="copyRoomCode" title="Kopiuj kod">📋</button>
     </div>
+    <p id="roundCounter"></p>
+    <p id="wordDisplay"></p>
+    <div id="countsContainer">
+      <p id="playerCountDisplay"></p>
+      <p id="impostorCountDisplay"></p>
+      <p id="hintChanceInfoDisplay"></p>
+    </div>
+    
+    <p id="voteResultDisplay" style="display:none;"></p>
+    
+    <ul id="playersList"></ul>
+    
+    <p id="lastRoundSummary"></p>
+    
+    <button id="startGame" style="display:none;">Start gry</button>
+    
+    <button id="startVoteBtn" style="display:none; margin-top: 0.8rem; background-color: #2ecc71;">Rozpocznij głosowanie</button>
+    <button id="confirmVoteBtn" style="display:none; margin-top: 0.8rem;">Zagłosuj</button>
+    
+    <button id="endRound" style="display:none; margin-top: 0.8rem; background-color: #c0392b;">Zakończ rundę (DEBUG)</button>
+    
+    <button id="leaveRoom" style="margin-top: 0.8rem;">Opuść pokój</button>
   </div>
 
   <button id="rulesBtn" title="Zasady gry">i</button>
   <button id="themeToggle" title="Przełącz tryb"></button>
   
-  <div id="messageBox" class="modal-box"></div>
-  <div id="roleMessageBox" class="modal-box"></div>
+  <div id="messageBox" class="modal-box" data-modal></div>
+  <div id="roleMessageBox" class="modal-box" data-modal></div>
   
-  <div id="categorySelectionBox" class="modal-box custom-scrollbar" style="display:none;">
+  <div id="categorySelectionBox" class="modal-box custom-scrollbar" data-modal style="display:none;">
     <p>Wybierz kategorie:</p>
     <span id="allCategoriesBtn"><span class="checkbox"></span> Wszystkie</span>
     <div class="category-grid">
@@ -67,7 +67,7 @@
     <button id="confirmCategories">Dalej</button>
   </div>
   
-  <div id="impostorSelectionBox" class="modal-box" style="display:none;">
+  <div id="impostorSelectionBox" class="modal-box" data-modal style="display:none;">
     <p>Wybierz liczbę impostorów</p>
     <p id="loadingMessage" style="display: none;">Ładowanie kategorii...</p>
     <div class="impostor-selector">
@@ -79,7 +79,7 @@
     <p id="recommendedPlayers"></p>
   </div>
 
-  <div id="impostorHintBox" class="modal-box" style="display:none;">
+  <div id="impostorHintBox" class="modal-box" data-modal style="display:none;">
     <p>Szansa podpowiedzi dla impostora</p>
     
     <div class="slider-container">
@@ -104,7 +104,7 @@
     <button id="confirmHintSettingsBtn">Dalej</button>
   </div>
   
-  <div id="impostorTeamBox" class="modal-box" style="display:none;">
+  <div id="impostorTeamBox" class="modal-box" data-modal style="display:none;">
     <p>Czy impostorzy wiedzą o sobie?</p>
     
     <div class="team-selector">
@@ -115,7 +115,7 @@
     <button id="confirmTeamSettingsBtn">Stwórz pokój</button>
   </div>
   
-  <div id="customCategoryBox" class="modal-box custom-scrollbar" style="display:none;">
+  <div id="customCategoryBox" class="modal-box custom-scrollbar" data-modal style="display:none;">
     <button id="closeCustomCategoryBtn" title="Zamknij">X</button>
     <h2>Stwórz Własną Kategorię</h2>
     
@@ -132,7 +132,7 @@
     <button id="saveCustomCategoryBtn" disabled>Zapisz i użyj</button>
   </div>
 
-  <div id="rulesBox" class="modal-box custom-scrollbar">
+  <div id="rulesBox" class="modal-box custom-scrollbar" data-modal style="display:none;">
     <button id="closeRulesTop" title="Zamknij">X</button> 
     <h2>Zasady gry Słowny Impostor</h2>
     <h3>Cel gry</h3>
@@ -161,5 +161,5 @@
   </div>
 
   <script src="config.js"></script>
-  <script src="script.js?v=5"></script> </body>
+  <script src="script.js?v=6"></script> </body>
 </html>
