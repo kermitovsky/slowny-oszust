@@ -518,10 +518,9 @@ function updatePlayersList(players, localIsHost) {
   }
 }
 
-// ... reszta funkcji (showMessage, showRoleMessage) ...
 function showMessage(text, duration = 3500) {
   messageBox.innerHTML = text;
-  showModal(messageBox); // Użyj nowej funkcji
+  showModal(messageBox); 
   
   if (text === '✅ Kod skopiowany!' || text === '❌ Nie udało się skopiować kodu') {
     messageBox.classList.add('copy-message');
@@ -530,16 +529,16 @@ function showMessage(text, duration = 3500) {
     messageBox.classList.remove('copy-message');
   }
   setTimeout(() => {
-    hideModal(messageBox); // Użyj nowej funkcji
+    hideModal(messageBox); 
     messageBox.classList.remove('copy-message');
   }, duration);
 }
 
 function showRoleMessage(text, duration = 5000) {
   roleMessageBox.innerHTML = text.replace(/\n/g, '<br>');
-  showModal(roleMessageBox); // Użyj nowej funkcji
+  showModal(roleMessageBox); 
   setTimeout(() => {
-    hideModal(roleMessageBox); // Użyj nowej funkcji
+    hideModal(roleMessageBox); 
   }, duration);
 }
 
@@ -767,7 +766,7 @@ function createRoom(numImpostors, chanceIndex, onStart, knows) {
   }).then(() => {
     console.log('Pokój utworzony:', currentRoomCode);
     showScreen(gameScreen); 
-    hideModal(impostorTeamBox, true); // Schowaj na siłę ostatni modal
+    hideModal(impostorTeamBox, true); 
     roomCodeDisplay.textContent = currentRoomCode;
     db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).onDisconnect().remove();
     listenToRoom(currentRoomCode);
@@ -1418,13 +1417,12 @@ function saveCustomCategory() {
     }
     const btn = categoryGrid.querySelector(`.category-btn[data-file="${editingCategoryFile}"]`);
     if (btn) {
-      // Usuń stare przyciski akcji przed zmianą tekstu
       const oldActions = btn.querySelector('.category-actions');
       if (oldActions) oldActions.remove();
       
       btn.textContent = categoryName; 
       btn.dataset.categoryName = categoryName;
-      addCategoryActions(btn, editingCategoryFile); // Dodaj nowe przyciski
+      addCategoryActions(btn, editingCategoryFile); 
     }
     editingCategoryFile = null; 
     
