@@ -48,7 +48,7 @@ const confirmHintSettingsBtn = document.getElementById('confirmHintSettingsBtn')
 const hintChanceInfoDisplay = document.getElementById('hintChanceInfoDisplay');
 const hintCheckboxContainer = document.querySelector('#impostorHintBox .checkbox-container');
 
-// NOWE ELEMENTY DOM DLA WŁASNYCH KATEGORII
+// Elementy Własnych Kategorii
 const createCustomCategoryBtn = document.getElementById('createCustomCategoryBtn');
 const customCategoryBox = document.getElementById('customCategoryBox');
 const closeCustomCategoryBtn = document.getElementById('closeCustomCategoryBtn');
@@ -57,6 +57,12 @@ const customWordInput = document.getElementById('customWordInput');
 const addCustomWordBtn = document.getElementById('addCustomWordBtn');
 const customWordsList = document.getElementById('customWordsList');
 const saveCustomCategoryBtn = document.getElementById('saveCustomCategoryBtn');
+
+// *** NOWE ELEMENTY DOM DLA DRUŻYNY IMPOSTORÓW ***
+const impostorTeamBox = document.getElementById('impostorTeamBox');
+const teamKnowsBtn = document.getElementById('teamKnowsBtn');
+const teamNotKnowsBtn = document.getElementById('teamNotKnowsBtn');
+const confirmTeamSettingsBtn = document.getElementById('confirmTeamSettingsBtn');
 
 
 // Zmienne stanu gry
@@ -76,9 +82,12 @@ let hintOnStart = false;
 const hintChanceValues = ['0%', '25%', '50%', '75%', '100%'];
 const hintChanceNumeric = [0, 0.25, 0.5, 0.75, 1];
 
-// NOWE ZMIENNE DLA WŁASNYCH KATEGORII
-let tempCustomWords = []; // Tymczasowa lista słów przy tworzeniu
-let customCategories = []; // Lokalna kopia własnych kategorii { name, file, words, isCustom }
+let tempCustomWords = [];
+let customCategories = [];
+
+// *** NOWA ZMIENNA STANU DLA DRUŻYNY ***
+let impostorsKnowEachOther = false; // Domyślnie 'Nie'
+
 
 // Kategorie
 const categories = [
@@ -132,7 +141,7 @@ const fetchWithTimeout = async (url, timeout = 5000) => {
   }
 };
 
-// *** NOWA FUNKCJA: "Zapamiętaj Mnie" ***
+// Funkcja "Zapamiętaj Mnie"
 function loadFromLocalStorage() {
   const savedNick = localStorage.getItem('slownyOszustNick');
   const savedEmoji = localStorage.getItem('slownyOszustEmoji');
@@ -145,7 +154,6 @@ function loadFromLocalStorage() {
   if (savedEmoji) {
     selectedEmoji = savedEmoji;
     console.log('Wczytano emoji z localStorage:', savedEmoji);
-    // Znajdź i zaznacz przycisk emoji
     document.querySelectorAll('.emoji-btn').forEach(btn => {
       if (btn.textContent === savedEmoji) {
         btn.classList.add('selected');
@@ -171,10 +179,9 @@ function initializeEmojiSelection() {
     emojiSelection.appendChild(btn);
   });
   
-  // Po stworzeniu przycisków, wczytaj zapisane dane
   loadFromLocalStorage();
 }
-initializeEmojiSelection(); // Odpalenie
+initializeEmojiSelection();
 
 // Wykrywanie zamknięcia przeglądarki lub odświeżenia
 window.addEventListener('beforeunload', () => {
@@ -211,7 +218,6 @@ if (localStorage.getItem('theme') === 'dark') {
 // Inicjalizacja wyboru kategorii
 function initializeCategorySelection() {
   console.log('Inicjalizacja wyboru kategorii');
-  // Usuń tylko standardowe kategorie, nie przycisk "Stwórz"
   categoryGrid.querySelectorAll('.category-btn:not(.custom-new-btn)').forEach(btn => btn.remove());
   
   categories.forEach(category => {
@@ -223,7 +229,6 @@ function initializeCategorySelection() {
     btn.addEventListener('click', () => {
       toggleCategory(category); 
     });
-    // Wstaw przed przyciskiem "Stwórz własną"
     categoryGrid.insertBefore(btn, createCustomCategoryBtn);
   });
   
@@ -297,7 +302,6 @@ confirmCategories.addEventListener('click', () => {
   document.getElementById('loadingMessage').style.display = 'block';
   confirmImpostors.disabled = true;
   
-  // ZMIANA: Przekaż wybrane kategorie do loadWords
   loadWords(selectedCategories).then(() => {
     document.getElementById('loadingMessage').style.display = 'none';
     confirmImpostors.disabled = false;
@@ -314,15 +318,14 @@ confirmCategories.addEventListener('click', () => {
   });
 });
 
-// *** ZMIANA: Ta funkcja teraz ładuje TYLKO to, co jej każesz ***
 async function loadWords(categoriesToLoad) {
-  words = []; // Zawsze zaczynaj z czystą listą
+  words = []; 
   
   const categoriesToFetch = categoriesToLoad.filter(c => !c.isCustom && c.file !== 'all');
   const localCategories = categoriesToLoad.filter(c => c.isCustom);
   
   if (categoriesToLoad.some(c => c.file === 'all')) {
-    categoriesToFetch.push(...categories); // Dodaj wszystkie standardowe kategorie
+    categoriesToFetch.push(...categories); 
   }
   
   let loadedAnyFile = false;
@@ -341,14 +344,13 @@ async function loadWords(categoriesToLoad) {
         })
         .catch(error => {
           console.error(`Błąd ładowania pliku ${category.file}:`, error);
-          if (category.file !== 'all') {
+          if (category.file !== 'all') { 
              showMessage(`❌ Błąd ładowania kategorii ${category.name}! Pomijam.`);
           }
         })
     );
     await Promise.all(fetchPromises);
 
-    // Dodaj słowa z własnych kategorii
     for (const category of localCategories) {
       const mappedWords = category.words.map(word => ({
         word: word,
@@ -359,20 +361,19 @@ async function loadWords(categoriesToLoad) {
       console.log(`Załadowano ${mappedWords.length} słów z własnej kategorii: ${category.name}`);
     }
 
-    if (!loadedAnyFile && localCategories.length === 0) { // Jeśli nie załadowano nic I nie ma własnych
+    if (!loadedAnyFile && localCategories.length === 0) { 
       throw new Error('Nie udało się załadować żadnego pliku kategorii.');
     }
 
     console.log('Łącznie załadowano słów:', words.length);
   } catch (error) {
     console.error('Błąd ładowania słów:', error);
-    // Zawsze miej fallback
     words = fallbackWords; 
     console.log('Użyto wbudowanej listy słów:', words.length);
   }
 }
 
-// Początkowe ładowanie słów (teraz ładuje tylko fallback)
+// Początkowe ładowanie słów
 words = fallbackWords;
 console.log('Załadowano domyślne słowa (fallback):', words.length);
 
@@ -466,7 +467,7 @@ function showMessage(text, duration = 3500) {
 }
 
 function showRoleMessage(text, duration = 5000) {
-  roleMessageBox.innerHTML = text.replace('\n', '<br>');
+  roleMessageBox.innerHTML = text.replace(/\n/g, '<br>'); // Zamień wszystkie \n na <br>
   roleMessageBox.style.display = 'block';
   setTimeout(() => {
     roleMessageBox.style.display = 'none';
@@ -482,6 +483,7 @@ function resetToLobby() {
   categorySelectionBox.style.display = 'none';
   impostorSelectionBox.style.display = 'none';
   impostorHintBox.style.display = 'none';
+  impostorTeamBox.style.display = 'none'; // Ukryj też nowy modal
   rulesBox.style.display = 'none';
   rulesBtn.classList.remove('hidden');
   themeToggle.classList.remove('hidden');
@@ -493,8 +495,7 @@ function resetToLobby() {
   impostorCount = 1;
   impostorCountDisplaySelector.textContent = impostorCount;
   selectedCategories = [];
-  customCategories = []; // Wyczyść własne kategorie
-  // Usuń przyciski własnych kategorii z siatki
+  customCategories = []; 
   document.querySelectorAll('.custom-category-btn').forEach(btn => btn.remove());
   
   hasShownStartMessage = false;
@@ -515,6 +516,11 @@ function resetToLobby() {
   hintCheckboxContainer.classList.remove('disabled');
   hintOnStartCheckbox.disabled = false;
   
+  // Zresetuj przyciski drużyny
+  impostorsKnowEachOther = false;
+  teamKnowsBtn.classList.remove('selected');
+  teamNotKnowsBtn.classList.add('selected');
+
   document.querySelectorAll('.emoji-btn').forEach(btn => btn.classList.remove('selected'));
   updateImpostorButtons();
   updateRecommendedPlayers();
@@ -563,7 +569,6 @@ createRoomBtn.addEventListener('click', () => {
     return;
   }
   
-  // ZAPISZ DANE ("Zapamiętaj Mnie")
   localStorage.setItem('slownyOszustNick', name);
   localStorage.setItem('slownyOszustEmoji', selectedEmoji);
   
@@ -572,7 +577,7 @@ createRoomBtn.addEventListener('click', () => {
   console.log('Ustawiono hosta, imię:', currentPlayerName);
   categorySelectionBox.style.display = 'block';
   console.log('Wyświetlono categorySelectionBox');
-  initializeCategorySelection(); // Zbuduj listę kategorii
+  initializeCategorySelection(); 
   rulesBtn.classList.add('hidden');
   themeToggle.classList.add('hidden');
 });
@@ -632,20 +637,50 @@ hintOnStartCheckbox.addEventListener('change', (e) => {
   console.log('Podpowiedź przy starcie impostora:', hintOnStart);
 });
 
+// *** ZMIENIONY PRZEPŁYW: TEN PRZYCISK DECYDUJE, CZY POKAZAĆ EKRAN DRUŻYNY ***
 confirmHintSettingsBtn.addEventListener('click', () => {
-  console.log('Potwierdzono ustawienia podpowiedzi, tworzenie pokoju...');
-  createRoom(impostorCount, hintChance, hintOnStart);
+  console.log('Potwierdzono ustawienia podpowiedzi.');
+  impostorHintBox.style.display = 'none';
+  
+  if (impostorCount > 1) {
+    // Pokaż ekran wyboru drużyny
+    impostorTeamBox.style.display = 'block';
+  } else {
+    // Pomiń ekran drużyny i od razu stwórz pokój
+    impostorsKnowEachOther = false; // (nie ma znaczenia, ale dla pewności)
+    createRoom(impostorCount, hintChance, hintOnStart, impostorsKnowEachOther);
+  }
 });
 
-// *** ZMIANA: createRoom() zapisuje teraz WŁASNE kategorie ***
-function createRoom(numImpostors, chanceIndex, onStart) {
-  // Przygotuj własne kategorie do zapisu
+// *** NOWE LISTENERY DLA EKRANU DRUŻYNY ***
+teamKnowsBtn.addEventListener('click', () => {
+  impostorsKnowEachOther = true;
+  teamKnowsBtn.classList.add('selected');
+  teamNotKnowsBtn.classList.remove('selected');
+  console.log('Impostorzy będą wiedzieć');
+});
+
+teamNotKnowsBtn.addEventListener('click', () => {
+  impostorsKnowEachOther = false;
+  teamNotKnowsBtn.classList.add('selected');
+  teamKnowsBtn.classList.remove('selected');
+  console.log('Impostorzy NIE będą wiedzieć');
+});
+
+confirmTeamSettingsBtn.addEventListener('click', () => {
+  console.log('Potwierdzono ustawienia drużyny, tworzenie pokoju...');
+  createRoom(impostorCount, hintChance, hintOnStart, impostorsKnowEachOther);
+});
+
+// *** ZMIANA: createRoom() przyjmuje 'knows' ***
+function createRoom(numImpostors, chanceIndex, onStart, knows) {
   const customCategoriesToSave = selectedCategories
     .filter(c => c.isCustom)
-    .map(c => ({ name: c.name, words: c.words })); // Zapisz tylko nazwę i słowa
+    .map(c => ({ name: c.name, words: c.words })); 
 
-  console.log('Tworzenie pokoju z', numImpostors, 'impostorami, kategorie:', selectedCategories.map(c => c.name));
+  console.log('Tworzenie pokoju z', numImpostors, 'impostorami');
   console.log('Ustawienia podpowiedzi:', hintChanceValues[chanceIndex], 'na starcie:', onStart);
+  console.log('Impostorzy wiedzą o sobie:', knows);
   
   currentRoomCode = generateRoomCode();
   currentPlayerId = db.ref().push().key;
@@ -666,16 +701,18 @@ function createRoom(numImpostors, chanceIndex, onStart) {
     resetMessage: null,
     starterId: null,
     numImpostors: numImpostors,
-    categories: selectedCategories.map(c => c.name), // Zapisz nazwy wszystkich
-    customCategories: customCategoriesToSave || [], // Zapisz pełne dane własnych
+    categories: selectedCategories.map(c => c.name), 
+    customCategories: customCategoriesToSave || [],
     hintChance: chanceIndex,
-    hintOnStart: onStart
+    hintOnStart: onStart,
+    impostorsKnow: knows // *** NOWA DANA W FIREBASE ***
   }).then(() => {
     console.log('Pokój utworzony:', currentRoomCode);
     loginScreen.style.display = 'none';
     gameScreen.style.display = 'block';
     roomCodeDisplay.textContent = currentRoomCode;
     impostorHintBox.style.display = 'none';
+    impostorTeamBox.style.display = 'none';
     rulesBtn.classList.remove('hidden');
     themeToggle.classList.remove('hidden');
     db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).onDisconnect().remove();
@@ -688,7 +725,6 @@ function createRoom(numImpostors, chanceIndex, onStart) {
   });
 }
 
-// *** ZMIANA: joinRoom() wczytuje WŁASNE kategorie ***
 joinRoomBtn.addEventListener('click', () => {
   console.log('Kliknięto Dołącz do pokoju');
   const name = playerNameInput.value.trim();
@@ -706,7 +742,6 @@ joinRoomBtn.addEventListener('click', () => {
     return;
   }
 
-  // ZAPISZ DANE ("Zapamiętaj Mnie")
   localStorage.setItem('slownyOszustNick', name);
   localStorage.setItem('slownyOszustEmoji', selectedEmoji);
   
@@ -752,16 +787,13 @@ joinRoomBtn.addEventListener('click', () => {
       gameScreen.style.display = 'block';
       roomCodeDisplay.textContent = currentRoomCode;
       
-      // *** NOWA LOGIKA TWORZENIA LISTY KATEGORII ***
       const categoryNames = room.categories || ['Wszystkie'];
-      // Odtwórz listę standardowych kategorii
       let standardCategories = [];
       if (categoryNames.includes('Wszystkie')) {
         standardCategories = [{ name: 'Wszystkie', file: 'all' }];
       } else {
         standardCategories = categories.filter(c => categoryNames.includes(c.name));
       }
-      // Odtwórz listę własnych kategorii z Firebase
       const customCategoriesData = room.customCategories || [];
       customCategories = customCategoriesData.map(c => ({ 
         ...c, 
@@ -769,7 +801,6 @@ joinRoomBtn.addEventListener('click', () => {
         isCustom: true 
       }));
       
-      // Połącz obie listy, aby załadować słowa
       selectedCategories = [...standardCategories, ...customCategories];
       
       loadWords(selectedCategories); 
@@ -1033,6 +1064,7 @@ function listenToRoom(roomCode) {
     confirmVoteBtn.style.display = votingActive && !myVote ? 'block' : 'none';
     endRoundBtn.style.display = 'none';
 
+    // *** ZMIENIONA LOGIKA POKAZYWANIA ROLI (Z DRUŻYNĄ) ***
     if (room.gameStarted && !votingActive && room.currentWord && iAmInRoom) {
       const isImpostor = iAmInRoom.role === 'impostor';
       const hint = room.impostorHint; 
@@ -1040,7 +1072,21 @@ function listenToRoom(roomCode) {
       let message;
       if (isImpostor) {
         const hintText = hint ? `\n(Podpowiedź: ${hint})` : '';
-        message = `Jesteś oszustem!${hintText}`;
+        let teamText = '';
+        
+        // Zbuduj listę drużyny, jeśli opcja jest włączona
+        if (room.impostorsKnow && room.numImpostors > 1) {
+          const teammateNames = Object.keys(players)
+            .filter(id => players[id].role === 'impostor' && id !== currentPlayerId)
+            .map(id => players[id].name)
+            .join(', ');
+            
+          if (teammateNames) {
+            teamText = `\nTwoi partnerzy: ${teammateNames}`;
+          }
+        }
+        
+        message = `Jesteś oszustem!${teamText}${hintText}`;
       } else {
         message = `Słowo: ${room.currentWord}`;
       }
@@ -1100,8 +1146,6 @@ startGameBtn.addEventListener('click', () => {
       return;
     }
 
-    // WAŻNE: 'words' teraz zawiera TYLKO słowa z wybranych kategorii
-    // (załadowane, gdy host klikał "Dalej" w 'confirmCategories')
     if (words.length === 0) {
       showMessage('❌ Brak słów! Spróbuj ponownie utworzyć pokój i wybrać kategorie.');
       console.log('Host próbował wystartować grę, ale "words" było puste.');
@@ -1208,6 +1252,7 @@ endRoundBtn.addEventListener('click', () => {
       currentCategory: null,
       impostorHint: null, 
       starterId: null,
+      impostorsKnow: null, // Wyczyść
       resetMessage: `Runda zakończona! Słowo: <strong>${currentWord}</strong><br>Impostorzy: <strong>${impostorNames || 'Brak'}</strong>`
     };
     Object.keys(players).forEach(id => {
@@ -1232,21 +1277,20 @@ endRoundBtn.addEventListener('click', () => {
 
 function showCustomCategoryModal() {
   console.log('Otwieranie modala własnej kategorii...');
-  // Wyczyść stan
   tempCustomWords = [];
   customCategoryNameInput.value = '';
   customWordInput.value = '';
-  updateTempWordsList(); // Wyczyść listę UI
-  saveCustomCategoryBtn.disabled = true; // Zablokuj przycisk zapisu
+  updateTempWordsList(); 
+  saveCustomCategoryBtn.disabled = true; 
   
   customCategoryBox.style.display = 'block';
-  categorySelectionBox.style.display = 'none'; // Ukryj poprzedni modal
+  categorySelectionBox.style.display = 'none'; 
 }
 
 function hideCustomCategoryModal() {
   console.log('Zamykanie modala własnej kategorii...');
   customCategoryBox.style.display = 'none';
-  categorySelectionBox.style.display = 'block'; // Pokaż z powrotem wybór kategorii
+  categorySelectionBox.style.display = 'block'; 
 }
 
 function addTempWord() {
@@ -1257,8 +1301,8 @@ function addTempWord() {
   }
   tempCustomWords.push(word);
   console.log('Dodano tymczasowe słowo:', word);
-  customWordInput.value = ''; // Wyczyść input
-  customWordInput.focus(); // Ustaw focus z powrotem
+  customWordInput.value = ''; 
+  customWordInput.focus(); 
   updateTempWordsList();
 }
 
@@ -1269,7 +1313,7 @@ function deleteTempWord(index) {
 }
 
 function updateTempWordsList() {
-  customWordsList.innerHTML = ''; // Wyczyść listę
+  customWordsList.innerHTML = ''; 
   if (tempCustomWords.length === 0) {
     customWordsList.innerHTML = '<li>Dodaj przynajmniej 3 słowa...</li>';
   }
@@ -1281,13 +1325,12 @@ function updateTempWordsList() {
     const deleteBtn = document.createElement('button');
     deleteBtn.textContent = '×';
     deleteBtn.classList.add('delete-word-btn');
-    deleteBtn.dataset.index = index; // Zapisz indeks do usunięcia
+    deleteBtn.dataset.index = index; 
     
     li.appendChild(deleteBtn);
     customWordsList.appendChild(li);
   });
   
-  // Odblokuj zapis, jeśli jest wystarczająco słów
   saveCustomCategoryBtn.disabled = tempCustomWords.length < 3;
 }
 
@@ -1300,15 +1343,15 @@ function saveCustomCategory() {
   
   const newCategory = {
     name: categoryName,
-    file: `custom_${Date.now()}`, // Unikalne ID
-    words: [...tempCustomWords], // Skopiuj tablicę
+    file: `custom_${Date.now()}`, 
+    words: [...tempCustomWords], 
     isCustom: true
   };
   
-  customCategories.push(newCategory); // Dodaj do globalnej listy (tylko dla hosta)
-  selectedCategories.push(newCategory); // Automatycznie wybierz nową kategorię
+  customCategories.push(newCategory); 
+  selectedCategories.push(newCategory); 
   
-  addCustomCategoryToGrid(newCategory); // Dodaj przycisk do UI
+  addCustomCategoryToGrid(newCategory); 
   
   console.log('Zapisano własną kategorię:', newCategory.name);
   hideCustomCategoryModal();
@@ -1316,7 +1359,7 @@ function saveCustomCategory() {
 
 function addCustomCategoryToGrid(category) {
   const btn = document.createElement('button');
-  btn.classList.add('category-btn', 'custom-category-btn'); // Dwie klasy
+  btn.classList.add('category-btn', 'custom-category-btn'); 
   btn.textContent = category.name;
   btn.dataset.file = category.file;
   btn.dataset.categoryName = category.name;
@@ -1325,20 +1368,17 @@ function addCustomCategoryToGrid(category) {
     toggleCategory(category); 
   });
   
-  categoryGrid.insertBefore(btn, createCustomCategoryBtn); // Wstaw przed przyciskiem "+"
+  categoryGrid.insertBefore(btn, createCustomCategoryBtn); 
   
-  // Zaktualizuj UI, żeby pokazać, że jest wybrana
   updateCategoryButtons();
   updateConfirmCategoriesButton();
 }
 
-// *** NOWE LISTENERY DLA MODALA WŁASNYCH KATEGORII ***
 createCustomCategoryBtn.addEventListener('click', showCustomCategoryModal);
 closeCustomCategoryBtn.addEventListener('click', hideCustomCategoryModal);
 addCustomWordBtn.addEventListener('click', addTempWord);
 saveCustomCategoryBtn.addEventListener('click', saveCustomCategory);
 
-// Użyj delegacji eventów dla przycisków usuwania
 customWordsList.addEventListener('click', (e) => {
   if (e.target && e.target.classList.contains('delete-word-btn')) {
     const index = parseInt(e.target.dataset.index, 10);
@@ -1346,7 +1386,6 @@ customWordsList.addEventListener('click', (e) => {
   }
 });
 
-// Pozwól na dodawanie słowa Enterem
 customWordInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') {
     addTempWord();
