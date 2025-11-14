@@ -58,7 +58,7 @@ const confirmTeamSettingsBtn = document.getElementById('confirmTeamSettingsBtn')
 const startVoteBtn = document.getElementById('startVoteBtn');
 const confirmVoteBtn = document.getElementById('confirmVoteBtn');
 const voteResultDisplay = document.getElementById('voteResultDisplay');
-const lastRoundSummary = document.getElementById('lastRoundSummary'); // NOWY ELEMENT PODSUMOWANIA
+const lastRoundSummary = document.getElementById('lastRoundSummary'); 
 
 // Elementy Własnych Kategorii
 const createCustomCategoryBtn = document.getElementById('createCustomCategoryBtn');
@@ -68,6 +68,7 @@ const customWordInput = document.getElementById('customWordInput');
 const addCustomWordBtn = document.getElementById('addCustomWordBtn');
 const customWordsList = document.getElementById('customWordsList');
 const saveCustomCategoryBtn = document.getElementById('saveCustomCategoryBtn');
+
 
 // Zmienne stanu gry
 let currentRoomCode = null;
@@ -88,10 +89,10 @@ const hintChanceNumeric = [0, 0.25, 0.5, 0.75, 1];
 
 let tempCustomWords = [];
 let customCategories = [];
-let editingCategoryFile = null; // Śledzi, którą kategorię edytujemy
+let editingCategoryFile = null; 
 
 let impostorsKnowEachOther = false; 
-let currentModal = null; // Śledzi otwarty modal
+let currentModal = null; 
 
 // Kategorie
 const categories = [
@@ -130,22 +131,19 @@ const fallbackWords = [
   { word: "muzyka", category: "Muzyka" }
 ];
 
-// --- NOWE FUNKCJE ZARZĄDZANIA UI ---
+// --- FUNKCJE ZARZĄDZANIA UI (POPRAWIONE) ---
 function showScreen(screenToShow) {
   const screens = [loginScreen, gameScreen];
   screens.forEach(screen => {
     if (screen === screenToShow) {
       screen.style.display = 'flex';
-      // Użyjmy animacji CSS
       if (screen === gameScreen) {
         screen.style.animation = 'slideInRight 0.4s ease forwards';
       }
     } else {
       if (screen.style.display !== 'none') {
-        // Dodaj animację wyjścia
         if (screen === loginScreen) {
           screen.style.animation = 'slideOutLeft 0.4s ease forwards';
-          // Ukryj po animacji
           setTimeout(() => screen.style.display = 'none', 400);
         } else {
           screen.style.display = 'none';
@@ -153,7 +151,6 @@ function showScreen(screenToShow) {
       }
     }
   });
-  // Ukryj wszystkie otwarte modale
   hideModal(currentModal, true);
 }
 
@@ -161,11 +158,14 @@ function showModal(modalToShow) {
   if (currentModal && currentModal !== modalToShow) {
     hideModal(currentModal);
   }
+  
+  // *** NAPRAWA BŁĘDU: Ustaw display: block PRZED dodaniem klasy ***
+  modalToShow.style.display = 'block'; 
+  
   modalToShow.classList.remove('is-hiding');
   modalToShow.classList.add('is-visible');
   currentModal = modalToShow;
   
-  // Ukryj przyciski UI
   rulesBtn.classList.add('hidden');
   themeToggle.classList.add('hidden');
 }
@@ -173,7 +173,6 @@ function showModal(modalToShow) {
 function hideModal(modalToHide, force = false) {
   if (!modalToHide) return;
   
-  // Na siłę (np. przy zmianie ekranu)
   if (force) {
     modalToHide.style.display = 'none';
     modalToHide.classList.remove('is-visible', 'is-hiding');
@@ -181,17 +180,15 @@ function hideModal(modalToHide, force = false) {
     return;
   }
   
-  // Z animacją
   modalToHide.classList.add('is-hiding');
   modalToHide.classList.remove('is-visible');
   
-  // Usuń po animacji
   setTimeout(() => {
-    modalToHide.style.display = 'none';
+    // *** NAPRAWA BŁĘDU: Ustaw display: none PO animacji ***
+    modalToHide.style.display = 'none'; 
     modalToHide.classList.remove('is-hiding');
     if (modalToHide === currentModal) {
       currentModal = null;
-      // Pokaż przyciski UI tylko, jeśli żaden inny modal nie jest otwarty
       if (!document.querySelector('.modal-box.is-visible')) {
         rulesBtn.classList.remove('hidden');
         themeToggle.classList.remove('hidden');
@@ -445,7 +442,6 @@ async function loadWords(categoriesToLoad) {
   }
 }
 
-// Początkowe ładowanie słów
 words = fallbackWords;
 console.log('Załadowano domyślne słowa (fallback):', words.length);
 
@@ -522,6 +518,7 @@ function updatePlayersList(players, localIsHost) {
   }
 }
 
+// ... reszta funkcji (showMessage, showRoleMessage) ...
 function showMessage(text, duration = 3500) {
   messageBox.innerHTML = text;
   showModal(messageBox); // Użyj nowej funkcji
@@ -547,7 +544,7 @@ function showRoleMessage(text, duration = 5000) {
 }
 
 function resetToLobby() {
-  showScreen(loginScreen); // Zamiast 'display: block'
+  showScreen(loginScreen); 
   
   startVoteBtn.style.display = 'none';
   confirmVoteBtn.style.display = 'none';
@@ -557,8 +554,8 @@ function resetToLobby() {
   hintChanceInfoDisplay.innerHTML = '';
   roundCounter.innerHTML = '';
   wordDisplay.innerHTML = '';
-  lastRoundSummary.innerHTML = ''; // Wyczyść podsumowanie
-  lastRoundSummary.style.display = 'none'; // Ukryj podsumowanie
+  lastRoundSummary.innerHTML = ''; 
+  lastRoundSummary.style.display = 'none'; 
   
   impostorCount = 1;
   impostorCountDisplaySelector.textContent = impostorCount;
@@ -592,7 +589,6 @@ function resetToLobby() {
   updateImpostorButtons();
   updateRecommendedPlayers();
   
-  // Załaduj nick i emoji z pamięci
   loadFromLocalStorage();
 }
 
@@ -643,7 +639,6 @@ createRoomBtn.addEventListener('click', () => {
   isHost = true;
   console.log('Ustawiono hosta, imię:', currentPlayerName);
   
-  // Zamiast `display: block`
   showModal(categorySelectionBox); 
   
   initializeCategorySelection();
@@ -711,7 +706,7 @@ confirmHintSettingsBtn.addEventListener('click', () => {
   if (impostorCount > 1) {
     showModal(impostorTeamBox);
   } else {
-    impostorsKnowEachOther = false;
+    impostorsKnowEachOther = false; 
     createRoom(impostorCount, hintChance, hintOnStart, impostorsKnowEachOther);
   }
 });
@@ -736,7 +731,7 @@ confirmTeamSettingsBtn.addEventListener('click', () => {
 });
 
 function createRoom(numImpostors, chanceIndex, onStart, knows) {
-  const customCategoriesToSave = customCategories // Użyj globalnej listy
+  const customCategoriesToSave = customCategories 
     .filter(c => c.isCustom)
     .map(c => ({ name: c.name, words: c.words })); 
 
@@ -760,7 +755,7 @@ function createRoom(numImpostors, chanceIndex, onStart, knows) {
     currentWord: null,
     currentCategory: null, 
     impostorHint: null, 
-    lastRoundSummary: null, // NOWE
+    lastRoundSummary: null,
     resetMessage: null,
     starterId: null,
     numImpostors: numImpostors,
@@ -771,15 +766,15 @@ function createRoom(numImpostors, chanceIndex, onStart, knows) {
     impostorsKnow: knows
   }).then(() => {
     console.log('Pokój utworzony:', currentRoomCode);
-    showScreen(gameScreen); // Użyj nowej funkcji
-    hideModal(impostorTeamBox); // Ukryj ostatni modal
+    showScreen(gameScreen); 
+    hideModal(impostorTeamBox, true); // Schowaj na siłę ostatni modal
     roomCodeDisplay.textContent = currentRoomCode;
     db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).onDisconnect().remove();
     listenToRoom(currentRoomCode);
   }).catch(error => {
     console.error('Błąd tworzenia pokoju:', error);
     showMessage('❌ Błąd tworzenia pokoju!');
-    showScreen(loginScreen); // Wróć do logowania
+    showScreen(loginScreen);
   });
 }
 
@@ -841,7 +836,7 @@ joinRoomBtn.addEventListener('click', () => {
       [currentPlayerId]: playerData
     }).then(() => {
       console.log('Dołączono do pokoju:', roomCode, 'Gracz:', playerData);
-      showScreen(gameScreen); // Użyj nowej funkcji
+      showScreen(gameScreen); 
       
       const categoryNames = room.categories || ['Wszystkie'];
       let standardCategories = [];
@@ -1010,9 +1005,10 @@ function tallyVotes(room) {
 
   const updates = {
     votingActive: false,
+    resetMessage: null,
     impostorHint: null, 
-    currentCategory: null,
-    lastRoundSummary: null, // Wyczyść stary, zanim dodasz nowy
+    currentCategory: null, 
+    lastRoundSummary: null, 
   };
 
   playerIds.forEach(id => {
@@ -1107,7 +1103,6 @@ function listenToRoom(roomCode) {
         : '';
     }
 
-    // Pokaż/ukryj podsumowanie rundy
     if (room.lastRoundSummary && !room.gameStarted) {
       lastRoundSummary.innerHTML = room.lastRoundSummary;
       lastRoundSummary.style.display = 'block';
@@ -1159,7 +1154,6 @@ function listenToRoom(roomCode) {
       hasShownStartMessage = false;
     }
 
-    // Komunikat 'resetMessage' (remis)
     if (room.resetMessage) {
       showMessage(room.resetMessage);
       if (isHost) {
@@ -1250,7 +1244,7 @@ startGameBtn.addEventListener('click', () => {
     updates.currentCategory = category;
     updates.impostorHint = hint; 
     updates.starterId = starterId;
-    updates.lastRoundSummary = null; // Wyczyść podsumowanie
+    updates.lastRoundSummary = null; 
     updates.currentRound = (room.currentRound || 0) + 1;
 
     roomRef.update(updates).then(() => {
@@ -1329,24 +1323,22 @@ endRoundBtn.addEventListener('click', () => {
   });
 });
 
-// *** NOWE FUNKCJE DLA WŁASNYCH KATEGORII ***
+// *** FUNKCJE WŁASNYCH KATEGORII ***
 
 function showCustomCategoryModal(editFileId = null) {
   console.log('Otwieranie modala własnej kategorii...');
-  editingCategoryFile = editFileId; // Ustaw tryb edycji
+  editingCategoryFile = editFileId; 
   
   if (editFileId) {
-    // Tryb Edycji
     const category = customCategories.find(c => c.file === editFileId);
     if (!category) {
       console.error('Nie znaleziono kategorii do edycji!');
       return;
     }
     customCategoryNameInput.value = category.name;
-    tempCustomWords = [...category.words]; // Załaduj słowa do edycji
+    tempCustomWords = [...category.words]; 
     saveCustomCategoryBtn.textContent = 'Zapisz zmiany';
   } else {
-    // Tryb Tworzenia
     tempCustomWords = [];
     customCategoryNameInput.value = '';
     customWordInput.value = '';
@@ -1354,13 +1346,14 @@ function showCustomCategoryModal(editFileId = null) {
   }
   
   updateTempWordsList(); 
-  showModal(customCategoryBox); // Użyj nowej funkcji
+  hideModal(categorySelectionBox); 
+  showModal(customCategoryBox); 
 }
 
 function hideCustomCategoryModal() {
-  hideModal(customCategoryBox); // Użyj nowej funkcji
+  hideModal(customCategoryBox); 
   showModal(categorySelectionBox);
-  editingCategoryFile = null; // Zawsze resetuj tryb edycji przy zamykaniu
+  editingCategoryFile = null; 
 }
 
 function addTempWord() {
@@ -1412,33 +1405,30 @@ function saveCustomCategory() {
   }
   
   if (editingCategoryFile) {
-    // --- TRYB EDYCJI ---
     console.log('Zapisywanie zmian w kategorii:', categoryName);
-    // Zaktualizuj globalną listę 'customCategories'
     const categoryIndex = customCategories.findIndex(c => c.file === editingCategoryFile);
     if (categoryIndex > -1) {
       customCategories[categoryIndex].name = categoryName;
       customCategories[categoryIndex].words = [...tempCustomWords];
     }
-    // Zaktualizuj listę 'selectedCategories'
     const selectedIndex = selectedCategories.findIndex(c => c.file === editingCategoryFile);
     if (selectedIndex > -1) {
       selectedCategories[selectedIndex].name = categoryName;
       selectedCategories[selectedIndex].words = [...tempCustomWords];
     }
-    // Zaktualizuj przycisk w siatce
     const btn = categoryGrid.querySelector(`.category-btn[data-file="${editingCategoryFile}"]`);
     if (btn) {
-      btn.textContent = categoryName; // Aktualizuj tekst
-      // Musimy też zaktualizować 'data-category-name', jeśli od tego zależy
+      // Usuń stare przyciski akcji przed zmianą tekstu
+      const oldActions = btn.querySelector('.category-actions');
+      if (oldActions) oldActions.remove();
+      
+      btn.textContent = categoryName; 
       btn.dataset.categoryName = categoryName;
-      // Dodaj akcje z powrotem, bo 'textContent' je kasuje
-      addCategoryActions(btn, editingCategoryFile);
+      addCategoryActions(btn, editingCategoryFile); // Dodaj nowe przyciski
     }
-    editingCategoryFile = null; // Wyłącz tryb edycji
+    editingCategoryFile = null; 
     
   } else {
-    // --- TRYB TWORZENIA ---
     console.log('Zapisywanie nowej kategorii:', categoryName);
     const newCategory = {
       name: categoryName,
@@ -1454,7 +1444,7 @@ function saveCustomCategory() {
   }
 
   hideCustomCategoryModal();
-  updateCategoryButtons(); // Zaktualizuj podświetlenie
+  updateCategoryButtons(); 
   updateConfirmCategoriesButton();
 }
 
@@ -1466,19 +1456,17 @@ function addCustomCategoryToGrid(category) {
   btn.dataset.categoryName = category.name;
   
   btn.addEventListener('click', (e) => {
-    // Nie przełączaj, jeśli kliknięto przycisk akcji
     if (e.target.closest('.category-actions')) {
       return;
     }
     toggleCategory(category); 
   });
   
-  addCategoryActions(btn, category.file); // Dodaj przyciski ✏️ i 🗑️
+  addCategoryActions(btn, category.file); 
   
   categoryGrid.insertBefore(btn, createCustomCategoryBtn); 
 }
 
-// NOWA FUNKCJA: Dodaje przyciski ✏️ i 🗑️
 function addCategoryActions(btn, fileId) {
   const actionsDiv = document.createElement('div');
   actionsDiv.classList.add('category-actions');
@@ -1500,14 +1488,11 @@ function addCategoryActions(btn, fileId) {
   btn.appendChild(actionsDiv);
 }
 
-// NOWA FUNKCJA: Usuwa kategorię
 function deleteCustomCategory(fileId) {
   console.log('Usuwanie kategorii:', fileId);
-  // Usuń z globalnych list
   customCategories = customCategories.filter(c => c.file !== fileId);
   selectedCategories = selectedCategories.filter(c => c.file !== fileId);
   
-  // Usuń przycisk z UI
   const btn = categoryGrid.querySelector(`.category-btn[data-file="${fileId}"]`);
   if (btn) {
     btn.remove();
@@ -1517,31 +1502,28 @@ function deleteCustomCategory(fileId) {
   updateConfirmCategoriesButton();
 }
 
-// NOWA FUNKCJA: Edytuje kategorię
 function editCustomCategory(fileId) {
   console.log('Edycja kategorii:', fileId);
   const category = customCategories.find(c => c.file === fileId);
   if (category) {
-    showCustomCategoryModal(fileId); // Otwórz modal w trybie edycji
+    showCustomCategoryModal(fileId); 
   }
 }
 
-// *** NOWE LISTENERY DLA MODALI ***
 createCustomCategoryBtn.addEventListener('click', () => showCustomCategoryModal());
 closeCustomCategoryBtn.addEventListener('click', hideCustomCategoryModal);
 addCustomWordBtn.addEventListener('click', addTempWord);
 saveCustomCategoryBtn.addEventListener('click', saveCustomCategory);
 
-// Delegowany listener dla przycisków ✏️ i 🗑️
 categoryGrid.addEventListener('click', (e) => {
-  const target = e.target.closest('button'); // Znajdź najbliższy przycisk
+  const target = e.target.closest('button'); 
   if (!target) return;
 
   if (target.classList.contains('delete-btn')) {
-    e.stopPropagation(); // Zatrzymaj propagację do przycisku kategorii
+    e.stopPropagation(); 
     deleteCustomCategory(target.dataset.file);
   } else if (target.classList.contains('edit-btn')) {
-    e.stopPropagation(); // Zatrzymaj propagację
+    e.stopPropagation(); 
     editCustomCategory(target.dataset.file);
   }
 });
@@ -1555,7 +1537,7 @@ customWordsList.addEventListener('click', (e) => {
 
 customWordInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') {
-    e.preventDefault(); // Zatrzymaj domyślną akcję (np. submit formularza)
+    e.preventDefault(); 
     addTempWord();
   }
 });
