@@ -362,7 +362,7 @@ function assignUniqueColor(players) {
   return selectedColor;
 }
 
-// *** POPRAWKA #1: Funkcja przyjmuje teraz 'localIsHost' ***
+// *** ZMIANA: Funkcja przyjmuje teraz 'localIsHost' ***
 function updatePlayersList(players, localIsHost) {
   playersList.innerHTML = '';
   if (!players || !Object.keys(players).length) {
@@ -380,7 +380,6 @@ function updatePlayersList(players, localIsHost) {
     li.appendChild(avatar);
     li.appendChild(document.createTextNode(` ${player.name || 'Nieznany gracz'}`));
     
-    // Ta logika (rysowanie tekstu) jest poprawna, bo czyta z obiektu 'player'
     if (player.isHost) {
       li.classList.add('host');
       li.appendChild(document.createTextNode(' (host)'));
@@ -389,7 +388,7 @@ function updatePlayersList(players, localIsHost) {
       li.classList.add('self');
     }
 
-    // *** POPRAWKA #2: Użyj 'localIsHost' zamiast globalnej 'isHost' ***
+    // Użyj 'localIsHost' zamiast globalnej 'isHost'
     if (localIsHost && id !== currentPlayerId) {
       const kickBtn = document.createElement('button');
       kickBtn.textContent = '×';
@@ -456,6 +455,7 @@ function resetToLobby() {
   hintChance = 0;
   hintOnStart = false;
   hintChanceSlider.value = 0;
+  // ZMIANA: Zresetuj etykiety slidera
   document.querySelectorAll('.slider-labels .slider-label').forEach((label, index) => {
     if (index === 0) {
       label.classList.add('label-active');
@@ -870,7 +870,6 @@ function tallyVotes(room) {
 }
 
 
-// *** NAJWAŻNIEJSZA ZMIANA JEST TUTAJ ***
 function listenToRoom(roomCode) {
   const roomRef = db.ref(`rooms/${roomCode}`);
   roomRef.on('value', snapshot => {
@@ -900,23 +899,21 @@ function listenToRoom(roomCode) {
       const newHostId = sortedPlayerIds[0];
       
       if (newHostId === currentPlayerId) {
-        console.log('To ja! Promuję się na nowego hosta.');
+        console.log('To ja! Promuję się na nowego hosta. Czekam na odświeżenie...');
         db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).update({ isHost: true });
-        // Nie ma potrzeby ręcznej zmiany 'isHost', pętla 'listenToRoom' sama to wykryje
+        return; // *** TUTAJ JEST NAPRAWA BŁĘDU HOSTA ***
       }
     }
 
-    // *** POPRAWKA #3: Ustaw 'isHost' NA PODSTAWIE NAJNOWSZYCH DANYCH ***
     isHost = iAmInRoom ? iAmInRoom.isHost : false; 
 
     if (votingActive) {
       document.body.classList.add('voting-active');
       wordDisplay.innerHTML = "<strong>Czas na głosowanie! Kto jest oszustem?</strong>";
-      updatePlayersListForVoting(players); // Ta funkcja nie potrzebuje 'isHost'
+      updatePlayersListForVoting(players);
     } else {
       document.body.classList.remove('voting-active');
       selectedPlayerId = null;
-      // *** POPRAWKA #4: Przekaż zaktualizowany 'isHost' do funkcji rysującej ***
       updatePlayersList(players, isHost); 
     }
 
@@ -942,7 +939,6 @@ function listenToRoom(roomCode) {
         : '';
     }
 
-    // *** Usunięto zduplikowane ustawienie 'isHost' stąd ***
     startGameBtn.style.display = isHost && !room.gameStarted && !votingActive ? 'block' : 'none';
     startVoteBtn.style.display = isHost && room.gameStarted && !votingActive ? 'block' : 'none';
     confirmVoteBtn.style.display = votingActive && !myVote ? 'block' : 'none';
