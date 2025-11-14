@@ -1,5 +1,3 @@
-alert("ŁADUJĘ KOD v12!"); // TESTOWY ALERT
-
 // Elementy DOM
 const playerNameInput = document.getElementById('playerName');
 const createRoomBtn = document.getElementById('createRoom');
@@ -33,10 +31,16 @@ const impostorTeamBox = document.getElementById('impostorTeamBox');
 const customCategoryBox = document.getElementById('customCategoryBox');
 const rulesBox = document.getElementById('rulesBox');
 
-// *** POPRAWKA BRAKUJĄCYCH ZMIENNYCH ***
+// Elementy animacji
+const fullscreenOverlay = document.getElementById('fullscreen-overlay');
+const countdownDisplay = document.getElementById('countdown-display');
+const fullscreenMessage = document.getElementById('fullscreen-message');
+const fsMessagePrimary = document.getElementById('fullscreen-message-primary');
+const fsMessageSecondary = document.getElementById('fullscreen-message-secondary');
+
+
 const closeRulesBtn = document.getElementById('closeRules');
 const closeRulesTopBtn = document.getElementById('closeRulesTop');
-// *** KONIEC POPRAWKI ***
 
 // Elementy Wyboru Kategorii
 const allCategoriesBtn = document.getElementById('allCategoriesBtn');
@@ -86,8 +90,10 @@ let words = [];
 let impostorCount = 1;
 let selectedCategories = [];
 let hasShownStartMessage = false;
+let hasShownEndMessage = false; // *** POPRAWKA: Nowa flaga do animacji końca rundy
 let selectedEmoji = null;
 let selectedPlayerId = null; 
+let isAnimating = false; // *** POPRAWKA: BRAKUJĄCA ZMIENNA ***
 
 let hintChance = 0; 
 let hintOnStart = false; 
@@ -161,13 +167,11 @@ function showScreen(screenToShow) {
   hideModal(currentModal, true);
 }
 
-// *** NAPRAWIONA FUNKCJA ***
 function showModal(modalToShow) {
   if (currentModal && currentModal !== modalToShow) {
     hideModal(currentModal);
   }
   
-  // NAJPIERW POKAŻ, POTEM ANIMUJ
   modalToShow.style.display = 'block'; 
   
   modalToShow.classList.remove('is-hiding');
@@ -178,7 +182,6 @@ function showModal(modalToShow) {
   themeToggle.classList.add('hidden');
 }
 
-// *** NAPRAWIONA FUNKCJA ***
 function hideModal(modalToHide, force = false) {
   if (!modalToHide) return;
   
@@ -193,7 +196,7 @@ function hideModal(modalToHide, force = false) {
   modalToHide.classList.remove('is-visible');
   
   setTimeout(() => {
-    modalToHide.style.display = 'none'; // UKRYJ PO ANIMACJI
+    modalToHide.style.display = 'none'; 
     modalToHide.classList.remove('is-hiding');
     if (modalToHide === currentModal) {
       currentModal = null;
@@ -202,7 +205,7 @@ function hideModal(modalToHide, force = false) {
         themeToggle.classList.remove('hidden');
       }
     }
-  }, 300); // Czas trwania animacji
+  }, 300); 
 }
 
 
@@ -542,6 +545,7 @@ function showMessage(text, duration = 3500) {
   }, duration);
 }
 
+// Ta funkcja nie jest już używana do pokazywania ról
 function showRoleMessage(text, duration = 5000) {
   roleMessageBox.innerHTML = text.replace(/\n/g, '<br>');
   showModal(roleMessageBox); 
@@ -571,6 +575,7 @@ function resetToLobby() {
   document.querySelectorAll('.custom-category-btn').forEach(btn => btn.remove());
   
   hasShownStartMessage = false;
+  hasShownEndMessage = false; // Zresetuj flagę końca rundy
   selectedEmoji = null;
   selectedPlayerId = null; 
   
@@ -1046,6 +1051,135 @@ function tallyVotes(room) {
 }
 
 
+// *** NOWA FUNKCJA DO POKAZYWANIA SEKWENCJI KOŃCA RUNDY ***
+function runRoundEndSequence(summaryMessage) {
+  if (isAnimating) return;
+  isAnimating = true;
+  
+  console.log("Pokazuję sekwencję końca rundy");
+  
+  fsMessagePrimary.innerHTML = summaryMessage; 
+  fsMessageSecondary.textContent = "Przygotujcie się na nową rundę...";
+  
+  fullscreenMessage.className = ''; 
+  
+  // Ustalanie koloru
+  if (summaryMessage.includes('Impostor wygrał')) {
+    fullscreenMessage.classList.add('impostor-role');
+  } else {
+    fullscreenMessage.classList.add('crewmate-role');
+  }
+  
+  countdownDisplay.style.display = 'none';
+  fullscreenMessage.style.animation = 'none';
+  fullscreenMessage.offsetHeight;
+  fullscreenMessage.style.display = 'flex';
+  fullscreenMessage.style.animation = 'slideInUp 0.5s ease forwards';
+  
+  fullscreenOverlay.classList.add('is-visible');
+
+  // Schowaj po 5 sekundach
+  setTimeout(() => {
+    fullscreenOverlay.classList.add('is-hiding'); // Użyj animacji wygaszania
+    isAnimating = false;
+    setTimeout(() => {
+      fullscreenOverlay.style.display = 'none'; // Ukryj po animacji
+      fullscreenOverlay.classList.remove('is-visible', 'is-hiding');
+      fsMessagePrimary.innerHTML = '';
+      fsMessageSecondary.textContent = '';
+      fullscreenMessage.style.display = 'none';
+    }, 500); // Czas trwania animacji .is-hiding
+  }, 5000);
+}
+
+
+// *** NOWA FUNKCJA DO POKAZYWANIA SEKWENCJI STARTU ***
+function runGameStartSequence(roleMessage, starterName) {
+  if (isAnimating) return;
+  isAnimating = true;
+  
+  console.log("Pokazuję sekwencję startu gry");
+  
+  // 1. Pokaż czarny ekran
+  fullscreenOverlay.classList.remove('is-hiding');
+  fullscreenMessage.style.display = 'none';
+  fullscreenMessage.classList.remove('show-message');
+  fullscreenOverlay.classList.add('is-visible');
+  
+  // 2. Przygotuj odliczanie
+  countdownDisplay.textContent = '3';
+  countdownDisplay.style.display = 'block';
+  countdownDisplay.style.animation = 'none';
+  countdownDisplay.offsetHeight; // Trik triggerujący reflow
+  countdownDisplay.style.animation = 'countdown-pulse 1s ease-in-out';
+  
+  // 3. Odliczanie 2
+  setTimeout(() => {
+    countdownDisplay.textContent = '2';
+    countdownDisplay.style.animation = 'none';
+    countdownDisplay.offsetHeight;
+    countdownDisplay.style.animation = 'countdown-pulse 1s ease-in-out';
+  }, 1000);
+  
+  // 4. Odliczanie 1
+  setTimeout(() => {
+    countdownDisplay.textContent = '1';
+    countdownDisplay.style.animation = 'none';
+    countdownDisplay.offsetHeight;
+    countdownDisplay.style.animation = 'countdown-pulse 1s ease-in-out';
+  }, 2000);
+  
+  // 5. Pokaż rolę
+  setTimeout(() => {
+    countdownDisplay.style.display = 'none';
+    
+    // Ustaw tekst i styl
+    const parts = roleMessage.split('\n');
+    fsMessagePrimary.innerHTML = parts[0]; // "Jesteś oszustem!" lub "Twoje słowo: Banan"
+    fsMessageSecondary.innerHTML = parts.slice(1).join('<br>'); // Podpowiedź i/lub drużyna
+    
+    fullscreenMessage.className = ''; // Resetuj klasy
+    if (roleMessage.includes('oszustem')) {
+      fullscreenMessage.classList.add('impostor-role');
+    } else {
+      fullscreenMessage.classList.add('crewmate-role');
+    }
+    
+    fullscreenMessage.style.animation = 'none';
+    fullscreenMessage.offsetHeight;
+    fullscreenMessage.style.display = 'flex';
+    fullscreenMessage.style.animation = 'slideInUp 0.5s ease forwards';
+
+  }, 3000);
+  
+  // 6. Pokaż kto zaczyna (przejście horyzontalne)
+  setTimeout(() => {
+    fullscreenMessage.style.animation = 'horizontalSlideOut 0.4s ease forwards';
+  }, 6000); // Pokaż rolę przez 3 sekundy
+  
+  setTimeout(() => {
+    fsMessagePrimary.textContent = "Zaczyna mówić:";
+    fsMessageSecondary.textContent = starterName;
+    fullscreenMessage.className = 'starter-role'; 
+    
+    fullscreenMessage.style.animation = 'horizontalSlideIn 0.4s ease forwards';
+  }, 6400); 
+
+  // 7. Schowaj wszystko
+  setTimeout(() => {
+    fullscreenOverlay.classList.add('is-hiding'); // Użyj animacji wygaszania
+    isAnimating = false;
+    setTimeout(() => {
+      fullscreenOverlay.style.display = 'none'; // Ukryj po animacji
+      fullscreenOverlay.classList.remove('is-visible', 'is-hiding');
+      fsMessagePrimary.textContent = '';
+      fsMessageSecondary.textContent = '';
+      fullscreenMessage.style.display = 'none';
+    }, 500); // Czas trwania animacji .is-hiding
+  }, 8400); // Pokaż startera przez 2 sekundy
+}
+
+
 function listenToRoom(roomCode) {
   const roomRef = db.ref(`rooms/${roomCode}`);
   roomRef.on('value', snapshot => {
@@ -1124,43 +1258,50 @@ function listenToRoom(roomCode) {
     confirmVoteBtn.style.display = votingActive && !myVote ? 'block' : 'none';
     endRoundBtn.style.display = 'none';
 
+    // *** ZMIENIONA LOGIKA POKAZYWANIA ROLI (Z DRUŻYNĄ) ***
     if (room.gameStarted && !votingActive && room.currentWord && iAmInRoom) {
-      const isImpostor = iAmInRoom.role === 'impostor';
-      const hint = room.impostorHint; 
       
-      let message;
-      if (isImpostor) {
-        const hintText = hint ? `\n(Podpowiedź: ${hint})` : '';
-        let teamText = '';
+      if (!hasShownStartMessage) {
+        hasShownStartMessage = true; // Zablokuj natychmiast
         
-        if (room.impostorsKnow && room.numImpostors > 1) {
-          const teammateNames = Object.keys(players)
-            .filter(id => players[id].role === 'impostor' && id !== currentPlayerId)
-            .map(id => players[id].name)
-            .join(', ');
-            
-          if (teammateNames) {
-            teamText = `\nTwoi partnerzy: ${teammateNames}`;
+        const isImpostor = iAmInRoom.role === 'impostor';
+        const hint = room.impostorHint; 
+        
+        let message;
+        if (isImpostor) {
+          const hintText = hint ? `\n(Podpowiedź: ${hint})` : '';
+          let teamText = '';
+          
+          if (room.impostorsKnow && room.numImpostors > 1) {
+            const teammateNames = Object.keys(players)
+              .filter(id => players[id].role === 'impostor' && id !== currentPlayerId)
+              .map(id => players[id].name)
+              .join(', ');
+              
+            if (teammateNames) {
+              teamText = `\nTwoi partnerzy: ${teammateNames}`;
+            }
           }
+          
+          message = `Jesteś oszustem!${teamText}${hintText}`;
+        } else {
+          message = `Słowo: ${room.currentWord}`;
         }
         
-        message = `Jesteś oszustem!${teamText}${hintText}`;
-      } else {
-        message = `Słowo: ${room.currentWord}`;
-      }
-
-      if (!hasShownStartMessage) {
-        showRoleMessage(message, 5000);
-      }
-      
-      if (room.starterId && !hasShownStartMessage && players[room.starterId]) {
-        hasShownStartMessage = true; 
-        setTimeout(() => {
-          showMessage(`Zaczyna mówić: <strong>${players[room.starterId].name}</strong>`, 5000);
-        }, 5000);
+        const starterName = players[room.starterId]?.name || '...';
+        
+        runGameStartSequence(message, starterName);
       }
     } else {
-      hasShownStartMessage = false;
+      hasShownStartMessage = false; // Zresetuj flagę, gdy gra się nie toczy
+    }
+
+    // *** POPRAWKA: POKAZYWANIE EKRANU KOŃCA RUNDY ***
+    if (room.lastRoundSummary && !room.gameStarted && !hasShownEndMessage) {
+      hasShownEndMessage = true; // Zablokuj
+      runRoundEndSequence(room.lastRoundSummary);
+    } else if (room.gameStarted) {
+      hasShownEndMessage = false; // Zresetuj, gdy gra się zacznie
     }
 
     if (room.resetMessage) {
@@ -1326,6 +1467,7 @@ endRoundBtn.addEventListener('click', () => {
     roomRef.update(updates).then(() => {
       console.log('Runda zakończona:', { word: currentWord, impostorIds });
       hasShownStartMessage = false;
+      hasShownEndMessage = false; // Zresetuj flagę
     }).catch(error => {
       console.error('Błąd kończenia rundy:', error);
       showMessage('❌ Błąd kończenia rundy!');
