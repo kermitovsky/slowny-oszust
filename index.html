@@ -61,7 +61,9 @@
   <div id="categorySelectionBox" class="modal-box custom-scrollbar" style="display:none;">
     <p>Wybierz kategorie:</p>
     <span id="allCategoriesBtn"><span class="checkbox"></span> Wszystkie</span>
-    <div class="category-grid"></div>
+    <div class="category-grid">
+      <button id="createCustomCategoryBtn" class="category-btn custom-new-btn">+ Stwórz własną</button>
+    </div>
     <button id="confirmCategories">Dalej</button>
   </div>
   
@@ -102,6 +104,23 @@
     <button id="confirmHintSettingsBtn">Stwórz pokój</button>
   </div>
   
+  <div id="customCategoryBox" class="modal-box custom-scrollbar" style="display:none;">
+    <button id="closeCustomCategoryBtn" title="Zamknij">X</button>
+    <h2>Stwórz Własną Kategorię</h2>
+    
+    <input type="text" id="customCategoryNameInput" placeholder="Nazwa kategorii (np. Nasza Paczka)">
+    
+    <div class="custom-word-adder">
+      <input type="text" id="customWordInput" placeholder="Wpisz słowo (min. 3)">
+      <button id="addCustomWordBtn">Dodaj</button>
+    </div>
+    
+    <ul id="customWordsList">
+      </ul>
+    
+    <button id="saveCustomCategoryBtn" disabled>Zapisz i użyj</button>
+  </div>
+
   <div id="rulesBox" class="modal-box custom-scrollbar">
     <button id="closeRulesTop" title="Zamknij">X</button> 
     <h2>Zasady gry Słowny Impostor</h2>
@@ -131,7 +150,5 @@
   </div>
 
   <script src="config.js"></script>
-  <script src="script.js?v=3"></script> 
-  
-</body>
+  <script src="script.js?v=4"></script> </body>
 </html>
