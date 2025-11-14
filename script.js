@@ -31,7 +31,7 @@ const impostorTeamBox = document.getElementById('impostorTeamBox');
 const customCategoryBox = document.getElementById('customCategoryBox');
 const rulesBox = document.getElementById('rulesBox');
 
-// *** NOWE ELEMENTY DLA ANIMACJI ***
+// Elementy animacji
 const fullscreenOverlay = document.getElementById('fullscreen-overlay');
 const countdownDisplay = document.getElementById('countdown-display');
 const fullscreenMessage = document.getElementById('fullscreen-message');
@@ -69,7 +69,7 @@ const confirmTeamSettingsBtn = document.getElementById('confirmTeamSettingsBtn')
 const startVoteBtn = document.getElementById('startVoteBtn');
 const confirmVoteBtn = document.getElementById('confirmVoteBtn');
 const voteResultDisplay = document.getElementById('voteResultDisplay');
-const lastRoundSummaryTitle = document.getElementById('lastRoundSummaryTitle');
+const lastRoundSummaryTitle = document.getElementById('lastRoundSummaryTitle'); // *** NAPRAWA: BRAKUJĄCA ZMIENNA ***
 const lastRoundSummary = document.getElementById('lastRoundSummary'); 
 
 // Elementy Własnych Kategorii
@@ -81,6 +81,7 @@ const addCustomWordBtn = document.getElementById('addCustomWordBtn');
 const customWordsList = document.getElementById('customWordsList');
 const saveCustomCategoryBtn = document.getElementById('saveCustomCategoryBtn');
 
+
 // Zmienne stanu gry
 let currentRoomCode = null;
 let currentPlayerId = null;
@@ -90,10 +91,10 @@ let words = [];
 let impostorCount = 1;
 let selectedCategories = [];
 let hasShownStartMessage = false;
-let hasShownEndMessage = false; // *** NOWA FLAGA ***
+let hasShownEndMessage = false;
 let selectedEmoji = null;
 let selectedPlayerId = null; 
-let isAnimating = false; // *** NOWA FLAGA ***
+let isAnimating = false;
 
 let hintChance = 0; 
 let hintOnStart = false; 
@@ -545,6 +546,7 @@ function showMessage(text, duration = 3500) {
   }, duration);
 }
 
+// Ta funkcja nie jest już używana do pokazywania ról
 function showRoleMessage(text, duration = 5000) {
   roleMessageBox.innerHTML = text.replace(/\n/g, '<br>');
   showModal(roleMessageBox); 
@@ -1030,7 +1032,8 @@ function tallyVotes(room) {
   });
 
   if (isTie || !ejectedPlayerId) {
-    updates.resetMessage = `REMIS! Nikt nie odpada.<br>Kontynuujcie dyskusję!`;
+    updates.lastRoundSummary = `REMIS! Nikt nie odpada.<br>Kontynuujcie dyskusję!`;
+    updates.roundEndMessage = updates.lastRoundSummary; // Pokaż też animację
   } else {
     const ejectedPlayer = players[ejectedPlayerId];
     
@@ -1057,7 +1060,6 @@ function tallyVotes(room) {
 }
 
 
-// *** NOWA FUNKCJA DO POKAZYWANIA SEKWENCJI KOŃCA RUNDY ***
 function runRoundEndSequence(summaryMessage) {
   if (isAnimating) return;
   isAnimating = true;
@@ -1081,6 +1083,7 @@ function runRoundEndSequence(summaryMessage) {
   fullscreenMessage.style.display = 'flex';
   fullscreenMessage.style.animation = 'slideInUp 0.5s ease forwards';
   
+  fullscreenOverlay.classList.remove('is-hiding');
   fullscreenOverlay.classList.add('is-visible');
 
   setTimeout(() => {
@@ -1096,8 +1099,6 @@ function runRoundEndSequence(summaryMessage) {
   }, 5000); 
 }
 
-
-// *** NOWA FUNKCJA DO POKAZYWANIA SEKWENCJI STARTU ***
 function runGameStartSequence(roleMessage, starterName) {
   if (isAnimating) return;
   isAnimating = true;
@@ -1245,7 +1246,6 @@ function listenToRoom(roomCode) {
         : '';
     }
 
-    // Pokaż stałe podsumowanie (jeśli jest)
     if (room.lastRoundSummary && !room.gameStarted) {
       lastRoundSummaryTitle.style.display = 'block';
       lastRoundSummary.innerHTML = room.lastRoundSummary;
@@ -1264,7 +1264,6 @@ function listenToRoom(roomCode) {
       
       if (!hasShownStartMessage) {
         hasShownStartMessage = true; 
-        hasShownEndMessage = false; // *** POPRAWKA: Zresetuj flagę końca rundy ***
         
         let message;
         if (iAmImpostor) {
@@ -1294,7 +1293,6 @@ function listenToRoom(roomCode) {
       hasShownStartMessage = false; 
     }
 
-    // *** POPRAWKA: POKAZYWANIE EKRANU KOŃCA RUNDY ***
     if (room.roundEndMessage && !room.gameStarted && !hasShownEndMessage) {
       hasShownEndMessage = true; 
       runRoundEndSequence(room.roundEndMessage);
@@ -1396,7 +1394,9 @@ startGameBtn.addEventListener('click', () => {
     updates.starterId = starterId;
     updates.lastRoundSummary = null; 
     updates.roundEndMessage = null; 
-    
+    updates.hasShownEndMessage = false; 
+    updates.currentRound = (room.currentRound || 0) + 1;
+
     roomRef.update(updates).then(() => {
       console.log('Gra rozpoczęta:', { word, impostorIds, starterId, hint });
     }).catch(error => {
