@@ -72,6 +72,15 @@ const voteResultDisplay = document.getElementById('voteResultDisplay');
 const lastRoundSummaryTitle = document.getElementById('lastRoundSummaryTitle');
 const lastRoundSummary = document.getElementById('lastRoundSummary'); 
 
+// Elementy Własnych Kategorii
+const createCustomCategoryBtn = document.getElementById('createCustomCategoryBtn');
+const closeCustomCategoryBtn = document.getElementById('closeCustomCategoryBtn');
+const customCategoryNameInput = document.getElementById('customCategoryNameInput');
+const customWordInput = document.getElementById('customWordInput');
+const addCustomWordBtn = document.getElementById('addCustomWordBtn');
+const customWordsList = document.getElementById('customWordsList');
+const saveCustomCategoryBtn = document.getElementById('saveCustomCategoryBtn');
+
 
 // Zmienne stanu gry
 let currentRoomCode = null;
@@ -82,10 +91,10 @@ let words = [];
 let impostorCount = 1;
 let selectedCategories = [];
 let hasShownStartMessage = false;
-let hasShownEndMessage = false; // *** POPRAWKA: Nowa flaga do animacji końca rundy
+let hasShownEndMessage = false; // *** NOWA FLAGA ***
 let selectedEmoji = null;
 let selectedPlayerId = null; 
-let isAnimating = false; // *** POPRAWKA: BRAKUJĄCA ZMIENNA ***
+let isAnimating = false;
 
 let hintChance = 0; 
 let hintOnStart = false; 
@@ -164,7 +173,6 @@ function showModal(modalToShow) {
     hideModal(currentModal);
   }
   
-  // *** NAPRAWA BŁĘDU: Ustaw display: block PRZED dodaniem klasy ***
   modalToShow.style.display = 'block'; 
   
   modalToShow.classList.remove('is-hiding');
@@ -189,7 +197,6 @@ function hideModal(modalToHide, force = false) {
   modalToHide.classList.remove('is-visible');
   
   setTimeout(() => {
-    // *** NAPRAWA BŁĘDU: Ustaw display: none PO animacji ***
     modalToHide.style.display = 'none'; 
     modalToHide.classList.remove('is-hiding');
     if (modalToHide === currentModal) {
@@ -199,7 +206,7 @@ function hideModal(modalToHide, force = false) {
         themeToggle.classList.remove('hidden');
       }
     }
-  }, 300); // Czas trwania animacji
+  }, 300); 
 }
 
 
@@ -539,7 +546,7 @@ function showMessage(text, duration = 3500) {
   }, duration);
 }
 
-// Ta funkcja jest teraz martwa, ale może służyć do komunikatów o błędach
+// Ta funkcja nie jest już używana do pokazywania ról
 function showRoleMessage(text, duration = 5000) {
   // roleMessageBox.innerHTML = text.replace(/\n/g, '<br>');
   // showModal(roleMessageBox); 
@@ -1238,7 +1245,6 @@ function listenToRoom(roomCode) {
     const hint = room.impostorHint;
     
     if (!votingActive) {
-      // *** POPRAWKA: Zintegrowana podpowiedź ***
       wordDisplay.innerHTML = room.gameStarted && room.currentWord && iAmInRoom
         ? (iAmImpostor
           ? `Twoje słowo: <span class="word-impostor">OSZUST! ${hint ? `<span class="impostor-hint-span">(Podpowiedź: ${hint})</span>` : ''}</span>`
