@@ -632,7 +632,6 @@ body.dark-mode #hintChanceSlider::-moz-range-thumb {
 /* 5.7. STYLE WŁASNYCH KATEGORII (NOWA SEKCJA) */
 /* =================================================================== */
 
-/* Przycisk "+ Stwórz własną" */
 .category-btn.custom-new-btn {
   background: rgba(46, 204, 113, 0.2);
   border: 2px dashed rgba(46, 204, 113, 0.5);
@@ -644,20 +643,20 @@ body.dark-mode #hintChanceSlider::-moz-range-thumb {
   background: rgba(46, 204, 113, 0.3);
 }
 
-/* Przycisk własnej kategorii (już dodanej) */
 .category-btn.custom-category-btn {
   background: rgba(46, 204, 113, 0.4);
-  border-color: rgba(46, 204, 113, 0.7);
+  border: 2px solid rgba(46, 204, 113, 0.7); /* Dodanie ramki dla odróżnienia */
   color: #fff;
+  opacity: 0.8; /* Lekka przezroczystość dla odróżnienia */
 }
 .category-btn.custom-category-btn.selected {
   background: rgba(46, 204, 113, 0.7);
   box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3);
+  opacity: 1;
 }
 
-/* Modal dodawania kategorii */
 #customCategoryBox {
-  z-index: 1003; /* Musi być nad innymi modalami */
+  z-index: 1003; 
   text-align: left;
 }
 #customCategoryBox h2 {
@@ -690,7 +689,6 @@ body.dark-mode #hintChanceSlider::-moz-range-thumb {
   background: rgba(0, 0, 0, 0.4);
 }
 
-/* Formularz dodawania słowa */
 .custom-word-adder {
   display: flex;
   gap: 1rem;
@@ -698,19 +696,18 @@ body.dark-mode #hintChanceSlider::-moz-range-thumb {
   max-width: 100%;
 }
 .custom-word-adder input {
-  flex-grow: 1; /* Input zajmuje większość miejsca */
+  flex-grow: 1; 
   margin: 0;
   max-width: none;
 }
 .custom-word-adder button {
   width: auto;
-  flex-shrink: 0; /* Przycisk się nie kurczy */
+  flex-shrink: 0; 
   margin: 0;
   padding: 0.8rem 1.2rem;
   background-color: var(--c-success);
 }
 
-/* Lista dodanych słów */
 #customWordsList {
   list-style: none;
   padding: 0;
@@ -731,6 +728,7 @@ body.dark-mode #hintChanceSlider::-moz-range-thumb {
   border-radius: 0.5rem;
   font-size: 1.8rem;
   color: var(--c-text-light-alt);
+  border: none; /* Resetowanie ramki z listy graczy */
 }
 #customWordsList .delete-word-btn {
   width: 24px;
@@ -758,6 +756,64 @@ body.dark-mode #hintChanceSlider::-moz-range-thumb {
   margin-top: 1rem;
 }
 
+/* =================================================================== */
+/* 5.8. STYLE EKRANU DRUŻYNY (NOWA SEKCJA) */
+/* =================================================================== */
+#impostorTeamBox p {
+  margin: 0 0 1.5rem 0;
+  font-size: 3rem;
+  color: var(--c-text-light-alt);
+  font-weight: 600;
+  text-shadow: 2px 2px 4px var(--c-shadow-heavy);
+  white-space: nowrap;
+}
+
+.team-selector {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+  max-width: 350px;
+  margin: 2rem auto;
+}
+.team-selector button {
+  width: 100%;
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 600;
+  background: var(--c-glass-bg-darker);
+  opacity: 0.7;
+  border: 2px solid var(--c-glass-border);
+}
+.team-selector button.selected {
+  background: var(--c-success);
+  opacity: 1;
+  border-color: var(--c-text-light);
+  box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3);
+}
+.team-selector button:nth-of-type(1).selected { /* Przycisk TAK */
+  background: var(--c-success);
+}
+.team-selector button:nth-of-type(2).selected { /* Przycisk NIE */
+  background: var(--c-danger);
+  box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
+}
+
+body.dark-mode .team-selector button {
+  background: var(--c-glass-highlight);
+}
+body.dark-mode .team-selector button:nth-of-type(1).selected { /* TAK */
+  background: var(--c-success);
+  border-color: var(--c-text-light-alt);
+}
+body.dark-mode .team-selector button:nth-of-type(2).selected { /* NIE */
+  background: var(--c-danger);
+  border-color: var(--c-text-light-alt);
+}
+
+#confirmTeamSettingsBtn {
+  margin-top: 1.5rem;
+}
 
 /* --- Przyciski Pływające (Zasady, Tryb) --- */
 #rulesBtn, #themeToggle {
@@ -1132,7 +1188,7 @@ body.dark-mode #messageBox:not(.copy-message) {
     font-size: 2.2rem;
   }
   
-  #impostorHintBox p, #customCategoryBox h2 {
+  #impostorHintBox p, #customCategoryBox h2, #impostorTeamBox p {
     font-size: 2.2rem;
   }
   .slider-container {
