@@ -31,6 +31,11 @@ const impostorTeamBox = document.getElementById('impostorTeamBox');
 const customCategoryBox = document.getElementById('customCategoryBox');
 const rulesBox = document.getElementById('rulesBox');
 
+// *** NAPRAWA BŁĘDU: TE LINIE ZOSTAŁY PRZYPADKOWO USUNIĘTE ***
+const closeRulesBtn = document.getElementById('closeRules');
+const closeRulesTopBtn = document.getElementById('closeRulesTop');
+// *** KONIEC NAPRAWY ***
+
 // Elementy Wyboru Kategorii
 const allCategoriesBtn = document.getElementById('allCategoriesBtn');
 const categoryGrid = document.querySelector('#categorySelectionBox .category-grid');
@@ -154,13 +159,11 @@ function showScreen(screenToShow) {
   hideModal(currentModal, true);
 }
 
-// *** NAPRAWIONA FUNKCJA ***
 function showModal(modalToShow) {
   if (currentModal && currentModal !== modalToShow) {
     hideModal(currentModal);
   }
   
-  // NAJPIERW POKAŻ, POTEM ANIMUJ
   modalToShow.style.display = 'block'; 
   
   modalToShow.classList.remove('is-hiding');
@@ -171,7 +174,6 @@ function showModal(modalToShow) {
   themeToggle.classList.add('hidden');
 }
 
-// *** NAPRAWIONA FUNKCJA ***
 function hideModal(modalToHide, force = false) {
   if (!modalToHide) return;
   
@@ -186,7 +188,7 @@ function hideModal(modalToHide, force = false) {
   modalToHide.classList.remove('is-visible');
   
   setTimeout(() => {
-    modalToHide.style.display = 'none'; // UKRYJ PO ANIMACJI
+    modalToHide.style.display = 'none'; 
     modalToHide.classList.remove('is-hiding');
     if (modalToHide === currentModal) {
       currentModal = null;
@@ -639,7 +641,7 @@ createRoomBtn.addEventListener('click', () => {
   isHost = true;
   console.log('Ustawiono hosta, imię:', currentPlayerName);
   
-  showModal(categorySelectionBox); 
+  showModal(categorySelectionBox); // *** NAPRAWIONY BŁĄD ***
   
   initializeCategorySelection();
 });
