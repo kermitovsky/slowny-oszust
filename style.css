@@ -356,7 +356,7 @@ body.dark-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   margin: 1rem 0;
 }
 
-/* NOWE STYLE DLA PODSUMOWANIA RUNDY */
+/* *** NOWE STYLE DLA PODSUMOWANIA RUNDY *** */
 #lastRoundSummaryTitle {
   display: none; 
   font-size: 1.4rem;
@@ -390,9 +390,6 @@ body.dark-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
 body.dark-mode #lastRoundSummary {
   background: var(--c-glass-bg-darker);
 }
-
-/* USUNIĘTY STYL #impostorHintDisplay */
-
 
 /* --- Lista Graczy --- */
 #playersList {
@@ -477,7 +474,7 @@ body.dark-mode #playersList li.self {
 }
 
 /* =================================================================== */
-/* 5.5. STYLE GŁOSOWANIA */
+/* 5.5. STYLE GŁOSOWANIA (NOWA SEKCJA) */
 /* =================================================================== */
 
 body.voting-active #playersList li.vote-target {
@@ -519,7 +516,7 @@ body.voting-active #playersList li.host.has-voted .avatar::after {
 }
 
 /* =================================================================== */
-/* 5.6. STYLE EKRANU PODPOWIEDZI */
+/* 5.6. STYLE EKRANU PODPOWIEDZI (SEKCJA ZMIENIONA) */
 /* =================================================================== */
 #impostorHintBox p {
   margin: 0 0 1.5rem 0;
@@ -1301,7 +1298,6 @@ body.dark-mode #messageBox:not(.copy-message) {
   from { opacity: 0; transform: translate(-50%, -40%); }
   to { opacity: 1; transform: translate(-50%, -50%); }
 }
-/* ZMIANA: Na płynne znikanie */
 @keyframes fadeOut {
   from { opacity: 1; transform: translate(-50%, -50%); }
   to { opacity: 0; transform: translate(-50%, -50%); }
