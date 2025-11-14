@@ -478,94 +478,82 @@ body.voting-active #playersList li.host.has-voted .avatar::after {
   width: 100%;
   max-width: 350px;
   margin: 3rem auto 3.5rem auto; 
-  padding: 0; /* Usunięty padding boczny */
+  padding: 0;
   box-sizing: border-box;
 }
 
-/* Kontener na etykiety pod sliderem */
 .slider-labels {
   position: relative;
   width: 100%;
-  height: 20px; /* Daj mu wysokość, żeby było miejsce */
-  margin-top: 10px; /* Odsuń od slidera */
+  height: 20px;
+  margin-top: 10px;
 }
 
-/* Etykieta (0%, 25%, itd.) */
 .slider-labels .slider-label {
   font-size: 1.6rem;
   color: var(--c-text-light-alt);
-  opacity: 0.7; /* "Lekkoszary" */
+  opacity: 0.7; 
   white-space: nowrap;
-  
-  /* Pozycjonowanie absolutne względem .slider-labels */
   position: absolute;
   top: 0;
-  transform: translateX(-50%); /* Magia centrowania */
-  
+  transform: translateX(-50%); 
   transition: opacity 0.2s, transform 0.2s, font-weight 0.2s;
 }
 
-/* Pozycjonowanie każdej etykiety */
 .slider-labels .slider-label:nth-child(1) { left: 0%; }
 .slider-labels .slider-label:nth-child(2) { left: 25%; }
 .slider-labels .slider-label:nth-child(3) { left: 50%; }
 .slider-labels .slider-label:nth-child(4) { left: 75%; }
 .slider-labels .slider-label:nth-child(5) { left: 100%; }
 
-/* Aktywna, podświetlona etykieta */
 .slider-labels .slider-label.label-active {
   opacity: 1;
   font-weight: 800;
-  transform: translateX(-50%) scale(1.15); /* "Biały i powiększony" */
+  transform: translateX(-50%) scale(1.15); 
   color: #fff;
 }
 
-/* Ukryty osobny wyświetlacz procentów */
 .slider-value-display {
   display: none;
 }
 
-/* Sam suwak */
 #hintChanceSlider {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  height: 8px; /* Grubość linii */
+  height: 8px; 
   background: var(--c-glass-bg-darker);
   border-radius: 5px;
   outline: none;
   padding: 0;
   margin: 0;
-  /* Kropki na sliderze */
   background-image: 
     radial-gradient(circle at center, var(--c-primary-light) 4px, transparent 4px),
     radial-gradient(circle at center, var(--c-primary-light) 4px, transparent 4px),
     radial-gradient(circle at center, var(--c-primary-light) 4px, transparent 4px),
     radial-gradient(circle at center, var(--c-primary-light) 4px, transparent 4px),
     radial-gradient(circle at center, var(--c-primary-light) 4px, transparent 4px);
-  background-size: 4px 4px; /* Rozmiar kropki */
+  background-size: 4px 4px;
   background-repeat: no-repeat;
-  /* Pozycje kropek */
   background-position: 0% 50%, 25% 50%, 50% 50%, 75% 50%, 100% 50%;
 }
 
-/* Kulka slidera (większa) */
 #hintChanceSlider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 28px; /* Powiększona */
-  height: 28px; /* Powiększona */
+  width: 28px; 
+  height: 28px; 
   border-radius: 50%;
   background: var(--c-primary);
   border: 4px solid var(--c-text-light);
   cursor: pointer;
-  margin-top: -10px; /* (28/2) - (8/2) = 10 */
+  margin-top: -10px; 
   box-shadow: 0 2px 5px var(--c-shadow-heavy);
 }
 
 #hintChanceSlider::-moz-range-thumb {
-  width: 28px; /* Powiększona */
-  height: 28px; /* Powiększona */
+  width: 28px; 
+  height: 28px; 
   border-radius: 50%;
   background: var(--c-primary);
   border: 4px solid var(--c-text-light);
@@ -595,6 +583,7 @@ body.dark-mode #hintChanceSlider::-moz-range-thumb {
   font-weight: 600;
   color: var(--c-text-light-alt);
   cursor: pointer;
+  transition: opacity 0.3s ease; /* Dodana płynność */
 }
 .checkbox-container input[type="checkbox"] {
   display: none;
@@ -627,6 +616,16 @@ body.dark-mode #hintChanceSlider::-moz-range-thumb {
 }
 .checkbox-container input[type="checkbox"]:checked + label .checkbox::before {
   content: '✔';
+}
+
+/* *** NOWA KLASA DO WYGASZANIA CHECKBOXA *** */
+.checkbox-container.disabled {
+  opacity: 0.5;
+  pointer-events: none; /* Blokuje klikanie */
+  cursor: not-allowed;
+}
+.checkbox-container.disabled label {
+  cursor: not-allowed;
 }
 
 
@@ -907,13 +906,12 @@ body.dark-mode #messageBox:not(.copy-message) {
   margin: 0.5rem 0;
 }
 
-/* *** ZMIENIONE STYLE PRZYCISKÓW "X" *** */
 #rulesBox #closeRules, #rulesBox #closeRulesTop {
   position: absolute;
   top: 1rem;
   right: 1rem;
-  width: 35px; /* Kwadrat */
-  height: 35px; /* Kwadrat */
+  width: 35px; 
+  height: 35px; 
   background: rgba(0, 0, 0, 0.2);
   border: none;
   border-radius: 8px;
@@ -1010,9 +1008,9 @@ body.dark-mode #messageBox:not(.copy-message) {
   .slider-container {
     padding-bottom: 25px;
     margin-bottom: 2.5rem;
-    margin-top: 2rem; /* Dopasowanie góry */
+    margin-top: 2rem; 
   }
   .slider-labels {
-    margin-top: 5px; /* Dopasuj pozycję etykiet na mobilce */
+    margin-top: 5px; 
   }
 }
