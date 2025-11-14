@@ -4,66 +4,70 @@ const createRoomBtn = document.getElementById('createRoom');
 const joinRoomBtn = document.getElementById('joinRoom');
 const roomCodeInput = document.getElementById('roomCodeInput');
 const statusMessage = document.getElementById('statusMessage');
-const loginScreen = document.getElementById('loginScreen');
-const gameScreen = document.getElementById('gameScreen');
+const emojiSelection = document.getElementById('emojiSelection');
+const playersList = document.getElementById('playersList');
 const roomCodeDisplay = document.getElementById('roomCodeDisplay');
 const copyRoomCodeBtn = document.getElementById('copyRoomCode');
 const impostorCountDisplay = document.getElementById('impostorCountDisplay');
 const playerCountDisplay = document.getElementById('playerCountDisplay');
 const roundCounter = document.getElementById('roundCounter');
 const wordDisplay = document.getElementById('wordDisplay');
-const playersList = document.getElementById('playersList');
 const startGameBtn = document.getElementById('startGame');
 const endRoundBtn = document.getElementById('endRound');
 const leaveRoomBtn = document.getElementById('leaveRoom');
+const rulesBtn = document.getElementById('rulesBtn');
+const themeToggle = document.getElementById('themeToggle');
+const recommendedPlayers = document.getElementById('recommendedPlayers');
+
+// Ekrany i Modale
+const loginScreen = document.getElementById('loginScreen');
+const gameScreen = document.getElementById('gameScreen');
 const messageBox = document.getElementById('messageBox');
 const roleMessageBox = document.getElementById('roleMessageBox');
 const categorySelectionBox = document.getElementById('categorySelectionBox');
+const impostorSelectionBox = document.getElementById('impostorSelectionBox');
+const impostorHintBox = document.getElementById('impostorHintBox');
+const impostorTeamBox = document.getElementById('impostorTeamBox');
+const customCategoryBox = document.getElementById('customCategoryBox');
+const rulesBox = document.getElementById('rulesBox');
+
+// Elementy Wyboru Kategorii
 const allCategoriesBtn = document.getElementById('allCategoriesBtn');
 const categoryGrid = document.querySelector('#categorySelectionBox .category-grid');
 const confirmCategories = document.getElementById('confirmCategories');
-const impostorSelectionBox = document.getElementById('impostorSelectionBox');
+
+// Elementy Wyboru Impostora
 const minusImpostor = document.getElementById('minusImpostor');
 const plusImpostor = document.getElementById('plusImpostor');
 const impostorCountDisplaySelector = document.getElementById('impostorCount');
 const confirmImpostors = document.getElementById('confirmImpostors');
-const rulesBtn = document.getElementById('rulesBtn');
-const themeToggle = document.getElementById('themeToggle');
-const rulesBox = document.getElementById('rulesBox');
-const closeRulesBtn = document.getElementById('closeRules');
-const closeRulesTopBtn = document.getElementById('closeRulesTop');
-const recommendedPlayers = document.getElementById('recommendedPlayers');
-const emojiSelection = document.getElementById('emojiSelection');
-
-// Elementy Głosowania
-const startVoteBtn = document.getElementById('startVoteBtn');
-const confirmVoteBtn = document.getElementById('confirmVoteBtn');
-const voteResultDisplay = document.getElementById('voteResultDisplay');
 
 // Elementy Podpowiedzi
-const impostorHintBox = document.getElementById('impostorHintBox');
 const hintChanceSlider = document.getElementById('hintChanceSlider');
 const hintOnStartCheckbox = document.getElementById('hintOnStartCheckbox');
 const confirmHintSettingsBtn = document.getElementById('confirmHintSettingsBtn');
 const hintChanceInfoDisplay = document.getElementById('hintChanceInfoDisplay');
 const hintCheckboxContainer = document.querySelector('#impostorHintBox .checkbox-container');
 
+// Elementy Drużyny
+const teamKnowsBtn = document.getElementById('teamKnowsBtn');
+const teamNotKnowsBtn = document.getElementById('teamNotKnowsBtn');
+const confirmTeamSettingsBtn = document.getElementById('confirmTeamSettingsBtn');
+
+// Elementy Głosowania
+const startVoteBtn = document.getElementById('startVoteBtn');
+const confirmVoteBtn = document.getElementById('confirmVoteBtn');
+const voteResultDisplay = document.getElementById('voteResultDisplay');
+const lastRoundSummary = document.getElementById('lastRoundSummary'); // NOWY ELEMENT PODSUMOWANIA
+
 // Elementy Własnych Kategorii
 const createCustomCategoryBtn = document.getElementById('createCustomCategoryBtn');
-const customCategoryBox = document.getElementById('customCategoryBox');
 const closeCustomCategoryBtn = document.getElementById('closeCustomCategoryBtn');
 const customCategoryNameInput = document.getElementById('customCategoryNameInput');
 const customWordInput = document.getElementById('customWordInput');
 const addCustomWordBtn = document.getElementById('addCustomWordBtn');
 const customWordsList = document.getElementById('customWordsList');
 const saveCustomCategoryBtn = document.getElementById('saveCustomCategoryBtn');
-
-// *** NOWE ELEMENTY DOM DLA DRUŻYNY IMPOSTORÓW ***
-const impostorTeamBox = document.getElementById('impostorTeamBox');
-const teamKnowsBtn = document.getElementById('teamKnowsBtn');
-const teamNotKnowsBtn = document.getElementById('teamNotKnowsBtn');
-const confirmTeamSettingsBtn = document.getElementById('confirmTeamSettingsBtn');
-
 
 // Zmienne stanu gry
 let currentRoomCode = null;
@@ -84,10 +88,10 @@ const hintChanceNumeric = [0, 0.25, 0.5, 0.75, 1];
 
 let tempCustomWords = [];
 let customCategories = [];
+let editingCategoryFile = null; // Śledzi, którą kategorię edytujemy
 
-// *** NOWA ZMIENNA STANU DLA DRUŻYNY ***
-let impostorsKnowEachOther = false; // Domyślnie 'Nie'
-
+let impostorsKnowEachOther = false; 
+let currentModal = null; // Śledzi otwarty modal
 
 // Kategorie
 const categories = [
@@ -125,6 +129,77 @@ const fallbackWords = [
   { word: "film", category: "Filmy i seriale" },
   { word: "muzyka", category: "Muzyka" }
 ];
+
+// --- NOWE FUNKCJE ZARZĄDZANIA UI ---
+function showScreen(screenToShow) {
+  const screens = [loginScreen, gameScreen];
+  screens.forEach(screen => {
+    if (screen === screenToShow) {
+      screen.style.display = 'flex';
+      // Użyjmy animacji CSS
+      if (screen === gameScreen) {
+        screen.style.animation = 'slideInRight 0.4s ease forwards';
+      }
+    } else {
+      if (screen.style.display !== 'none') {
+        // Dodaj animację wyjścia
+        if (screen === loginScreen) {
+          screen.style.animation = 'slideOutLeft 0.4s ease forwards';
+          // Ukryj po animacji
+          setTimeout(() => screen.style.display = 'none', 400);
+        } else {
+          screen.style.display = 'none';
+        }
+      }
+    }
+  });
+  // Ukryj wszystkie otwarte modale
+  hideModal(currentModal, true);
+}
+
+function showModal(modalToShow) {
+  if (currentModal && currentModal !== modalToShow) {
+    hideModal(currentModal);
+  }
+  modalToShow.classList.remove('is-hiding');
+  modalToShow.classList.add('is-visible');
+  currentModal = modalToShow;
+  
+  // Ukryj przyciski UI
+  rulesBtn.classList.add('hidden');
+  themeToggle.classList.add('hidden');
+}
+
+function hideModal(modalToHide, force = false) {
+  if (!modalToHide) return;
+  
+  // Na siłę (np. przy zmianie ekranu)
+  if (force) {
+    modalToHide.style.display = 'none';
+    modalToHide.classList.remove('is-visible', 'is-hiding');
+    if (modalToHide === currentModal) currentModal = null;
+    return;
+  }
+  
+  // Z animacją
+  modalToHide.classList.add('is-hiding');
+  modalToHide.classList.remove('is-visible');
+  
+  // Usuń po animacji
+  setTimeout(() => {
+    modalToHide.style.display = 'none';
+    modalToHide.classList.remove('is-hiding');
+    if (modalToHide === currentModal) {
+      currentModal = null;
+      // Pokaż przyciski UI tylko, jeśli żaden inny modal nie jest otwarty
+      if (!document.querySelector('.modal-box.is-visible')) {
+        rulesBtn.classList.remove('hidden');
+        themeToggle.classList.remove('hidden');
+      }
+    }
+  }, 300); // Czas trwania animacji
+}
+
 
 // --- Funkcja do pobierania z limitem czasu ---
 const fetchWithTimeout = async (url, timeout = 5000) => {
@@ -193,10 +268,7 @@ window.addEventListener('beforeunload', () => {
 
 // Funkcja zamykania zasad
 function closeRules() {
-  console.log('Kliknięto Zamknij zasady');
-  rulesBox.style.display = 'none';
-  rulesBtn.classList.remove('hidden');
-  themeToggle.classList.remove('hidden');
+  hideModal(rulesBox);
 }
 
 // Funkcja przełączania trybu
@@ -297,8 +369,8 @@ confirmCategories.addEventListener('click', () => {
     return;
   }
   console.log('Potwierdzono kategorie:', selectedCategories.map(c => c.name));
-  categorySelectionBox.style.display = 'none';
-  impostorSelectionBox.style.display = 'block';
+  hideModal(categorySelectionBox);
+  showModal(impostorSelectionBox);
   document.getElementById('loadingMessage').style.display = 'block';
   confirmImpostors.disabled = true;
   
@@ -451,9 +523,9 @@ function updatePlayersList(players, localIsHost) {
 }
 
 function showMessage(text, duration = 3500) {
-  console.log('showMessage:', text);
   messageBox.innerHTML = text;
-  messageBox.style.display = 'block';
+  showModal(messageBox); // Użyj nowej funkcji
+  
   if (text === '✅ Kod skopiowany!' || text === '❌ Nie udało się skopiować kodu') {
     messageBox.classList.add('copy-message');
     duration = 1500;
@@ -461,37 +533,33 @@ function showMessage(text, duration = 3500) {
     messageBox.classList.remove('copy-message');
   }
   setTimeout(() => {
-    messageBox.style.display = 'none';
+    hideModal(messageBox); // Użyj nowej funkcji
     messageBox.classList.remove('copy-message');
   }, duration);
 }
 
 function showRoleMessage(text, duration = 5000) {
-  roleMessageBox.innerHTML = text.replace(/\n/g, '<br>'); // Zamień wszystkie \n na <br>
-  roleMessageBox.style.display = 'block';
+  roleMessageBox.innerHTML = text.replace(/\n/g, '<br>');
+  showModal(roleMessageBox); // Użyj nowej funkcji
   setTimeout(() => {
-    roleMessageBox.style.display = 'none';
+    hideModal(roleMessageBox); // Użyj nowej funkcji
   }, duration);
 }
 
 function resetToLobby() {
-  startGameBtn.style.display = isHost ? 'block' : 'none';
+  showScreen(loginScreen); // Zamiast 'display: block'
+  
   startVoteBtn.style.display = 'none';
   confirmVoteBtn.style.display = 'none';
   endRoundBtn.style.display = 'none';
-  roleMessageBox.style.display = 'none';
-  categorySelectionBox.style.display = 'none';
-  impostorSelectionBox.style.display = 'none';
-  impostorHintBox.style.display = 'none';
-  impostorTeamBox.style.display = 'none'; // Ukryj też nowy modal
-  rulesBox.style.display = 'none';
-  rulesBtn.classList.remove('hidden');
-  themeToggle.classList.remove('hidden');
   impostorCountDisplay.innerHTML = '';
   playerCountDisplay.innerHTML = '';
   hintChanceInfoDisplay.innerHTML = '';
   roundCounter.innerHTML = '';
   wordDisplay.innerHTML = '';
+  lastRoundSummary.innerHTML = ''; // Wyczyść podsumowanie
+  lastRoundSummary.style.display = 'none'; // Ukryj podsumowanie
+  
   impostorCount = 1;
   impostorCountDisplaySelector.textContent = impostorCount;
   selectedCategories = [];
@@ -516,7 +584,6 @@ function resetToLobby() {
   hintCheckboxContainer.classList.remove('disabled');
   hintOnStartCheckbox.disabled = false;
   
-  // Zresetuj przyciski drużyny
   impostorsKnowEachOther = false;
   teamKnowsBtn.classList.remove('selected');
   teamNotKnowsBtn.classList.add('selected');
@@ -524,6 +591,9 @@ function resetToLobby() {
   document.querySelectorAll('.emoji-btn').forEach(btn => btn.classList.remove('selected'));
   updateImpostorButtons();
   updateRecommendedPlayers();
+  
+  // Załaduj nick i emoji z pamięci
+  loadFromLocalStorage();
 }
 
 function updateImpostorButtons() {
@@ -545,10 +615,7 @@ closeRulesBtn.addEventListener('click', closeRules);
 closeRulesTopBtn.addEventListener('click', closeRules);
 
 rulesBtn.addEventListener('click', () => {
-  console.log('Kliknięto Zasady gry');
-  rulesBox.style.display = 'block';
-  rulesBtn.classList.add('hidden');
-  themeToggle.classList.add('hidden');
+  showModal(rulesBox);
 });
 
 themeToggle.addEventListener('click', () => {
@@ -575,11 +642,11 @@ createRoomBtn.addEventListener('click', () => {
   currentPlayerName = name;
   isHost = true;
   console.log('Ustawiono hosta, imię:', currentPlayerName);
-  categorySelectionBox.style.display = 'block';
-  console.log('Wyświetlono categorySelectionBox');
-  initializeCategorySelection(); 
-  rulesBtn.classList.add('hidden');
-  themeToggle.classList.add('hidden');
+  
+  // Zamiast `display: block`
+  showModal(categorySelectionBox); 
+  
+  initializeCategorySelection();
 });
 
 minusImpostor.addEventListener('click', () => {
@@ -604,8 +671,8 @@ plusImpostor.addEventListener('click', () => {
 
 confirmImpostors.addEventListener('click', () => {
   console.log('Potwierdzono liczbę impostorów:', impostorCount);
-  impostorSelectionBox.style.display = 'none';
-  impostorHintBox.style.display = 'block';
+  hideModal(impostorSelectionBox);
+  showModal(impostorHintBox);
 });
 
 hintChanceSlider.addEventListener('input', (e) => {
@@ -637,22 +704,18 @@ hintOnStartCheckbox.addEventListener('change', (e) => {
   console.log('Podpowiedź przy starcie impostora:', hintOnStart);
 });
 
-// *** ZMIENIONY PRZEPŁYW: TEN PRZYCISK DECYDUJE, CZY POKAZAĆ EKRAN DRUŻYNY ***
 confirmHintSettingsBtn.addEventListener('click', () => {
   console.log('Potwierdzono ustawienia podpowiedzi.');
-  impostorHintBox.style.display = 'none';
+  hideModal(impostorHintBox);
   
   if (impostorCount > 1) {
-    // Pokaż ekran wyboru drużyny
-    impostorTeamBox.style.display = 'block';
+    showModal(impostorTeamBox);
   } else {
-    // Pomiń ekran drużyny i od razu stwórz pokój
-    impostorsKnowEachOther = false; // (nie ma znaczenia, ale dla pewności)
+    impostorsKnowEachOther = false;
     createRoom(impostorCount, hintChance, hintOnStart, impostorsKnowEachOther);
   }
 });
 
-// *** NOWE LISTENERY DLA EKRANU DRUŻYNY ***
 teamKnowsBtn.addEventListener('click', () => {
   impostorsKnowEachOther = true;
   teamKnowsBtn.classList.add('selected');
@@ -672,13 +735,12 @@ confirmTeamSettingsBtn.addEventListener('click', () => {
   createRoom(impostorCount, hintChance, hintOnStart, impostorsKnowEachOther);
 });
 
-// *** ZMIANA: createRoom() przyjmuje 'knows' ***
 function createRoom(numImpostors, chanceIndex, onStart, knows) {
-  const customCategoriesToSave = selectedCategories
+  const customCategoriesToSave = customCategories // Użyj globalnej listy
     .filter(c => c.isCustom)
     .map(c => ({ name: c.name, words: c.words })); 
 
-  console.log('Tworzenie pokoju z', numImpostors, 'impostorami');
+  console.log('Tworzenie pokoju z', numImpostors, 'impostorami, kategorie:', selectedCategories.map(c => c.name));
   console.log('Ustawienia podpowiedzi:', hintChanceValues[chanceIndex], 'na starcie:', onStart);
   console.log('Impostorzy wiedzą o sobie:', knows);
   
@@ -698,6 +760,7 @@ function createRoom(numImpostors, chanceIndex, onStart, knows) {
     currentWord: null,
     currentCategory: null, 
     impostorHint: null, 
+    lastRoundSummary: null, // NOWE
     resetMessage: null,
     starterId: null,
     numImpostors: numImpostors,
@@ -705,23 +768,18 @@ function createRoom(numImpostors, chanceIndex, onStart, knows) {
     customCategories: customCategoriesToSave || [],
     hintChance: chanceIndex,
     hintOnStart: onStart,
-    impostorsKnow: knows // *** NOWA DANA W FIREBASE ***
+    impostorsKnow: knows
   }).then(() => {
     console.log('Pokój utworzony:', currentRoomCode);
-    loginScreen.style.display = 'none';
-    gameScreen.style.display = 'block';
+    showScreen(gameScreen); // Użyj nowej funkcji
+    hideModal(impostorTeamBox); // Ukryj ostatni modal
     roomCodeDisplay.textContent = currentRoomCode;
-    impostorHintBox.style.display = 'none';
-    impostorTeamBox.style.display = 'none';
-    rulesBtn.classList.remove('hidden');
-    themeToggle.classList.remove('hidden');
     db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).onDisconnect().remove();
     listenToRoom(currentRoomCode);
   }).catch(error => {
     console.error('Błąd tworzenia pokoju:', error);
     showMessage('❌ Błąd tworzenia pokoju!');
-    rulesBtn.classList.remove('hidden');
-    themeToggle.classList.remove('hidden');
+    showScreen(loginScreen); // Wróć do logowania
   });
 }
 
@@ -783,9 +841,7 @@ joinRoomBtn.addEventListener('click', () => {
       [currentPlayerId]: playerData
     }).then(() => {
       console.log('Dołączono do pokoju:', roomCode, 'Gracz:', playerData);
-      loginScreen.style.display = 'none';
-      gameScreen.style.display = 'block';
-      roomCodeDisplay.textContent = currentRoomCode;
+      showScreen(gameScreen); // Użyj nowej funkcji
       
       const categoryNames = room.categories || ['Wszystkie'];
       let standardCategories = [];
@@ -847,13 +903,10 @@ leaveRoomBtn.addEventListener('click', () => {
     roomRef.child(`players/${currentPlayerId}`).remove().then(() => {
       console.log('Gracz opuścił pokój:', currentPlayerId);
       resetToLobby();
-      loginScreen.style.display = 'block';
-      gameScreen.style.display = 'none';
       currentRoomCode = null;
       currentPlayerId = null;
       isHost = false;
       roomCodeInput.value = '';
-      playerNameInput.value = '';
     }).catch(error => {
       console.error('Błąd opuszczania pokoju:', error);
       showMessage('❌ Błąd opuszczania pokoju!');
@@ -957,9 +1010,9 @@ function tallyVotes(room) {
 
   const updates = {
     votingActive: false,
-    resetMessage: null,
     impostorHint: null, 
-    currentCategory: null, 
+    currentCategory: null,
+    lastRoundSummary: null, // Wyczyść stary, zanim dodasz nowy
   };
 
   playerIds.forEach(id => {
@@ -967,7 +1020,7 @@ function tallyVotes(room) {
   });
 
   if (isTie || !ejectedPlayerId) {
-    updates.resetMessage = `REMIS! Nikt nie odpada.<br>Kontynuujcie dyskusję!`;
+    updates.lastRoundSummary = `REMIS! Nikt nie odpada.<br>Kontynuujcie dyskusję!`;
   } else {
     const ejectedPlayer = players[ejectedPlayerId];
     
@@ -980,9 +1033,9 @@ function tallyVotes(room) {
     });
 
     if (ejectedPlayer.role === 'impostor') {
-      updates.resetMessage = `Impostor został wykryty!<br>(Oszust: <strong>${ejectedPlayer.name}</strong>)<br>Słowo: <strong>${room.currentWord}</strong>`;
+      updates.lastRoundSummary = `Impostor został wykryty!<br>(Oszust: <strong>${ejectedPlayer.name}</strong>)<br>Słowo: <strong>${room.currentWord}</strong>`;
     } else {
-      updates.resetMessage = `Impostor wygrał rundę!<br>(Wygłosowano <strong>${ejectedPlayer.name}</strong>)<br>Słowo: <strong>${room.currentWord}</strong>`;
+      updates.lastRoundSummary = `Impostor wygrał rundę!<br>(Wygłosowano <strong>${ejectedPlayer.name}</strong>)<br>Słowo: <strong>${room.currentWord}</strong>`;
     }
   }
 
@@ -998,11 +1051,6 @@ function listenToRoom(roomCode) {
       console.log('Pokój usunięty:', roomCode);
       showMessage('❌ Pokój został usunięty!');
       resetToLobby();
-      loginScreen.style.display = 'block';
-      gameScreen.style.display = 'none';
-      currentRoomCode = null;
-      currentPlayerId = null;
-      isHost = false;
       return;
     }
 
@@ -1059,12 +1107,19 @@ function listenToRoom(roomCode) {
         : '';
     }
 
+    // Pokaż/ukryj podsumowanie rundy
+    if (room.lastRoundSummary && !room.gameStarted) {
+      lastRoundSummary.innerHTML = room.lastRoundSummary;
+      lastRoundSummary.style.display = 'block';
+    } else {
+      lastRoundSummary.style.display = 'none';
+    }
+
     startGameBtn.style.display = isHost && !room.gameStarted && !votingActive ? 'block' : 'none';
     startVoteBtn.style.display = isHost && room.gameStarted && !votingActive ? 'block' : 'none';
     confirmVoteBtn.style.display = votingActive && !myVote ? 'block' : 'none';
     endRoundBtn.style.display = 'none';
 
-    // *** ZMIENIONA LOGIKA POKAZYWANIA ROLI (Z DRUŻYNĄ) ***
     if (room.gameStarted && !votingActive && room.currentWord && iAmInRoom) {
       const isImpostor = iAmInRoom.role === 'impostor';
       const hint = room.impostorHint; 
@@ -1074,7 +1129,6 @@ function listenToRoom(roomCode) {
         const hintText = hint ? `\n(Podpowiedź: ${hint})` : '';
         let teamText = '';
         
-        // Zbuduj listę drużyny, jeśli opcja jest włączona
         if (room.impostorsKnow && room.numImpostors > 1) {
           const teammateNames = Object.keys(players)
             .filter(id => players[id].role === 'impostor' && id !== currentPlayerId)
@@ -1105,6 +1159,7 @@ function listenToRoom(roomCode) {
       hasShownStartMessage = false;
     }
 
+    // Komunikat 'resetMessage' (remis)
     if (room.resetMessage) {
       showMessage(room.resetMessage);
       if (isHost) {
@@ -1195,6 +1250,7 @@ startGameBtn.addEventListener('click', () => {
     updates.currentCategory = category;
     updates.impostorHint = hint; 
     updates.starterId = starterId;
+    updates.lastRoundSummary = null; // Wyczyść podsumowanie
     updates.currentRound = (room.currentRound || 0) + 1;
 
     roomRef.update(updates).then(() => {
@@ -1252,8 +1308,8 @@ endRoundBtn.addEventListener('click', () => {
       currentCategory: null,
       impostorHint: null, 
       starterId: null,
-      impostorsKnow: null, // Wyczyść
-      resetMessage: `Runda zakończona! Słowo: <strong>${currentWord}</strong><br>Impostorzy: <strong>${impostorNames || 'Brak'}</strong>`
+      impostorsKnow: null,
+      lastRoundSummary: `Runda zakończona! Słowo: <strong>${currentWord}</strong><br>Impostorzy: <strong>${impostorNames || 'Brak'}</strong>`
     };
     Object.keys(players).forEach(id => {
       updates[`players/${id}/role`] = null;
@@ -1275,22 +1331,36 @@ endRoundBtn.addEventListener('click', () => {
 
 // *** NOWE FUNKCJE DLA WŁASNYCH KATEGORII ***
 
-function showCustomCategoryModal() {
+function showCustomCategoryModal(editFileId = null) {
   console.log('Otwieranie modala własnej kategorii...');
-  tempCustomWords = [];
-  customCategoryNameInput.value = '';
-  customWordInput.value = '';
-  updateTempWordsList(); 
-  saveCustomCategoryBtn.disabled = true; 
+  editingCategoryFile = editFileId; // Ustaw tryb edycji
   
-  customCategoryBox.style.display = 'block';
-  categorySelectionBox.style.display = 'none'; 
+  if (editFileId) {
+    // Tryb Edycji
+    const category = customCategories.find(c => c.file === editFileId);
+    if (!category) {
+      console.error('Nie znaleziono kategorii do edycji!');
+      return;
+    }
+    customCategoryNameInput.value = category.name;
+    tempCustomWords = [...category.words]; // Załaduj słowa do edycji
+    saveCustomCategoryBtn.textContent = 'Zapisz zmiany';
+  } else {
+    // Tryb Tworzenia
+    tempCustomWords = [];
+    customCategoryNameInput.value = '';
+    customWordInput.value = '';
+    saveCustomCategoryBtn.textContent = 'Zapisz i użyj';
+  }
+  
+  updateTempWordsList(); 
+  showModal(customCategoryBox); // Użyj nowej funkcji
 }
 
 function hideCustomCategoryModal() {
-  console.log('Zamykanie modala własnej kategorii...');
-  customCategoryBox.style.display = 'none';
-  categorySelectionBox.style.display = 'block'; 
+  hideModal(customCategoryBox); // Użyj nowej funkcji
+  showModal(categorySelectionBox);
+  editingCategoryFile = null; // Zawsze resetuj tryb edycji przy zamykaniu
 }
 
 function addTempWord() {
@@ -1341,20 +1411,51 @@ function saveCustomCategory() {
     return;
   }
   
-  const newCategory = {
-    name: categoryName,
-    file: `custom_${Date.now()}`, 
-    words: [...tempCustomWords], 
-    isCustom: true
-  };
-  
-  customCategories.push(newCategory); 
-  selectedCategories.push(newCategory); 
-  
-  addCustomCategoryToGrid(newCategory); 
-  
-  console.log('Zapisano własną kategorię:', newCategory.name);
+  if (editingCategoryFile) {
+    // --- TRYB EDYCJI ---
+    console.log('Zapisywanie zmian w kategorii:', categoryName);
+    // Zaktualizuj globalną listę 'customCategories'
+    const categoryIndex = customCategories.findIndex(c => c.file === editingCategoryFile);
+    if (categoryIndex > -1) {
+      customCategories[categoryIndex].name = categoryName;
+      customCategories[categoryIndex].words = [...tempCustomWords];
+    }
+    // Zaktualizuj listę 'selectedCategories'
+    const selectedIndex = selectedCategories.findIndex(c => c.file === editingCategoryFile);
+    if (selectedIndex > -1) {
+      selectedCategories[selectedIndex].name = categoryName;
+      selectedCategories[selectedIndex].words = [...tempCustomWords];
+    }
+    // Zaktualizuj przycisk w siatce
+    const btn = categoryGrid.querySelector(`.category-btn[data-file="${editingCategoryFile}"]`);
+    if (btn) {
+      btn.textContent = categoryName; // Aktualizuj tekst
+      // Musimy też zaktualizować 'data-category-name', jeśli od tego zależy
+      btn.dataset.categoryName = categoryName;
+      // Dodaj akcje z powrotem, bo 'textContent' je kasuje
+      addCategoryActions(btn, editingCategoryFile);
+    }
+    editingCategoryFile = null; // Wyłącz tryb edycji
+    
+  } else {
+    // --- TRYB TWORZENIA ---
+    console.log('Zapisywanie nowej kategorii:', categoryName);
+    const newCategory = {
+      name: categoryName,
+      file: `custom_${Date.now()}`, 
+      words: [...tempCustomWords], 
+      isCustom: true
+    };
+    
+    customCategories.push(newCategory); 
+    selectedCategories.push(newCategory); 
+    
+    addCustomCategoryToGrid(newCategory); 
+  }
+
   hideCustomCategoryModal();
+  updateCategoryButtons(); // Zaktualizuj podświetlenie
+  updateConfirmCategoriesButton();
 }
 
 function addCustomCategoryToGrid(category) {
@@ -1364,20 +1465,86 @@ function addCustomCategoryToGrid(category) {
   btn.dataset.file = category.file;
   btn.dataset.categoryName = category.name;
   
-  btn.addEventListener('click', () => {
+  btn.addEventListener('click', (e) => {
+    // Nie przełączaj, jeśli kliknięto przycisk akcji
+    if (e.target.closest('.category-actions')) {
+      return;
+    }
     toggleCategory(category); 
   });
   
+  addCategoryActions(btn, category.file); // Dodaj przyciski ✏️ i 🗑️
+  
   categoryGrid.insertBefore(btn, createCustomCategoryBtn); 
+}
+
+// NOWA FUNKCJA: Dodaje przyciski ✏️ i 🗑️
+function addCategoryActions(btn, fileId) {
+  const actionsDiv = document.createElement('div');
+  actionsDiv.classList.add('category-actions');
+  
+  const editBtn = document.createElement('button');
+  editBtn.textContent = '✏️';
+  editBtn.classList.add('edit-btn');
+  editBtn.dataset.file = fileId;
+  editBtn.title = 'Edytuj';
+  
+  const deleteBtn = document.createElement('button');
+  deleteBtn.textContent = '🗑️';
+  deleteBtn.classList.add('delete-btn');
+  deleteBtn.dataset.file = fileId;
+  deleteBtn.title = 'Usuń';
+  
+  actionsDiv.appendChild(editBtn);
+  actionsDiv.appendChild(deleteBtn);
+  btn.appendChild(actionsDiv);
+}
+
+// NOWA FUNKCJA: Usuwa kategorię
+function deleteCustomCategory(fileId) {
+  console.log('Usuwanie kategorii:', fileId);
+  // Usuń z globalnych list
+  customCategories = customCategories.filter(c => c.file !== fileId);
+  selectedCategories = selectedCategories.filter(c => c.file !== fileId);
+  
+  // Usuń przycisk z UI
+  const btn = categoryGrid.querySelector(`.category-btn[data-file="${fileId}"]`);
+  if (btn) {
+    btn.remove();
+  }
   
   updateCategoryButtons();
   updateConfirmCategoriesButton();
 }
 
-createCustomCategoryBtn.addEventListener('click', showCustomCategoryModal);
+// NOWA FUNKCJA: Edytuje kategorię
+function editCustomCategory(fileId) {
+  console.log('Edycja kategorii:', fileId);
+  const category = customCategories.find(c => c.file === fileId);
+  if (category) {
+    showCustomCategoryModal(fileId); // Otwórz modal w trybie edycji
+  }
+}
+
+// *** NOWE LISTENERY DLA MODALI ***
+createCustomCategoryBtn.addEventListener('click', () => showCustomCategoryModal());
 closeCustomCategoryBtn.addEventListener('click', hideCustomCategoryModal);
 addCustomWordBtn.addEventListener('click', addTempWord);
 saveCustomCategoryBtn.addEventListener('click', saveCustomCategory);
+
+// Delegowany listener dla przycisków ✏️ i 🗑️
+categoryGrid.addEventListener('click', (e) => {
+  const target = e.target.closest('button'); // Znajdź najbliższy przycisk
+  if (!target) return;
+
+  if (target.classList.contains('delete-btn')) {
+    e.stopPropagation(); // Zatrzymaj propagację do przycisku kategorii
+    deleteCustomCategory(target.dataset.file);
+  } else if (target.classList.contains('edit-btn')) {
+    e.stopPropagation(); // Zatrzymaj propagację
+    editCustomCategory(target.dataset.file);
+  }
+});
 
 customWordsList.addEventListener('click', (e) => {
   if (e.target && e.target.classList.contains('delete-word-btn')) {
@@ -1388,6 +1555,7 @@ customWordsList.addEventListener('click', (e) => {
 
 customWordInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') {
+    e.preventDefault(); // Zatrzymaj domyślną akcję (np. submit formularza)
     addTempWord();
   }
 });
