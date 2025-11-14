@@ -258,6 +258,14 @@ body.dark-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   font-family: var(--font-heading);
   font-weight: 800;
 }
+/* NOWY STYL: Podpowiedź w tekście */
+.word-impostor span {
+  color: var(--c-text-light-alt);
+  font-weight: 500;
+  font-size: 1.8rem;
+  opacity: 0.8;
+}
+
 
 /* =================================================================== */
 /* 5. STYLE KOMPONENTÓW (ID, klasy) */
@@ -348,9 +356,9 @@ body.dark-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   margin: 1rem 0;
 }
 
-/* *** NOWE STYLE DLA PODSUMOWANIA RUNDY *** */
+/* NOWE STYLE DLA PODSUMOWANIA RUNDY */
 #lastRoundSummaryTitle {
-  display: none; /* Ukryty domyślnie */
+  display: none; 
   font-size: 1.4rem;
   font-weight: 600;
   color: var(--c-text-light-alt);
@@ -367,7 +375,7 @@ body.dark-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   border: 1px solid var(--c-glass-border);
   border-radius: 0.8rem;
   padding: 0.8rem 1.2rem;
-  margin: 0.5rem 0.5rem 1rem 0.5rem; /* Zmniejszony margines górny */
+  margin: 0.5rem 0.5rem 1rem 0.5rem; 
   width: 100%;
   max-width: 350px;
   box-sizing: border-box;
@@ -383,24 +391,7 @@ body.dark-mode #lastRoundSummary {
   background: var(--c-glass-bg-darker);
 }
 
-/* *** NOWY STYL DLA PODPOWIEDZI W GRZE *** */
-#impostorHintDisplay {
-  position: fixed;
-  bottom: 1.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--c-danger);
-  color: var(--c-text-light);
-  font-family: var(--font-heading);
-  font-size: 1.8rem;
-  font-weight: 600;
-  padding: 0.8rem 1.5rem;
-  border-radius: 1rem;
-  border: 2px solid var(--c-text-light-alt);
-  box-shadow: 0 4px 15px var(--c-shadow-heavy);
-  z-index: 999;
-  animation: float 2s ease-in-out infinite;
-}
+/* USUNIĘTY STYL #impostorHintDisplay */
 
 
 /* --- Lista Graczy --- */
@@ -486,7 +477,7 @@ body.dark-mode #playersList li.self {
 }
 
 /* =================================================================== */
-/* 5.5. STYLE GŁOSOWANIA (NOWA SEKCJA) */
+/* 5.5. STYLE GŁOSOWANIA */
 /* =================================================================== */
 
 body.voting-active #playersList li.vote-target {
@@ -528,7 +519,7 @@ body.voting-active #playersList li.host.has-voted .avatar::after {
 }
 
 /* =================================================================== */
-/* 5.6. STYLE EKRANU PODPOWIEDZI (SEKCJA ZMIENIONA) */
+/* 5.6. STYLE EKRANU PODPOWIEDZI */
 /* =================================================================== */
 #impostorHintBox p {
   margin: 0 0 1.5rem 0;
@@ -695,7 +686,7 @@ body.dark-mode #hintChanceSlider::-moz-range-thumb {
 
 
 /* =================================================================== */
-/* 5.7. STYLE WŁASNYCH KATEGORII (NOWA SEKCJA) */
+/* 5.7. STYLE WŁASNYCH KATEGORII */
 /* =================================================================== */
 
 .category-btn.custom-new-btn {
@@ -861,7 +852,7 @@ body.dark-mode #hintChanceSlider::-moz-range-thumb {
 }
 
 /* =================================================================== */
-/* 5.8. STYLE EKRANU DRUŻYNY (NOWA SEKCJA) */
+/* 5.8. STYLE EKRANU DRUŻYNY */
 /* =================================================================== */
 #impostorTeamBox p {
   margin: 0 0 1.5rem 0;
@@ -919,7 +910,7 @@ body.dark-mode .team-selector button:nth-of-type(2).selected { /* NIE */
 }
 
 /* =================================================================== */
-/* 5.9. STYL EKRANU PEŁNOEKRANOWEGO (NOWA SEKCJA) */
+/* 5.9. STYL EKRANU PEŁNOEKRANOWEGO */
 /* =================================================================== */
 #fullscreen-overlay {
   position: fixed;
@@ -1310,14 +1301,10 @@ body.dark-mode #messageBox:not(.copy-message) {
   from { opacity: 0; transform: translate(-50%, -40%); }
   to { opacity: 1; transform: translate(-50%, -50%); }
 }
-@keyframes slideOutDown {
-  from { opacity: 1; transform: translate(-50%, -50%); }
-  to { opacity: 0; transform: translate(-50%, -40%); }
-}
-/* NOWA ANIMACJA */
+/* ZMIANA: Na płynne znikanie */
 @keyframes fadeOut {
-  from { opacity: 1; }
-  to { opacity: 0; }
+  from { opacity: 1; transform: translate(-50%, -50%); }
+  to { opacity: 0; transform: translate(-50%, -50%); }
 }
 
 @keyframes slideInRight {
@@ -1421,9 +1408,9 @@ body.dark-mode #messageBox:not(.copy-message) {
     font-size: 5vw;
   }
   
-  #impostorHintDisplay {
-    font-size: 1.6rem;
-    padding: 0.5rem 1rem;
-    width: 90%;
+  /* Styl podpowiedzi na mobilce */
+  #wordDisplay .impostor-hint-span {
+    font-size: 1.4rem; /* Mniejsza czcionka na mobilce */
+    display: block; /* Pod spodem, a nie obok */
   }
 }
