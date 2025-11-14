@@ -163,9 +163,8 @@ button:disabled {
 /* Logika ekranów */
 [data-screen] {
   animation-duration: 0.4s;
-  animation-fill-mode: forwards; /* Pozostaw stan po animacji */
+  animation-fill-mode: forwards;
 }
-/* Domyślnie ukryte */
 #gameScreen[data-screen] {
   display: none;
 }
@@ -181,7 +180,7 @@ button:disabled {
   border-radius: 1.5rem;
   text-align: center;
   z-index: 1001;
-  display: none; /* Domyślnie ukryte */
+  display: none; 
   max-width: 90vw;
   box-shadow: 0 10px 30px var(--c-shadow-modal);
   border: 2px solid var(--c-glass-border);
@@ -191,7 +190,6 @@ button:disabled {
   animation-duration: 0.3s;
   animation-fill-mode: forwards;
 }
-/* Klasa dodawana przez JS do pokazania modala */
 .modal-box.is-visible {
   display: block;
   animation-name: slideInUp;
@@ -351,7 +349,6 @@ body.dark-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   margin: 1rem 0;
 }
 
-/* *** NOWY STYL DLA PODSUMOWANIA RUNDY *** */
 #lastRoundSummary {
   font-size: 1.6rem;
   font-family: var(--font-heading);
@@ -393,7 +390,6 @@ body.dark-mode #lastRoundSummary {
   color: var(--c-text-dark);
   display: flex;
   align-items: center;
-  /* Usunięta animacja fadeIn */
   box-sizing: border-box;
   transition: background-color 0.2s ease, opacity 0.2s ease, border 0.2s ease;
   border: 4px solid transparent; 
@@ -691,8 +687,8 @@ body.dark-mode #hintChanceSlider::-moz-range-thumb {
   color: #fff;
   opacity: 0.8; 
   position: relative;
-  padding-right: 65px; /* Zwiększony padding na przyciski */
-  text-align: left; /* Wyrównaj tekst do lewej */
+  padding-right: 65px; 
+  text-align: left; 
   padding-left: 1rem;
 }
 .category-btn.custom-category-btn.selected {
@@ -701,7 +697,6 @@ body.dark-mode #hintChanceSlider::-moz-range-thumb {
   opacity: 1;
 }
 
-/* Wrapper na przyciski Edytuj/Usuń */
 .category-actions {
   position: absolute;
   right: 5px;
@@ -732,7 +727,7 @@ body.dark-mode #hintChanceSlider::-moz-range-thumb {
 }
 .category-actions button:hover {
   transform: scale(1.1);
-  animation: none; /* Wyłącz pulsowanie */
+  animation: none; 
 }
 
 
@@ -894,6 +889,85 @@ body.dark-mode .team-selector button:nth-of-type(2).selected { /* NIE */
 #confirmTeamSettingsBtn {
   margin-top: 1.5rem;
 }
+
+/* =================================================================== */
+/* 5.9. STYL EKRANU PEŁNOEKRANOWEGO (NOWA SEKCJA) */
+/* =================================================================== */
+#fullscreen-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  z-index: 2000;
+  display: none; /* Ukryty domyślnie */
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  color: var(--c-text-light-alt);
+  font-family: var(--font-heading);
+}
+#fullscreen-overlay.is-visible {
+  display: flex;
+  opacity: 1;
+}
+
+#countdown-display {
+  font-size: 15vw; /* Skaluje się z szerokością ekranu */
+  font-weight: 800;
+  animation: countdown-pulse 1s ease-in-out infinite;
+  display: none; /* Ukryty domyślnie */
+}
+
+#fullscreen-message {
+  display: none; /* Ukryty domyślnie */
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 1rem;
+}
+/* Klasa dodawana przez JS */
+#fullscreen-message.show-message {
+  animation: slideInUp 0.5s ease forwards;
+}
+
+#fullscreen-message-primary {
+  font-size: 5vw;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1.1;
+}
+#fullscreen-message-secondary {
+  font-size: 3vw;
+  font-weight: 500;
+  margin: 0;
+  opacity: 0.8;
+}
+
+/* Kolory dla ról */
+#fullscreen-message.impostor-role #fullscreen-message-primary {
+  color: var(--c-danger);
+}
+#fullscreen-message.impostor-role #fullscreen-message-secondary {
+  color: var(--c-danger);
+}
+#fullscreen-message.crewmate-role #fullscreen-message-primary {
+  color: var(--c-success);
+}
+#fullscreen-message.crewmate-role #fullscreen-message-secondary {
+  color: var(--c-success);
+}
+#fullscreen-message.starter-role #fullscreen-message-secondary {
+  color: var(--c-primary);
+  font-weight: 800;
+}
+
 
 /* --- Przyciski Pływające (Zasady, Tryb) --- */
 #rulesBtn, #themeToggle {
@@ -1200,7 +1274,7 @@ body.dark-mode #messageBox:not(.copy-message) {
 
 
 /* =================================================================== */
-/* 6. ANIMACJE (ZMIENIONE) */
+/* 6. ANIMACJE */
 /* =================================================================== */
 @keyframes slideInUp {
   from { opacity: 0; transform: translate(-50%, -40%); }
@@ -1217,6 +1291,23 @@ body.dark-mode #messageBox:not(.copy-message) {
 @keyframes slideOutLeft {
   from { opacity: 1; transform: translateX(0); }
   to { opacity: 0; transform: translateX(-50px); }
+}
+
+/* NOWA ANIMACJA DLA KOMUNIKATÓW */
+@keyframes horizontalSlideOut {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(-50px); }
+}
+@keyframes horizontalSlideIn {
+  from { opacity: 0; transform: translateX(50px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* NOWA ANIMACJA ODLICZANIA */
+@keyframes countdown-pulse {
+  0% { transform: scale(1); opacity: 1; }
+  80% { transform: scale(1.3); opacity: 0; }
+  100% { transform: scale(1); opacity: 0; }
 }
 
 @keyframes pulse {
@@ -1284,5 +1375,16 @@ body.dark-mode #messageBox:not(.copy-message) {
   }
   .slider-labels {
     margin-top: 5px; 
+  }
+  
+  /* Dostosuj czcionki animacji */
+  #countdown-display {
+    font-size: 30vw;
+  }
+  #fullscreen-message-primary {
+    font-size: 8vw;
+  }
+  #fullscreen-message-secondary {
+    font-size: 5vw;
   }
 }
