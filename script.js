@@ -69,6 +69,7 @@ const confirmTeamSettingsBtn = document.getElementById('confirmTeamSettingsBtn')
 const startVoteBtn = document.getElementById('startVoteBtn');
 const confirmVoteBtn = document.getElementById('confirmVoteBtn');
 const voteResultDisplay = document.getElementById('voteResultDisplay');
+const lastRoundSummaryTitle = document.getElementById('lastRoundSummaryTitle');
 const lastRoundSummary = document.getElementById('lastRoundSummary'); 
 
 // Elementy Własnych Kategorii
@@ -80,6 +81,9 @@ const addCustomWordBtn = document.getElementById('addCustomWordBtn');
 const customWordsList = document.getElementById('customWordsList');
 const saveCustomCategoryBtn = document.getElementById('saveCustomCategoryBtn');
 
+// *** NOWY ELEMENT: STAŁA PODPOWIEDŹ ***
+const impostorHintDisplay = document.getElementById('impostorHintDisplay');
+
 
 // Zmienne stanu gry
 let currentRoomCode = null;
@@ -90,10 +94,10 @@ let words = [];
 let impostorCount = 1;
 let selectedCategories = [];
 let hasShownStartMessage = false;
-let hasShownEndMessage = false; // *** POPRAWKA: Nowa flaga do animacji końca rundy
+let hasShownEndMessage = false; // NOWA FLAGA
 let selectedEmoji = null;
 let selectedPlayerId = null; 
-let isAnimating = false; // *** POPRAWKA: BRAKUJĄCA ZMIENNA ***
+let isAnimating = false; // NAPRAWA BŁĘDU
 
 let hintChance = 0; 
 let hintOnStart = false; 
@@ -167,6 +171,7 @@ function showScreen(screenToShow) {
   hideModal(currentModal, true);
 }
 
+// *** NAPRAWIONA FUNKCJA ***
 function showModal(modalToShow) {
   if (currentModal && currentModal !== modalToShow) {
     hideModal(currentModal);
@@ -182,6 +187,7 @@ function showModal(modalToShow) {
   themeToggle.classList.add('hidden');
 }
 
+// *** NAPRAWIONA FUNKCJA ***
 function hideModal(modalToHide, force = false) {
   if (!modalToHide) return;
   
@@ -205,7 +211,7 @@ function hideModal(modalToHide, force = false) {
         themeToggle.classList.remove('hidden');
       }
     }
-  }, 300); 
+  }, 300); // Czas trwania animacji
 }
 
 
@@ -567,6 +573,8 @@ function resetToLobby() {
   wordDisplay.innerHTML = '';
   lastRoundSummary.innerHTML = ''; 
   lastRoundSummary.style.display = 'none'; 
+  lastRoundSummaryTitle.style.display = 'none';
+  impostorHintDisplay.style.display = 'none';
   
   impostorCount = 1;
   impostorCountDisplaySelector.textContent = impostorCount;
@@ -1063,7 +1071,6 @@ function runRoundEndSequence(summaryMessage) {
   
   fullscreenMessage.className = ''; 
   
-  // Ustalanie koloru
   if (summaryMessage.includes('Impostor wygrał')) {
     fullscreenMessage.classList.add('impostor-role');
   } else {
@@ -1078,18 +1085,17 @@ function runRoundEndSequence(summaryMessage) {
   
   fullscreenOverlay.classList.add('is-visible');
 
-  // Schowaj po 5 sekundach
   setTimeout(() => {
-    fullscreenOverlay.classList.add('is-hiding'); // Użyj animacji wygaszania
+    fullscreenOverlay.classList.add('is-hiding'); 
     isAnimating = false;
     setTimeout(() => {
-      fullscreenOverlay.style.display = 'none'; // Ukryj po animacji
+      fullscreenOverlay.style.display = 'none'; 
       fullscreenOverlay.classList.remove('is-visible', 'is-hiding');
       fsMessagePrimary.innerHTML = '';
       fsMessageSecondary.textContent = '';
       fullscreenMessage.style.display = 'none';
-    }, 500); // Czas trwania animacji .is-hiding
-  }, 5000);
+    }, 500); 
+  }, 5000); // Pokaż przez 5 sekund
 }
 
 
@@ -1100,20 +1106,17 @@ function runGameStartSequence(roleMessage, starterName) {
   
   console.log("Pokazuję sekwencję startu gry");
   
-  // 1. Pokaż czarny ekran
   fullscreenOverlay.classList.remove('is-hiding');
   fullscreenMessage.style.display = 'none';
   fullscreenMessage.classList.remove('show-message');
   fullscreenOverlay.classList.add('is-visible');
   
-  // 2. Przygotuj odliczanie
   countdownDisplay.textContent = '3';
   countdownDisplay.style.display = 'block';
   countdownDisplay.style.animation = 'none';
-  countdownDisplay.offsetHeight; // Trik triggerujący reflow
+  countdownDisplay.offsetHeight; 
   countdownDisplay.style.animation = 'countdown-pulse 1s ease-in-out';
   
-  // 3. Odliczanie 2
   setTimeout(() => {
     countdownDisplay.textContent = '2';
     countdownDisplay.style.animation = 'none';
@@ -1121,7 +1124,6 @@ function runGameStartSequence(roleMessage, starterName) {
     countdownDisplay.style.animation = 'countdown-pulse 1s ease-in-out';
   }, 1000);
   
-  // 4. Odliczanie 1
   setTimeout(() => {
     countdownDisplay.textContent = '1';
     countdownDisplay.style.animation = 'none';
@@ -1129,16 +1131,14 @@ function runGameStartSequence(roleMessage, starterName) {
     countdownDisplay.style.animation = 'countdown-pulse 1s ease-in-out';
   }, 2000);
   
-  // 5. Pokaż rolę
   setTimeout(() => {
     countdownDisplay.style.display = 'none';
     
-    // Ustaw tekst i styl
     const parts = roleMessage.split('\n');
-    fsMessagePrimary.innerHTML = parts[0]; // "Jesteś oszustem!" lub "Twoje słowo: Banan"
-    fsMessageSecondary.innerHTML = parts.slice(1).join('<br>'); // Podpowiedź i/lub drużyna
+    fsMessagePrimary.innerHTML = parts[0]; 
+    fsMessageSecondary.innerHTML = parts.slice(1).join('<br>');
     
-    fullscreenMessage.className = ''; // Resetuj klasy
+    fullscreenMessage.className = ''; 
     if (roleMessage.includes('oszustem')) {
       fullscreenMessage.classList.add('impostor-role');
     } else {
@@ -1152,10 +1152,9 @@ function runGameStartSequence(roleMessage, starterName) {
 
   }, 3000);
   
-  // 6. Pokaż kto zaczyna (przejście horyzontalne)
   setTimeout(() => {
     fullscreenMessage.style.animation = 'horizontalSlideOut 0.4s ease forwards';
-  }, 6000); // Pokaż rolę przez 3 sekundy
+  }, 6000); 
   
   setTimeout(() => {
     fsMessagePrimary.textContent = "Zaczyna mówić:";
@@ -1165,18 +1164,17 @@ function runGameStartSequence(roleMessage, starterName) {
     fullscreenMessage.style.animation = 'horizontalSlideIn 0.4s ease forwards';
   }, 6400); 
 
-  // 7. Schowaj wszystko
   setTimeout(() => {
-    fullscreenOverlay.classList.add('is-hiding'); // Użyj animacji wygaszania
+    fullscreenOverlay.classList.add('is-hiding'); 
     isAnimating = false;
     setTimeout(() => {
-      fullscreenOverlay.style.display = 'none'; // Ukryj po animacji
+      fullscreenOverlay.style.display = 'none'; 
       fullscreenOverlay.classList.remove('is-visible', 'is-hiding');
       fsMessagePrimary.textContent = '';
       fsMessageSecondary.textContent = '';
       fullscreenMessage.style.display = 'none';
-    }, 500); // Czas trwania animacji .is-hiding
-  }, 8400); // Pokaż startera przez 2 sekundy
+    }, 500); 
+  }, 8400); 
 }
 
 
@@ -1238,18 +1236,30 @@ function listenToRoom(roomCode) {
     const hintOnStartText = room.hintOnStart ? " (Start)" : "";
     hintChanceInfoDisplay.innerHTML = `Podpowiedź: <span class="bold">${hintChanceText}${hintOnStartText}</span>`;
 
+    // Logika dla stałej podpowiedzi impostora
+    const iAmImpostor = iAmInRoom && iAmInRoom.role === 'impostor';
+    const hint = room.impostorHint;
+    if (room.gameStarted && iAmImpostor && hint) {
+      impostorHintDisplay.textContent = `Podpowiedź: ${hint}`;
+      impostorHintDisplay.style.display = 'block';
+    } else {
+      impostorHintDisplay.style.display = 'none';
+    }
+
     if (!votingActive) {
       wordDisplay.innerHTML = room.gameStarted && room.currentWord && iAmInRoom
-        ? (iAmInRoom.role === 'impostor'
+        ? (iAmImpostor
           ? `Twoje słowo: <span class="word-impostor">OSZUST!</span>`
           : `Twoje słowo: <span class="word-normal">${room.currentWord}</span>`)
         : '';
     }
 
     if (room.lastRoundSummary && !room.gameStarted) {
+      lastRoundSummaryTitle.style.display = 'block'; // Pokaż tytuł
       lastRoundSummary.innerHTML = room.lastRoundSummary;
       lastRoundSummary.style.display = 'block';
     } else {
+      lastRoundSummaryTitle.style.display = 'none'; // Ukryj tytuł
       lastRoundSummary.style.display = 'none';
     }
 
@@ -1258,17 +1268,13 @@ function listenToRoom(roomCode) {
     confirmVoteBtn.style.display = votingActive && !myVote ? 'block' : 'none';
     endRoundBtn.style.display = 'none';
 
-    // *** ZMIENIONA LOGIKA POKAZYWANIA ROLI (Z DRUŻYNĄ) ***
     if (room.gameStarted && !votingActive && room.currentWord && iAmInRoom) {
       
       if (!hasShownStartMessage) {
-        hasShownStartMessage = true; // Zablokuj natychmiast
-        
-        const isImpostor = iAmInRoom.role === 'impostor';
-        const hint = room.impostorHint; 
+        hasShownStartMessage = true; 
         
         let message;
-        if (isImpostor) {
+        if (iAmImpostor) {
           const hintText = hint ? `\n(Podpowiedź: ${hint})` : '';
           let teamText = '';
           
@@ -1282,7 +1288,6 @@ function listenToRoom(roomCode) {
               teamText = `\nTwoi partnerzy: ${teammateNames}`;
             }
           }
-          
           message = `Jesteś oszustem!${teamText}${hintText}`;
         } else {
           message = `Słowo: ${room.currentWord}`;
@@ -1293,15 +1298,13 @@ function listenToRoom(roomCode) {
         runGameStartSequence(message, starterName);
       }
     } else {
-      hasShownStartMessage = false; // Zresetuj flagę, gdy gra się nie toczy
+      hasShownStartMessage = false; 
     }
 
-    // *** POPRAWKA: POKAZYWANIE EKRANU KOŃCA RUNDY ***
+    // Pokaż podsumowanie rundy (ANIMACJA)
     if (room.lastRoundSummary && !room.gameStarted && !hasShownEndMessage) {
       hasShownEndMessage = true; // Zablokuj
       runRoundEndSequence(room.lastRoundSummary);
-    } else if (room.gameStarted) {
-      hasShownEndMessage = false; // Zresetuj, gdy gra się zacznie
     }
 
     if (room.resetMessage) {
@@ -1396,6 +1399,7 @@ startGameBtn.addEventListener('click', () => {
     updates.impostorHint = hint; 
     updates.starterId = starterId;
     updates.lastRoundSummary = null; 
+    updates.hasShownEndMessage = false; // Zresetuj flagę końca
     updates.currentRound = (room.currentRound || 0) + 1;
 
     roomRef.update(updates).then(() => {
