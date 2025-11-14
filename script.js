@@ -43,17 +43,17 @@ const voteResultDisplay = document.getElementById('voteResultDisplay');
 // NOWE ELEMENTY DOM DLA PODPOWIEDZI
 const impostorHintBox = document.getElementById('impostorHintBox');
 const hintChanceSlider = document.getElementById('hintChanceSlider');
-// USUNIĘTY: hintChanceDisplay
 const hintOnStartCheckbox = document.getElementById('hintOnStartCheckbox');
 const confirmHintSettingsBtn = document.getElementById('confirmHintSettingsBtn');
 const hintChanceInfoDisplay = document.getElementById('hintChanceInfoDisplay');
+const hintCheckboxContainer = document.querySelector('#impostorHintBox .checkbox-container'); // NOWY
 
 // Zmienne stanu gry
 let currentRoomCode = null;
 let currentPlayerId = null;
 let currentPlayerName = null;
-let isHost = false; // To jest teraz aktualizowane we właściwym momencie
-let words = []; // OBIEKTY: { word: "Kot", category: "Zwierzęta" }
+let isHost = false; 
+let words = []; 
 let impostorCount = 1;
 let selectedCategories = [];
 let hasShownStartMessage = false;
@@ -61,8 +61,8 @@ let selectedEmoji = null;
 let selectedPlayerId = null; 
 
 // NOWE ZMIENNE STANU DLA PODPOWIEDZI
-let hintChance = 0; // Wartość slidera (indeks 0-4)
-let hintOnStart = false; // Wartość checkboxa
+let hintChance = 0; 
+let hintOnStart = false; 
 const hintChanceValues = ['0%', '25%', '50%', '75%', '100%'];
 const hintChanceNumeric = [0, 0.25, 0.5, 0.75, 1];
 
@@ -362,7 +362,6 @@ function assignUniqueColor(players) {
   return selectedColor;
 }
 
-// *** ZMIANA: Funkcja przyjmuje teraz 'localIsHost' ***
 function updatePlayersList(players, localIsHost) {
   playersList.innerHTML = '';
   if (!players || !Object.keys(players).length) {
@@ -388,7 +387,6 @@ function updatePlayersList(players, localIsHost) {
       li.classList.add('self');
     }
 
-    // Użyj 'localIsHost' zamiast globalnej 'isHost'
     if (localIsHost && id !== currentPlayerId) {
       const kickBtn = document.createElement('button');
       kickBtn.textContent = '×';
@@ -455,7 +453,7 @@ function resetToLobby() {
   hintChance = 0;
   hintOnStart = false;
   hintChanceSlider.value = 0;
-  // ZMIANA: Zresetuj etykiety slidera
+  // ZMIANA: Zresetuj etykiety slidera i checkbox
   document.querySelectorAll('.slider-labels .slider-label').forEach((label, index) => {
     if (index === 0) {
       label.classList.add('label-active');
@@ -463,8 +461,10 @@ function resetToLobby() {
       label.classList.remove('label-active');
     }
   });
-
   hintOnStartCheckbox.checked = false;
+  hintCheckboxContainer.classList.remove('disabled');
+  hintOnStartCheckbox.disabled = false;
+
   
   document.querySelectorAll('.emoji-btn').forEach(btn => btn.classList.remove('selected'));
   updateImpostorButtons();
@@ -549,6 +549,7 @@ confirmImpostors.addEventListener('click', () => {
   impostorHintBox.style.display = 'block';
 });
 
+// *** ZMIANA: Logika slidera i wygaszania checkboxa ***
 hintChanceSlider.addEventListener('input', (e) => {
   hintChance = parseInt(e.target.value, 10);
   console.log('Szansa na podpowiedź:', hintChanceValues[hintChance]);
@@ -562,6 +563,17 @@ hintChanceSlider.addEventListener('input', (e) => {
       label.classList.remove('label-active');
     }
   });
+
+  // Wygaszanie checkboxa
+  if (hintChance === 4) { // 4 to 100%
+    hintOnStartCheckbox.disabled = true;
+    hintOnStartCheckbox.checked = false; // Odznacz
+    hintOnStart = false; // Zaktualizuj stan
+    hintCheckboxContainer.classList.add('disabled');
+  } else {
+    hintOnStartCheckbox.disabled = false;
+    hintCheckboxContainer.classList.remove('disabled');
+  }
 });
 
 hintOnStartCheckbox.addEventListener('change', (e) => {
@@ -893,6 +905,7 @@ function listenToRoom(roomCode) {
     const votingActive = room.votingActive || false;
     const myVote = iAmInRoom ? iAmInRoom.votedFor : null;
 
+    // *** POPRAWKA BŁĘDU HOSTA ***
     if (!hostExists && iAmInRoom && playerIds.length > 0) {
       console.warn('Brak hosta! Wybieranie nowego...');
       const sortedPlayerIds = playerIds.sort();
@@ -901,10 +914,11 @@ function listenToRoom(roomCode) {
       if (newHostId === currentPlayerId) {
         console.log('To ja! Promuję się na nowego hosta. Czekam na odświeżenie...');
         db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).update({ isHost: true });
-        return; // *** TUTAJ JEST NAPRAWA BŁĘDU HOSTA ***
+        return; // ZATRZYMAJ WYKONYWANIE, poczekaj na nowe dane
       }
     }
 
+    // Ustaw 'isHost' NA PODSTAWIE NAJNOWSZYCH DANYCH
     isHost = iAmInRoom ? iAmInRoom.isHost : false; 
 
     if (votingActive) {
@@ -914,7 +928,7 @@ function listenToRoom(roomCode) {
     } else {
       document.body.classList.remove('voting-active');
       selectedPlayerId = null;
-      updatePlayersList(players, isHost); 
+      updatePlayersList(players, isHost); // Przekaż zaktualizowany 'isHost'
     }
 
     document.querySelectorAll('.kickBtn').forEach(btn => {
