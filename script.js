@@ -1,3 +1,5 @@
+alert("ŁADUJĘ KOD v9!"); // TESTOWY ALERT
+
 // Elementy DOM
 const playerNameInput = document.getElementById('playerName');
 const createRoomBtn = document.getElementById('createRoom');
@@ -154,12 +156,13 @@ function showScreen(screenToShow) {
   hideModal(currentModal, true);
 }
 
+// *** NAPRAWIONA FUNKCJA ***
 function showModal(modalToShow) {
   if (currentModal && currentModal !== modalToShow) {
     hideModal(currentModal);
   }
   
-  // *** NAPRAWA BŁĘDU: Ustaw display: block PRZED dodaniem klasy ***
+  // NAJPIERW POKAŻ, POTEM ANIMUJ
   modalToShow.style.display = 'block'; 
   
   modalToShow.classList.remove('is-hiding');
@@ -170,6 +173,7 @@ function showModal(modalToShow) {
   themeToggle.classList.add('hidden');
 }
 
+// *** NAPRAWIONA FUNKCJA ***
 function hideModal(modalToHide, force = false) {
   if (!modalToHide) return;
   
@@ -184,8 +188,7 @@ function hideModal(modalToHide, force = false) {
   modalToHide.classList.remove('is-visible');
   
   setTimeout(() => {
-    // *** NAPRAWA BŁĘDU: Ustaw display: none PO animacji ***
-    modalToHide.style.display = 'none'; 
+    modalToHide.style.display = 'none'; // UKRYJ PO ANIMACJI
     modalToHide.classList.remove('is-hiding');
     if (modalToHide === currentModal) {
       currentModal = null;
