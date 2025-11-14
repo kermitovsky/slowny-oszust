@@ -1,5 +1,3 @@
-alert("ŁADUJĘ KOD v9!"); // TESTOWY ALERT
-
 // Elementy DOM
 const playerNameInput = document.getElementById('playerName');
 const createRoomBtn = document.getElementById('createRoom');
