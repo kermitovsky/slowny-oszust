@@ -69,7 +69,7 @@ const confirmTeamSettingsBtn = document.getElementById('confirmTeamSettingsBtn')
 const startVoteBtn = document.getElementById('startVoteBtn');
 const confirmVoteBtn = document.getElementById('confirmVoteBtn');
 const voteResultDisplay = document.getElementById('voteResultDisplay');
-const lastRoundSummaryTitle = document.getElementById('lastRoundSummaryTitle');
+const lastRoundSummaryTitle = document.getElementById('lastRoundSummaryTitle'); 
 const lastRoundSummary = document.getElementById('lastRoundSummary'); 
 
 // Elementy Własnych Kategorii
@@ -546,14 +546,14 @@ function showMessage(text, duration = 3500) {
   }, duration);
 }
 
-// Zmieniamy to, żeby już nie używać 'roleMessageBox'
+// Ta funkcja nie jest już używana do pokazywania ról
 function showRoleMessage(text, duration = 5000) {
   // roleMessageBox.innerHTML = text.replace(/\n/g, '<br>');
   // showModal(roleMessageBox); 
   // setTimeout(() => {
   //   hideModal(roleMessageBox); 
   // }, duration);
-  console.log("showRoleMessage (teraz puste):", text);
+  console.log("showRoleMessage (nieużywane):", text);
 }
 
 function resetToLobby() {
@@ -1299,11 +1299,10 @@ function listenToRoom(roomCode) {
       hasShownStartMessage = false; 
     }
 
-    // *** POPRAWKA: LOGIKA URUCHAMIANIA ANIMACJI KOŃCA RUNDY ***
     if (room.roundEndMessage && !room.gameStarted && !hasShownEndMessage) {
       hasShownEndMessage = true; 
       runRoundEndSequence(room.roundEndMessage);
-      // Logika usuwania przeniesiona do 'runRoundEndSequence'
+      // *** POPRAWKA: Logika usuwania przeniesiona do 'runRoundEndSequence' ***
     }
 
     if (room.resetMessage) {
