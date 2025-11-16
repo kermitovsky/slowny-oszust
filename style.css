@@ -332,7 +332,6 @@ body.dark-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   font-weight: 800;
 }
 
-/* MODYFIKACJA 3: Styl dla kategorii w lobby */
 #lobbyCategories {
   font-size: 1.6rem;
   font-style: italic;
@@ -484,22 +483,18 @@ body.dark-mode #playersList li.self {
   color: var(--c-primary);
 }
 
-/* MODYFIKACJA 2: Wskaźnik "Kto Mówi" */
 #playersList li.is-starter::before {
   content: '🎤';
   position: absolute;
-  /* Pozycja na prawo od tekstu, ale przed przyciskiem wyrzucenia */
   right: 2.8rem; 
   top: 50%;
   transform: translateY(-50%);
   font-size: 1.5rem;
   opacity: 0.7;
 }
-/* Jeśli host jest starterem, przesuń mikrofon, aby nie nakładał się na przycisk */
 #playersList li.is-starter.host::before {
   right: 4.8rem; 
 }
-/* Kiedy nie ma przycisku wyrzucenia (np. dla samego siebie lub w trybie głosowania) */
 body:not(.voting-active) #playersList li.is-starter.self::before,
 body.voting-active #playersList li.is-starter::before {
   right: 0.8rem;
@@ -1002,9 +997,10 @@ body.dark-mode #messageBox:not(.copy-message) {
   font-size: 3.5rem;
   font-weight: bold;
   font-family: 'Segoe UI Black', var(--font-body);
-  transition: opacity 1s ease-in-out;
+  /* MODYFIKACJA: Usunięcie transition, polegamy na animacji .is-hiding */
 }
 #roleMessageBox.is-fading-out {
+  /* Ten styl nie jest już używany, ale nie szkodzi */
   opacity: 0;
 }
 
@@ -1356,7 +1352,6 @@ body.dark-mode #messageBox:not(.copy-message) {
     padding: 1.5rem 1rem; /* Mniej paddingu po bokach */
     max-height: 85vh;
     font-size: 1.4rem;
-    /* MODYFIKACJA: Ustawienie szerokości modala */
     width: 90vw;
     max-width: 90vw;
     box-sizing: border-box; /* Upewnij się, że padding jest wliczony */
@@ -1371,7 +1366,6 @@ body.dark-mode #messageBox:not(.copy-message) {
     font-size: 1.4rem;
   }
   
-  /* POPRAWKA: Tytuły modali - Zezwolenie na zawijanie */
   #impostorSelectionBox p, 
   #categorySelectionBox p,
   #impostorHintBox p, 
@@ -1381,7 +1375,6 @@ body.dark-mode #messageBox:not(.copy-message) {
     white-space: normal; /* POZWÓL NA ZAWIJANIE TEKSTU */
   }
   
-  /* POPRAWKA: Komunikat roli */
   #roleMessageBox {
     font-size: 2.4rem; /* Zmniejszenie z 3.5rem */
   }
@@ -1400,7 +1393,6 @@ body.dark-mode #messageBox:not(.copy-message) {
     display: block;
   }
   
-  /* MODYFIKACJA: Zezwól elementom wewnątrz modala na użycie pełnej szerokości */
   .modal-box .impostor-selector,
   .modal-box .slider-container,
   .modal-box .team-selector,
