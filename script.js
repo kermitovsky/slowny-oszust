@@ -165,15 +165,20 @@ function showScreen(screenToShow) {
 }
 
 function showModal(modalToShow) {
-  // MODYFIKACJA: Pozwól, aby showRoleMessage przerwało showMessage (i na odwrót)
-  if (isAnimating && (modalToShow === roleMessageBox || modalToShow === messageBox)) {
-      // Nie rób return, pozwól na przerwanie
-  } else if (isAnimating) {
-      return; // Zablokuj inne modale (np. zasady) podczas animacji
-  }
-  
+  // Jeśli coś się animuje I NIE jest to próba pokazania modala wiadomości, zablokuj.
+  if (isAnimating && modalToShow !== roleMessageBox && modalToShow !== messageBox) return;
+
+  // Jeśli poprzedni modal istnieje I NIE jest to ten sam modal
   if (currentModal && currentModal !== modalToShow) {
-    hideModal(currentModal, true); // Użyj "force" dla płynnego przejścia
+    // Jeśli próbujemy pokazać `roleMessageBox`, a starym modalem jest `messageBox`
+    // (lub na odwrót), ukryj stary natychmiast (force), aby zastąpić.
+    if ((modalToShow === roleMessageBox && currentModal === messageBox) || 
+        (modalToShow === messageBox && currentModal === roleMessageBox)) {
+      hideModal(currentModal, true); // Force hide
+    } else {
+      // W przeciwnym razie (np. zamykając zasady) pozwól na normalne schowanie
+      hideModal(currentModal); 
+    }
   }
   
   modalToShow.style.display = 'block'; 
@@ -1181,7 +1186,7 @@ function listenToRoom(roomCode) {
     endRoundBtn.style.display = 'none';
 
     // =================================================================
-    // MODYFIKACJA: LOGIKA "ZAPADKI" DLA PROPOZYCJI 1
+    // MODYFIKACJA: LOGIKA "ZAPADKI" DLA SEKWENCJI MODALI
     // =================================================================
 
     const newStarterId = room.starterId;
@@ -1193,7 +1198,6 @@ function listenToRoom(roomCode) {
       lastSeenStarterId = newStarterId; // Zamknij zapadkę
       lastSeenSummary = null; // Otwórz zapadkę końca rundy
       
-      // MODYFIKACJA 1: Odtwórz dźwięk startu
       audioStart.play();
       
       const starterName = players[newStarterId]?.name || '...';
@@ -1216,16 +1220,17 @@ function listenToRoom(roomCode) {
       wordDisplay.innerHTML = ''; 
       isAnimating = true; // Zablokuj pokazywanie słowa
       
-      // MODYFIKACJA: Użyj `showRoleMessage`, aby uzyskać animację slideInUp
-      showRoleMessage(roleMsg, 5000); // Pokaż rolę
+      // 1. Pokaż rolę. `showRoleMessage` automatycznie zniknie po 5s.
+      showRoleMessage(roleMsg, 5000); 
       
-      // Po 5 sekundach wywołaj `showRoleMessage` ponownie.
-      // `showModal` automatycznie zamknie stare okno (z animacją fadeOut) i otworzy nowe (z animacją slideInUp)
+      // 2. 300ms PO tym jak pierwsze okno ZACZNIE znikać (5000ms), pokaż drugie.
+      // 5000ms (duration) + 300ms (fadeOut animation) = 5300ms
       setTimeout(() => {
         showRoleMessage(starterMsg, 4000); // Pokaż, kto zaczyna
-      }, 5000); // Czas pokazywania pierwszej wiadomości
+      }, 5300); // Czekaj na ZNIKNIĘCIE pierwszego okna
 
-      // Odblokuj pokazywanie słowa po zakończeniu obu animacji
+      // 3. Odblokuj pokazywanie słowa po CAŁEJ sekwencji
+      // 5300ms (wait) + 4000ms (duration) + 300ms (fadeOut) = 9600ms
       setTimeout(() => {
         isAnimating = false;
         if (room.gameStarted && room.currentWord && iAmInRoom) {
@@ -1233,7 +1238,7 @@ function listenToRoom(roomCode) {
             ? `Twoje słowo: <span class="word-impostor">OSZUST! ${myHint ? `<span class="impostor-hint-span">(Podpowiedź: ${myHint})</span>` : ''}</span>`
             : `Twoje słowo: <span class="word-normal">${room.currentWord}</span>`;
         }
-      }, 9000); // 5s + 4s = 9s
+      }, 9600); // 5300 + 4000 + 300
     }
     
     // 2. ZAPADKA KOŃCA RUNDY
@@ -1244,7 +1249,6 @@ function listenToRoom(roomCode) {
       lastSeenSummary = newSummary; // Zamknij zapadkę
       lastSeenStarterId = null; // Otwórz zapadkę startu
       
-      // MODYFIKACJA 1: Odtwórz dźwięk końca
       audioEnd.play();
       
       // MODYFIKACJA 4: Pokaż podsumowanie w dużym oknie
