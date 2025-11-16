@@ -72,15 +72,6 @@ const voteResultDisplay = document.getElementById('voteResultDisplay');
 const lastRoundSummaryTitle = document.getElementById('lastRoundSummaryTitle');
 const lastRoundSummary = document.getElementById('lastRoundSummary'); 
 
-// Elementy Własnych Kategorii
-const createCustomCategoryBtn = document.getElementById('createCustomCategoryBtn');
-const closeCustomCategoryBtn = document.getElementById('closeCustomCategoryBtn');
-const customCategoryNameInput = document.getElementById('customCategoryNameInput');
-const customWordInput = document.getElementById('customWordInput');
-const addCustomWordBtn = document.getElementById('addCustomWordBtn');
-const customWordsList = document.getElementById('customWordsList');
-const saveCustomCategoryBtn = document.getElementById('saveCustomCategoryBtn');
-
 
 // Zmienne stanu gry
 let currentRoomCode = null;
@@ -94,7 +85,7 @@ let hasShownStartMessage = false;
 let hasShownEndMessage = false; 
 let selectedEmoji = null;
 let selectedPlayerId = null; 
-let isAnimating = false;
+let isAnimating = false; // *** POPRAWKA: BRAKUJĄCA ZMIENNA ***
 
 let hintChance = 0; 
 let hintOnStart = false; 
@@ -168,11 +159,13 @@ function showScreen(screenToShow) {
   hideModal(currentModal, true);
 }
 
+// *** NAPRAWIONA FUNKCJA ***
 function showModal(modalToShow) {
   if (currentModal && currentModal !== modalToShow) {
     hideModal(currentModal);
   }
   
+  // NAJPIERW POKAŻ, POTEM ANIMUJ
   modalToShow.style.display = 'block'; 
   
   modalToShow.classList.remove('is-hiding');
@@ -183,6 +176,7 @@ function showModal(modalToShow) {
   themeToggle.classList.add('hidden');
 }
 
+// *** NAPRAWIONA FUNKCJA ***
 function hideModal(modalToHide, force = false) {
   if (!modalToHide) return;
   
@@ -197,7 +191,7 @@ function hideModal(modalToHide, force = false) {
   modalToHide.classList.remove('is-visible');
   
   setTimeout(() => {
-    modalToHide.style.display = 'none'; 
+    modalToHide.style.display = 'none'; // UKRYJ PO ANIMACJI
     modalToHide.classList.remove('is-hiding');
     if (modalToHide === currentModal) {
       currentModal = null;
@@ -206,7 +200,7 @@ function hideModal(modalToHide, force = false) {
         themeToggle.classList.remove('hidden');
       }
     }
-  }, 300); 
+  }, 300); // Czas trwania animacji
 }
 
 
@@ -546,7 +540,6 @@ function showMessage(text, duration = 3500) {
   }, duration);
 }
 
-// Ta funkcja nie jest już używana do pokazywania ról
 function showRoleMessage(text, duration = 5000) {
   console.log("showRoleMessage (nieużywane):", text);
 }
@@ -1265,6 +1258,7 @@ function listenToRoom(roomCode) {
       
       if (!hasShownStartMessage) {
         hasShownStartMessage = true; 
+        hasShownEndMessage = false; // *** POPRAWKA: Zresetuj flagę końca rundy ***
         
         let message;
         if (iAmImpostor) {
@@ -1291,6 +1285,7 @@ function listenToRoom(roomCode) {
         runGameStartSequence(message, starterName);
       }
     } else {
+      // *** POPRAWKA: Zresetuj flagę startu, gdy gra się skończy ***
       hasShownStartMessage = false; 
     }
 
