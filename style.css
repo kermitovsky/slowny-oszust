@@ -579,9 +579,9 @@ body.voting-active #playersList li.host.has-voted .avatar::after {
   border-radius: 5px;
   outline: none;
   padding: 0;
-  /* MODYFIKACJA 3: Obliczanie szerokości i marginesu, aby kulka dochodziła do krawędzi */
-  width: calc(100% - 28px);
-  margin: 0 14px;
+  /* POPRAWKA SLIDERA: Obliczanie szerokości i marginesu, aby kulka dochodziła do krawędzi */
+  width: calc(100% - 28px); /* 28px to szerokość kulki */
+  margin: 0 14px; /* 14px to połowa szerokości kulki */
   background-image: 
     radial-gradient(circle at center, var(--c-primary-light) 4px, transparent 4px),
     radial-gradient(circle at center, var(--c-primary-light) 4px, transparent 4px),
@@ -590,27 +590,27 @@ body.voting-active #playersList li.host.has-voted .avatar::after {
     radial-gradient(circle at center, var(--c-primary-light) 4px, transparent 4px);
   background-size: 4px 4px;
   background-repeat: no-repeat;
-  /* MODYFIKACJA 3: Dopasowanie kropek do nowej szerokości */
+  /* POPRAWKA SLIDERA: Dopasowanie kropek do nowej szerokości */
   background-position: 0% 50%, 25% 50%, 50% 50%, 75% 50%, 100% 50%;
 }
 
 #hintChanceSlider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  /* MODYFIKACJA 3: Przywrócenie 28px */
+  /* POPRAWKA SLIDERA: Przywrócenie 28px */
   width: 28px; 
   height: 28px; 
   border-radius: 50%;
   background: var(--c-primary);
   border: 4px solid var(--c-text-light);
   cursor: pointer;
-  /* MODYFIKACJA 3: Przywrócenie centrowania dla 28px */
+  /* POPRAWKA SLIDERA: Przywrócenie centrowania dla 28px */
   margin-top: -10px; 
   box-shadow: 0 2px 5px var(--c-shadow-heavy);
 }
 
 #hintChanceSlider::-moz-range-thumb {
-  /* MODYFIKACJA 3: Przywrócenie 28px */
+  /* POPRAWKA SLIDERA: Przywrócenie 28px */
   width: 28px; 
   height: 28px; 
   border-radius: 50%;
@@ -729,7 +729,7 @@ body.dark-mode #hintChanceSlider::-moz-range-thumb {
 .category-actions button {
   width: 28px;
   height: 28px;
-  /* MODYFIKACJA 1: Zmniejszenie ikon */
+  /* POPRAWKA IKON: Zmniejszenie ikon */
   font-size: 1rem; 
   font-weight: bold;
   color: white;
@@ -1018,7 +1018,7 @@ body.dark-mode #messageBox:not(.copy-message) {
   font-size: 2.5rem; 
   font-weight: bold;
   transition: opacity 0.3s ease, background 0.3s ease;
-  /* MODYFIKACJA 2: Centrowanie + / - */
+  /* POPRAWKA PRZYCISKÓW +/-: Centrowanie */
   display: flex;
   align-items: center;
   justify-content: center;
