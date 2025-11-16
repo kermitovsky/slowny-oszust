@@ -72,15 +72,6 @@ const voteResultDisplay = document.getElementById('voteResultDisplay');
 const lastRoundSummaryTitle = document.getElementById('lastRoundSummaryTitle');
 const lastRoundSummary = document.getElementById('lastRoundSummary'); 
 
-// Elementy Własnych Kategorii
-const createCustomCategoryBtn = document.getElementById('createCustomCategoryBtn');
-const closeCustomCategoryBtn = document.getElementById('closeCustomCategoryBtn');
-const customCategoryNameInput = document.getElementById('customCategoryNameInput');
-const customWordInput = document.getElementById('customWordInput');
-const addCustomWordBtn = document.getElementById('addCustomWordBtn');
-const customWordsList = document.getElementById('customWordsList');
-const saveCustomCategoryBtn = document.getElementById('saveCustomCategoryBtn');
-
 
 // Zmienne stanu gry
 let currentRoomCode = null;
@@ -1245,6 +1236,7 @@ function listenToRoom(roomCode) {
     const hint = room.impostorHint;
     
     if (!votingActive) {
+      // *** POPRAWKA: Zintegrowana podpowiedź ***
       wordDisplay.innerHTML = room.gameStarted && room.currentWord && iAmInRoom
         ? (iAmImpostor
           ? `Twoje słowo: <span class="word-impostor">OSZUST! ${hint ? `<span class="impostor-hint-span">(Podpowiedź: ${hint})</span>` : ''}</span>`
@@ -1299,6 +1291,7 @@ function listenToRoom(roomCode) {
       hasShownStartMessage = false; 
     }
 
+    // *** POPRAWKA: LOGIKA URUCHAMIANIA ANIMACJI KOŃCA RUNDY ***
     if (room.roundEndMessage && !room.gameStarted && !hasShownEndMessage) {
       hasShownEndMessage = true; 
       runRoundEndSequence(room.roundEndMessage);
