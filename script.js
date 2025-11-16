@@ -31,12 +31,7 @@ const impostorTeamBox = document.getElementById('impostorTeamBox');
 const customCategoryBox = document.getElementById('customCategoryBox');
 const rulesBox = document.getElementById('rulesBox');
 
-// Elementy animacji
-const fullscreenOverlay = document.getElementById('fullscreen-overlay');
-const countdownDisplay = document.getElementById('countdown-display');
-const fullscreenMessage = document.getElementById('fullscreen-message');
-const fsMessagePrimary = document.getElementById('fullscreen-message-primary');
-const fsMessageSecondary = document.getElementById('fullscreen-message-secondary');
+// Elementy animacji (USUNIĘTE)
 
 
 const closeRulesBtn = document.getElementById('closeRules');
@@ -81,11 +76,10 @@ let isHost = false;
 let words = []; 
 let impostorCount = 1;
 let selectedCategories = [];
-let hasShownStartMessage = false;
-let hasShownEndMessage = false; 
+// Flagi animacji (USUNIĘTE)
 let selectedEmoji = null;
 let selectedPlayerId = null; 
-let isAnimating = false;
+// Flaga animacji (USUNIĘTA)
 
 let hintChance = 0; 
 let hintOnStart = false; 
@@ -562,8 +556,7 @@ function resetToLobby() {
   customCategories = []; 
   document.querySelectorAll('.custom-category-btn').forEach(btn => btn.remove());
   
-  hasShownStartMessage = false;
-  hasShownEndMessage = false;
+  // Flagi usunięte
   selectedEmoji = null;
   selectedPlayerId = null; 
   
@@ -756,7 +749,7 @@ function createRoom(numImpostors, chanceIndex, onStart, knows) {
     currentCategory: null, 
     impostorHint: null, 
     lastRoundSummary: null,
-    roundEndMessage: null,
+    roundEndMessage: null, // Ta linia nadal tu jest, ale nie jest już używana do animacji
     resetMessage: null,
     starterId: null,
     numImpostors: numImpostors,
@@ -1019,7 +1012,7 @@ function tallyVotes(room) {
 
   if (isTie || !ejectedPlayerId) {
     updates.lastRoundSummary = `REMIS! Nikt nie odpada.<br>Kontynuujcie dyskusję!`;
-    updates.roundEndMessage = updates.lastRoundSummary; // Pokaż też animację
+    // updates.roundEndMessage = updates.lastRoundSummary; // USUNIĘTE
   } else {
     const ejectedPlayer = players[ejectedPlayerId];
     
@@ -1039,137 +1032,14 @@ function tallyVotes(room) {
     }
     
     updates.lastRoundSummary = summaryMessage; 
-    updates.roundEndMessage = summaryMessage;
+    // updates.roundEndMessage = summaryMessage; // USUNIĘTE
   }
 
   db.ref(`rooms/${currentRoomCode}`).update(updates);
 }
 
 
-function runRoundEndSequence(summaryMessage) {
-  // 1. Zdejmij blokady (są już ustawione w listenerze)
-  // if (isAnimating) return; // USUNIĘTE
-  // isAnimating = true; // USUNIĘTE
-  
-  console.log("Pokazuję sekwencję końca rundy");
-  
-  fsMessagePrimary.innerHTML = summaryMessage; 
-  fsMessageSecondary.textContent = "Przygotujcie się na nową rundę...";
-  
-  fullscreenMessage.className = ''; 
-  
-  if (summaryMessage.includes('Impostor wygrał')) {
-    fullscreenMessage.classList.add('impostor-role');
-  } else {
-    fullscreenMessage.classList.add('crewmate-role');
-  }
-  
-  countdownDisplay.style.display = 'none';
-  fullscreenMessage.style.animation = 'none';
-  fullscreenMessage.offsetHeight;
-  fullscreenMessage.style.display = 'flex';
-  fullscreenMessage.style.animation = 'slideInUp 0.5s ease forwards';
-  
-  fullscreenOverlay.classList.remove('is-hiding');
-  fullscreenOverlay.classList.add('is-visible');
-
-  // 2. Na końcu animacji, zwolnij blokadę
-  setTimeout(() => {
-    fullscreenOverlay.classList.add('is-hiding'); 
-    isAnimating = false; // ZWOLNIJ BLOKADĘ
-    
-    if (isHost) {
-      db.ref(`rooms/${currentRoomCode}/roundEndMessage`).remove();
-    }
-    setTimeout(() => {
-      fullscreenOverlay.style.display = 'none'; 
-      fullscreenOverlay.classList.remove('is-visible', 'is-hiding');
-      fsMessagePrimary.innerHTML = '';
-      fsMessageSecondary.textContent = '';
-      fullscreenMessage.style.display = 'none';
-    }, 500); 
-  }, 5000); 
-}
-
-
-function runGameStartSequence(roleMessage, starterName) {
-  // 1. Zdejmij blokady (są już ustawione w listenerze)
-  // if (isAnimating) return; // USUNIĘTE
-  // isAnimating = true; // USUNIĘTE
-  
-  console.log("Pokazuję sekwencję startu gry");
-  
-  fullscreenOverlay.classList.remove('is-hiding');
-  fullscreenMessage.style.display = 'none';
-  fullscreenMessage.classList.remove('show-message');
-  fullscreenOverlay.classList.add('is-visible');
-  
-  countdownDisplay.textContent = '3';
-  countdownDisplay.style.display = 'block';
-  countdownDisplay.style.animation = 'none';
-  countdownDisplay.offsetHeight; 
-  countdownDisplay.style.animation = 'countdown-pulse 1s ease-in-out';
-  
-  setTimeout(() => {
-    countdownDisplay.textContent = '2';
-    countdownDisplay.style.animation = 'none';
-    countdownDisplay.offsetHeight;
-    countdownDisplay.style.animation = 'countdown-pulse 1s ease-in-out';
-  }, 1000);
-  
-  setTimeout(() => {
-    countdownDisplay.textContent = '1';
-    countdownDisplay.style.animation = 'none';
-    countdownDisplay.offsetHeight;
-    countdownDisplay.style.animation = 'countdown-pulse 1s ease-in-out';
-  }, 2000);
-  
-  setTimeout(() => {
-    countdownDisplay.style.display = 'none';
-    
-    const parts = roleMessage.split('\n');
-    fsMessagePrimary.innerHTML = parts[0]; 
-    fsMessageSecondary.innerHTML = parts.slice(1).join('<br>');
-    
-    fullscreenMessage.className = ''; 
-    if (roleMessage.includes('oszustem')) {
-      fullscreenMessage.classList.add('impostor-role');
-    } else {
-      fullscreenMessage.classList.add('crewmate-role');
-    }
-    
-    fullscreenMessage.style.animation = 'none';
-    fullscreenMessage.offsetHeight;
-    fullscreenMessage.style.display = 'flex';
-    fullscreenMessage.style.animation = 'slideInUp 0.5s ease forwards';
-
-  }, 3000);
-  
-  setTimeout(() => {
-    fullscreenMessage.style.animation = 'horizontalSlideOut 0.4s ease forwards';
-  }, 6000); 
-  
-  setTimeout(() => {
-    fsMessagePrimary.textContent = "Zaczyna mówić:";
-    fsMessageSecondary.textContent = starterName;
-    fullscreenMessage.className = 'starter-role'; 
-    
-    fullscreenMessage.style.animation = 'horizontalSlideIn 0.4s ease forwards';
-  }, 6400); 
-
-  // 2. Na końcu animacji, zwolnij blokadę
-  setTimeout(() => {
-    fullscreenOverlay.classList.add('is-hiding'); 
-    isAnimating = false; // ZWOLNIJ BLOKADĘ
-    setTimeout(() => {
-      fullscreenOverlay.style.display = 'none'; 
-      fullscreenOverlay.classList.remove('is-visible', 'is-hiding');
-      fsMessagePrimary.textContent = '';
-      fsMessageSecondary.textContent = '';
-      fullscreenMessage.style.display = 'none';
-    }, 500); 
-  }, 8400); 
-}
+// Funkcje animacji (USUNIĘTE)
 
 
 function listenToRoom(roomCode) {
@@ -1178,11 +1048,10 @@ function listenToRoom(roomCode) {
     
     const room = snapshot.val();
     if (!room) {
-      if (!isAnimating) {
-        console.log('Pokój usunięty:', roomCode);
-        showMessage('❌ Pokój został usunięty!');
-        resetToLobby();
-      }
+      // Sprawdzenie isAnimating usunięte
+      console.log('Pokój usunięty:', roomCode);
+      showMessage('❌ Pokój został usunięty!');
+      resetToLobby();
       return;
     }
 
@@ -1191,7 +1060,7 @@ function listenToRoom(roomCode) {
     const hostExists = Object.values(players).some(p => p.isHost);
     const iAmInRoom = players[currentPlayerId];
     
-    if (!iAmInRoom && !isAnimating) {
+    if (!iAmInRoom) { // Sprawdzenie isAnimating usunięte
         console.log('Wyrzucono z pokoju lub błąd stanu.');
         showMessage('❌ Zostałeś rozłączony z pokojem.');
         resetToLobby();
@@ -1242,6 +1111,7 @@ function listenToRoom(roomCode) {
     const iAmImpostor = iAmInRoom && iAmInRoom.role === 'impostor';
     const hint = room.impostorHint;
     
+    // Ta sekcja jest teraz jedynym wskaźnikiem startu gry. Działa idealnie.
     if (!votingActive) {
       wordDisplay.innerHTML = room.gameStarted && room.currentWord && iAmInRoom
         ? (iAmImpostor
@@ -1250,11 +1120,13 @@ function listenToRoom(roomCode) {
         : '';
     }
 
+    // Ta sekcja jest teraz jedynym wskaźnikiem końca rundy. Działa idealnie.
     if (room.lastRoundSummary && !room.gameStarted) {
       lastRoundSummaryTitle.style.display = 'block';
       lastRoundSummary.innerHTML = room.lastRoundSummary;
       lastRoundSummary.style.display = 'block';
     } else {
+      // Automatycznie czyści się, gdy `lastRoundSummary` jest 'null' (przy starcie gry)
       lastRoundSummaryTitle.style.display = 'none';
       lastRoundSummary.style.display = 'none';
     }
@@ -1264,69 +1136,7 @@ function listenToRoom(roomCode) {
     confirmVoteBtn.style.display = votingActive && !myVote ? 'block' : 'none';
     endRoundBtn.style.display = 'none';
 
-    // =================================================================
-    // NOWA LOGIKA BLOKOWANIA (ROZWIĄZANIE RACE CONDITION)
-    // =================================================================
-
-    // 1. Sprawdź, czy gra się rozpoczęła
-    if (room.gameStarted && !votingActive && room.currentWord && iAmInRoom) {
-      
-      // Jeśli animacja startu się nie odbyła ORAZ nic innego nie animuje
-      if (!hasShownStartMessage && !isAnimating) { 
-        console.log("WYZWALAM Animację Startu");
-        
-        // SEKCJA KRYTYCZNA: Ustaw flagi NATYCHMIAST, aby zablokować wyścig
-        isAnimating = true; 
-        hasShownStartMessage = true;
-        hasShownEndMessage = false; // Zresetuj flagę końca (przygotuj na koniec rundy)
-        
-        // Przygotuj wiadomość
-        let message;
-        if (iAmImpostor) {
-          const hintText = hint ? `\n(Podpowiedź: ${hint})` : '';
-          let teamText = '';
-          
-          if (room.impostorsKnow && room.numImpostors > 1) {
-            const teammateNames = Object.keys(players)
-              .filter(id => players[id].role === 'impostor' && id !== currentPlayerId)
-              .map(id => players[id].name)
-              .join(', ');
-              
-            if (teammateNames) {
-              teamText = `\nTwoi partnerzy: ${teammateNames}`;
-            }
-          }
-          message = `Jesteś oszustem!${teamText}${hintText}`;
-        } else {
-          message = `Słowo: ${room.currentWord}`;
-        }
-        const starterName = players[room.starterId]?.name || '...';
-        
-        // Wywołaj animację (zwolni 'isAnimating' po zakończeniu)
-        runGameStartSequence(message, starterName);
-      }
-    }
-
-    // 2. Sprawdź, czy runda się zakończyła
-    if (room.roundEndMessage && !room.gameStarted) {
-      
-      // Jeśli animacja końca się nie odbyła ORAZ nic innego nie animuje
-      if (!hasShownEndMessage && !isAnimating) { 
-        console.log("WYZWALAM Animację Końca");
-        
-        // SEKCJA KRYTYCZNA: Ustaw flagi NATYCHMIAST
-        isAnimating = true;
-        hasShownEndMessage = true;
-        hasShownStartMessage = false; // Zresetuj flagę startu (przygotuj na nową rundę)
-        
-        // Wywołaj animację (zwolni 'isAnimating' po zakończeniu)
-        runRoundEndSequence(room.roundEndMessage);
-      }
-    }
-    
-    // =================================================================
-    // KONIEC LOGIKI ANIMACJI
-    // =================================================================
+    // Cała skomplikowana logika flag i animacji została USUNIĘTA
 
     if (room.resetMessage) {
       showMessage(room.resetMessage); 
@@ -1351,7 +1161,7 @@ function listenToRoom(roomCode) {
 
 startGameBtn.addEventListener('click', () => {
   console.log('Kliknięto Start gry');
-  if (isAnimating) return; // Blokuj kliknięcie, jeśli animacja trwa
+  // if (isAnimating) return; // USUNIĘTE
   if (!isHost) {
     console.log('Tylko host może rozpocząć grę');
     return;
@@ -1419,7 +1229,7 @@ startGameBtn.addEventListener('click', () => {
     updates.currentCategory = category;
     updates.impostorHint = hint; 
     updates.starterId = starterId;
-    updates.lastRoundSummary = null; 
+    updates.lastRoundSummary = null; // To jest kluczowe - czyści podsumowanie poprzedniej rundy
     updates.roundEndMessage = null; 
     
     roomRef.update(updates).then(() => {
@@ -1435,7 +1245,7 @@ startGameBtn.addEventListener('click', () => {
 });
 
 startVoteBtn.addEventListener('click', () => {
-  if (isAnimating) return;
+  // if (isAnimating) return; // USUNIĘTE
   console.log('Kliknięto Rozpocznij głosowanie');
   if (!isHost) {
     console.log('Tylko host może rozpocząć głosowanie');
@@ -1447,7 +1257,7 @@ startVoteBtn.addEventListener('click', () => {
 });
 
 confirmVoteBtn.addEventListener('click', () => {
-  if (isAnimating) return;
+  // if (isAnimating) return; // USUNIĘTE
   if (!selectedPlayerId) {
     showMessage('❌ Najpierw wybierz gracza, na którego chcesz zagłosować!', 2500);
     return;
@@ -1457,7 +1267,7 @@ confirmVoteBtn.addEventListener('click', () => {
 
 // Przycisk "Zakończ rundę" (DEBUG)
 endRoundBtn.addEventListener('click', () => {
-  if (isAnimating) return;
+  // if (isAnimating) return; // USUNIĘTE
   console.log('Kliknięto Zakończ rundę (PRZYCISK PANIKI)');
   if (!isHost) {
     console.log('Tylko host może zakończyć rundę');
@@ -1483,7 +1293,7 @@ endRoundBtn.addEventListener('click', () => {
       starterId: null,
       impostorsKnow: null,
       lastRoundSummary: summary, 
-      roundEndMessage: summary,
+      roundEndMessage: summary, // Ta linia nic już nie robi, ale nie szkodzi
     };
     Object.keys(players).forEach(id => {
       updates[`players/${id}/role`] = null;
@@ -1492,8 +1302,7 @@ endRoundBtn.addEventListener('click', () => {
 
     roomRef.update(updates).then(() => {
       console.log('Runda zakończona:', { word: currentWord, impostorIds });
-      hasShownStartMessage = false;
-      hasShownEndMessage = false; 
+      // Flagi usunięte
     }).catch(error => {
       console.error('Błąd kończenia rundy:', error);
       showMessage('❌ Błąd kończenia rundy!');
