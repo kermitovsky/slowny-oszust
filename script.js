@@ -26,17 +26,12 @@ const messageBox = document.getElementById('messageBox');
 const roleMessageBox = document.getElementById('roleMessageBox');
 const categorySelectionBox = document.getElementById('categorySelectionBox');
 const impostorSelectionBox = document.getElementById('impostorSelectionBox');
-const impostorHintBox = document.getElementById('impostorHintBox');
-const impostorTeamBox = document.getElementById('impostorTeamBox');
-const customCategoryBox = document.getElementById('customCategoryBox');
+const impostorHintBox = document.getElementById('impostorHintBox'); // NOWY
+const impostorTeamBox = document.getElementById('impostorTeamBox'); // NOWY
+const customCategoryBox = document.getElementById('customCategoryBox'); // NOWY
 const rulesBox = document.getElementById('rulesBox');
 
-// MODYFIKACJA: Przywrócenie elementów animacji
-const fullscreenOverlay = document.getElementById('fullscreen-overlay');
-const countdownDisplay = document.getElementById('countdown-display');
-const fullscreenMessage = document.getElementById('fullscreen-message');
-const fsMessagePrimary = document.getElementById('fullscreen-message-primary');
-const fsMessageSecondary = document.getElementById('fullscreen-message-secondary');
+// Elementy animacji (USUNIĘTE)
 
 
 const closeRulesBtn = document.getElementById('closeRules');
@@ -46,6 +41,7 @@ const closeRulesTopBtn = document.getElementById('closeRulesTop');
 const allCategoriesBtn = document.getElementById('allCategoriesBtn');
 const categoryGrid = document.querySelector('#categorySelectionBox .category-grid');
 const confirmCategories = document.getElementById('confirmCategories');
+const createCustomCategoryBtn = document.getElementById('createCustomCategoryBtn'); // NOWY
 
 // Elementy Wyboru Impostora
 const minusImpostor = document.getElementById('minusImpostor');
@@ -53,14 +49,14 @@ const plusImpostor = document.getElementById('plusImpostor');
 const impostorCountDisplaySelector = document.getElementById('impostorCount');
 const confirmImpostors = document.getElementById('confirmImpostors');
 
-// Elementy Podpowiedzi
+// Elementy Podpowiedzi (NOWE)
 const hintChanceSlider = document.getElementById('hintChanceSlider');
 const hintOnStartCheckbox = document.getElementById('hintOnStartCheckbox');
 const confirmHintSettingsBtn = document.getElementById('confirmHintSettingsBtn');
 const hintChanceInfoDisplay = document.getElementById('hintChanceInfoDisplay');
 const hintCheckboxContainer = document.querySelector('#impostorHintBox .checkbox-container');
 
-// Elementy Drużyny
+// Elementy Drużyny (NOWE)
 const teamKnowsBtn = document.getElementById('teamKnowsBtn');
 const teamNotKnowsBtn = document.getElementById('teamNotKnowsBtn');
 const confirmTeamSettingsBtn = document.getElementById('confirmTeamSettingsBtn');
@@ -69,8 +65,16 @@ const confirmTeamSettingsBtn = document.getElementById('confirmTeamSettingsBtn')
 const startVoteBtn = document.getElementById('startVoteBtn');
 const confirmVoteBtn = document.getElementById('confirmVoteBtn');
 const voteResultDisplay = document.getElementById('voteResultDisplay');
-const lastRoundSummaryTitle = document.getElementById('lastRoundSummaryTitle');
-const lastRoundSummary = document.getElementById('lastRoundSummary'); 
+const lastRoundSummaryTitle = document.getElementById('lastRoundSummaryTitle'); // NOWY
+const lastRoundSummary = document.getElementById('lastRoundSummary'); // NOWY
+
+// Elementy Własnych Kategorii (NOWE)
+const closeCustomCategoryBtn = document.getElementById('closeCustomCategoryBtn');
+const customCategoryNameInput = document.getElementById('customCategoryNameInput');
+const customWordInput = document.getElementById('customWordInput');
+const addCustomWordBtn = document.getElementById('addCustomWordBtn');
+const customWordsList = document.getElementById('customWordsList');
+const saveCustomCategoryBtn = document.getElementById('saveCustomCategoryBtn');
 
 
 // Zmienne stanu gry
@@ -81,20 +85,18 @@ let isHost = false;
 let words = []; 
 let impostorCount = 1;
 let selectedCategories = [];
+let hasShownStartMessage = false; // ORYGINALNA FLAGA (Z POPRAWKĄ)
 let selectedEmoji = null;
 let selectedPlayerId = null; 
-let isAnimating = false; // MODYFIKACJA: Prosta flaga blokująca przyciski
-let lastSeenStarterId = null; // MODYFIKACJA: "Zapadka" dla animacji startu
 
+// NOWE ZMIENNE STANU
 let hintChance = 0; 
 let hintOnStart = false; 
 const hintChanceValues = ['0%', '25%', '50%', '75%', '100%'];
 const hintChanceNumeric = [0, 0.25, 0.5, 0.75, 1];
-
 let tempCustomWords = [];
 let customCategories = [];
 let editingCategoryFile = null; 
-
 let impostorsKnowEachOther = false; 
 let currentModal = null; 
 
@@ -135,7 +137,7 @@ const fallbackWords = [
   { word: "muzyka", category: "Muzyka" }
 ];
 
-// --- FUNKCJE ZARZĄDZANIA UI (POPRAWIONE) ---
+// --- NOWE FUNKCJE ZARZĄDZANIA UI ---
 function showScreen(screenToShow) {
   const screens = [loginScreen, gameScreen];
   screens.forEach(screen => {
@@ -444,6 +446,7 @@ async function loadWords(categoriesToLoad) {
   }
 }
 
+// Załaduj domyślne słowa na start (zamiast polegać na animals.json)
 words = fallbackWords;
 console.log('Załadowano domyślne słowa (fallback):', words.length);
 
@@ -537,7 +540,11 @@ function showMessage(text, duration = 3500) {
 }
 
 function showRoleMessage(text, duration = 5000) {
-  console.log("showRoleMessage (nieużywane):", text);
+  roleMessageBox.innerHTML = text; // Użyj innerHTML, aby obsłużyć <span>
+  showModal(roleMessageBox);
+  setTimeout(() => {
+    hideModal(roleMessageBox);
+  }, duration);
 }
 
 function resetToLobby() {
@@ -561,9 +568,9 @@ function resetToLobby() {
   customCategories = []; 
   document.querySelectorAll('.custom-category-btn').forEach(btn => btn.remove());
   
+  hasShownStartMessage = false; // Kluczowy reset flagi
   selectedEmoji = null;
   selectedPlayerId = null; 
-  lastSeenStarterId = null; // MODYFIKACJA: Resetowanie zapadki
   
   hintChance = 0;
   hintOnStart = false;
@@ -668,6 +675,7 @@ confirmImpostors.addEventListener('click', () => {
   showModal(impostorHintBox);
 });
 
+// NOWA OBSŁUGA SLIDERA
 hintChanceSlider.addEventListener('input', (e) => {
   hintChance = parseInt(e.target.value, 10);
   console.log('Szansa na podpowiedź:', hintChanceValues[hintChance]);
@@ -692,11 +700,13 @@ hintChanceSlider.addEventListener('input', (e) => {
   }
 });
 
+// NOWA OBSŁUGA CHECKBOXA
 hintOnStartCheckbox.addEventListener('change', (e) => {
   hintOnStart = e.target.checked;
   console.log('Podpowiedź przy starcie impostora:', hintOnStart);
 });
 
+// NOWA OBSŁUGA PRZYCISKU PODPOWIEDZI
 confirmHintSettingsBtn.addEventListener('click', () => {
   console.log('Potwierdzono ustawienia podpowiedzi.');
   hideModal(impostorHintBox);
@@ -709,6 +719,7 @@ confirmHintSettingsBtn.addEventListener('click', () => {
   }
 });
 
+// NOWA OBSŁUGA PRZYCISKÓW DRUŻYNY
 teamKnowsBtn.addEventListener('click', () => {
   impostorsKnowEachOther = true;
   teamKnowsBtn.classList.add('selected');
@@ -728,6 +739,7 @@ confirmTeamSettingsBtn.addEventListener('click', () => {
   createRoom(impostorCount, hintChance, hintOnStart, impostorsKnowEachOther);
 });
 
+// ZMODYFIKOWANA FUNKCJA TWORZENIA POKOJU
 function createRoom(numImpostors, chanceIndex, onStart, knows) {
   const customCategoriesToSave = customCategories 
     .filter(c => c.isCustom)
@@ -751,22 +763,24 @@ function createRoom(numImpostors, chanceIndex, onStart, knows) {
     gameStarted: false,
     votingActive: false,
     currentWord: null,
-    currentCategory: null, 
-    impostorHint: null, 
-    lastRoundSummary: null,
-    roundEndMessage: null, 
+    currentCategory: null, // NOWE
+    impostorHint: null, // NOWE
+    lastRoundSummary: null, // NOWE
+    roundEndMessage: null,
     resetMessage: null,
     starterId: null,
     numImpostors: numImpostors,
     categories: selectedCategories.map(c => c.name), 
-    customCategories: customCategoriesToSave || [],
-    hintChance: chanceIndex,
-    hintOnStart: onStart,
-    impostorsKnow: knows
+    customCategories: customCategoriesToSave || [], // NOWE
+    hintChance: chanceIndex, // NOWE
+    hintOnStart: onStart, // NOWE
+    impostorsKnow: knows // NOWE
   }).then(() => {
     console.log('Pokój utworzony:', currentRoomCode);
     showScreen(gameScreen); 
     hideModal(impostorTeamBox, true); 
+    hideModal(impostorSelectionBox, true); // Upewnij się, że ten też jest schowany
+    hideModal(categorySelectionBox, true); // I ten
     roomCodeDisplay.textContent = currentRoomCode;
     db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).onDisconnect().remove();
     listenToRoom(currentRoomCode);
@@ -1017,7 +1031,7 @@ function tallyVotes(room) {
 
   if (isTie || !ejectedPlayerId) {
     updates.lastRoundSummary = `REMIS! Nikt nie odpada.<br>Kontynuujcie dyskusję!`;
-    updates.roundEndMessage = updates.lastRoundSummary; // To pole jest teraz ignorowane
+    updates.resetMessage = updates.lastRoundSummary; // Użyj resetMessage do natychmiastowego pop-upu
   } else {
     const ejectedPlayer = players[ejectedPlayerId];
     
@@ -1036,108 +1050,22 @@ function tallyVotes(room) {
       summaryMessage = `Impostor wygrał rundę!<br>(Wygłosowano <strong>${ejectedPlayer.name}</strong>)<br>Słowo: <strong>${room.currentWord}</strong>`;
     }
     
-    updates.lastRoundSummary = summaryMessage; 
-    updates.roundEndMessage = summaryMessage; // To pole jest teraz ignorowane
+    updates.lastRoundSummary = summaryMessage; // To pokaże się w lobby
+    updates.resetMessage = summaryMessage; // To pokaże się jako pop-up
   }
 
   db.ref(`rooms/${currentRoomCode}`).update(updates);
 }
 
 
-// MODYFIKACJA: Przywrócenie funkcji animacji
-function runGameStartSequence(isImpostor, word, hint, starterName) {
-  if (isAnimating) return; // Podwójne sprawdzenie, na wszelki wypadek
-  isAnimating = true; // Zablokuj przyciski
-  
-  console.log("Pokazuję sekwencję startu gry");
-  
-  fullscreenOverlay.classList.remove('is-hiding');
-  fullscreenMessage.style.display = 'none';
-  fullscreenMessage.classList.remove('show-message');
-  fullscreenOverlay.classList.add('is-visible');
-  
-  countdownDisplay.textContent = '3';
-  countdownDisplay.style.display = 'block';
-  countdownDisplay.style.animation = 'none';
-  countdownDisplay.offsetHeight; 
-  countdownDisplay.style.animation = 'countdown-pulse 1s ease-in-out';
-  
-  setTimeout(() => {
-    countdownDisplay.textContent = '2';
-    countdownDisplay.style.animation = 'none';
-    countdownDisplay.offsetHeight;
-    countdownDisplay.style.animation = 'countdown-pulse 1s ease-in-out';
-  }, 1000);
-  
-  setTimeout(() => {
-    countdownDisplay.textContent = '1';
-    countdownDisplay.style.animation = 'none';
-    countdownDisplay.offsetHeight;
-    countdownDisplay.style.animation = 'countdown-pulse 1s ease-in-out';
-  }, 2000);
-  
-  // Po odliczaniu, pokaż rolę
-  setTimeout(() => {
-    countdownDisplay.style.display = 'none';
-    
-    // Zbuduj komunikat roli
-    if (isImpostor) {
-      fsMessagePrimary.innerHTML = "Jesteś oszustem!";
-      fsMessageSecondary.innerHTML = hint ? `(Podpowiedź: ${hint})` : "";
-      fullscreenMessage.className = 'impostor-role';
-    } else {
-      fsMessagePrimary.innerHTML = "Twoje słowo:";
-      fsMessageSecondary.innerHTML = word;
-      fullscreenMessage.className = 'crewmate-role';
-    }
-    
-    fullscreenMessage.style.animation = 'none';
-    fullscreenMessage.offsetHeight;
-    fullscreenMessage.style.display = 'flex';
-    fullscreenMessage.style.animation = 'slideInUp 0.5s ease forwards';
-
-  }, 3000);
-  
-  // Schowaj rolę
-  setTimeout(() => {
-    fullscreenMessage.style.animation = 'horizontalSlideOut 0.4s ease forwards';
-  }, 6000); 
-  
-  // Pokaż, kto zaczyna
-  setTimeout(() => {
-    fsMessagePrimary.textContent = "Zaczyna mówić:";
-    fsMessageSecondary.textContent = starterName;
-    fullscreenMessage.className = 'starter-role'; 
-    
-    fullscreenMessage.style.animation = 'horizontalSlideIn 0.4s ease forwards';
-  }, 6400); 
-
-  // Schowaj wszystko i odblokuj grę
-  setTimeout(() => {
-    fullscreenOverlay.classList.add('is-hiding'); 
-    isAnimating = false; // Odblokuj przyciski
-    setTimeout(() => {
-      fullscreenOverlay.style.display = 'none'; 
-      fullscreenOverlay.classList.remove('is-visible', 'is-hiding');
-      fsMessagePrimary.textContent = '';
-      fsMessageSecondary.textContent = '';
-      fullscreenMessage.style.display = 'none';
-    }, 500); 
-  }, 8400); 
-}
-
-
 function listenToRoom(roomCode) {
   const roomRef = db.ref(`rooms/${roomCode}`);
   roomRef.on('value', snapshot => {
-    
     const room = snapshot.val();
     if (!room) {
-      if (!isAnimating) {
-        console.log('Pokój usunięty:', roomCode);
-        showMessage('❌ Pokój został usunięty!');
-        resetToLobby();
-      }
+      console.log('Pokój usunięty:', roomCode);
+      showMessage('❌ Pokój został usunięty!');
+      resetToLobby();
       return;
     }
 
@@ -1146,7 +1074,7 @@ function listenToRoom(roomCode) {
     const hostExists = Object.values(players).some(p => p.isHost);
     const iAmInRoom = players[currentPlayerId];
     
-    if (!iAmInRoom && !isAnimating) { 
+    if (!iAmInRoom) {
         console.log('Wyrzucono z pokoju lub błąd stanu.');
         showMessage('❌ Zostałeś rozłączony z pokojem.');
         resetToLobby();
@@ -1190,6 +1118,7 @@ function listenToRoom(roomCode) {
     impostorCountDisplay.innerHTML = `Impostorzy: <span class="bold">${room.numImpostors || 0}</span>`;
     roundCounter.innerHTML = room.currentRound > 0 ? `Runda: <strong>${room.currentRound}</strong>` : '';
     
+    // NOWE: Wyświetlanie info o podpowiedzi
     const hintChanceText = hintChanceValues[room.hintChance || 0];
     const hintOnStartText = room.hintOnStart ? " (Start)" : "";
     hintChanceInfoDisplay.innerHTML = `Podpowiedź: <span class="bold">${hintChanceText}${hintOnStartText}</span>`;
@@ -1197,17 +1126,16 @@ function listenToRoom(roomCode) {
     const iAmImpostor = iAmInRoom && iAmInRoom.role === 'impostor';
     const hint = room.impostorHint;
     
+    // ZMODYFIKOWANE: Użycie `wordDisplay` dla zintegrowanej podpowiedzi
     if (!votingActive) {
-      // MODYFIKACJA: Pokaż słowo dopiero PO animacji (ona ustawi `isAnimating = false`)
-      if (room.gameStarted && room.currentWord && iAmInRoom && !isAnimating) {
-        wordDisplay.innerHTML = iAmImpostor
+      wordDisplay.innerHTML = room.gameStarted && room.currentWord && iAmInRoom
+        ? (iAmImpostor
           ? `Twoje słowo: <span class="word-impostor">OSZUST! ${hint ? `<span class="impostor-hint-span">(Podpowiedź: ${hint})</span>` : ''}</span>`
-          : `Twoje słowo: <span class="word-normal">${room.currentWord}</span>`;
-      } else if (!room.gameStarted) {
-        wordDisplay.innerHTML = ''; // Wyczyść słowo w lobby
-      }
+          : `Twoje słowo: <span class="word-normal">${room.currentWord}</span>`)
+        : '';
     }
 
+    // NOWE: Wyświetlanie podsumowania ostatniej rundy
     if (room.lastRoundSummary && !room.gameStarted) {
       lastRoundSummaryTitle.style.display = 'block';
       lastRoundSummary.innerHTML = room.lastRoundSummary;
@@ -1220,42 +1148,40 @@ function listenToRoom(roomCode) {
     startGameBtn.style.display = isHost && !room.gameStarted && !votingActive ? 'block' : 'none';
     startVoteBtn.style.display = isHost && room.gameStarted && !votingActive ? 'block' : 'none';
     confirmVoteBtn.style.display = votingActive && !myVote ? 'block' : 'none';
-    endRoundBtn.style.display = 'none';
+    endRoundBtn.style.display = 'none'; 
 
     // =================================================================
-    // MODYFIKACJA: NOWA, PROSTA LOGIKA "ZAPADKI" (LATCH)
+    // POWRÓT DO ORYGINALNEJ LOGIKI KOMUNIKATÓW (Z POPRAWKAMI)
     // =================================================================
-
-    const newStarterId = room.starterId;
-
-    // 1. Sprawdź, czy gra się rozpoczęła I czy jest nowy starterId
-    if (room.gameStarted && newStarterId && newStarterId !== lastSeenStarterId) {
-      console.log(`Nowa runda! Starter ID: ${newStarterId}. Ostatni: ${lastSeenStarterId}`);
+    if (room.gameStarted && !votingActive && room.currentWord && iAmInRoom) {
       
-      // 2. ZAMKNIJ ZAPADKĘ: Zapisz ten starterId, aby nie odpalić animacji ponownie
-      lastSeenStarterId = newStarterId; 
-      
-      // 3. Zbierz dane do animacji
-      const starterName = players[newStarterId]?.name || '...';
-      const myWord = room.currentWord;
-      const myHint = room.impostorHint;
-      const amIImpostor = iAmInRoom.role === 'impostor';
-      
-      // 4. Ukryj stare słowo natychmiast
-      wordDisplay.innerHTML = ''; 
-
-      // 5. Uruchom sekwencję
-      runGameStartSequence(amIImpostor, myWord, myHint, starterName);
+      if (!hasShownStartMessage) {
+        hasShownStartMessage = true; 
+        
+        let message;
+        if (iAmImpostor) {
+          message = 'Jesteś oszustem!';
+          // ZINTEGROWANA PODPOWIEDŹ (inna niż w wordDisplay, w modalu)
+          if (hint) { 
+            message += ` <span class="impostor-hint-span">(Podpowiedź: ${hint})</span>`;
+          }
+        } else {
+          message = `Słowo: ${room.currentWord}`;
+        }
+        
+        showRoleMessage(message, 5000);
+        
+        if (room.starterId && players[room.starterId]) {
+          setTimeout(() => {
+            showMessage(`Zaczyna mówić: <strong>${players[room.starterId].name}</strong>`, 5000);
+          }, 5000); // Pokaż kto zaczyna PO tym jak zniknie rola
+        }
+      }
+    } else {
+      // *** KLUCZOWA POPRAWKA ***
+      // Resetuj flagę, gdy gra się nie toczy (jesteśmy w lobby)
+      hasShownStartMessage = false;
     }
-    
-    // 6. Jeśli gra się NIE toczy (jesteśmy w lobby), zresetuj zapadkę
-    if (!room.gameStarted) {
-      lastSeenStarterId = null;
-    }
-    
-    // =================================================================
-    // KONIEC LOGIKI ZAPADKI
-    // =================================================================
 
     if (room.resetMessage) {
       showMessage(room.resetMessage); 
@@ -1279,7 +1205,6 @@ function listenToRoom(roomCode) {
 }
 
 startGameBtn.addEventListener('click', () => {
-  if (isAnimating) return; // Blokada na czas animacji
   console.log('Kliknięto Start gry');
   if (!isHost) {
     console.log('Tylko host może rozpocząć grę');
@@ -1305,6 +1230,7 @@ startGameBtn.addEventListener('click', () => {
       return;
     }
 
+    // ZMODYFIKOWANE: Losowanie obiektu słowa (dla podpowiedzi)
     const wordObject = words[Math.floor(Math.random() * words.length)];
     const word = wordObject.word;
     const category = wordObject.category;
@@ -1328,6 +1254,7 @@ startGameBtn.addEventListener('click', () => {
     selectionPool = selectionPool.concat(nonImpostorIds);
     let starterId = selectionPool[Math.floor(Math.random() * selectionPool.length)];
 
+    // NOWA LOGIKA PODPOWIEDZI
     let hint = null;
     const hintChanceValue = hintChanceNumeric[room.hintChance || 0];
     const impostorStarted = impostorIds.includes(starterId);
@@ -1345,11 +1272,12 @@ startGameBtn.addEventListener('click', () => {
     updates.gameStarted = true;
     updates.votingActive = false; 
     updates.currentWord = word;
-    updates.currentCategory = category;
-    updates.impostorHint = hint; 
-    updates.starterId = starterId; // To jest klucz do odpalenia animacji
-    updates.lastRoundSummary = null; 
-    updates.roundEndMessage = null; 
+    updates.currentCategory = category; // NOWE
+    updates.impostorHint = hint; // NOWE
+    updates.starterId = starterId;
+    updates.lastRoundSummary = null; // NOWE (czyści stare podsumowanie)
+    updates.roundEndMessage = null; // NOWE (czyści stare)
+    updates.currentRound = (room.currentRound || 0) + 1; // Aktualizuj licznik rund
     
     roomRef.update(updates).then(() => {
       console.log('Gra rozpoczęta:', { word, impostorIds, starterId, hint });
@@ -1364,7 +1292,6 @@ startGameBtn.addEventListener('click', () => {
 });
 
 startVoteBtn.addEventListener('click', () => {
-  if (isAnimating) return; // Blokada na czas animacji
   console.log('Kliknięto Rozpocznij głosowanie');
   if (!isHost) {
     console.log('Tylko host może rozpocząć głosowanie');
@@ -1376,7 +1303,6 @@ startVoteBtn.addEventListener('click', () => {
 });
 
 confirmVoteBtn.addEventListener('click', () => {
-  if (isAnimating) return; // Blokada na czas animacji
   if (!selectedPlayerId) {
     showMessage('❌ Najpierw wybierz gracza, na którego chcesz zagłosować!', 2500);
     return;
@@ -1386,7 +1312,6 @@ confirmVoteBtn.addEventListener('click', () => {
 
 // Przycisk "Zakończ rundę" (DEBUG)
 endRoundBtn.addEventListener('click', () => {
-  if (isAnimating) return; // Blokada na czas animacji
   console.log('Kliknięto Zakończ rundę (PRZYCISK PANIKI)');
   if (!isHost) {
     console.log('Tylko host może zakończyć rundę');
@@ -1411,8 +1336,8 @@ endRoundBtn.addEventListener('click', () => {
       impostorHint: null, 
       starterId: null,
       impostorsKnow: null,
-      lastRoundSummary: summary, 
-      roundEndMessage: summary,
+      lastRoundSummary: summary, // NOWE
+      resetMessage: summary, // Stare
     };
     Object.keys(players).forEach(id => {
       updates[`players/${id}/role`] = null;
@@ -1421,6 +1346,7 @@ endRoundBtn.addEventListener('click', () => {
 
     roomRef.update(updates).then(() => {
       console.log('Runda zakończona:', { word: currentWord, impostorIds });
+      hasShownStartMessage = false;
     }).catch(error => {
       console.error('Błąd kończenia rundy:', error);
       showMessage('❌ Błąd kończenia rundy!');
@@ -1431,7 +1357,7 @@ endRoundBtn.addEventListener('click', () => {
   });
 });
 
-// *** FUNKCJE WŁASNYCH KATEGORII ***
+// *** DODANO FUNKCJE WŁASNYCH KATEGORII ***
 
 function showCustomCategoryModal(editFileId = null) {
   console.log('Otwieranie modala własnej kategorii...');
