@@ -72,6 +72,15 @@ const voteResultDisplay = document.getElementById('voteResultDisplay');
 const lastRoundSummaryTitle = document.getElementById('lastRoundSummaryTitle');
 const lastRoundSummary = document.getElementById('lastRoundSummary'); 
 
+// Elementy Własnych Kategorii
+const createCustomCategoryBtn = document.getElementById('createCustomCategoryBtn');
+const closeCustomCategoryBtn = document.getElementById('closeCustomCategoryBtn');
+const customCategoryNameInput = document.getElementById('customCategoryNameInput');
+const customWordInput = document.getElementById('customWordInput');
+const addCustomWordBtn = document.getElementById('addCustomWordBtn');
+const customWordsList = document.getElementById('customWordsList');
+const saveCustomCategoryBtn = document.getElementById('saveCustomCategoryBtn');
+
 
 // Zmienne stanu gry
 let currentRoomCode = null;
@@ -82,7 +91,7 @@ let words = [];
 let impostorCount = 1;
 let selectedCategories = [];
 let hasShownStartMessage = false;
-let hasShownEndMessage = false; // *** NOWA FLAGA ***
+let hasShownEndMessage = false; 
 let selectedEmoji = null;
 let selectedPlayerId = null; 
 let isAnimating = false;
@@ -539,11 +548,6 @@ function showMessage(text, duration = 3500) {
 
 // Ta funkcja nie jest już używana do pokazywania ról
 function showRoleMessage(text, duration = 5000) {
-  // roleMessageBox.innerHTML = text.replace(/\n/g, '<br>');
-  // showModal(roleMessageBox); 
-  // setTimeout(() => {
-  //   hideModal(roleMessageBox); 
-  // }, duration);
   console.log("showRoleMessage (nieużywane):", text);
 }
 
@@ -1236,7 +1240,6 @@ function listenToRoom(roomCode) {
     const hint = room.impostorHint;
     
     if (!votingActive) {
-      // *** POPRAWKA: Zintegrowana podpowiedź ***
       wordDisplay.innerHTML = room.gameStarted && room.currentWord && iAmInRoom
         ? (iAmImpostor
           ? `Twoje słowo: <span class="word-impostor">OSZUST! ${hint ? `<span class="impostor-hint-span">(Podpowiedź: ${hint})</span>` : ''}</span>`
@@ -1291,11 +1294,9 @@ function listenToRoom(roomCode) {
       hasShownStartMessage = false; 
     }
 
-    // *** POPRAWKA: LOGIKA URUCHAMIANIA ANIMACJI KOŃCA RUNDY ***
     if (room.roundEndMessage && !room.gameStarted && !hasShownEndMessage) {
       hasShownEndMessage = true; 
       runRoundEndSequence(room.roundEndMessage);
-      // *** POPRAWKA: Logika usuwania przeniesiona do 'runRoundEndSequence' ***
     }
 
     if (room.resetMessage) {
