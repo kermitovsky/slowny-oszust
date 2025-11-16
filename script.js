@@ -31,10 +31,10 @@ const impostorTeamBox = document.getElementById('impostorTeamBox');
 const customCategoryBox = document.getElementById('customCategoryBox'); 
 const rulesBox = document.getElementById('rulesBox');
 
-// MODYFIKACJA 1: Elementy audio
-const audioStart = document.getElementById('audio-start');
-const audioVote = document.getElementById('audio-vote');
-const audioEnd = document.getElementById('audio-end');
+// MODYFIKACJA 1: Usunięcie audio
+// const audioStart = document.getElementById('audio-start');
+// const audioVote = document.getElementById('audio-vote');
+// const audioEnd = document.getElementById('audio-end');
 
 const closeRulesBtn = document.getElementById('closeRules');
 const closeRulesTopBtn = document.getElementById('closeRulesTop');
@@ -552,9 +552,13 @@ function showMessage(text, duration = 3500) {
   } else {
     messageBox.classList.remove('copy-message');
   }
+  
+  // Ustaw timer, aby schować *ten konkretny* modal
   setTimeout(() => {
-    hideModal(messageBox); 
-    messageBox.classList.remove('copy-message');
+    if (currentModal === messageBox) {
+      hideModal(messageBox); 
+      messageBox.classList.remove('copy-message');
+    }
   }, duration);
 }
 
@@ -990,8 +994,8 @@ function updatePlayersListForVoting(players) {
 
 function voteForPlayer(targetId) {
   console.log(`Głosuję na: ${targetId}`);
-  // MODYFIKACJA 1: Odtwórz dźwięk głosu
-  audioVote.play();
+  // MODYFIKACJA 1: Usunięcie audio
+  // audioVote.play();
   db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).update({
     votedFor: targetId
   });
@@ -1191,7 +1195,7 @@ function listenToRoom(roomCode) {
       lastSeenStarterId = newStarterId; // Zamknij zapadkę
       lastSeenSummary = null; // Otwórz zapadkę końca rundy
       
-      audioStart.play();
+      // audioStart.play(); // USUNIĘTE
       
       const starterName = players[newStarterId]?.name || '...';
       const myWord = room.currentWord;
@@ -1214,7 +1218,7 @@ function listenToRoom(roomCode) {
       isAnimating = true; // Zablokuj pokazywanie słowa
       
       // 1. Pokaż rolę
-      showRoleMessage(roleMsg); // Pokaż
+      showRoleMessage(roleMsg); 
       
       // 2. Ustaw timer na schowanie roli
       setTimeout(() => {
@@ -1223,15 +1227,11 @@ function listenToRoom(roomCode) {
 
       // 3. Ustaw timer na pokazanie drugiego komunikatu (po schowaniu pierwszego)
       setTimeout(() => {
-        showRoleMessage(starterMsg); // Pokaż
+        // Użyj showMessage (białe okno) dla drugiego komunikatu, aby uniknąć konfliktu
+        showMessage(starterMsg, 4000); 
       }, 5300); // 5000ms + 300ms na fadeOut
 
-      // 4. Ustaw timer na schowanie drugiego komunikatu
-      setTimeout(() => {
-        hideModal(roleMessageBox); // Schowaj
-      }, 9300); // 5300ms + 4000ms
-
-      // 5. Odblokuj pokazywanie słowa po CAŁEJ sekwencji
+      // 4. Odblokuj pokazywanie słowa po CAŁEJ sekwencji
       setTimeout(() => {
         isAnimating = false;
         if (room.gameStarted && room.currentWord && iAmInRoom) {
@@ -1239,7 +1239,7 @@ function listenToRoom(roomCode) {
             ? `Twoje słowo: <span class="word-impostor">OSZUST! ${myHint ? `<span class="impostor-hint-span">(Podpowiedź: ${myHint})</span>` : ''}</span>`
             : `Twoje słowo: <span class="word-normal">${room.currentWord}</span>`;
         }
-      }, 9600); // 9300ms + 300ms na fadeOut
+      }, 9600); // 5300 + 4000 + 300 (zniknięcie drugiego okna)
     }
     
     // 2. ZAPADKA KOŃCA RUNDY
@@ -1250,7 +1250,7 @@ function listenToRoom(roomCode) {
       lastSeenSummary = newSummary; // Zamknij zapadkę
       lastSeenStarterId = null; // Otwórz zapadkę startu
       
-      audioEnd.play();
+      // audioEnd.play(); // USUNIĘTE
       
       // Pokaż podsumowanie w dużym oknie (na 5 sekund, samo zniknie)
       showRoleMessage(newSummary, 5000);
@@ -1656,3 +1656,6 @@ customWordInput.addEventListener('keypress', (e) => {
     addTempWord();
   }
 });
+
+// MODYFIKACJA 3: Alert testowy
+alert("Słowny Impostor v30 załadowany!");
