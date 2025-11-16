@@ -165,9 +165,15 @@ function showScreen(screenToShow) {
 }
 
 function showModal(modalToShow) {
-  if (isAnimating && modalToShow !== roleMessageBox && modalToShow !== messageBox) return;
+  // MODYFIKACJA: Pozwól, aby showRoleMessage przerwało showMessage (i na odwrót)
+  if (isAnimating && (modalToShow === roleMessageBox || modalToShow === messageBox)) {
+      // Nie rób return, pozwól na przerwanie
+  } else if (isAnimating) {
+      return; // Zablokuj inne modale (np. zasady) podczas animacji
+  }
+  
   if (currentModal && currentModal !== modalToShow) {
-    hideModal(currentModal);
+    hideModal(currentModal, true); // Użyj "force" dla płynnego przejścia
   }
   
   modalToShow.style.display = 'block'; 
@@ -205,7 +211,7 @@ function hideModal(modalToHide, force = false) {
         themeToggle.classList.remove('hidden');
       }
     }
-  }, 300); 
+  }, 300); // 300ms to czas trwania animacji fadeOut
 }
 
 
@@ -561,36 +567,6 @@ function showRoleMessage(text, duration = 5000) {
   }, duration);
 }
 
-// MODYFIKACJA: Funkcja do pokazywania sekwencji startowej (z przenikaniem i pauzą)
-function showRoleMessageSequence(roleMsg, starterMsg, totalDuration = 11000, firstMsgDuration = 5000, fadeDuration = 1000) {
-  isAnimating = true; // Zablokuj inne akcje na czas pokazywania roli
-  
-  // 1. Pokaż rolę
-  roleMessageBox.innerHTML = roleMsg;
-  roleMessageBox.classList.remove('is-fading-out'); 
-  showModal(roleMessageBox);
-  
-  // 2. Po `firstMsgDuration` (5s) zacznij przenikanie (zanikanie)
-  setTimeout(() => {
-    if (currentModal !== roleMessageBox) return; // Przerwij, jeśli okno zostało zamknięte
-    roleMessageBox.classList.add('is-fading-out'); // Zacznij znikanie (trwa 1s)
-    
-    // 3. Po czasie na zniknięcie (`fadeDuration`), podmień tekst i zacznij pojawianie
-    setTimeout(() => {
-      if (currentModal !== roleMessageBox) return; // Przerwij, jeśli okno zostało zamknięte
-      roleMessageBox.innerHTML = starterMsg;
-      roleMessageBox.classList.remove('is-fading-out'); // Zacznij pojawianie (trwa 1s)
-    }, fadeDuration); // Czas musi być zgodny z CSS transition (1s)
-
-  }, firstMsgDuration); // Czas pokazywania pierwszej wiadomości
-
-  // 4. Po całkowitym czasie schowaj modal i odblokuj
-  setTimeout(() => {
-    hideModal(roleMessageBox);
-    isAnimating = false; 
-  }, totalDuration);
-}
-
 function resetToLobby() {
   showScreen(loginScreen); 
   
@@ -605,6 +581,7 @@ function resetToLobby() {
   lastRoundSummary.innerHTML = ''; 
   lastRoundSummary.style.display = 'none'; 
   lastRoundSummaryTitle.style.display = 'none';
+  lobbyCategories.style.display = 'none'; // MODYFIKACJA 3
   
   impostorCount = 1;
   impostorCountDisplaySelector.textContent = impostorCount;
@@ -1204,7 +1181,7 @@ function listenToRoom(roomCode) {
     endRoundBtn.style.display = 'none';
 
     // =================================================================
-    // LOGIKA "ZAPADKI" (LATCH)
+    // MODYFIKACJA: LOGIKA "ZAPADKI" DLA PROPOZYCJI 1
     // =================================================================
 
     const newStarterId = room.starterId;
@@ -1237,16 +1214,26 @@ function listenToRoom(roomCode) {
       const starterMsg = `Zaczyna mówić: <strong>${starterName}</strong>`;
       
       wordDisplay.innerHTML = ''; 
+      isAnimating = true; // Zablokuj pokazywanie słowa
       
-      showRoleMessageSequence(roleMsg, starterMsg, 10000, 5000, 1000); 
-
+      // MODYFIKACJA: Użyj `showRoleMessage`, aby uzyskać animację slideInUp
+      showRoleMessage(roleMsg, 5000); // Pokaż rolę
+      
+      // Po 5 sekundach wywołaj `showRoleMessage` ponownie.
+      // `showModal` automatycznie zamknie stare okno (z animacją fadeOut) i otworzy nowe (z animacją slideInUp)
       setTimeout(() => {
+        showRoleMessage(starterMsg, 4000); // Pokaż, kto zaczyna
+      }, 5000); // Czas pokazywania pierwszej wiadomości
+
+      // Odblokuj pokazywanie słowa po zakończeniu obu animacji
+      setTimeout(() => {
+        isAnimating = false;
         if (room.gameStarted && room.currentWord && iAmInRoom) {
           wordDisplay.innerHTML = amIImpostor
             ? `Twoje słowo: <span class="word-impostor">OSZUST! ${myHint ? `<span class="impostor-hint-span">(Podpowiedź: ${myHint})</span>` : ''}</span>`
             : `Twoje słowo: <span class="word-normal">${room.currentWord}</span>`;
         }
-      }, 10000); // Musi być równe totalDuration
+      }, 9000); // 5s + 4s = 9s
     }
     
     // 2. ZAPADKA KOŃCA RUNDY
