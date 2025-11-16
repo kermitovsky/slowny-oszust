@@ -574,13 +574,14 @@ body.voting-active #playersList li.host.has-voted .avatar::after {
 #hintChanceSlider {
   -webkit-appearance: none;
   appearance: none;
-  width: 100%;
   height: 8px; 
   background: var(--c-glass-bg-darker);
   border-radius: 5px;
   outline: none;
   padding: 0;
-  margin: 0;
+  /* MODYFIKACJA 3: Obliczanie szerokości i marginesu */
+  width: calc(100% - 28px);
+  margin: 0 14px;
   background-image: 
     radial-gradient(circle at center, var(--c-primary-light) 4px, transparent 4px),
     radial-gradient(circle at center, var(--c-primary-light) 4px, transparent 4px),
@@ -589,27 +590,29 @@ body.voting-active #playersList li.host.has-voted .avatar::after {
     radial-gradient(circle at center, var(--c-primary-light) 4px, transparent 4px);
   background-size: 4px 4px;
   background-repeat: no-repeat;
+  /* MODYFIKACJA 3: Dopasowanie kropek do nowej szerokości */
   background-position: 0% 50%, 25% 50%, 50% 50%, 75% 50%, 100% 50%;
 }
 
 #hintChanceSlider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  /* MODYFIKACJA 3: Zwiększono rozmiar */
-  width: 32px; 
-  height: 32px; 
+  /* MODYFIKACJA 3: Przywrócenie 28px */
+  width: 28px; 
+  height: 28px; 
   border-radius: 50%;
   background: var(--c-primary);
   border: 4px solid var(--c-text-light);
   cursor: pointer;
-  margin-top: -12px; /* MODYFIKACJA 3: Dopasowanie centrowania */
+  /* MODYFIKACJA 3: Przywrócenie centrowania dla 28px */
+  margin-top: -10px; 
   box-shadow: 0 2px 5px var(--c-shadow-heavy);
 }
 
 #hintChanceSlider::-moz-range-thumb {
-  /* MODYFIKACJA 3: Zwiększono rozmiar */
-  width: 32px; 
-  height: 32px; 
+  /* MODYFIKACJA 3: Przywrócenie 28px */
+  width: 28px; 
+  height: 28px; 
   border-radius: 50%;
   background: var(--c-primary);
   border: 4px solid var(--c-text-light);
@@ -972,10 +975,8 @@ body.dark-mode #messageBox:not(.copy-message) {
   font-size: 3.5rem;
   font-weight: bold;
   font-family: 'Segoe UI Black', var(--font-body);
-  /* MODYFIKACJA: Dłuższe, płynne przejście */
   transition: opacity 1s ease-in-out;
 }
-/* MODYFIKACJA: Klasa do przenikania */
 #roleMessageBox.is-fading-out {
   opacity: 0;
 }
