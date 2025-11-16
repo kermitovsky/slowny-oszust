@@ -579,7 +579,7 @@ body.voting-active #playersList li.host.has-voted .avatar::after {
   border-radius: 5px;
   outline: none;
   padding: 0;
-  /* MODYFIKACJA 3: Obliczanie szerokości i marginesu */
+  /* MODYFIKACJA 3: Obliczanie szerokości i marginesu, aby kulka dochodziła do krawędzi */
   width: calc(100% - 28px);
   margin: 0 14px;
   background-image: 
@@ -1264,14 +1264,51 @@ body.dark-mode #messageBox:not(.copy-message) {
 /* 7. MEDIA QUERIES (Responsywność) */
 /* =================================================================== */
 @media (max-width: 600px) {
+  /* === GŁÓWNE ROZMIARY === */
   body {
-    padding: 1rem;
+    padding: 0.5rem; /* Mniej paddingu na body */
+    font-size: 1.6rem; /* Zmniejszenie bazowej czcionki z 2rem */
   }
   .container {
     padding: 0.8rem;
     margin: 0.5rem;
   }
+  input, button {
+    font-size: 1.6rem; /* Zmniejszenie domyślnej czcionki przycisków/inputów */
+    padding: 0.7rem;
+  }
+  h1.fancy-title {
+    font-size: 2.5rem; /* Zmniejszenie głównego tytułu */
+  }
+
+  /* === EKRAN GRY === */
+  #roundCounter, #wordDisplay {
+    font-size: 1.8rem; /* Zmniejszenie tekstu słowa */
+  }
+  #countsContainer {
+    gap: 1rem 1.5rem; /* Mniejsze odstępy */
+  }
+  #playerCountDisplay, #impostorCountDisplay, #hintChanceInfoDisplay {
+    font-size: 1.5rem; /* Mniejszy tekst licznika */
+  }
+  #playersList li {
+    padding: 0.6rem 4rem 0.6rem 3.5rem; /* Mniejszy padding listy */
+    font-size: 1.6rem;
+  }
   
+  /* === EKRAN LOGOWANIA (EMOTKI) === */
+  .emoji-btn {
+    width: 50px;
+    height: 50px;
+    min-width: 50px;
+    font-size: 2.2rem;
+  }
+  #emojiSelection {
+    gap: 10px;
+    max-width: 320px; /* Dopasuj do mniejszego ekranu */
+  }
+  
+  /* === PRZYCISKI PŁYWAJĄCE === */
   #rulesBtn, #themeToggle {
     width: 3rem;
     height: 3rem;
@@ -1285,8 +1322,9 @@ body.dark-mode #messageBox:not(.copy-message) {
     right: 5rem;
   }
 
+  /* === MODALE === */
   .modal-box {
-    padding: 1.5rem;
+    padding: 1.5rem 1rem; /* Mniej paddingu po bokach */
     max-height: 85vh;
     font-size: 1.4rem;
   }
@@ -1299,14 +1337,22 @@ body.dark-mode #messageBox:not(.copy-message) {
   #rulesBox p, #rulesBox li {
     font-size: 1.4rem;
   }
-
-  #impostorSelectionBox p, #categorySelectionBox p {
+  
+  /* POPRAWKA: Tytuły modali - Zezwolenie na zawijanie */
+  #impostorSelectionBox p, 
+  #categorySelectionBox p,
+  #impostorHintBox p, 
+  #customCategoryBox h2, 
+  #impostorTeamBox p {
     font-size: 2.2rem;
+    white-space: normal; /* POZWÓL NA ZAWIJANIE TEKSTU */
   }
   
-  #impostorHintBox p, #customCategoryBox h2, #impostorTeamBox p {
-    font-size: 2.2rem;
+  /* POPRAWKA: Komunikat roli */
+  #roleMessageBox {
+    font-size: 2.4rem; /* Zmniejszenie z 3.5rem */
   }
+  
   .slider-container {
     padding-bottom: 25px;
     margin-bottom: 2.5rem;
