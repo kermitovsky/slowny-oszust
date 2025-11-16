@@ -168,10 +168,9 @@ function showModal(modalToShow) {
   if (isAnimating && modalToShow !== roleMessageBox && modalToShow !== messageBox) return;
 
   if (currentModal && currentModal !== modalToShow) {
-    // Natychmiast ukryj stary modal, jeśli zastępujemy jeden komunikat drugim
     if ((modalToShow === roleMessageBox && currentModal === messageBox) || 
         (modalToShow === messageBox && currentModal === roleMessageBox) ||
-        (modalToShow === roleMessageBox && currentModal === roleMessageBox)) { // Kluczowy dodatek
+        (modalToShow === roleMessageBox && currentModal === roleMessageBox)) { 
       hideModal(currentModal, true); // Force hide
     } else {
       hideModal(currentModal); 
@@ -560,18 +559,10 @@ function showMessage(text, duration = 3500) {
 }
 
 // MODYFIKACJA: showRoleMessage teraz TYLKO pokazuje
-function showRoleMessage(text, duration = 5000) {
+function showRoleMessage(text) {
   roleMessageBox.innerHTML = text; 
   roleMessageBox.classList.remove('is-fading-out'); 
-  showModal(roleMessageBox);
-  
-  // Ustaw timer, aby schować *ten konkretny* modal
-  setTimeout(() => {
-    // Schowaj tylko, jeśli to nadal ten sam modal (nie został przerwany przez inny)
-    if (currentModal === roleMessageBox) {
-      hideModal(roleMessageBox);
-    }
-  }, duration);
+  showModal(roleMessageBox); // Po prostu pokazuje
 }
 
 function resetToLobby() {
@@ -1222,26 +1213,33 @@ function listenToRoom(roomCode) {
       wordDisplay.innerHTML = ''; 
       isAnimating = true; // Zablokuj pokazywanie słowa
       
-      // Pokaż rolę (na 5 sekund, zniknie z fadeOut)
-      showRoleMessage(roleMsg, 5000); 
+      // 1. Pokaż rolę
+      showRoleMessage(roleMsg); // Pokaż
       
-      // Poczekaj aż pierwsza animacja się skończy (5s + 300ms na fadeOut)
+      // 2. Ustaw timer na schowanie roli
       setTimeout(() => {
-        // Pokaż drugi komunikat (na 4 sekundy)
-        showRoleMessage(starterMsg, 4000); 
-      }, 5300); 
+        hideModal(roleMessageBox); // Schowaj z animacją fadeOut (300ms)
+      }, 5000); // Czas pokazywania pierwszej wiadomości
 
-      // Odblokuj pokazywanie słowa po CAŁEJ sekwencji
-      // (5300ms czekania + 4000ms pokazywania + 300ms na fadeOut = 9600ms)
+      // 3. Ustaw timer na pokazanie drugiego komunikatu (po schowaniu pierwszego)
+      setTimeout(() => {
+        showRoleMessage(starterMsg); // Pokaż
+      }, 5300); // 5000ms + 300ms na fadeOut
+
+      // 4. Ustaw timer na schowanie drugiego komunikatu
+      setTimeout(() => {
+        hideModal(roleMessageBox); // Schowaj
+      }, 9300); // 5300ms + 4000ms
+
+      // 5. Odblokuj pokazywanie słowa po CAŁEJ sekwencji
       setTimeout(() => {
         isAnimating = false;
-        // Ręcznie odśwież wordDisplay, na wypadek gdyby listener nie złapał
         if (room.gameStarted && room.currentWord && iAmInRoom) {
           wordDisplay.innerHTML = amIImpostor
             ? `Twoje słowo: <span class="word-impostor">OSZUST! ${myHint ? `<span class="impostor-hint-span">(Podpowiedź: ${myHint})</span>` : ''}</span>`
             : `Twoje słowo: <span class="word-normal">${room.currentWord}</span>`;
         }
-      }, 9600); 
+      }, 9600); // 9300ms + 300ms na fadeOut
     }
     
     // 2. ZAPADKA KOŃCA RUNDY
@@ -1254,7 +1252,7 @@ function listenToRoom(roomCode) {
       
       audioEnd.play();
       
-      // MODYFIKACJA 4: Pokaż podsumowanie w dużym oknie
+      // Pokaż podsumowanie w dużym oknie (na 5 sekund, samo zniknie)
       showRoleMessage(newSummary, 5000);
     }
     
