@@ -31,13 +31,7 @@ const impostorTeamBox = document.getElementById('impostorTeamBox');
 const customCategoryBox = document.getElementById('customCategoryBox'); 
 const rulesBox = document.getElementById('rulesBox');
 
-// MODYFIKACJA: Przywrócenie elementów animacji
-const fullscreenOverlay = document.getElementById('fullscreen-overlay');
-const countdownDisplay = document.getElementById('countdown-display');
-const fullscreenMessage = document.getElementById('fullscreen-message');
-const fsMessagePrimary = document.getElementById('fullscreen-message-primary');
-const fsMessageSecondary = document.getElementById('fullscreen-message-secondary');
-
+// Elementy animacji (USUNIĘTE)
 
 const closeRulesBtn = document.getElementById('closeRules');
 const closeRulesTopBtn = document.getElementById('closeRulesTop');
@@ -92,7 +86,7 @@ let impostorCount = 1;
 let selectedCategories = [];
 let selectedEmoji = null;
 let selectedPlayerId = null; 
-let isAnimating = false; 
+let isAnimating = false; // Prosta blokada na czas pokazywania modali
 // MODYFIKACJA: Niezawodne "zapadki"
 let lastSeenStarterId = null; 
 let lastSeenSummary = null; 
@@ -168,6 +162,7 @@ function showScreen(screenToShow) {
 }
 
 function showModal(modalToShow) {
+  if (isAnimating && modalToShow !== roleMessageBox) return; // Pozwól `roleMessageBox` przerwać `messageBox`
   if (currentModal && currentModal !== modalToShow) {
     hideModal(currentModal);
   }
@@ -545,12 +540,14 @@ function showMessage(text, duration = 3500) {
   }, duration);
 }
 
-// Ta funkcja nie jest już używana, ale ją zostawiam
+// MODYFIKACJA: Prosta funkcja do pokazywania/chowania `roleMessageBox`
 function showRoleMessage(text, duration = 5000) {
-  roleMessageBox.innerHTML = text; 
+  isAnimating = true; // Zablokuj inne akcje na czas pokazywania roli
+  roleMessageBox.innerHTML = text; // Użyj innerHTML, aby obsłużyć <span>
   showModal(roleMessageBox);
   setTimeout(() => {
     hideModal(roleMessageBox);
+    isAnimating = false; // Odblokuj po zniknięciu
   }, duration);
 }
 
@@ -770,7 +767,7 @@ function createRoom(numImpostors, chanceIndex, onStart, knows) {
     currentCategory: null, 
     impostorHint: null, 
     lastRoundSummary: null,
-    roundEndMessage: null, // To pole nie jest już używane, ale może zostać
+    roundEndMessage: null, 
     resetMessage: null,
     starterId: null,
     numImpostors: numImpostors,
@@ -778,7 +775,8 @@ function createRoom(numImpostors, chanceIndex, onStart, knows) {
     customCategories: customCategoriesToSave || [],
     hintChance: chanceIndex,
     hintOnStart: onStart,
-    impostorsKnow: knows
+    impostorsKnow: knows,
+    currentRound: 0 // Inicjalizacja licznika rund
   }).then(() => {
     console.log('Pokój utworzony:', currentRoomCode);
     showScreen(gameScreen); 
@@ -1054,118 +1052,11 @@ function tallyVotes(room) {
       summaryMessage = `Impostor wygrał rundę!<br>(Wygłosowano <strong>${ejectedPlayer.name}</strong>)<br>Słowo: <strong>${room.currentWord}</strong>`;
     }
     
-    updates.lastRoundSummary = summaryMessage; 
+    updates.lastRoundSummary = summaryMessage; // To pokaże się w lobby
+    // `lastRoundSummary` odpali zapadkę w `listenToRoom`
   }
 
   db.ref(`rooms/${currentRoomCode}`).update(updates);
-}
-
-
-// MODYFIKACJA: Funkcja animacji startu (Propozycja 2)
-function runGameStartSequence(roleMessagePrimary, roleMessageSecondary, isImpostor) {
-  if (isAnimating) return;
-  isAnimating = true; 
-  
-  console.log("Pokazuję sekwencję startu gry");
-  
-  fullscreenOverlay.classList.remove('is-hiding');
-  fullscreenMessage.style.display = 'none';
-  fullscreenMessage.classList.remove('show-message');
-  fullscreenOverlay.classList.add('is-visible');
-  
-  countdownDisplay.textContent = '3';
-  countdownDisplay.style.display = 'block';
-  countdownDisplay.style.animation = 'none';
-  countdownDisplay.offsetHeight; 
-  countdownDisplay.style.animation = 'countdown-pulse 1s ease-in-out';
-  
-  setTimeout(() => {
-    countdownDisplay.textContent = '2';
-    countdownDisplay.style.animation = 'none';
-    countdownDisplay.offsetHeight;
-    countdownDisplay.style.animation = 'countdown-pulse 1s ease-in-out';
-  }, 1000);
-  
-  setTimeout(() => {
-    countdownDisplay.textContent = '1';
-    countdownDisplay.style.animation = 'none';
-    countdownDisplay.offsetHeight;
-    countdownDisplay.style.animation = 'countdown-pulse 1s ease-in-out';
-  }, 2000);
-  
-  // Po odliczaniu, pokaż rolę + kto zaczyna
-  setTimeout(() => {
-    countdownDisplay.style.display = 'none';
-    
-    fsMessagePrimary.innerHTML = roleMessagePrimary; 
-    fsMessageSecondary.innerHTML = roleMessageSecondary;
-    
-    fullscreenMessage.className = ''; 
-    if (isImpostor) {
-      fullscreenMessage.classList.add('impostor-role');
-    } else {
-      fullscreenMessage.classList.add('crewmate-role');
-    }
-    
-    fullscreenMessage.style.animation = 'none';
-    fullscreenMessage.offsetHeight;
-    fullscreenMessage.style.display = 'flex';
-    fullscreenMessage.style.animation = 'slideInUp 0.5s ease forwards';
-
-  }, 3000);
-  
-  // Schowaj wszystko
-  setTimeout(() => {
-    fullscreenOverlay.classList.add('is-hiding'); 
-    isAnimating = false; // Odblokuj
-    setTimeout(() => {
-      fullscreenOverlay.style.display = 'none'; 
-      fullscreenOverlay.classList.remove('is-visible', 'is-hiding');
-      fsMessagePrimary.textContent = '';
-      fsMessageSecondary.textContent = '';
-      fullscreenMessage.style.display = 'none';
-    }, 500); 
-  }, 8000); // 3s odliczania + 5s pokazywania = 8s
-}
-
-// MODYFIKACJA: Funkcja animacji końca (Propozycja 2)
-function runRoundEndSequence(resultMessagePrimary, resultMessageSecondary, impostorWon) {
-  if (isAnimating) return;
-  isAnimating = true; 
-  
-  console.log("Pokazuję sekwencję końca rundy");
-  
-  fsMessagePrimary.innerHTML = resultMessagePrimary; 
-  fsMessageSecondary.innerHTML = resultMessageSecondary;
-  
-  fullscreenMessage.className = ''; 
-  if (impostorWon) {
-    fullscreenMessage.classList.add('impostor-role');
-  } else {
-    fullscreenMessage.classList.add('crewmate-role');
-  }
-  
-  countdownDisplay.style.display = 'none';
-  fullscreenMessage.style.animation = 'none';
-  fullscreenMessage.offsetHeight;
-  fullscreenMessage.style.display = 'flex';
-  fullscreenMessage.style.animation = 'slideInUp 0.5s ease forwards';
-  
-  fullscreenOverlay.classList.remove('is-hiding');
-  fullscreenOverlay.classList.add('is-visible');
-
-  // Schowaj wszystko
-  setTimeout(() => {
-    fullscreenOverlay.classList.add('is-hiding'); 
-    isAnimating = false; // Odblokuj
-    setTimeout(() => {
-      fullscreenOverlay.style.display = 'none'; 
-      fullscreenOverlay.classList.remove('is-visible', 'is-hiding');
-      fsMessagePrimary.innerHTML = '';
-      fsMessageSecondary.textContent = '';
-      fullscreenMessage.style.display = 'none';
-    }, 500); 
-  }, 5000); // Pokaż przez 5 sekund
 }
 
 
@@ -1267,7 +1158,7 @@ function listenToRoom(roomCode) {
     endRoundBtn.style.display = 'none';
 
     // =================================================================
-    // NOWA, PROSTA LOGIKA "ZAPADKI" (LATCH)
+    // MODYFIKACJA: LOGIKA "ZAPADKI" DLA PROPOZYCJI 1
     // =================================================================
 
     const newStarterId = room.starterId;
@@ -1284,20 +1175,42 @@ function listenToRoom(roomCode) {
       const myHint = room.impostorHint;
       const amIImpostor = iAmInRoom.role === 'impostor';
       
-      let primaryMsg, secondaryMsg;
+      let roleMsg;
       if (amIImpostor) {
-        primaryMsg = "Jesteś oszustem!";
-        if (myHint) {
-          primaryMsg += ` <span class="impostor-hint-span">(Podpowiedź: ${myHint})</span>`;
+        roleMsg = 'Jesteś oszustem!';
+        if (myHint) { 
+            roleMsg += ` <span class="impostor-hint-span">(Podpowiedź: ${myHint})</span>`;
         }
       } else {
-        primaryMsg = "Twoje słowo: " + myWord;
+        roleMsg = `Słowo: ${room.currentWord}`;
       }
-      secondaryMsg = "Zaczyna mówić: " + starterName;
       
-      wordDisplay.innerHTML = ''; // Ukryj słowo na czas animacji
+      const starterMsg = `Zaczyna mówić: <strong>${starterName}</strong>`;
+      
+      // Ukryj słowo na czas animacji
+      wordDisplay.innerHTML = ''; 
+      isAnimating = true; // Zablokuj pokazywanie słowa
 
-      runGameStartSequence(primaryMsg, secondaryMsg, amIImpostor);
+      // 1. Pokaż rolę
+      showRoleMessage(roleMsg, 9000); // Pokaż na 9 sekund łącznie
+      
+      // 2. Po 5 sekundach zmień tekst
+      setTimeout(() => {
+          if (currentModal === roleMessageBox) { // Sprawdź, czy okno nie zostało zamknięte
+              roleMessageBox.innerHTML = starterMsg;
+          }
+      }, 5000);
+
+      // 3. Po 9 sekundach odblokuj pokazywanie słowa
+      setTimeout(() => {
+        isAnimating = false;
+        // Ręcznie odśwież `wordDisplay`, bo listener mógł być zablokowany
+        if (room.gameStarted && room.currentWord && iAmInRoom) {
+          wordDisplay.innerHTML = amIImpostor
+            ? `Twoje słowo: <span class="word-impostor">OSZUST! ${myHint ? `<span class="impostor-hint-span">(Podpowiedź: ${myHint})</span>` : ''}</span>`
+            : `Twoje słowo: <span class="word-normal">${room.currentWord}</span>`;
+        }
+      }, 9000);
     }
     
     // 2. ZAPADKA KOŃCA RUNDY
@@ -1308,27 +1221,11 @@ function listenToRoom(roomCode) {
       lastSeenSummary = newSummary; // Zamknij zapadkę
       lastSeenStarterId = null; // Otwórz zapadkę startu
       
-      let primaryMsg, secondaryMsg;
-      let impostorWon = false;
-
-      if (newSummary.includes("REMIS")) {
-        primaryMsg = "REMIS!";
-        secondaryMsg = "Nikt nie odpada.";
-      } else if (newSummary.includes("wykryty")) {
-        primaryMsg = "Impostor wykryty!";
-      } else if (newSummary.includes("wygrał")) {
-        primaryMsg = "Impostor wygrał rundę!";
-        impostorWon = true;
-      }
-
-      // Spróbuj wyciągnąć słowo z podsumowania
-      const wordMatch = newSummary.match(/Słowo: <strong>(.*?)<\/strong>/);
-      secondaryMsg = wordMatch ? "Słowo: " + wordMatch[1] : (newSummary.includes("REMIS") ? "Nikt nie odpada" : "");
-
-      runRoundEndSequence(primaryMsg, secondaryMsg, impostorWon);
+      // Pokaż podsumowanie w 'showMessage' (małe okienko)
+      showMessage(newSummary, 5000);
     }
     
-    // 3. Reset zapadki, gdy gra się nie toczy (na wszelki wypadek)
+    // 3. Reset zapadki (na wszelki wypadek, gdyby starterId był null)
     if (!room.gameStarted) {
       lastSeenStarterId = null;
     }
@@ -1337,8 +1234,8 @@ function listenToRoom(roomCode) {
     // KONIEC LOGIKI ZAPADKI
     // =================================================================
 
-    if (room.resetMessage) {
-      // resetMessage jest teraz używany tylko do komunikatów "REMIS"
+    if (room.resetMessage && room.resetMessage !== lastSeenSummary) {
+      // Użyj `resetMessage` tylko dla komunikatów "REMIS", które nie są `lastRoundSummary`
       showMessage(room.resetMessage, 4000); 
       if (isHost) {
         db.ref(`rooms/${currentRoomCode}/resetMessage`).remove();
