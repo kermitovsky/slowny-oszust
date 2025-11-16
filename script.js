@@ -31,7 +31,7 @@ const impostorTeamBox = document.getElementById('impostorTeamBox');
 const customCategoryBox = document.getElementById('customCategoryBox');
 const rulesBox = document.getElementById('rulesBox');
 
-// Elementy animacji
+// Elementy animacji (MODYFIKACJA)
 const fullscreenOverlay = document.getElementById('fullscreen-overlay');
 const countdownDisplay = document.getElementById('countdown-display');
 const fullscreenMessage = document.getElementById('fullscreen-message');
@@ -81,11 +81,11 @@ let isHost = false;
 let words = []; 
 let impostorCount = 1;
 let selectedCategories = [];
-let hasShownStartMessage = false;
-let hasShownEndMessage = false; 
+let hasShownStartMessage = false; // MODYFIKACJA: Flaga animacji startu
+let hasShownEndMessage = false; // MODYFIKACJA: Flaga animacji końca
 let selectedEmoji = null;
 let selectedPlayerId = null; 
-let isAnimating = false;
+let isAnimating = false; // MODYFIKACJA: Flaga globalnej animacji
 
 let hintChance = 0; 
 let hintOnStart = false; 
@@ -562,6 +562,7 @@ function resetToLobby() {
   customCategories = []; 
   document.querySelectorAll('.custom-category-btn').forEach(btn => btn.remove());
   
+  // MODYFIKACJA: Poprawka resetowania flag
   hasShownStartMessage = false;
   hasShownEndMessage = false;
   selectedEmoji = null;
@@ -1046,6 +1047,7 @@ function tallyVotes(room) {
 }
 
 
+// MODYFIKACJA: Funkcja do animacji końca rundy
 function runRoundEndSequence(summaryMessage) {
   if (isAnimating) return;
   isAnimating = true;
@@ -1089,6 +1091,7 @@ function runRoundEndSequence(summaryMessage) {
 }
 
 
+// MODYFIKACJA: Funkcja do animacji startu gry
 function runGameStartSequence(roleMessage, starterName) {
   if (isAnimating) return;
   isAnimating = true;
@@ -1238,6 +1241,7 @@ function listenToRoom(roomCode) {
     const iAmImpostor = iAmInRoom && iAmInRoom.role === 'impostor';
     const hint = room.impostorHint;
     
+    // MODYFIKACJA: Zintegrowana podpowiedź
     if (!votingActive) {
       wordDisplay.innerHTML = room.gameStarted && room.currentWord && iAmInRoom
         ? (iAmImpostor
@@ -1258,8 +1262,9 @@ function listenToRoom(roomCode) {
     startGameBtn.style.display = isHost && !room.gameStarted && !votingActive ? 'block' : 'none';
     startVoteBtn.style.display = isHost && room.gameStarted && !votingActive ? 'block' : 'none';
     confirmVoteBtn.style.display = votingActive && !myVote ? 'block' : 'none';
-    endRoundBtn.style.display = 'none';
+    endRoundBtn.style.display = 'none'; // Przycisk debugowy
 
+    // MODYFIKACJA: Logika animacji startu i reset flagi końca
     if (room.gameStarted && !votingActive && room.currentWord && iAmInRoom) {
       
       if (!hasShownStartMessage) {
@@ -1295,6 +1300,7 @@ function listenToRoom(roomCode) {
       hasShownStartMessage = false; 
     }
 
+    // MODYFIKACJA: Logika animacji końca rundy
     if (room.roundEndMessage && !room.gameStarted && !hasShownEndMessage) {
       hasShownEndMessage = true; 
       runRoundEndSequence(room.roundEndMessage);
@@ -1323,7 +1329,7 @@ function listenToRoom(roomCode) {
 
 startGameBtn.addEventListener('click', () => {
   console.log('Kliknięto Start gry');
-  if (isAnimating) return;
+  if (isAnimating) return; // MODYFIKACJA: Blokuj, jeśli animacja trwa
   if (!isHost) {
     console.log('Tylko host może rozpocząć grę');
     return;
@@ -1407,7 +1413,7 @@ startGameBtn.addEventListener('click', () => {
 });
 
 startVoteBtn.addEventListener('click', () => {
-  if (isAnimating) return;
+  if (isAnimating) return; // MODYFIKACJA: Blokuj, jeśli animacja trwa
   console.log('Kliknięto Rozpocznij głosowanie');
   if (!isHost) {
     console.log('Tylko host może rozpocząć głosowanie');
@@ -1419,7 +1425,7 @@ startVoteBtn.addEventListener('click', () => {
 });
 
 confirmVoteBtn.addEventListener('click', () => {
-  if (isAnimating) return;
+  if (isAnimating) return; // MODYFIKACJA: Blokuj, jeśli animacja trwa
   if (!selectedPlayerId) {
     showMessage('❌ Najpierw wybierz gracza, na którego chcesz zagłosować!', 2500);
     return;
@@ -1429,7 +1435,7 @@ confirmVoteBtn.addEventListener('click', () => {
 
 // Przycisk "Zakończ rundę" (DEBUG)
 endRoundBtn.addEventListener('click', () => {
-  if (isAnimating) return;
+  if (isAnimating) return; // MODYFIKACJA: Blokuj, jeśli animacja trwa
   console.log('Kliknięto Zakończ rundę (PRZYCISK PANIKI)');
   if (!isHost) {
     console.log('Tylko host może zakończyć rundę');
