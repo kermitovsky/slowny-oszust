@@ -1,5 +1,3 @@
-alert("ŁADUJĘ KOD v15/v19!"); // TESTOWY ALERT
-
 // Elementy DOM
 const playerNameInput = document.getElementById('playerName');
 const createRoomBtn = document.getElementById('createRoom');
@@ -1077,7 +1075,6 @@ function runRoundEndSequence(summaryMessage) {
   setTimeout(() => {
     fullscreenOverlay.classList.add('is-hiding'); 
     isAnimating = false;
-    // *** POPRAWKA: Przeniesione czyszczenie wiadomości tutaj ***
     if (isHost) {
       db.ref(`rooms/${currentRoomCode}/roundEndMessage`).remove();
     }
@@ -1173,13 +1170,15 @@ function runGameStartSequence(roleMessage, starterName) {
 function listenToRoom(roomCode) {
   const roomRef = db.ref(`rooms/${roomCode}`);
   roomRef.on('value', snapshot => {
-    if (isAnimating) return; 
+    // *** NAPRAWA: Usunięto 'isAnimating' stąd, żeby kluczowe update'y dochodziły ***
     
     const room = snapshot.val();
     if (!room) {
-      console.log('Pokój usunięty:', roomCode);
-      showMessage('❌ Pokój został usunięty!');
-      resetToLobby();
+      if (!isAnimating) { // Tylko jeśli nie jesteśmy w trakcie animacji
+        console.log('Pokój usunięty:', roomCode);
+        showMessage('❌ Pokój został usunięty!');
+        resetToLobby();
+      }
       return;
     }
 
@@ -1187,6 +1186,14 @@ function listenToRoom(roomCode) {
     const playerIds = Object.keys(players);
     const hostExists = Object.values(players).some(p => p.isHost);
     const iAmInRoom = players[currentPlayerId];
+    
+    if (!iAmInRoom && !isAnimating) { // Jeśli nas wyrzucono, ale nie w trakcie animacji
+        console.log('Wyrzucono z pokoju lub błąd stanu.');
+        showMessage('❌ Zostałeś rozłączony z pokojem.');
+        resetToLobby();
+        return;
+    }
+    
     const votingActive = room.votingActive || false;
     const myVote = iAmInRoom ? iAmInRoom.votedFor : null;
 
@@ -1257,6 +1264,7 @@ function listenToRoom(roomCode) {
       
       if (!hasShownStartMessage) {
         hasShownStartMessage = true; 
+        hasShownEndMessage = false; // *** POPRAWKA: Zresetuj flagę końca rundy ***
         
         let message;
         if (iAmImpostor) {
@@ -1283,6 +1291,7 @@ function listenToRoom(roomCode) {
         runGameStartSequence(message, starterName);
       }
     } else {
+      // *** POPRAWKA: Zresetuj flagę startu, gdy gra się skończy ***
       hasShownStartMessage = false; 
     }
 
@@ -1384,9 +1393,7 @@ startGameBtn.addEventListener('click', () => {
     updates.starterId = starterId;
     updates.lastRoundSummary = null; 
     updates.roundEndMessage = null; 
-    updates.hasShownEndMessage = false; 
-    updates.currentRound = (room.currentRound || 0) + 1;
-
+    
     roomRef.update(updates).then(() => {
       console.log('Gra rozpoczęta:', { word, impostorIds, starterId, hint });
     }).catch(error => {
