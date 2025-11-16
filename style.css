@@ -332,6 +332,17 @@ body.dark-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   font-weight: 800;
 }
 
+/* MODYFIKACJA 3: Styl dla kategorii w lobby */
+#lobbyCategories {
+  font-size: 1.6rem;
+  font-style: italic;
+  opacity: 0.8;
+  text-align: center;
+  margin: 0.5rem 1rem;
+  max-width: 400px;
+  line-height: 1.4;
+}
+
 #roundCounter, #wordDisplay {
   font-size: 2rem;
   font-family: var(--font-heading);
@@ -473,6 +484,28 @@ body.dark-mode #playersList li.self {
   color: var(--c-primary);
 }
 
+/* MODYFIKACJA 2: Wskaźnik "Kto Mówi" */
+#playersList li.is-starter::before {
+  content: '🎤';
+  position: absolute;
+  /* Pozycja na prawo od tekstu, ale przed przyciskiem wyrzucenia */
+  right: 2.8rem; 
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.5rem;
+  opacity: 0.7;
+}
+/* Jeśli host jest starterem, przesuń mikrofon, aby nie nakładał się na przycisk */
+#playersList li.is-starter.host::before {
+  right: 4.8rem; 
+}
+/* Kiedy nie ma przycisku wyrzucenia (np. dla samego siebie lub w trybie głosowania) */
+body:not(.voting-active) #playersList li.is-starter.self::before,
+body.voting-active #playersList li.is-starter::before {
+  right: 0.8rem;
+}
+
+
 /* =================================================================== */
 /* 5.5. STYLE GŁOSOWANIA (NOWA SEKCJA) */
 /* =================================================================== */
@@ -579,9 +612,8 @@ body.voting-active #playersList li.host.has-voted .avatar::after {
   border-radius: 5px;
   outline: none;
   padding: 0;
-  /* POPRAWKA SLIDERA: Obliczanie szerokości i marginesu, aby kulka dochodziła do krawędzi */
-  width: calc(100% - 28px); /* 28px to szerokość kulki */
-  margin: 0 14px; /* 14px to połowa szerokości kulki */
+  width: calc(100% - 28px);
+  margin: 0 14px;
   background-image: 
     radial-gradient(circle at center, var(--c-primary-light) 4px, transparent 4px),
     radial-gradient(circle at center, var(--c-primary-light) 4px, transparent 4px),
@@ -590,27 +622,23 @@ body.voting-active #playersList li.host.has-voted .avatar::after {
     radial-gradient(circle at center, var(--c-primary-light) 4px, transparent 4px);
   background-size: 4px 4px;
   background-repeat: no-repeat;
-  /* POPRAWKA SLIDERA: Dopasowanie kropek do nowej szerokości */
   background-position: 0% 50%, 25% 50%, 50% 50%, 75% 50%, 100% 50%;
 }
 
 #hintChanceSlider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  /* POPRAWKA SLIDERA: Przywrócenie 28px */
   width: 28px; 
   height: 28px; 
   border-radius: 50%;
   background: var(--c-primary);
   border: 4px solid var(--c-text-light);
   cursor: pointer;
-  /* POPRAWKA SLIDERA: Przywrócenie centrowania dla 28px */
   margin-top: -10px; 
   box-shadow: 0 2px 5px var(--c-shadow-heavy);
 }
 
 #hintChanceSlider::-moz-range-thumb {
-  /* POPRAWKA SLIDERA: Przywrócenie 28px */
   width: 28px; 
   height: 28px; 
   border-radius: 50%;
@@ -729,7 +757,6 @@ body.dark-mode #hintChanceSlider::-moz-range-thumb {
 .category-actions button {
   width: 28px;
   height: 28px;
-  /* POPRAWKA IKON: Zmniejszenie ikon */
   font-size: 1rem; 
   font-weight: bold;
   color: white;
@@ -1018,7 +1045,6 @@ body.dark-mode #messageBox:not(.copy-message) {
   font-size: 2.5rem; 
   font-weight: bold;
   transition: opacity 0.3s ease, background 0.3s ease;
-  /* POPRAWKA PRZYCISKÓW +/-: Centrowanie */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1291,6 +1317,9 @@ body.dark-mode #messageBox:not(.copy-message) {
   #playerCountDisplay, #impostorCountDisplay, #hintChanceInfoDisplay {
     font-size: 1.5rem; /* Mniejszy tekst licznika */
   }
+  #lobbyCategories {
+    font-size: 1.4rem; /* Mniejsze kategorie w lobby */
+  }
   #playersList li {
     padding: 0.6rem 4rem 0.6rem 3.5rem; /* Mniejszy padding listy */
     font-size: 1.6rem;
@@ -1380,7 +1409,6 @@ body.dark-mode #messageBox:not(.copy-message) {
     max-width: 100%; /* Usuwa ograniczenie 350px wewnątrz modali */
   }
   
-  /* POPRAWKA SLIDERA: Dopasowanie etykiet do nowej szerokości */
   #hintChanceSlider {
     width: calc(100% - 28px);
     margin: 0 14px;
