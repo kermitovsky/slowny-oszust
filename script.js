@@ -165,18 +165,15 @@ function showScreen(screenToShow) {
 }
 
 function showModal(modalToShow) {
-  // Jeśli coś się animuje I NIE jest to próba pokazania modala wiadomości, zablokuj.
   if (isAnimating && modalToShow !== roleMessageBox && modalToShow !== messageBox) return;
 
-  // Jeśli poprzedni modal istnieje I NIE jest to ten sam modal
   if (currentModal && currentModal !== modalToShow) {
-    // Jeśli próbujemy pokazać `roleMessageBox`, a starym modalem jest `messageBox`
-    // (lub na odwrót), ukryj stary natychmiast (force), aby zastąpić.
+    // Natychmiast ukryj stary modal, jeśli zastępujemy jeden komunikat drugim
     if ((modalToShow === roleMessageBox && currentModal === messageBox) || 
-        (modalToShow === messageBox && currentModal === roleMessageBox)) {
+        (modalToShow === messageBox && currentModal === roleMessageBox) ||
+        (modalToShow === roleMessageBox && currentModal === roleMessageBox)) { // Kluczowy dodatek
       hideModal(currentModal, true); // Force hide
     } else {
-      // W przeciwnym razie (np. zamykając zasady) pozwól na normalne schowanie
       hideModal(currentModal); 
     }
   }
@@ -562,13 +559,18 @@ function showMessage(text, duration = 3500) {
   }, duration);
 }
 
-// MODYFIKACJA 4: `showRoleMessage` jest teraz używane także do końca rundy
+// MODYFIKACJA: showRoleMessage teraz TYLKO pokazuje
 function showRoleMessage(text, duration = 5000) {
-  roleMessageBox.innerHTML = text; // Użyj innerHTML, aby obsłużyć <span>
-  roleMessageBox.classList.remove('is-fading-out'); // Upewnij się, że jest widoczne
+  roleMessageBox.innerHTML = text; 
+  roleMessageBox.classList.remove('is-fading-out'); 
   showModal(roleMessageBox);
+  
+  // Ustaw timer, aby schować *ten konkretny* modal
   setTimeout(() => {
-    hideModal(roleMessageBox);
+    // Schowaj tylko, jeśli to nadal ten sam modal (nie został przerwany przez inny)
+    if (currentModal === roleMessageBox) {
+      hideModal(roleMessageBox);
+    }
   }, duration);
 }
 
@@ -1186,7 +1188,7 @@ function listenToRoom(roomCode) {
     endRoundBtn.style.display = 'none';
 
     // =================================================================
-    // MODYFIKACJA: LOGIKA "ZAPADKI" DLA SEKWENCJI MODALI
+    // MODYFIKACJA: LOGIKA "ZAPADKI" Z DWOMA OSOBNYMI MODALAMI
     // =================================================================
 
     const newStarterId = room.starterId;
@@ -1220,25 +1222,26 @@ function listenToRoom(roomCode) {
       wordDisplay.innerHTML = ''; 
       isAnimating = true; // Zablokuj pokazywanie słowa
       
-      // 1. Pokaż rolę. `showRoleMessage` automatycznie zniknie po 5s.
+      // Pokaż rolę (na 5 sekund, zniknie z fadeOut)
       showRoleMessage(roleMsg, 5000); 
       
-      // 2. 300ms PO tym jak pierwsze okno ZACZNIE znikać (5000ms), pokaż drugie.
-      // 5000ms (duration) + 300ms (fadeOut animation) = 5300ms
+      // Poczekaj aż pierwsza animacja się skończy (5s + 300ms na fadeOut)
       setTimeout(() => {
-        showRoleMessage(starterMsg, 4000); // Pokaż, kto zaczyna
-      }, 5300); // Czekaj na ZNIKNIĘCIE pierwszego okna
+        // Pokaż drugi komunikat (na 4 sekundy)
+        showRoleMessage(starterMsg, 4000); 
+      }, 5300); 
 
-      // 3. Odblokuj pokazywanie słowa po CAŁEJ sekwencji
-      // 5300ms (wait) + 4000ms (duration) + 300ms (fadeOut) = 9600ms
+      // Odblokuj pokazywanie słowa po CAŁEJ sekwencji
+      // (5300ms czekania + 4000ms pokazywania + 300ms na fadeOut = 9600ms)
       setTimeout(() => {
         isAnimating = false;
+        // Ręcznie odśwież wordDisplay, na wypadek gdyby listener nie złapał
         if (room.gameStarted && room.currentWord && iAmInRoom) {
           wordDisplay.innerHTML = amIImpostor
             ? `Twoje słowo: <span class="word-impostor">OSZUST! ${myHint ? `<span class="impostor-hint-span">(Podpowiedź: ${myHint})</span>` : ''}</span>`
             : `Twoje słowo: <span class="word-normal">${room.currentWord}</span>`;
         }
-      }, 9600); // 5300 + 4000 + 300
+      }, 9600); 
     }
     
     // 2. ZAPADKA KOŃCA RUNDY
