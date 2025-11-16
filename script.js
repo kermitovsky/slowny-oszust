@@ -31,7 +31,7 @@ const impostorTeamBox = document.getElementById('impostorTeamBox');
 const customCategoryBox = document.getElementById('customCategoryBox');
 const rulesBox = document.getElementById('rulesBox');
 
-// Elementy animacji (MODYFIKACJA)
+// Elementy animacji
 const fullscreenOverlay = document.getElementById('fullscreen-overlay');
 const countdownDisplay = document.getElementById('countdown-display');
 const fullscreenMessage = document.getElementById('fullscreen-message');
@@ -81,11 +81,11 @@ let isHost = false;
 let words = []; 
 let impostorCount = 1;
 let selectedCategories = [];
-let hasShownStartMessage = false; // MODYFIKACJA: Flaga animacji startu
-let hasShownEndMessage = false; // MODYFIKACJA: Flaga animacji końca
+let hasShownStartMessage = false;
+let hasShownEndMessage = false; 
 let selectedEmoji = null;
 let selectedPlayerId = null; 
-let isAnimating = false; // MODYFIKACJA: Flaga globalnej animacji
+let isAnimating = false;
 
 let hintChance = 0; 
 let hintOnStart = false; 
@@ -562,7 +562,6 @@ function resetToLobby() {
   customCategories = []; 
   document.querySelectorAll('.custom-category-btn').forEach(btn => btn.remove());
   
-  // MODYFIKACJA: Poprawka resetowania flag
   hasShownStartMessage = false;
   hasShownEndMessage = false;
   selectedEmoji = null;
@@ -1078,6 +1077,7 @@ function runRoundEndSequence(summaryMessage) {
     fullscreenOverlay.classList.add('is-hiding'); 
     isAnimating = false;
     if (isHost) {
+      // Sprzątanie po animacji (host usuwa wiadomość, aby inni nie widzieli jej po ponownym dołączeniu)
       db.ref(`rooms/${currentRoomCode}/roundEndMessage`).remove();
     }
     setTimeout(() => {
@@ -1173,11 +1173,10 @@ function runGameStartSequence(roleMessage, starterName) {
 function listenToRoom(roomCode) {
   const roomRef = db.ref(`rooms/${roomCode}`);
   roomRef.on('value', snapshot => {
-    // *** NAPRAWA: Usunięto 'isAnimating' stąd, żeby kluczowe update'y dochodziły ***
     
     const room = snapshot.val();
     if (!room) {
-      if (!isAnimating) { // Tylko jeśli nie jesteśmy w trakcie animacji
+      if (!isAnimating) {
         console.log('Pokój usunięty:', roomCode);
         showMessage('❌ Pokój został usunięty!');
         resetToLobby();
@@ -1190,7 +1189,7 @@ function listenToRoom(roomCode) {
     const hostExists = Object.values(players).some(p => p.isHost);
     const iAmInRoom = players[currentPlayerId];
     
-    if (!iAmInRoom && !isAnimating) { // Jeśli nas wyrzucono, ale nie w trakcie animacji
+    if (!iAmInRoom && !isAnimating) {
         console.log('Wyrzucono z pokoju lub błąd stanu.');
         showMessage('❌ Zostałeś rozłączony z pokojem.');
         resetToLobby();
@@ -1241,7 +1240,6 @@ function listenToRoom(roomCode) {
     const iAmImpostor = iAmInRoom && iAmInRoom.role === 'impostor';
     const hint = room.impostorHint;
     
-    // MODYFIKACJA: Zintegrowana podpowiedź
     if (!votingActive) {
       wordDisplay.innerHTML = room.gameStarted && room.currentWord && iAmInRoom
         ? (iAmImpostor
@@ -1262,14 +1260,20 @@ function listenToRoom(roomCode) {
     startGameBtn.style.display = isHost && !room.gameStarted && !votingActive ? 'block' : 'none';
     startVoteBtn.style.display = isHost && room.gameStarted && !votingActive ? 'block' : 'none';
     confirmVoteBtn.style.display = votingActive && !myVote ? 'block' : 'none';
-    endRoundBtn.style.display = 'none'; // Przycisk debugowy
+    endRoundBtn.style.display = 'none';
 
-    // MODYFIKACJA: Logika animacji startu i reset flagi końca
+    // =================================================================
+    // NOWA LOGIKA CYKLU ANIMACJI
+    // =================================================================
+
+    // 1. Sprawdź, czy gra się rozpoczęła
     if (room.gameStarted && !votingActive && room.currentWord && iAmInRoom) {
       
+      // Jeśli flaga startu NIE jest jeszcze ustawiona (czyli animacja się nie odbyła)
       if (!hasShownStartMessage) {
-        hasShownStartMessage = true; 
-        hasShownEndMessage = false; // *** POPRAWKA: Zresetuj flagę końca rundy ***
+        console.log("WYZWALAM Animację Startu");
+        hasShownStartMessage = true; // Ustaw flagę startu
+        hasShownEndMessage = false;  // ZRESETUJ flagę końca
         
         let message;
         if (iAmImpostor) {
@@ -1295,16 +1299,23 @@ function listenToRoom(roomCode) {
         
         runGameStartSequence(message, starterName);
       }
-    } else {
-      // *** POPRAWKA: Zresetuj flagę startu, gdy gra się skończy ***
-      hasShownStartMessage = false; 
     }
 
-    // MODYFIKACJA: Logika animacji końca rundy
-    if (room.roundEndMessage && !room.gameStarted && !hasShownEndMessage) {
-      hasShownEndMessage = true; 
-      runRoundEndSequence(room.roundEndMessage);
+    // 2. Sprawdź, czy runda się zakończyła (jest wiadomość końcowa I gra się nie toczy)
+    if (room.roundEndMessage && !room.gameStarted) {
+      
+      // Jeśli flaga końca NIE jest jeszcze ustawiona
+      if (!hasShownEndMessage) { 
+        console.log("WYZWALAM Animację Końca");
+        hasShownEndMessage = true;   // Ustaw flagę końca
+        hasShownStartMessage = false; // ZRESETUJ flagę startu
+        runRoundEndSequence(room.roundEndMessage);
+      }
     }
+    
+    // =================================================================
+    // KONIEC LOGIKI ANIMACJI
+    // =================================================================
 
     if (room.resetMessage) {
       showMessage(room.resetMessage); 
@@ -1329,7 +1340,7 @@ function listenToRoom(roomCode) {
 
 startGameBtn.addEventListener('click', () => {
   console.log('Kliknięto Start gry');
-  if (isAnimating) return; // MODYFIKACJA: Blokuj, jeśli animacja trwa
+  if (isAnimating) return;
   if (!isHost) {
     console.log('Tylko host może rozpocząć grę');
     return;
@@ -1413,7 +1424,7 @@ startGameBtn.addEventListener('click', () => {
 });
 
 startVoteBtn.addEventListener('click', () => {
-  if (isAnimating) return; // MODYFIKACJA: Blokuj, jeśli animacja trwa
+  if (isAnimating) return;
   console.log('Kliknięto Rozpocznij głosowanie');
   if (!isHost) {
     console.log('Tylko host może rozpocząć głosowanie');
@@ -1425,7 +1436,7 @@ startVoteBtn.addEventListener('click', () => {
 });
 
 confirmVoteBtn.addEventListener('click', () => {
-  if (isAnimating) return; // MODYFIKACJA: Blokuj, jeśli animacja trwa
+  if (isAnimating) return;
   if (!selectedPlayerId) {
     showMessage('❌ Najpierw wybierz gracza, na którego chcesz zagłosować!', 2500);
     return;
@@ -1435,7 +1446,7 @@ confirmVoteBtn.addEventListener('click', () => {
 
 // Przycisk "Zakończ rundę" (DEBUG)
 endRoundBtn.addEventListener('click', () => {
-  if (isAnimating) return; // MODYFIKACJA: Blokuj, jeśli animacja trwa
+  if (isAnimating) return;
   console.log('Kliknięto Zakończ rundę (PRZYCISK PANIKI)');
   if (!isHost) {
     console.log('Tylko host może zakończyć rundę');
