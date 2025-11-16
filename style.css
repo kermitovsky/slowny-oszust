@@ -258,6 +258,7 @@ body.dark-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   font-family: var(--font-heading);
   font-weight: 800;
 }
+/* MODYFIKACJA: Styl dla zintegrowanej podpowiedzi */
 .impostor-hint-span {
   color: var(--c-text-light-alt);
   font-weight: 500;
@@ -906,7 +907,7 @@ body.dark-mode .team-selector button:nth-of-type(2).selected { /* NIE */
 }
 
 /* =================================================================== */
-/* 5.9. STYL EKRANU PEŁNOEKRANOWEGO */
+/* 5.9. STYL EKRANU PEŁNOEKRANOWEGO (MODYFIKACJA) */
 /* =================================================================== */
 #fullscreen-overlay {
   position: fixed;
@@ -1291,7 +1292,7 @@ body.dark-mode #messageBox:not(.copy-message) {
 
 
 /* =================================================================== */
-/* 6. ANIMACJE */
+/* 6. ANIMACJE (MODYFIKACJA) */
 /* =================================================================== */
 @keyframes slideInUp {
   from { opacity: 0; transform: translate(-50%, -40%); }
@@ -1311,6 +1312,7 @@ body.dark-mode #messageBox:not(.copy-message) {
   to { opacity: 0; transform: translateX(-50px); }
 }
 
+/* Animacje dla sekwencji start/koniec */
 @keyframes horizontalSlideOut {
   from { opacity: 1; transform: translateX(0); }
   to { opacity: 0; transform: translateX(-50px); }
@@ -1334,7 +1336,7 @@ body.dark-mode #messageBox:not(.copy-message) {
 @keyframes float {
   0% { transform: translateY(0); }
   50% { transform: translateY(-5px); }
-  100% { transform: translateY(0); }
+  100% { translateY(0); }
 }
 
 /* =================================================================== */
@@ -1393,6 +1395,7 @@ body.dark-mode #messageBox:not(.copy-message) {
     margin-top: 5px; 
   }
   
+  /* Modyfikacja pełnego ekranu dla mobi */
   #countdown-display {
     font-size: 30vw;
   }
@@ -1403,6 +1406,7 @@ body.dark-mode #messageBox:not(.copy-message) {
     font-size: 5vw;
   }
   
+  /* Modyfikacja podpowiedzi dla mobi */
   #wordDisplay .impostor-hint-span {
     font-size: 1.4rem;
     display: block;
