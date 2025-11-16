@@ -541,27 +541,28 @@ function showMessage(text, duration = 3500) {
   }, duration);
 }
 
-// MODYFIKACJA: Funkcja do pokazywania sekwencji startowej (Propozycja 1 z przenikaniem)
-function showRoleMessageSequence(roleMsg, starterMsg, totalDuration = 9000, fadePause = 400) {
+// MODYFIKACJA: Funkcja do pokazywania sekwencji startowej (z przenikaniem i pauzą)
+function showRoleMessageSequence(roleMsg, starterMsg, totalDuration = 11000, firstMsgDuration = 5000, fadeDuration = 1000) {
   isAnimating = true; // Zablokuj inne akcje na czas pokazywania roli
-  const fadeDuration = fadePause / 2; // Czas na zniknięcie i pojawienie się
-
+  
   // 1. Pokaż rolę
   roleMessageBox.innerHTML = roleMsg;
   roleMessageBox.classList.remove('is-fading-out'); 
   showModal(roleMessageBox);
   
-  // 2. Po 5 sekundach zacznij przenikanie
+  // 2. Po `firstMsgDuration` (5s) zacznij przenikanie (zanikanie)
   setTimeout(() => {
-    roleMessageBox.classList.add('is-fading-out'); // Zacznij znikanie
+    if (currentModal !== roleMessageBox) return; // Przerwij, jeśli okno zostało zamknięte
+    roleMessageBox.classList.add('is-fading-out'); // Zacznij znikanie (trwa 1s)
     
-    // 3. Po czasie na zniknięcie, podmień tekst i zacznij pojawianie
+    // 3. Po czasie na zniknięcie (`fadeDuration`), podmień tekst i zacznij pojawianie
     setTimeout(() => {
+      if (currentModal !== roleMessageBox) return; // Przerwij, jeśli okno zostało zamknięte
       roleMessageBox.innerHTML = starterMsg;
-      roleMessageBox.classList.remove('is-fading-out'); // Zacznij pojawianie
-    }, fadeDuration); 
+      roleMessageBox.classList.remove('is-fading-out'); // Zacznij pojawianie (trwa 1s)
+    }, fadeDuration); // Czas musi być zgodny z CSS transition (1s)
 
-  }, 5000); // Czas pokazywania pierwszej wiadomości
+  }, firstMsgDuration); // Czas pokazywania pierwszej wiadomości
 
   // 4. Po całkowitym czasie schowaj modal i odblokuj
   setTimeout(() => {
@@ -1201,10 +1202,11 @@ function listenToRoom(roomCode) {
       
       const starterMsg = `Zaczyna mówić: <strong>${starterName}</strong>`;
       
-      wordDisplay.innerHTML = ''; // Ukryj słowo na czas animacji
+      wordDisplay.innerHTML = ''; 
       
       // Wywołaj sekwencję z przenikaniem
-      showRoleMessageSequence(roleMsg, starterMsg, 9000, 300); // 9s łącznie, 0.3s przenikanie
+      // 5s na rolę, potem 1s zanikania, 1s pojawiania, 3s na startera = 10s łącznie
+      showRoleMessageSequence(roleMsg, starterMsg, 10000, 5000, 1000); 
 
       // Odblokuj pokazywanie słowa po zakończeniu animacji
       setTimeout(() => {
@@ -1213,7 +1215,7 @@ function listenToRoom(roomCode) {
             ? `Twoje słowo: <span class="word-impostor">OSZUST! ${myHint ? `<span class="impostor-hint-span">(Podpowiedź: ${myHint})</span>` : ''}</span>`
             : `Twoje słowo: <span class="word-normal">${room.currentWord}</span>`;
         }
-      }, 9000); // Musi być równe totalDuration
+      }, 10000); // Musi być równe totalDuration
     }
     
     // 2. ZAPADKA KOŃCA RUNDY
