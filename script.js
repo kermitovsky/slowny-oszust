@@ -542,23 +542,24 @@ function showMessage(text, duration = 3500) {
 }
 
 // MODYFIKACJA: Funkcja do pokazywania sekwencji startowej (Propozycja 1 z przenikaniem)
-function showRoleMessageSequence(roleMsg, starterMsg, totalDuration = 9000, fadeDuration = 300) {
+function showRoleMessageSequence(roleMsg, starterMsg, totalDuration = 9000, fadePause = 400) {
   isAnimating = true; // Zablokuj inne akcje na czas pokazywania roli
-  
+  const fadeDuration = fadePause / 2; // Czas na zniknięcie i pojawienie się
+
   // 1. Pokaż rolę
   roleMessageBox.innerHTML = roleMsg;
-  roleMessageBox.classList.remove('is-fading-out'); // Upewnij się, że jest widoczne
+  roleMessageBox.classList.remove('is-fading-out'); 
   showModal(roleMessageBox);
   
   // 2. Po 5 sekundach zacznij przenikanie
   setTimeout(() => {
     roleMessageBox.classList.add('is-fading-out'); // Zacznij znikanie
     
-    // 3. W połowie znikania podmień tekst i zacznij pojawianie
+    // 3. Po czasie na zniknięcie, podmień tekst i zacznij pojawianie
     setTimeout(() => {
       roleMessageBox.innerHTML = starterMsg;
       roleMessageBox.classList.remove('is-fading-out'); // Zacznij pojawianie
-    }, fadeDuration); // Czas musi być zgodny z CSS transition
+    }, fadeDuration); 
 
   }, 5000); // Czas pokazywania pierwszej wiadomości
 
@@ -1200,10 +1201,10 @@ function listenToRoom(roomCode) {
       
       const starterMsg = `Zaczyna mówić: <strong>${starterName}</strong>`;
       
-      wordDisplay.innerHTML = ''; 
+      wordDisplay.innerHTML = ''; // Ukryj słowo na czas animacji
       
       // Wywołaj sekwencję z przenikaniem
-      showRoleMessageSequence(roleMsg, starterMsg, 9000, 300);
+      showRoleMessageSequence(roleMsg, starterMsg, 9000, 300); // 9s łącznie, 0.3s przenikanie
 
       // Odblokuj pokazywanie słowa po zakończeniu animacji
       setTimeout(() => {
