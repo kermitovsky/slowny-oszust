@@ -1046,10 +1046,10 @@ function tallyVotes(room) {
 }
 
 
-// MODYFIKACJA: Funkcja do animacji końca rundy
 function runRoundEndSequence(summaryMessage) {
-  if (isAnimating) return;
-  isAnimating = true;
+  // 1. Zdejmij blokady (są już ustawione w listenerze)
+  // if (isAnimating) return; // USUNIĘTE
+  // isAnimating = true; // USUNIĘTE
   
   console.log("Pokazuję sekwencję końca rundy");
   
@@ -1073,11 +1073,12 @@ function runRoundEndSequence(summaryMessage) {
   fullscreenOverlay.classList.remove('is-hiding');
   fullscreenOverlay.classList.add('is-visible');
 
+  // 2. Na końcu animacji, zwolnij blokadę
   setTimeout(() => {
     fullscreenOverlay.classList.add('is-hiding'); 
-    isAnimating = false;
+    isAnimating = false; // ZWOLNIJ BLOKADĘ
+    
     if (isHost) {
-      // Sprzątanie po animacji (host usuwa wiadomość, aby inni nie widzieli jej po ponownym dołączeniu)
       db.ref(`rooms/${currentRoomCode}/roundEndMessage`).remove();
     }
     setTimeout(() => {
@@ -1091,10 +1092,10 @@ function runRoundEndSequence(summaryMessage) {
 }
 
 
-// MODYFIKACJA: Funkcja do animacji startu gry
 function runGameStartSequence(roleMessage, starterName) {
-  if (isAnimating) return;
-  isAnimating = true;
+  // 1. Zdejmij blokady (są już ustawione w listenerze)
+  // if (isAnimating) return; // USUNIĘTE
+  // isAnimating = true; // USUNIĘTE
   
   console.log("Pokazuję sekwencję startu gry");
   
@@ -1156,9 +1157,10 @@ function runGameStartSequence(roleMessage, starterName) {
     fullscreenMessage.style.animation = 'horizontalSlideIn 0.4s ease forwards';
   }, 6400); 
 
+  // 2. Na końcu animacji, zwolnij blokadę
   setTimeout(() => {
     fullscreenOverlay.classList.add('is-hiding'); 
-    isAnimating = false;
+    isAnimating = false; // ZWOLNIJ BLOKADĘ
     setTimeout(() => {
       fullscreenOverlay.style.display = 'none'; 
       fullscreenOverlay.classList.remove('is-visible', 'is-hiding');
@@ -1263,18 +1265,22 @@ function listenToRoom(roomCode) {
     endRoundBtn.style.display = 'none';
 
     // =================================================================
-    // NOWA LOGIKA CYKLU ANIMACJI
+    // NOWA LOGIKA BLOKOWANIA (ROZWIĄZANIE RACE CONDITION)
     // =================================================================
 
     // 1. Sprawdź, czy gra się rozpoczęła
     if (room.gameStarted && !votingActive && room.currentWord && iAmInRoom) {
       
-      // Jeśli flaga startu NIE jest jeszcze ustawiona (czyli animacja się nie odbyła)
-      if (!hasShownStartMessage) {
+      // Jeśli animacja startu się nie odbyła ORAZ nic innego nie animuje
+      if (!hasShownStartMessage && !isAnimating) { 
         console.log("WYZWALAM Animację Startu");
-        hasShownStartMessage = true; // Ustaw flagę startu
-        hasShownEndMessage = false;  // ZRESETUJ flagę końca
         
+        // SEKCJA KRYTYCZNA: Ustaw flagi NATYCHMIAST, aby zablokować wyścig
+        isAnimating = true; 
+        hasShownStartMessage = true;
+        hasShownEndMessage = false; // Zresetuj flagę końca (przygotuj na koniec rundy)
+        
+        // Przygotuj wiadomość
         let message;
         if (iAmImpostor) {
           const hintText = hint ? `\n(Podpowiedź: ${hint})` : '';
@@ -1294,21 +1300,26 @@ function listenToRoom(roomCode) {
         } else {
           message = `Słowo: ${room.currentWord}`;
         }
-        
         const starterName = players[room.starterId]?.name || '...';
         
+        // Wywołaj animację (zwolni 'isAnimating' po zakończeniu)
         runGameStartSequence(message, starterName);
       }
     }
 
-    // 2. Sprawdź, czy runda się zakończyła (jest wiadomość końcowa I gra się nie toczy)
+    // 2. Sprawdź, czy runda się zakończyła
     if (room.roundEndMessage && !room.gameStarted) {
       
-      // Jeśli flaga końca NIE jest jeszcze ustawiona
-      if (!hasShownEndMessage) { 
+      // Jeśli animacja końca się nie odbyła ORAZ nic innego nie animuje
+      if (!hasShownEndMessage && !isAnimating) { 
         console.log("WYZWALAM Animację Końca");
-        hasShownEndMessage = true;   // Ustaw flagę końca
-        hasShownStartMessage = false; // ZRESETUJ flagę startu
+        
+        // SEKCJA KRYTYCZNA: Ustaw flagi NATYCHMIAST
+        isAnimating = true;
+        hasShownEndMessage = true;
+        hasShownStartMessage = false; // Zresetuj flagę startu (przygotuj na nową rundę)
+        
+        // Wywołaj animację (zwolni 'isAnimating' po zakończeniu)
         runRoundEndSequence(room.roundEndMessage);
       }
     }
@@ -1340,7 +1351,7 @@ function listenToRoom(roomCode) {
 
 startGameBtn.addEventListener('click', () => {
   console.log('Kliknięto Start gry');
-  if (isAnimating) return;
+  if (isAnimating) return; // Blokuj kliknięcie, jeśli animacja trwa
   if (!isHost) {
     console.log('Tylko host może rozpocząć grę');
     return;
