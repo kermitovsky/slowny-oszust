@@ -31,7 +31,12 @@ const impostorTeamBox = document.getElementById('impostorTeamBox');
 const customCategoryBox = document.getElementById('customCategoryBox');
 const rulesBox = document.getElementById('rulesBox');
 
-// Elementy animacji (USUNIĘTE)
+// MODYFIKACJA: Przywrócenie elementów animacji
+const fullscreenOverlay = document.getElementById('fullscreen-overlay');
+const countdownDisplay = document.getElementById('countdown-display');
+const fullscreenMessage = document.getElementById('fullscreen-message');
+const fsMessagePrimary = document.getElementById('fullscreen-message-primary');
+const fsMessageSecondary = document.getElementById('fullscreen-message-secondary');
 
 
 const closeRulesBtn = document.getElementById('closeRules');
@@ -76,10 +81,10 @@ let isHost = false;
 let words = []; 
 let impostorCount = 1;
 let selectedCategories = [];
-// Flagi animacji (USUNIĘTE)
 let selectedEmoji = null;
 let selectedPlayerId = null; 
-// Flaga animacji (USUNIĘTA)
+let isAnimating = false; // MODYFIKACJA: Prosta flaga blokująca przyciski
+let lastSeenStarterId = null; // MODYFIKACJA: "Zapadka" dla animacji startu
 
 let hintChance = 0; 
 let hintOnStart = false; 
@@ -556,9 +561,9 @@ function resetToLobby() {
   customCategories = []; 
   document.querySelectorAll('.custom-category-btn').forEach(btn => btn.remove());
   
-  // Flagi usunięte
   selectedEmoji = null;
   selectedPlayerId = null; 
+  lastSeenStarterId = null; // MODYFIKACJA: Resetowanie zapadki
   
   hintChance = 0;
   hintOnStart = false;
@@ -749,7 +754,7 @@ function createRoom(numImpostors, chanceIndex, onStart, knows) {
     currentCategory: null, 
     impostorHint: null, 
     lastRoundSummary: null,
-    roundEndMessage: null, // Ta linia nadal tu jest, ale nie jest już używana do animacji
+    roundEndMessage: null, 
     resetMessage: null,
     starterId: null,
     numImpostors: numImpostors,
@@ -1012,7 +1017,7 @@ function tallyVotes(room) {
 
   if (isTie || !ejectedPlayerId) {
     updates.lastRoundSummary = `REMIS! Nikt nie odpada.<br>Kontynuujcie dyskusję!`;
-    // updates.roundEndMessage = updates.lastRoundSummary; // USUNIĘTE
+    updates.roundEndMessage = updates.lastRoundSummary; // To pole jest teraz ignorowane
   } else {
     const ejectedPlayer = players[ejectedPlayerId];
     
@@ -1032,14 +1037,94 @@ function tallyVotes(room) {
     }
     
     updates.lastRoundSummary = summaryMessage; 
-    // updates.roundEndMessage = summaryMessage; // USUNIĘTE
+    updates.roundEndMessage = summaryMessage; // To pole jest teraz ignorowane
   }
 
   db.ref(`rooms/${currentRoomCode}`).update(updates);
 }
 
 
-// Funkcje animacji (USUNIĘTE)
+// MODYFIKACJA: Przywrócenie funkcji animacji
+function runGameStartSequence(isImpostor, word, hint, starterName) {
+  if (isAnimating) return; // Podwójne sprawdzenie, na wszelki wypadek
+  isAnimating = true; // Zablokuj przyciski
+  
+  console.log("Pokazuję sekwencję startu gry");
+  
+  fullscreenOverlay.classList.remove('is-hiding');
+  fullscreenMessage.style.display = 'none';
+  fullscreenMessage.classList.remove('show-message');
+  fullscreenOverlay.classList.add('is-visible');
+  
+  countdownDisplay.textContent = '3';
+  countdownDisplay.style.display = 'block';
+  countdownDisplay.style.animation = 'none';
+  countdownDisplay.offsetHeight; 
+  countdownDisplay.style.animation = 'countdown-pulse 1s ease-in-out';
+  
+  setTimeout(() => {
+    countdownDisplay.textContent = '2';
+    countdownDisplay.style.animation = 'none';
+    countdownDisplay.offsetHeight;
+    countdownDisplay.style.animation = 'countdown-pulse 1s ease-in-out';
+  }, 1000);
+  
+  setTimeout(() => {
+    countdownDisplay.textContent = '1';
+    countdownDisplay.style.animation = 'none';
+    countdownDisplay.offsetHeight;
+    countdownDisplay.style.animation = 'countdown-pulse 1s ease-in-out';
+  }, 2000);
+  
+  // Po odliczaniu, pokaż rolę
+  setTimeout(() => {
+    countdownDisplay.style.display = 'none';
+    
+    // Zbuduj komunikat roli
+    if (isImpostor) {
+      fsMessagePrimary.innerHTML = "Jesteś oszustem!";
+      fsMessageSecondary.innerHTML = hint ? `(Podpowiedź: ${hint})` : "";
+      fullscreenMessage.className = 'impostor-role';
+    } else {
+      fsMessagePrimary.innerHTML = "Twoje słowo:";
+      fsMessageSecondary.innerHTML = word;
+      fullscreenMessage.className = 'crewmate-role';
+    }
+    
+    fullscreenMessage.style.animation = 'none';
+    fullscreenMessage.offsetHeight;
+    fullscreenMessage.style.display = 'flex';
+    fullscreenMessage.style.animation = 'slideInUp 0.5s ease forwards';
+
+  }, 3000);
+  
+  // Schowaj rolę
+  setTimeout(() => {
+    fullscreenMessage.style.animation = 'horizontalSlideOut 0.4s ease forwards';
+  }, 6000); 
+  
+  // Pokaż, kto zaczyna
+  setTimeout(() => {
+    fsMessagePrimary.textContent = "Zaczyna mówić:";
+    fsMessageSecondary.textContent = starterName;
+    fullscreenMessage.className = 'starter-role'; 
+    
+    fullscreenMessage.style.animation = 'horizontalSlideIn 0.4s ease forwards';
+  }, 6400); 
+
+  // Schowaj wszystko i odblokuj grę
+  setTimeout(() => {
+    fullscreenOverlay.classList.add('is-hiding'); 
+    isAnimating = false; // Odblokuj przyciski
+    setTimeout(() => {
+      fullscreenOverlay.style.display = 'none'; 
+      fullscreenOverlay.classList.remove('is-visible', 'is-hiding');
+      fsMessagePrimary.textContent = '';
+      fsMessageSecondary.textContent = '';
+      fullscreenMessage.style.display = 'none';
+    }, 500); 
+  }, 8400); 
+}
 
 
 function listenToRoom(roomCode) {
@@ -1048,10 +1133,11 @@ function listenToRoom(roomCode) {
     
     const room = snapshot.val();
     if (!room) {
-      // Sprawdzenie isAnimating usunięte
-      console.log('Pokój usunięty:', roomCode);
-      showMessage('❌ Pokój został usunięty!');
-      resetToLobby();
+      if (!isAnimating) {
+        console.log('Pokój usunięty:', roomCode);
+        showMessage('❌ Pokój został usunięty!');
+        resetToLobby();
+      }
       return;
     }
 
@@ -1060,7 +1146,7 @@ function listenToRoom(roomCode) {
     const hostExists = Object.values(players).some(p => p.isHost);
     const iAmInRoom = players[currentPlayerId];
     
-    if (!iAmInRoom) { // Sprawdzenie isAnimating usunięte
+    if (!iAmInRoom && !isAnimating) { 
         console.log('Wyrzucono z pokoju lub błąd stanu.');
         showMessage('❌ Zostałeś rozłączony z pokojem.');
         resetToLobby();
@@ -1111,22 +1197,22 @@ function listenToRoom(roomCode) {
     const iAmImpostor = iAmInRoom && iAmInRoom.role === 'impostor';
     const hint = room.impostorHint;
     
-    // Ta sekcja jest teraz jedynym wskaźnikiem startu gry. Działa idealnie.
     if (!votingActive) {
-      wordDisplay.innerHTML = room.gameStarted && room.currentWord && iAmInRoom
-        ? (iAmImpostor
+      // MODYFIKACJA: Pokaż słowo dopiero PO animacji (ona ustawi `isAnimating = false`)
+      if (room.gameStarted && room.currentWord && iAmInRoom && !isAnimating) {
+        wordDisplay.innerHTML = iAmImpostor
           ? `Twoje słowo: <span class="word-impostor">OSZUST! ${hint ? `<span class="impostor-hint-span">(Podpowiedź: ${hint})</span>` : ''}</span>`
-          : `Twoje słowo: <span class="word-normal">${room.currentWord}</span>`)
-        : '';
+          : `Twoje słowo: <span class="word-normal">${room.currentWord}</span>`;
+      } else if (!room.gameStarted) {
+        wordDisplay.innerHTML = ''; // Wyczyść słowo w lobby
+      }
     }
 
-    // Ta sekcja jest teraz jedynym wskaźnikiem końca rundy. Działa idealnie.
     if (room.lastRoundSummary && !room.gameStarted) {
       lastRoundSummaryTitle.style.display = 'block';
       lastRoundSummary.innerHTML = room.lastRoundSummary;
       lastRoundSummary.style.display = 'block';
     } else {
-      // Automatycznie czyści się, gdy `lastRoundSummary` jest 'null' (przy starcie gry)
       lastRoundSummaryTitle.style.display = 'none';
       lastRoundSummary.style.display = 'none';
     }
@@ -1136,7 +1222,40 @@ function listenToRoom(roomCode) {
     confirmVoteBtn.style.display = votingActive && !myVote ? 'block' : 'none';
     endRoundBtn.style.display = 'none';
 
-    // Cała skomplikowana logika flag i animacji została USUNIĘTA
+    // =================================================================
+    // MODYFIKACJA: NOWA, PROSTA LOGIKA "ZAPADKI" (LATCH)
+    // =================================================================
+
+    const newStarterId = room.starterId;
+
+    // 1. Sprawdź, czy gra się rozpoczęła I czy jest nowy starterId
+    if (room.gameStarted && newStarterId && newStarterId !== lastSeenStarterId) {
+      console.log(`Nowa runda! Starter ID: ${newStarterId}. Ostatni: ${lastSeenStarterId}`);
+      
+      // 2. ZAMKNIJ ZAPADKĘ: Zapisz ten starterId, aby nie odpalić animacji ponownie
+      lastSeenStarterId = newStarterId; 
+      
+      // 3. Zbierz dane do animacji
+      const starterName = players[newStarterId]?.name || '...';
+      const myWord = room.currentWord;
+      const myHint = room.impostorHint;
+      const amIImpostor = iAmInRoom.role === 'impostor';
+      
+      // 4. Ukryj stare słowo natychmiast
+      wordDisplay.innerHTML = ''; 
+
+      // 5. Uruchom sekwencję
+      runGameStartSequence(amIImpostor, myWord, myHint, starterName);
+    }
+    
+    // 6. Jeśli gra się NIE toczy (jesteśmy w lobby), zresetuj zapadkę
+    if (!room.gameStarted) {
+      lastSeenStarterId = null;
+    }
+    
+    // =================================================================
+    // KONIEC LOGIKI ZAPADKI
+    // =================================================================
 
     if (room.resetMessage) {
       showMessage(room.resetMessage); 
@@ -1160,8 +1279,8 @@ function listenToRoom(roomCode) {
 }
 
 startGameBtn.addEventListener('click', () => {
+  if (isAnimating) return; // Blokada na czas animacji
   console.log('Kliknięto Start gry');
-  // if (isAnimating) return; // USUNIĘTE
   if (!isHost) {
     console.log('Tylko host może rozpocząć grę');
     return;
@@ -1228,8 +1347,8 @@ startGameBtn.addEventListener('click', () => {
     updates.currentWord = word;
     updates.currentCategory = category;
     updates.impostorHint = hint; 
-    updates.starterId = starterId;
-    updates.lastRoundSummary = null; // To jest kluczowe - czyści podsumowanie poprzedniej rundy
+    updates.starterId = starterId; // To jest klucz do odpalenia animacji
+    updates.lastRoundSummary = null; 
     updates.roundEndMessage = null; 
     
     roomRef.update(updates).then(() => {
@@ -1245,7 +1364,7 @@ startGameBtn.addEventListener('click', () => {
 });
 
 startVoteBtn.addEventListener('click', () => {
-  // if (isAnimating) return; // USUNIĘTE
+  if (isAnimating) return; // Blokada na czas animacji
   console.log('Kliknięto Rozpocznij głosowanie');
   if (!isHost) {
     console.log('Tylko host może rozpocząć głosowanie');
@@ -1257,7 +1376,7 @@ startVoteBtn.addEventListener('click', () => {
 });
 
 confirmVoteBtn.addEventListener('click', () => {
-  // if (isAnimating) return; // USUNIĘTE
+  if (isAnimating) return; // Blokada na czas animacji
   if (!selectedPlayerId) {
     showMessage('❌ Najpierw wybierz gracza, na którego chcesz zagłosować!', 2500);
     return;
@@ -1267,7 +1386,7 @@ confirmVoteBtn.addEventListener('click', () => {
 
 // Przycisk "Zakończ rundę" (DEBUG)
 endRoundBtn.addEventListener('click', () => {
-  // if (isAnimating) return; // USUNIĘTE
+  if (isAnimating) return; // Blokada na czas animacji
   console.log('Kliknięto Zakończ rundę (PRZYCISK PANIKI)');
   if (!isHost) {
     console.log('Tylko host może zakończyć rundę');
@@ -1293,7 +1412,7 @@ endRoundBtn.addEventListener('click', () => {
       starterId: null,
       impostorsKnow: null,
       lastRoundSummary: summary, 
-      roundEndMessage: summary, // Ta linia nic już nie robi, ale nie szkodzi
+      roundEndMessage: summary,
     };
     Object.keys(players).forEach(id => {
       updates[`players/${id}/role`] = null;
@@ -1302,7 +1421,6 @@ endRoundBtn.addEventListener('click', () => {
 
     roomRef.update(updates).then(() => {
       console.log('Runda zakończona:', { word: currentWord, impostorIds });
-      // Flagi usunięte
     }).catch(error => {
       console.error('Błąd kończenia rundy:', error);
       showMessage('❌ Błąd kończenia rundy!');
