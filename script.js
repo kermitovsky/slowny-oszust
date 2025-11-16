@@ -1187,6 +1187,9 @@ function listenToRoom(roomCode) {
     // =================================================================
 
     const newStarterId = room.starterId;
+    const animationDelay = 300; // Czas trwania animacji fadeOut z CSS
+    const roleDuration = 5000;
+    const starterDuration = 4000;
 
     // 1. ZAPADKA STARTU RUNDY
     if (room.gameStarted && newStarterId && newStarterId !== lastSeenStarterId) {
@@ -1223,13 +1226,13 @@ function listenToRoom(roomCode) {
       // 2. Ustaw timer na schowanie roli
       setTimeout(() => {
         hideModal(roleMessageBox); // Schowaj z animacją fadeOut (300ms)
-      }, 5000); // Czas pokazywania pierwszej wiadomości
+      }, roleDuration); // Czas pokazywania pierwszej wiadomości
 
       // 3. Ustaw timer na pokazanie drugiego komunikatu (po schowaniu pierwszego)
       setTimeout(() => {
         // Użyj showMessage (białe okno) dla drugiego komunikatu, aby uniknąć konfliktu
-        showMessage(starterMsg, 4000); 
-      }, 5300); // 5000ms + 300ms na fadeOut
+        showMessage(starterMsg, starterDuration); 
+      }, roleDuration + animationDelay); // 5000ms + 300ms 
 
       // 4. Odblokuj pokazywanie słowa po CAŁEJ sekwencji
       setTimeout(() => {
@@ -1239,7 +1242,7 @@ function listenToRoom(roomCode) {
             ? `Twoje słowo: <span class="word-impostor">OSZUST! ${myHint ? `<span class="impostor-hint-span">(Podpowiedź: ${myHint})</span>` : ''}</span>`
             : `Twoje słowo: <span class="word-normal">${room.currentWord}</span>`;
         }
-      }, 9600); // 5300 + 4000 + 300 (zniknięcie drugiego okna)
+      }, roleDuration + animationDelay + starterDuration); // 5300ms + 4000ms
     }
     
     // 2. ZAPADKA KOŃCA RUNDY
@@ -1252,8 +1255,15 @@ function listenToRoom(roomCode) {
       
       // audioEnd.play(); // USUNIĘTE
       
-      // Pokaż podsumowanie w dużym oknie (na 5 sekund, samo zniknie)
-      showRoleMessage(newSummary, 5000);
+      // MODYFIKACJA 4: Pokaż podsumowanie w dużym oknie
+      showRoleMessage(newSummary); // Pokaż
+        
+      // MODYFIKACJA: Dodaj timer, aby schować okno po 5 sekundach
+      setTimeout(() => {
+          if (currentModal === roleMessageBox) { // Upewnij się, że to wciąż to okno
+              hideModal(roleMessageBox); // Schowaj z animacją fadeOut
+          }
+      }, 5000);
     }
     
     if (!room.gameStarted) {
@@ -1657,5 +1667,5 @@ customWordInput.addEventListener('keypress', (e) => {
   }
 });
 
-// MODYFIKACJA 3: Alert testowy
-alert("Słowny Impostor v30 załadowany!");
+// MODYFIKACJA 3: Usunięcie alertu
+// alert("Słowny Impostor v30 załadowany!");
