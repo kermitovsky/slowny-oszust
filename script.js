@@ -1,3 +1,5 @@
+alert("ŁADUJĘ KOD v15/v19!"); // TESTOWY ALERT
+
 // Elementy DOM
 const playerNameInput = document.getElementById('playerName');
 const createRoomBtn = document.getElementById('createRoom');
@@ -537,7 +539,6 @@ function showMessage(text, duration = 3500) {
   }, duration);
 }
 
-// Ta funkcja nie jest już używana do pokazywania ról
 function showRoleMessage(text, duration = 5000) {
   console.log("showRoleMessage (nieużywane):", text);
 }
