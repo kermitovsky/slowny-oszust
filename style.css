@@ -595,19 +595,21 @@ body.voting-active #playersList li.host.has-voted .avatar::after {
 #hintChanceSlider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 28px; 
-  height: 28px; 
+  /* MODYFIKACJA 3: Zwiększono rozmiar */
+  width: 32px; 
+  height: 32px; 
   border-radius: 50%;
   background: var(--c-primary);
   border: 4px solid var(--c-text-light);
   cursor: pointer;
-  margin-top: -10px; 
+  margin-top: -12px; /* MODYFIKACJA 3: Dopasowanie centrowania */
   box-shadow: 0 2px 5px var(--c-shadow-heavy);
 }
 
 #hintChanceSlider::-moz-range-thumb {
-  width: 28px; 
-  height: 28px; 
+  /* MODYFIKACJA 3: Zwiększono rozmiar */
+  width: 32px; 
+  height: 32px; 
   border-radius: 50%;
   background: var(--c-primary);
   border: 4px solid var(--c-text-light);
@@ -724,7 +726,8 @@ body.dark-mode #hintChanceSlider::-moz-range-thumb {
 .category-actions button {
   width: 28px;
   height: 28px;
-  font-size: 1.6rem;
+  /* MODYFIKACJA 1: Zmniejszenie ikon */
+  font-size: 1rem; 
   font-weight: bold;
   color: white;
   border: none;
@@ -734,6 +737,7 @@ body.dark-mode #hintChanceSlider::-moz-range-thumb {
   margin: 0;
   min-width: 0;
   line-height: 28px;
+  text-align: center;
 }
 .category-actions .edit-btn {
   background-color: var(--c-accent);
@@ -1010,9 +1014,15 @@ body.dark-mode #messageBox:not(.copy-message) {
   border-radius: 50%;
   background: var(--c-glass-highlight);
   border: 1px solid var(--c-glass-border);
-  font-size: 2.5rem;
+  font-size: 2.5rem; 
   font-weight: bold;
   transition: opacity 0.3s ease, background 0.3s ease;
+  /* MODYFIKACJA 2: Centrowanie + / - */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1; 
 }
 #impostorSelectionBox #minusImpostor:hover:not(:disabled),
 #impostorSelectionBox #plusImpostor:hover:not(:disabled) {
