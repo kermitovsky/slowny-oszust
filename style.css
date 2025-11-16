@@ -194,7 +194,7 @@ button:disabled {
   animation-name: slideInUp;
 }
 .modal-box.is-hiding {
-  animation-name: fadeOut; /* ZMIANA: Płynne znikanie */
+  animation-name: fadeOut; 
 }
 
 
@@ -258,8 +258,7 @@ body.dark-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   font-family: var(--font-heading);
   font-weight: 800;
 }
-/* NOWY STYL: Podpowiedź w tekście */
-.word-impostor span {
+.impostor-hint-span {
   color: var(--c-text-light-alt);
   font-weight: 500;
   font-size: 1.8rem;
@@ -356,7 +355,6 @@ body.dark-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   margin: 1rem 0;
 }
 
-/* *** NOWE STYLE DLA PODSUMOWANIA RUNDY *** */
 #lastRoundSummaryTitle {
   display: none; 
   font-size: 1.4rem;
@@ -1405,9 +1403,8 @@ body.dark-mode #messageBox:not(.copy-message) {
     font-size: 5vw;
   }
   
-  /* Styl podpowiedzi na mobilce */
   #wordDisplay .impostor-hint-span {
-    font-size: 1.4rem; /* Mniejsza czcionka na mobilce */
-    display: block; /* Pod spodem, a nie obok */
+    font-size: 1.4rem;
+    display: block;
   }
 }
