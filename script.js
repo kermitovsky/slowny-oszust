@@ -31,7 +31,10 @@ const impostorTeamBox = document.getElementById('impostorTeamBox');
 const customCategoryBox = document.getElementById('customCategoryBox'); 
 const rulesBox = document.getElementById('rulesBox');
 
-// Elementy animacji (USUNIĘTE)
+// MODYFIKACJA 1: Elementy audio
+const audioStart = document.getElementById('audio-start');
+const audioVote = document.getElementById('audio-vote');
+const audioEnd = document.getElementById('audio-end');
 
 const closeRulesBtn = document.getElementById('closeRules');
 const closeRulesTopBtn = document.getElementById('closeRulesTop');
@@ -66,6 +69,7 @@ const confirmVoteBtn = document.getElementById('confirmVoteBtn');
 const voteResultDisplay = document.getElementById('voteResultDisplay');
 const lastRoundSummaryTitle = document.getElementById('lastRoundSummaryTitle'); 
 const lastRoundSummary = document.getElementById('lastRoundSummary'); 
+const lobbyCategories = document.getElementById('lobbyCategories'); // MODYFIKACJA 3
 
 // Elementy Własnych Kategorii 
 const closeCustomCategoryBtn = document.getElementById('closeCustomCategoryBtn');
@@ -485,7 +489,8 @@ function assignUniqueColor(players) {
   return selectedColor;
 }
 
-function updatePlayersList(players, localIsHost) {
+// MODYFIKACJA 2: Dodano `starterId` jako argument
+function updatePlayersList(players, localIsHost, starterId = null) {
   playersList.innerHTML = '';
   if (!players || !Object.keys(players).length) {
     playersList.innerHTML = '<li>Brak graczy</li>';
@@ -508,6 +513,11 @@ function updatePlayersList(players, localIsHost) {
     }
     if (id === currentPlayerId) {
       li.classList.add('self');
+    }
+    
+    // MODYFIKACJA 2: Dodanie klasy dla startującego
+    if (id === starterId) {
+      li.classList.add('is-starter');
     }
 
     if (localIsHost && id !== currentPlayerId) {
@@ -538,6 +548,16 @@ function showMessage(text, duration = 3500) {
   setTimeout(() => {
     hideModal(messageBox); 
     messageBox.classList.remove('copy-message');
+  }, duration);
+}
+
+// MODYFIKACJA 4: `showRoleMessage` jest teraz używane także do końca rundy
+function showRoleMessage(text, duration = 5000) {
+  roleMessageBox.innerHTML = text; // Użyj innerHTML, aby obsłużyć <span>
+  roleMessageBox.classList.remove('is-fading-out'); // Upewnij się, że jest widoczne
+  showModal(roleMessageBox);
+  setTimeout(() => {
+    hideModal(roleMessageBox);
   }, duration);
 }
 
@@ -995,6 +1015,8 @@ function updatePlayersListForVoting(players) {
 
 function voteForPlayer(targetId) {
   console.log(`Głosuję na: ${targetId}`);
+  // MODYFIKACJA 1: Odtwórz dźwięk głosu
+  audioVote.play();
   db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).update({
     votedFor: targetId
   });
@@ -1121,6 +1143,7 @@ function listenToRoom(roomCode) {
 
     isHost = iAmInRoom ? iAmInRoom.isHost : false; 
 
+    // MODYFIKACJA 2: Przekaż starterId do updatePlayersList
     if (votingActive) {
       document.body.classList.add('voting-active');
       wordDisplay.innerHTML = "<strong>Czas na głosowanie! Kto jest oszustem?</strong>";
@@ -1128,7 +1151,7 @@ function listenToRoom(roomCode) {
     } else {
       document.body.classList.remove('voting-active');
       selectedPlayerId = null;
-      updatePlayersList(players, isHost); 
+      updatePlayersList(players, isHost, room.starterId); // Przekaż starterId
     }
 
     document.querySelectorAll('.kickBtn').forEach(btn => {
@@ -1138,12 +1161,20 @@ function listenToRoom(roomCode) {
     });
 
     playerCountDisplay.innerHTML = `Gracze: <span class="bold">${playerIds.length}</span>`;
-    impostorCountDisplay.innerHTML = `Impostorzy: <span class="bold">${room.numImpostors || 0}</span>`;
-    roundCounter.innerHTML = room.currentRound > 0 ? `Runda: <strong>${room.currentRound}</strong>` : '';
     
+    // MODYFIKACJA 3: Zawsze pokazuj info o lobby
     const hintChanceText = hintChanceValues[room.hintChance || 0];
     const hintOnStartText = room.hintOnStart ? " (Start)" : "";
+    impostorCountDisplay.innerHTML = `Impostorzy: <span class="bold">${room.numImpostors || 0}</span>`;
     hintChanceInfoDisplay.innerHTML = `Podpowiedź: <span class="bold">${hintChanceText}${hintOnStartText}</span>`;
+    
+    if (!room.gameStarted && !votingActive) { // Jesteśmy w lobby
+      lobbyCategories.style.display = 'block';
+      lobbyCategories.textContent = 'Kategorie: ' + (room.categories.join(', ') || 'Brak');
+    } else {
+      lobbyCategories.style.display = 'none';
+    }
+
 
     const iAmImpostor = iAmInRoom && iAmInRoom.role === 'impostor';
     const hint = room.impostorHint;
@@ -1173,7 +1204,7 @@ function listenToRoom(roomCode) {
     endRoundBtn.style.display = 'none';
 
     // =================================================================
-    // MODYFIKACJA: LOGIKA "ZAPADKI" DLA PROPOZYCJI 1
+    // LOGIKA "ZAPADKI" (LATCH)
     // =================================================================
 
     const newStarterId = room.starterId;
@@ -1184,6 +1215,9 @@ function listenToRoom(roomCode) {
       
       lastSeenStarterId = newStarterId; // Zamknij zapadkę
       lastSeenSummary = null; // Otwórz zapadkę końca rundy
+      
+      // MODYFIKACJA 1: Odtwórz dźwięk startu
+      audioStart.play();
       
       const starterName = players[newStarterId]?.name || '...';
       const myWord = room.currentWord;
@@ -1204,11 +1238,8 @@ function listenToRoom(roomCode) {
       
       wordDisplay.innerHTML = ''; 
       
-      // Wywołaj sekwencję z przenikaniem
-      // 5s na rolę, potem 1s zanikania, 1s pojawiania, 3s na startera = 10s łącznie
       showRoleMessageSequence(roleMsg, starterMsg, 10000, 5000, 1000); 
 
-      // Odblokuj pokazywanie słowa po zakończeniu animacji
       setTimeout(() => {
         if (room.gameStarted && room.currentWord && iAmInRoom) {
           wordDisplay.innerHTML = amIImpostor
@@ -1226,8 +1257,11 @@ function listenToRoom(roomCode) {
       lastSeenSummary = newSummary; // Zamknij zapadkę
       lastSeenStarterId = null; // Otwórz zapadkę startu
       
-      // Pokaż podsumowanie w 'showMessage' (małe okienko)
-      showMessage(newSummary, 5000);
+      // MODYFIKACJA 1: Odtwórz dźwięk końca
+      audioEnd.play();
+      
+      // MODYFIKACJA 4: Pokaż podsumowanie w dużym oknie
+      showRoleMessage(newSummary, 5000);
     }
     
     if (!room.gameStarted) {
