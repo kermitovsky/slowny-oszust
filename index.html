@@ -7,7 +7,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=27" />
+  <link rel="stylesheet" href="style.css?v=28" />
 </head>
 <body>
   
@@ -36,6 +36,8 @@
       <p id="impostorCountDisplay"></p>
       <p id="hintChanceInfoDisplay"></p> 
     </div>
+    
+    <p id="lobbyCategories" style="display:none;"></p>
     
     <p id="voteResultDisplay" style="display:none;"></p>
     
@@ -161,8 +163,11 @@
     <button id="closeRules" title="Zamknij">X</button> 
   </div>
 
+  <audio id="audio-start" src="start.mp3" preload="auto"></audio>
+  <audio id="audio-vote" src="vote.mp3" preload="auto"></audio>
+  <audio id="audio-end" src="end.mp3" preload="auto"></audio>
+
   <script src="config.js"></script>
-  <script src="script.js?v=27"></script> 
+  <script src="script.js?v=28"></script> 
 </body>
 </html>
-
