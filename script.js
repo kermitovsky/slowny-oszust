@@ -86,8 +86,7 @@ let impostorCount = 1;
 let selectedCategories = [];
 let selectedEmoji = null;
 let selectedPlayerId = null; 
-let isAnimating = false; // Prosta blokada na czas pokazywania modali
-// MODYFIKACJA: Niezawodne "zapadki"
+let isAnimating = false; 
 let lastSeenStarterId = null; 
 let lastSeenSummary = null; 
 
@@ -162,7 +161,7 @@ function showScreen(screenToShow) {
 }
 
 function showModal(modalToShow) {
-  if (isAnimating && modalToShow !== roleMessageBox) return; // Pozwól `roleMessageBox` przerwać `messageBox`
+  if (isAnimating && modalToShow !== roleMessageBox && modalToShow !== messageBox) return;
   if (currentModal && currentModal !== modalToShow) {
     hideModal(currentModal);
   }
@@ -173,8 +172,10 @@ function showModal(modalToShow) {
   modalToShow.classList.add('is-visible');
   currentModal = modalToShow;
   
-  rulesBtn.classList.add('hidden');
-  themeToggle.classList.add('hidden');
+  if (modalToShow !== messageBox) {
+    rulesBtn.classList.add('hidden');
+    themeToggle.classList.add('hidden');
+  }
 }
 
 function hideModal(modalToHide, force = false) {
@@ -540,15 +541,32 @@ function showMessage(text, duration = 3500) {
   }, duration);
 }
 
-// MODYFIKACJA: Prosta funkcja do pokazywania/chowania `roleMessageBox`
-function showRoleMessage(text, duration = 5000) {
+// MODYFIKACJA: Funkcja do pokazywania sekwencji startowej (Propozycja 1 z przenikaniem)
+function showRoleMessageSequence(roleMsg, starterMsg, totalDuration = 9000, fadeDuration = 300) {
   isAnimating = true; // Zablokuj inne akcje na czas pokazywania roli
-  roleMessageBox.innerHTML = text; // Użyj innerHTML, aby obsłużyć <span>
+  
+  // 1. Pokaż rolę
+  roleMessageBox.innerHTML = roleMsg;
+  roleMessageBox.classList.remove('is-fading-out'); // Upewnij się, że jest widoczne
   showModal(roleMessageBox);
+  
+  // 2. Po 5 sekundach zacznij przenikanie
+  setTimeout(() => {
+    roleMessageBox.classList.add('is-fading-out'); // Zacznij znikanie
+    
+    // 3. W połowie znikania podmień tekst i zacznij pojawianie
+    setTimeout(() => {
+      roleMessageBox.innerHTML = starterMsg;
+      roleMessageBox.classList.remove('is-fading-out'); // Zacznij pojawianie
+    }, fadeDuration); // Czas musi być zgodny z CSS transition
+
+  }, 5000); // Czas pokazywania pierwszej wiadomości
+
+  // 4. Po całkowitym czasie schowaj modal i odblokuj
   setTimeout(() => {
     hideModal(roleMessageBox);
-    isAnimating = false; // Odblokuj po zniknięciu
-  }, duration);
+    isAnimating = false; 
+  }, totalDuration);
 }
 
 function resetToLobby() {
@@ -574,7 +592,6 @@ function resetToLobby() {
   
   selectedEmoji = null;
   selectedPlayerId = null; 
-  // MODYFIKACJA: Resetowanie zapadek
   lastSeenStarterId = null; 
   lastSeenSummary = null;
   
@@ -776,7 +793,7 @@ function createRoom(numImpostors, chanceIndex, onStart, knows) {
     hintChance: chanceIndex,
     hintOnStart: onStart,
     impostorsKnow: knows,
-    currentRound: 0 // Inicjalizacja licznika rund
+    currentRound: 0
   }).then(() => {
     console.log('Pokój utworzony:', currentRoomCode);
     showScreen(gameScreen); 
@@ -1052,8 +1069,7 @@ function tallyVotes(room) {
       summaryMessage = `Impostor wygrał rundę!<br>(Wygłosowano <strong>${ejectedPlayer.name}</strong>)<br>Słowo: <strong>${room.currentWord}</strong>`;
     }
     
-    updates.lastRoundSummary = summaryMessage; // To pokaże się w lobby
-    // `lastRoundSummary` odpali zapadkę w `listenToRoom`
+    updates.lastRoundSummary = summaryMessage; // To pokaże się w lobby i odpali zapadkę
   }
 
   db.ref(`rooms/${currentRoomCode}`).update(updates);
@@ -1131,18 +1147,15 @@ function listenToRoom(roomCode) {
     const hint = room.impostorHint;
     
     if (!votingActive) {
-      // Pokaż słowo dopiero PO animacji
       if (room.gameStarted && room.currentWord && iAmInRoom && !isAnimating) { 
         wordDisplay.innerHTML = iAmImpostor
           ? `Twoje słowo: <span class="word-impostor">OSZUST! ${hint ? `<span class="impostor-hint-span">(Podpowiedź: ${hint})</span>` : ''}</span>`
           : `Twoje słowo: <span class="word-normal">${room.currentWord}</span>`;
       } else if (!room.gameStarted) {
-        wordDisplay.innerHTML = ''; // Wyczyść słowo w lobby
+        wordDisplay.innerHTML = ''; 
       }
     }
 
-    // Pokazywanie `lastRoundSummary` jest teraz obsługiwane przez animację końca rundy
-    // Ale zostawiamy to dla trwałości w lobby
     if (room.lastRoundSummary && !room.gameStarted && !isAnimating) { 
       lastRoundSummaryTitle.style.display = 'block';
       lastRoundSummary.innerHTML = room.lastRoundSummary;
@@ -1187,30 +1200,19 @@ function listenToRoom(roomCode) {
       
       const starterMsg = `Zaczyna mówić: <strong>${starterName}</strong>`;
       
-      // Ukryj słowo na czas animacji
       wordDisplay.innerHTML = ''; 
-      isAnimating = true; // Zablokuj pokazywanie słowa
-
-      // 1. Pokaż rolę
-      showRoleMessage(roleMsg, 9000); // Pokaż na 9 sekund łącznie
       
-      // 2. Po 5 sekundach zmień tekst
-      setTimeout(() => {
-          if (currentModal === roleMessageBox) { // Sprawdź, czy okno nie zostało zamknięte
-              roleMessageBox.innerHTML = starterMsg;
-          }
-      }, 5000);
+      // Wywołaj sekwencję z przenikaniem
+      showRoleMessageSequence(roleMsg, starterMsg, 9000, 300);
 
-      // 3. Po 9 sekundach odblokuj pokazywanie słowa
+      // Odblokuj pokazywanie słowa po zakończeniu animacji
       setTimeout(() => {
-        isAnimating = false;
-        // Ręcznie odśwież `wordDisplay`, bo listener mógł być zablokowany
         if (room.gameStarted && room.currentWord && iAmInRoom) {
           wordDisplay.innerHTML = amIImpostor
             ? `Twoje słowo: <span class="word-impostor">OSZUST! ${myHint ? `<span class="impostor-hint-span">(Podpowiedź: ${myHint})</span>` : ''}</span>`
             : `Twoje słowo: <span class="word-normal">${room.currentWord}</span>`;
         }
-      }, 9000);
+      }, 9000); // Musi być równe totalDuration
     }
     
     // 2. ZAPADKA KOŃCA RUNDY
@@ -1225,7 +1227,6 @@ function listenToRoom(roomCode) {
       showMessage(newSummary, 5000);
     }
     
-    // 3. Reset zapadki (na wszelki wypadek, gdyby starterId był null)
     if (!room.gameStarted) {
       lastSeenStarterId = null;
     }
@@ -1235,7 +1236,6 @@ function listenToRoom(roomCode) {
     // =================================================================
 
     if (room.resetMessage && room.resetMessage !== lastSeenSummary) {
-      // Użyj `resetMessage` tylko dla komunikatów "REMIS", które nie są `lastRoundSummary`
       showMessage(room.resetMessage, 4000); 
       if (isHost) {
         db.ref(`rooms/${currentRoomCode}/resetMessage`).remove();
