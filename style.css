@@ -1327,6 +1327,10 @@ body.dark-mode #messageBox:not(.copy-message) {
     padding: 1.5rem 1rem; /* Mniej paddingu po bokach */
     max-height: 85vh;
     font-size: 1.4rem;
+    /* MODYFIKACJA: Ustawienie szerokości modala */
+    width: 90vw;
+    max-width: 90vw;
+    box-sizing: border-box; /* Upewnij się, że padding jest wliczony */
   }
   #rulesBox h2 {
     font-size: 2rem;
@@ -1365,5 +1369,20 @@ body.dark-mode #messageBox:not(.copy-message) {
   #wordDisplay .impostor-hint-span {
     font-size: 1.4rem;
     display: block;
+  }
+  
+  /* MODYFIKACJA: Zezwól elementom wewnątrz modala na użycie pełnej szerokości */
+  .modal-box .impostor-selector,
+  .modal-box .slider-container,
+  .modal-box .team-selector,
+  .modal-box .category-grid,
+  .modal-box button {
+    max-width: 100%; /* Usuwa ograniczenie 350px wewnątrz modali */
+  }
+  
+  /* POPRAWKA SLIDERA: Dopasowanie etykiet do nowej szerokości */
+  #hintChanceSlider {
+    width: calc(100% - 28px);
+    margin: 0 14px;
   }
 }
