@@ -340,6 +340,8 @@ body.dark-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   text-shadow: 1px 1px 2px var(--c-shadow);
   text-align: center;
   margin: 0.5rem 0;
+  /* MODYFIKACJA: Dodajemy min-height, aby zapobiec skakaniu layoutu */
+  min-height: 1.2em;
 }
 #roundCounter strong {
   font-weight: 800;
@@ -906,8 +908,84 @@ body.dark-mode .team-selector button:nth-of-type(2).selected { /* NIE */
 }
 
 /* =================================================================== */
-/* 5.9. STYL EKRANU PEŁNOEKRANOWEGO (USUNIĘTE) */
+/* 5.9. STYL EKRANU PEŁNOEKRANOWEGO (MODYFIKACJA) */
 /* =================================================================== */
+#fullscreen-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  z-index: 2000;
+  display: none; 
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  opacity: 0;
+  color: var(--c-text-light-alt);
+  font-family: var(--font-heading);
+}
+#fullscreen-overlay.is-visible {
+  display: flex;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+#fullscreen-overlay.is-hiding {
+  opacity: 0;
+  transition: opacity 0.5s ease-out;
+}
+
+#countdown-display {
+  font-size: 15vw; 
+  font-weight: 800;
+  animation: countdown-pulse 1s ease-in-out infinite;
+  display: none; 
+}
+
+#fullscreen-message {
+  display: none; 
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 1rem;
+}
+#fullscreen-message.show-message {
+  animation: slideInUp 0.5s ease forwards;
+}
+
+#fullscreen-message-primary {
+  font-size: 5vw;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1.1;
+}
+#fullscreen-message-secondary {
+  font-size: 3vw;
+  font-weight: 500;
+  margin: 0;
+  opacity: 0.8;
+}
+
+#fullscreen-message.impostor-role #fullscreen-message-primary {
+  color: var(--c-danger);
+}
+#fullscreen-message.impostor-role #fullscreen-message-secondary {
+  color: var(--c-danger);
+}
+#fullscreen-message.crewmate-role #fullscreen-message-primary {
+  color: var(--c-success);
+}
+#fullscreen-message.crewmate-role #fullscreen-message-secondary {
+  color: var(--c-success);
+}
+#fullscreen-message.starter-role #fullscreen-message-secondary {
+  color: var(--c-primary);
+  font-weight: 800;
+}
 
 
 /* --- Przyciski Pływające (Zasady, Tryb) --- */
@@ -1235,6 +1313,22 @@ body.dark-mode #messageBox:not(.copy-message) {
   to { opacity: 0; transform: translateX(-50px); }
 }
 
+/* MODYFIKACJA: Przywrócenie animacji dla nakładki */
+@keyframes horizontalSlideOut {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(-50px); }
+}
+@keyframes horizontalSlideIn {
+  from { opacity: 0; transform: translateX(50px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes countdown-pulse {
+  0% { transform: scale(1); opacity: 1; }
+  80% { transform: scale(1.3); opacity: 0; }
+  100% { transform: scale(1); opacity: 0; }
+}
+
 @keyframes pulse {
   0% { transform: scale(1); }
   50% { transform: scale(1.02); }
@@ -1300,6 +1394,17 @@ body.dark-mode #messageBox:not(.copy-message) {
   }
   .slider-labels {
     margin-top: 5px; 
+  }
+  
+  /* MODYFIKACJA: Przywrócenie styli mobilnych dla nakładki */
+  #countdown-display {
+    font-size: 30vw;
+  }
+  #fullscreen-message-primary {
+    font-size: 8vw;
+  }
+  #fullscreen-message-secondary {
+    font-size: 5vw;
   }
   
   #wordDisplay .impostor-hint-span {
