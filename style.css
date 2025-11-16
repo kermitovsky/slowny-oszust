@@ -968,8 +968,8 @@ body.dark-mode #messageBox:not(.copy-message) {
   font-size: 3.5rem;
   font-weight: bold;
   font-family: 'Segoe UI Black', var(--font-body);
-  /* MODYFIKACJA: Dodanie płynnego przejścia */
-  transition: opacity 0.3s ease-in-out;
+  /* MODYFIKACJA: Dłuższe, płynne przejście */
+  transition: opacity 1s ease-in-out;
 }
 /* MODYFIKACJA: Klasa do przenikania */
 #roleMessageBox.is-fading-out {
