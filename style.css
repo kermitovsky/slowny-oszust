@@ -906,10 +906,6 @@ body.dark-mode .team-selector button:nth-of-type(2).selected { /* NIE */
   margin-top: 1.5rem;
 }
 
-/* =================================================================== */
-/* 5.9. STYLE EKRANU PEŁNOEKRANOWEGO (USUNIĘTE) */
-/* =================================================================== */
-
 
 /* --- Przyciski Pływające (Zasady, Tryb) --- */
 #rulesBtn, #themeToggle {
@@ -972,6 +968,12 @@ body.dark-mode #messageBox:not(.copy-message) {
   font-size: 3.5rem;
   font-weight: bold;
   font-family: 'Segoe UI Black', var(--font-body);
+  /* MODYFIKACJA: Dodanie płynnego przejścia */
+  transition: opacity 0.3s ease-in-out;
+}
+/* MODYFIKACJA: Klasa do przenikania */
+#roleMessageBox.is-fading-out {
+  opacity: 0;
 }
 
 #impostorSelectionBox p {
