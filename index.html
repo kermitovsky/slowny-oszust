@@ -6,31 +6,23 @@
   <title>Słowny Impostor</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet" />
-  
-  <link rel="stylesheet" href="style.css?v=30" />
+  <link rel="stylesheet" href="style.css?v=31" />
 </head>
 <body>
+  
   <div id="modalBackdrop"></div>
-
+  
   <div class="container" id="loginScreen" data-screen>
     <h1 class="fancy-title">Słowny Impostor</h1>
-    
     <input type="text" id="playerName" placeholder="Podaj swój nick" />
-    
     <h3>Wybierz awatar</h3>
     <div id="emojiSelection"></div>
-    
     <hr class="section-divider" />
-    
     <button id="createRoom">Stwórz pokój</button>
-    
     <hr class="section-divider" />
-    
     <input type="text" id="roomCodeInput" placeholder="Kod pokoju" maxlength="4" />
     <button id="joinRoom">Dołącz do pokoju</button>
-    
     <p id="statusMessage"></p>
   </div>
 
@@ -39,10 +31,8 @@
       <p>Kod pokoju: <span id="roomCodeDisplay"></span></p>
       <button id="copyRoomCode" title="Kopiuj kod">📋</button>
     </div>
-    
     <p id="roundCounter"></p>
     <p id="wordDisplay"></p>
-
     <div id="countsContainer">
       <p id="playerCountDisplay"></p>
       <p id="impostorCountDisplay"></p>
@@ -69,61 +59,114 @@
   </div>
 
   <button id="rulesBtn" title="Zasady gry">i</button>
-  <button id="themeToggle" title="Przełącz motyw">🌓</button>
-  <button id="settingsBtn" title="Ustawienia" style="display:none;">⚙️</button>
-
-  <div id="rulesModal" class="modal">
-    <div class="modal-content">
-      <span id="rulesClose" class="close">&times;</span>
-      <h2>Zasady Gry</h2>
-      <p><strong>Cel:</strong><br/>Niewinni muszą znaleźć Impostora.<br/>Impostor musi udawać niewinnego i zgadnąć słowo.</p>
-      <p><strong>Przebieg:</strong><br/>Wszyscy (oprócz Impostora) dostają to samo tajne słowo. Każdy po kolei mówi JEDNO słowo-skojarzenie związane z tajnym hasłem.</p>
-      <p>Impostor widzi "Jesteś Impostorem" i musi wymyślać skojarzenia na podstawie tego, co mówią inni, żeby się nie zdradzić.</p>
-      <p><strong>Głosowanie:</strong><br/>Gdy wszyscy powiedzą swoje skojarzenie, następuje głosowanie na to, kto jest Impostorem.</p>
+  <button id="themeToggle" title="Przełącz tryb"></button>
+  
+  <div id="messageBox" class="modal-box" data-modal></div>
+  <div id="roleMessageBox" class="modal-box" data-modal></div>
+  
+  <div id="categorySelectionBox" class="modal-box custom-scrollbar" data-modal style="display:none;">
+    <p>Wybierz kategorie:</p>
+    <span id="allCategoriesBtn"><span class="checkbox"></span> Wszystkie</span>
+    <div class="category-grid">
+      <button id="createCustomCategoryBtn" class="category-btn custom-new-btn">+ Stwórz własną</button>
     </div>
+    <button id="confirmCategories">Dalej</button>
   </div>
   
-  <div id="settingsModal" class="modal">
-    <div class="modal-content">
-      <span id="settingsClose" class="close">&times;</span>
-      <h2>Ustawienia Gry</h2>
-      
-      <label for="impostorCountSelect">Liczba Impostorów:</label>
-      <select id="impostorCountSelect">
-        <option value="1" selected>1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-      </select>
-      <p class="small-info">Maksymalna liczba impostorów to połowa graczy (zaokrąglona w dół).</p>
-
-      <label for="hintChanceRange">Szansa na podpowiedź dla Impostora (%): <span id="hintChanceValue">10</span>%</label>
-      <input type="range" id="hintChanceRange" min="0" max="100" value="10" step="5">
-      <p class="small-info">Jeśli zadziała, Impostor zobaczy tylko kategorię słowa.</p>
-      
-      <hr />
-      <h3>Kategorie słów</h3>
-      <div id="categoriesCheckboxes">
-        </div>
-      
-      <button id="saveSettingsBtn" style="margin-top: 1rem;">Zapisz ustawienia</button>
+  <div id="impostorSelectionBox" class="modal-box" data-modal style="display:none;">
+    <p>Wybierz liczbę impostorów</p>
+    <p id="loadingMessage" style="display: none;">Ładowanie kategorii...</p>
+    <div class="impostor-selector">
+      <button id="minusImpostor" title="Zmniejsz">-</button>
+      <span id="impostorCount">1</span>
+      <button id="plusImpostor" title="Zwiększ">+</button>
     </div>
+    <button id="confirmImpostors" disabled>Dalej</button> <p id="recommendedPlayers"></p>
   </div>
 
-  <div id="myRoleModal" class="modal role-reveal-modal">
-    <div class="modal-content role-reveal-content">
-      <span id="closeRoleModal" class="close" style="display:none;">&times;</span>
-      <h2 id="roleTitle">Twoja rola to...</h2>
-      <div class="curtain-container">
-        <div class="curtain" id="curtain">
-          <span class="curtain-text">Kliknij, aby odkryć</span>
-        </div>
-        <div class="hidden-role-info" id="hiddenRoleInfo">
-          </div>
+  <div id="impostorHintBox" class="modal-box" data-modal style="display:none;">
+    <p>Szansa podpowiedzi dla impostora</p>
+    
+    <div class="slider-container">
+      <input type="range" min="0" max="4" value="0" step="1" id="hintChanceSlider" />
+      <div class="slider-labels">
+        <span class="slider-label label-active">0%</span>
+        <span class="slider-label">25%</span>
+        <span class="slider-label">50%</span>
+        <span class="slider-label">75%</span>
+        <span class="slider-label">100%</span>
       </div>
     </div>
+    
+    <div class="checkbox-container">
+      <input type="checkbox" id="hintOnStartCheckbox" />
+      <label for="hintOnStartCheckbox">
+        <span class="checkbox"></span>
+        Gdy zaczyna mówić
+      </label>
+    </div>
+    
+    <button id="confirmHintSettingsBtn">Dalej</button>
+  </div>
+  
+  <div id="impostorTeamBox" class="modal-box" data-modal style="display:none;">
+    <p>Czy impostorzy wiedzą o sobie?</p>
+    
+    <div class="team-selector">
+      <button id="teamKnowsBtn">Tak</button>
+      <button id="teamNotKnowsBtn" class="selected">Nie</button>
+    </div>
+    
+    <button id="confirmTeamSettingsBtn">Stwórz pokój</button>
+  </div>
+  
+  <div id="customCategoryBox" class="modal-box custom-scrollbar" data-modal style="display:none;">
+    <button id="closeCustomCategoryBtn" title="Zamknij">X</button>
+    <h2>Stwórz Własną Kategorię</h2>
+    
+    <input type="text" id="customCategoryNameInput" placeholder="Nazwa kategorii (np. Nasza Paczka)">
+    
+    <div class="custom-word-adder">
+      <input type="text" id="customWordInput" placeholder="Wpisz słowo (min. 3)">
+      <button id="addCustomWordBtn">Dodaj</button>
+    </div>
+    
+    <ul id="customWordsList">
+      </ul>
+    
+    <button id="saveCustomCategoryBtn" disabled>Zapisz i użyj</button>
   </div>
 
+  <div id="rulesBox" class="modal-box custom-scrollbar" data-modal style="display:none;">
+    <button id="closeRulesTop" title="Zamknij">X</button> 
+    <h2>Zasady gry Słowny Impostor</h2>
+    <h3>Cel gry</h3>
+    <p>Wciel się w detektywa słów! Twoim zadaniem jest opisanie tajemniczego słowa, nie zdradzając go, lub blefowanie jako impostor, który słowa nie zna. Celem jest zidentyfikowanie impostora przed końcem rundy!</p>
+    <h3>Przebieg gry</h3>
+    <ul>
+      <li><strong>Tworzenie pokoju:</strong> Host tworzy pokój, wybierając kategorie słów i liczbę impostorów (1–5). Gracze dołączają, wpisując kod pokoju.</li>
+      <li><strong>Start gry:</strong> Host uruchamia grę, gdy w pokoju jest odpowiednia liczba graczy (min. 3 dla 1 impostora, 4 dla 2, itd., maks. 10).</li>
+      <li><strong>Losowanie słowa:</strong> Gra losuje jedno słowo z wybranych kategorii. Normalni gracze znają słowo, impostorzy muszą blefować.</li>
+      <li><strong>Opisywanie:</strong> Gracze po kolei opisują słowo w kreatywny sposób, unikając jego bezpośredniego użycia. Losowy gracz zaczyna, z mniejszą szansą na impostora.</li>
+      <li><strong>Zakończenie rundy:</strong> Host może zakończyć rundę, gdy podejrzewa impostora. Omówcie, kto był impostorem, i zacznijcie nową rundę!</li>
+    </ul>
+    <h3>Role w grze</h3>
+    <ul>
+      <li><strong>Normalny gracz:</strong> Zna słowo i opisuje je, aby pomóc innym graczom, jednocześnie obserwując, kto może blefować.</li>
+      <li><strong>Impostor:</strong> Nie zna słowa i musi sprytnie udawać, że je zna, aby nie zostać zdemaskowanym.</li>
+      <li><strong>Host:</strong> Tworzy pokój, wybiera kategorie i liczbę impostorów, rozpoczyna i kończy rundy. Może też wyrzucać graczy z pokoju.</li>
+    </ul>
+    <h3>Porady</h3>
+    <ul>
+      <li>Bądź kreatywny w opisach, ale uważaj, by nie zdradzić słowa!</li>
+      <li>Obserwuj, czy opisy innych graczy są spójne – impostorzy mogą się zdradzić!</li>
+      <li>Graj w grupie do 10 osób dla najlepszej zabawy.</li>
+    </ul>
+    <button id="closeRules" title="Zamknij">X</button> 
+  </div>
+
+  <script src="config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <script src="script.js?v=31"></script>
+  <script src="script.js?v=31"></script> 
 </body>
 </html>
