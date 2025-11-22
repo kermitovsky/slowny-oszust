@@ -168,6 +168,27 @@ button:disabled {
   display: none;
 }
 
+/* NOWE: Tło przyciemniające (Backdrop) */
+#modalBackdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7); /* 70% przyciemnienia */
+  z-index: 1000; /* Pod modalami (1001), ale nad wszystkim innym */
+  display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none; /* Przepuszcza kliknięcia gdy ukryty */
+}
+
+#modalBackdrop.is-visible {
+  display: block;
+  opacity: 1;
+  pointer-events: auto;
+}
+
 .modal-box {
   position: fixed;
   top: 50%;
@@ -178,7 +199,7 @@ button:disabled {
   padding: 2rem 3rem;
   border-radius: 1.5rem;
   text-align: center;
-  z-index: 1001;
+  z-index: 1001; /* Musi być wyżej niż #modalBackdrop */
   display: none; 
   max-width: 90vw;
   box-shadow: 0 10px 30px var(--c-shadow-modal);
@@ -997,10 +1018,8 @@ body.dark-mode #messageBox:not(.copy-message) {
   font-size: 3.5rem;
   font-weight: bold;
   font-family: 'Segoe UI Black', var(--font-body);
-  /* MODYFIKACJA: Usunięcie transition, polegamy na animacji .is-hiding */
 }
 #roleMessageBox.is-fading-out {
-  /* Ten styl nie jest już używany, ale nie szkodzi */
   opacity: 0;
 }
 
