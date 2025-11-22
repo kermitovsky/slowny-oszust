@@ -30,6 +30,7 @@ const impostorHintBox = document.getElementById('impostorHintBox');
 const impostorTeamBox = document.getElementById('impostorTeamBox'); 
 const customCategoryBox = document.getElementById('customCategoryBox'); 
 const rulesBox = document.getElementById('rulesBox');
+const modalBackdrop = document.getElementById('modalBackdrop'); // NOWE: Tło
 
 // MODYFIKACJA 1: Usunięcie audio
 // const audioStart = document.getElementById('audio-start');
@@ -181,6 +182,12 @@ function showModal(modalToShow) {
   
   modalToShow.classList.remove('is-hiding');
   modalToShow.classList.add('is-visible');
+  
+  // NOWE: Pokaż tło przyciemniające
+  if (modalBackdrop) {
+    modalBackdrop.classList.add('is-visible');
+  }
+  
   currentModal = modalToShow;
   
   if (modalToShow !== messageBox) {
@@ -195,12 +202,21 @@ function hideModal(modalToHide, force = false) {
   if (force) {
     modalToHide.style.display = 'none';
     modalToHide.classList.remove('is-visible', 'is-hiding');
-    if (modalToHide === currentModal) currentModal = null;
+    if (modalToHide === currentModal) {
+        currentModal = null;
+        // NOWE: Ukryj tło przyciemniające przy force
+        if (modalBackdrop) modalBackdrop.classList.remove('is-visible');
+    }
     return;
   }
   
   modalToHide.classList.add('is-hiding');
   modalToHide.classList.remove('is-visible');
+  
+  // NOWE: Ukryj tło przyciemniające
+  if (modalBackdrop) {
+    modalBackdrop.classList.remove('is-visible');
+  }
   
   setTimeout(() => {
     modalToHide.style.display = 'none'; 
@@ -1068,8 +1084,24 @@ function tallyVotes(room) {
     let summaryMessage = '';
     if (ejectedPlayer.role === 'impostor') {
       summaryMessage = `Impostor został wykryty!<br>(Oszust: <strong>${ejectedPlayer.name}</strong>)<br>Słowo: <strong>${room.currentWord}</strong>`;
+      
+      // NOWE: Konfetti dla Niewinnych (kolorowe)
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+      
     } else {
       summaryMessage = `Impostor wygrał rundę!<br>(Wygłosowano <strong>${ejectedPlayer.name}</strong>)<br>Słowo: <strong>${room.currentWord}</strong>`;
+      
+      // NOWE: Konfetti dla Impostora (czerwono-czarne)
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#e74c3c', '#2c3e50', '#c0392b']
+      });
     }
     
     updates.lastRoundSummary = summaryMessage; // To pokaże się w lobby i odpali zapadkę
@@ -1666,6 +1698,3 @@ customWordInput.addEventListener('keypress', (e) => {
     addTempWord();
   }
 });
-
-// MODYFIKACJA 3: Usunięcie alertu
-// alert("Słowny Impostor v30 załadowany!");
