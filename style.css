@@ -127,6 +127,8 @@ button {
   color: var(--c-text-light);
   cursor: pointer;
   transition: box-shadow 0.3s ease, background 0.3s ease;
+  font-family: var(--font-heading); /* ZMIANA: Czcionka jak w lobby */
+  font-weight: 600;
 }
 
 button:hover:not(:disabled) {
@@ -175,7 +177,7 @@ button:disabled {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.8); /* Mocniejsze przyciemnienie dla lepszego kontrastu odliczania */
+  background: rgba(0, 0, 0, 0.8); 
   z-index: 1000; 
   display: none;
   opacity: 0;
@@ -189,17 +191,17 @@ button:disabled {
   pointer-events: auto;
 }
 
-/* NOWE: Wyświetlacz Odliczania */
+/* Wyświetlacz Odliczania */
 #countdownDisplay {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 15rem; /* Bardzo duże */
+  font-size: 15rem; 
   font-family: var(--font-heading);
   color: #fff;
   font-weight: 800;
-  z-index: 1002; /* Nad wszystkim */
+  z-index: 1002; 
   text-shadow: 0 0 20px var(--c-primary);
   pointer-events: none;
   display: none;
@@ -226,7 +228,7 @@ button:disabled {
   padding: 2rem 3rem;
   border-radius: 1.5rem;
   text-align: center;
-  z-index: 1001; /* Nad backdropem (1000) */
+  z-index: 1001; 
   display: none; 
   max-width: 90vw;
   box-shadow: 0 10px 30px var(--c-shadow-modal);
