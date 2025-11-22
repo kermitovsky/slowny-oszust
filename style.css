@@ -141,7 +141,7 @@ button:disabled {
 }
 
 /* =================================================================== */
-/* 4. KLASY UŻYTKOWE (Nowe, posprzątane) */
+/* 4. KLASY UŻYTKOWE */
 /* =================================================================== */
 .container {
   max-width: 800px;
@@ -168,19 +168,19 @@ button:disabled {
   display: none;
 }
 
-/* NOWE: Tło przyciemniające (Backdrop) */
+/* Tło przyciemniające (Backdrop) */
 #modalBackdrop {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.7); /* 70% przyciemnienia */
-  z-index: 1000; /* Pod modalami (1001), ale nad wszystkim innym */
+  background: rgba(0, 0, 0, 0.8); /* Mocniejsze przyciemnienie dla lepszego kontrastu odliczania */
+  z-index: 1000; 
   display: none;
   opacity: 0;
   transition: opacity 0.3s ease;
-  pointer-events: none; /* Przepuszcza kliknięcia gdy ukryty */
+  pointer-events: none;
 }
 
 #modalBackdrop.is-visible {
@@ -188,6 +188,33 @@ button:disabled {
   opacity: 1;
   pointer-events: auto;
 }
+
+/* NOWE: Wyświetlacz Odliczania */
+#countdownDisplay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 15rem; /* Bardzo duże */
+  font-family: var(--font-heading);
+  color: #fff;
+  font-weight: 800;
+  z-index: 1002; /* Nad wszystkim */
+  text-shadow: 0 0 20px var(--c-primary);
+  pointer-events: none;
+  display: none;
+}
+#countdownDisplay.active {
+  display: block;
+  animation: countdownPulse 0.9s ease-in-out infinite;
+}
+
+@keyframes countdownPulse {
+  0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+  50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+}
+
 
 .modal-box {
   position: fixed;
@@ -199,7 +226,7 @@ button:disabled {
   padding: 2rem 3rem;
   border-radius: 1.5rem;
   text-align: center;
-  z-index: 1001; /* Musi być wyżej niż #modalBackdrop */
+  z-index: 1001; /* Nad backdropem (1000) */
   display: none; 
   max-width: 90vw;
   box-shadow: 0 10px 30px var(--c-shadow-modal);
@@ -523,7 +550,7 @@ body.voting-active #playersList li.is-starter::before {
 
 
 /* =================================================================== */
-/* 5.5. STYLE GŁOSOWANIA (NOWA SEKCJA) */
+/* 5.5. STYLE GŁOSOWANIA */
 /* =================================================================== */
 
 body.voting-active #playersList li.vote-target {
@@ -565,7 +592,7 @@ body.voting-active #playersList li.host.has-voted .avatar::after {
 }
 
 /* =================================================================== */
-/* 5.6. STYLE EKRANU PODPOWIEDZI (SEKCJA ZMIENIONA) */
+/* 5.6. STYLE EKRANU PODPOWIEDZI */
 /* =================================================================== */
 #impostorHintBox p {
   margin: 0 0 1.5rem 0;
@@ -992,7 +1019,7 @@ body.dark-mode .team-selector button:nth-of-type(2).selected { /* NIE */
   display: none;
 }
 
-/* --- Okienka Modalne (Tylko unikalne style) --- */
+/* --- Okienka Modalne --- */
 
 #messageBox {
   background: rgba(255, 255, 255, 0.8);
