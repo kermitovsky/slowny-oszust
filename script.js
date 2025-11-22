@@ -31,7 +31,7 @@ const impostorTeamBox = document.getElementById('impostorTeamBox');
 const customCategoryBox = document.getElementById('customCategoryBox'); 
 const rulesBox = document.getElementById('rulesBox');
 const modalBackdrop = document.getElementById('modalBackdrop'); 
-const countdownDisplay = document.getElementById('countdownDisplay'); // NOWE
+const countdownDisplay = document.getElementById('countdownDisplay'); 
 
 // MODYFIKACJA 1: Usunięcie audio
 // const audioStart = document.getElementById('audio-start');
@@ -95,7 +95,7 @@ let selectedPlayerId = null;
 let isAnimating = false; 
 let lastSeenStarterId = null; 
 let lastSeenSummary = null; 
-let lastSeenRoundWinner = null; // NOWE: do konfetti
+let lastSeenRoundWinner = null; 
 
 let hintChance = 0; 
 let hintOnStart = false; 
@@ -144,7 +144,7 @@ const fallbackWords = [
   { word: "muzyka", category: "Muzyka" }
 ];
 
-// --- FUNKCJE ZARZĄDZANIA UI (POPRAWIONE) ---
+// --- FUNKCJE ZARZĄDZANIA UI ---
 function showScreen(screenToShow) {
   const screens = [loginScreen, gameScreen];
   screens.forEach(screen => {
@@ -1121,10 +1121,6 @@ function runCountdown(callback) {
       countdownDisplay.classList.remove('active');
       countdownDisplay.textContent = '';
       
-      // Nie usuwamy backdropu, bo rola go potrzebuje
-      // Ale jeśli rola go usunie po swoim czasie, to ok.
-      // U nas funkcja callback (pokaż rolę) zarządza backdropem.
-      
       if (callback) callback();
     }
   }, 1000); // Co 1 sekundę
@@ -1225,7 +1221,6 @@ function listenToRoom(roomCode) {
       lastRoundSummary.innerHTML = room.lastRoundSummary;
       lastRoundSummary.style.display = 'block';
     } else {
-      // Nie chowaj, jeśli to komunikat o remisie w trakcie gry
       if (room.lastRoundSummary && room.gameStarted) {
           // Pokaż jako "toast" na chwilę? Albo po prostu w bloku
           // Tutaj zostawiamy logikę wyświetlania w modalu niżej
@@ -1233,28 +1228,6 @@ function listenToRoom(roomCode) {
           lastRoundSummaryTitle.style.display = 'none';
           lastRoundSummary.style.display = 'none';
       }
-    }
-    
-    // NOWE: Obsługa konfetti
-    if (room.roundWinner && room.roundWinner !== lastSeenRoundWinner) {
-        lastSeenRoundWinner = room.roundWinner;
-        
-        if (room.roundWinner === 'innocent') {
-             // Konfetti dla Niewinnych (kolorowe)
-             confetti({
-                particleCount: 200,
-                spread: 100,
-                origin: { y: 0.6 }
-              });
-        } else if (room.roundWinner === 'impostor') {
-            // Konfetti dla Impostora (czerwono-czarne)
-            confetti({
-                particleCount: 200,
-                spread: 100,
-                origin: { y: 0.6 },
-                colors: ['#e74c3c', '#2c3e50', '#c0392b']
-              });
-        }
     }
     
 
@@ -1344,6 +1317,26 @@ function listenToRoom(roomCode) {
       
       // Pokaż podsumowanie w dużym oknie
       showRoleMessage(newSummary); 
+      
+      // NOWE: Konfetti tutaj, razem z komunikatem
+      if (room.roundWinner && room.roundWinner !== lastSeenRoundWinner) {
+        lastSeenRoundWinner = room.roundWinner;
+        
+        if (room.roundWinner === 'innocent') {
+             confetti({
+                particleCount: 200,
+                spread: 100,
+                origin: { y: 0.6 }
+              });
+        } else if (room.roundWinner === 'impostor') {
+            confetti({
+                particleCount: 200,
+                spread: 100,
+                origin: { y: 0.6 },
+                colors: ['#e74c3c', '#2c3e50', '#c0392b']
+              });
+        }
+      }
         
       // Dodaj timer, aby schować okno po 5 sekundach
       setTimeout(() => {
