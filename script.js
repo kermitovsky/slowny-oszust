@@ -30,7 +30,8 @@ const impostorHintBox = document.getElementById('impostorHintBox');
 const impostorTeamBox = document.getElementById('impostorTeamBox'); 
 const customCategoryBox = document.getElementById('customCategoryBox'); 
 const rulesBox = document.getElementById('rulesBox');
-const modalBackdrop = document.getElementById('modalBackdrop'); // NOWE: Tło
+const modalBackdrop = document.getElementById('modalBackdrop'); 
+const countdownDisplay = document.getElementById('countdownDisplay'); // NOWE
 
 // MODYFIKACJA 1: Usunięcie audio
 // const audioStart = document.getElementById('audio-start');
@@ -94,6 +95,7 @@ let selectedPlayerId = null;
 let isAnimating = false; 
 let lastSeenStarterId = null; 
 let lastSeenSummary = null; 
+let lastSeenRoundWinner = null; // NOWE: do konfetti
 
 let hintChance = 0; 
 let hintOnStart = false; 
@@ -183,7 +185,7 @@ function showModal(modalToShow) {
   modalToShow.classList.remove('is-hiding');
   modalToShow.classList.add('is-visible');
   
-  // NOWE: Pokaż tło przyciemniające
+  // Pokaż tło przyciemniające
   if (modalBackdrop) {
     modalBackdrop.classList.add('is-visible');
   }
@@ -204,7 +206,7 @@ function hideModal(modalToHide, force = false) {
     modalToHide.classList.remove('is-visible', 'is-hiding');
     if (modalToHide === currentModal) {
         currentModal = null;
-        // NOWE: Ukryj tło przyciemniające przy force
+        // Ukryj tło przyciemniające przy force
         if (modalBackdrop) modalBackdrop.classList.remove('is-visible');
     }
     return;
@@ -213,7 +215,7 @@ function hideModal(modalToHide, force = false) {
   modalToHide.classList.add('is-hiding');
   modalToHide.classList.remove('is-visible');
   
-  // NOWE: Ukryj tło przyciemniające
+  // Ukryj tło przyciemniające
   if (modalBackdrop) {
     modalBackdrop.classList.remove('is-visible');
   }
@@ -611,6 +613,7 @@ function resetToLobby() {
   selectedPlayerId = null; 
   lastSeenStarterId = null; 
   lastSeenSummary = null;
+  lastSeenRoundWinner = null; // Reset flagi konfetti
   
   hintChance = 0;
   hintOnStart = false;
@@ -804,6 +807,7 @@ function createRoom(numImpostors, chanceIndex, onStart, knows) {
     roundEndMessage: null, 
     resetMessage: null,
     starterId: null,
+    roundWinner: null, // NOWE
     numImpostors: numImpostors,
     categories: selectedCategories.map(c => c.name), 
     customCategories: customCategoriesToSave || [],
@@ -1057,9 +1061,9 @@ function tallyVotes(room) {
   const updates = {
     votingActive: false,
     impostorHint: null, 
-    currentCategory: null, 
-    lastRoundSummary: null, 
-    roundEndMessage: null, 
+    // currentCategory: null, // Nie czyścimy, bo może grać dalej
+    // lastRoundSummary: null, 
+    // roundEndMessage: null, 
     resetMessage: null,
   };
 
@@ -1068,14 +1072,16 @@ function tallyVotes(room) {
   });
 
   if (isTie || !ejectedPlayerId) {
-    updates.lastRoundSummary = `REMIS! Nikt nie odpada.<br>Kontynuujcie dyskusję!`;
-    // Celowo nie ustawiamy resetMessage, aby nie było pop-upu, tylko kontynuacja gry
+    // NOWE: Logika remisu - nie czyścimy ról, gramy dalej
+    updates.lastRoundSummary = `Remis! Kontynuujcie grę.<br>Nikt nie odpada.`;
+    // Nie ustawiamy gameStarted = false, więc gra toczy się dalej
   } else {
     const ejectedPlayer = players[ejectedPlayerId];
     
     updates.gameStarted = false;
     updates.currentWord = null;
     updates.starterId = null;
+    updates.currentCategory = null;
     
     playerIds.forEach(id => {
       updates[`players/${id}/role`] = null;
@@ -1084,30 +1090,44 @@ function tallyVotes(room) {
     let summaryMessage = '';
     if (ejectedPlayer.role === 'impostor') {
       summaryMessage = `Impostor został wykryty!<br>(Oszust: <strong>${ejectedPlayer.name}</strong>)<br>Słowo: <strong>${room.currentWord}</strong>`;
-      
-      // NOWE: Konfetti dla Niewinnych (kolorowe)
-      confetti({
-        particleCount: 150,
-        spread: 70,
-        origin: { y: 0.6 }
-      });
-      
+      updates.roundWinner = 'innocent';
     } else {
       summaryMessage = `Impostor wygrał rundę!<br>(Wygłosowano <strong>${ejectedPlayer.name}</strong>)<br>Słowo: <strong>${room.currentWord}</strong>`;
-      
-      // NOWE: Konfetti dla Impostora (czerwono-czarne)
-      confetti({
-        particleCount: 150,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ['#e74c3c', '#2c3e50', '#c0392b']
-      });
+      updates.roundWinner = 'impostor';
     }
     
-    updates.lastRoundSummary = summaryMessage; // To pokaże się w lobby i odpali zapadkę
+    updates.lastRoundSummary = summaryMessage; 
   }
 
   db.ref(`rooms/${currentRoomCode}`).update(updates);
+}
+
+// NOWE: Funkcja odliczania
+function runCountdown(callback) {
+  if (modalBackdrop) {
+    modalBackdrop.classList.add('is-visible');
+    countdownDisplay.classList.add('active');
+  }
+
+  let count = 3;
+  countdownDisplay.textContent = count;
+
+  const interval = setInterval(() => {
+    count--;
+    if (count > 0) {
+      countdownDisplay.textContent = count;
+    } else {
+      clearInterval(interval);
+      countdownDisplay.classList.remove('active');
+      countdownDisplay.textContent = '';
+      
+      // Nie usuwamy backdropu, bo rola go potrzebuje
+      // Ale jeśli rola go usunie po swoim czasie, to ok.
+      // U nas funkcja callback (pokaż rolę) zarządza backdropem.
+      
+      if (callback) callback();
+    }
+  }, 1000); // Co 1 sekundę
 }
 
 
@@ -1205,9 +1225,38 @@ function listenToRoom(roomCode) {
       lastRoundSummary.innerHTML = room.lastRoundSummary;
       lastRoundSummary.style.display = 'block';
     } else {
-      lastRoundSummaryTitle.style.display = 'none';
-      lastRoundSummary.style.display = 'none';
+      // Nie chowaj, jeśli to komunikat o remisie w trakcie gry
+      if (room.lastRoundSummary && room.gameStarted) {
+          // Pokaż jako "toast" na chwilę? Albo po prostu w bloku
+          // Tutaj zostawiamy logikę wyświetlania w modalu niżej
+      } else {
+          lastRoundSummaryTitle.style.display = 'none';
+          lastRoundSummary.style.display = 'none';
+      }
     }
+    
+    // NOWE: Obsługa konfetti
+    if (room.roundWinner && room.roundWinner !== lastSeenRoundWinner) {
+        lastSeenRoundWinner = room.roundWinner;
+        
+        if (room.roundWinner === 'innocent') {
+             // Konfetti dla Niewinnych (kolorowe)
+             confetti({
+                particleCount: 200,
+                spread: 100,
+                origin: { y: 0.6 }
+              });
+        } else if (room.roundWinner === 'impostor') {
+            // Konfetti dla Impostora (czerwono-czarne)
+            confetti({
+                particleCount: 200,
+                spread: 100,
+                origin: { y: 0.6 },
+                colors: ['#e74c3c', '#2c3e50', '#c0392b']
+              });
+        }
+    }
+    
 
     startGameBtn.style.display = isHost && !room.gameStarted && !votingActive ? 'block' : 'none';
     startVoteBtn.style.display = isHost && room.gameStarted && !votingActive ? 'block' : 'none';
@@ -1215,7 +1264,7 @@ function listenToRoom(roomCode) {
     endRoundBtn.style.display = 'none';
 
     // =================================================================
-    // MODYFIKACJA: LOGIKA "ZAPADKI" Z DWOMA OSOBNYMI MODALAMI
+    // MODYFIKACJA: LOGIKA "ZAPADKI" Z ODLICZANIEM
     // =================================================================
 
     const newStarterId = room.starterId;
@@ -1223,12 +1272,13 @@ function listenToRoom(roomCode) {
     const roleDuration = 5000;
     const starterDuration = 4000;
 
-    // 1. ZAPADKA STARTU RUNDY
+    // 1. START RUNDY
     if (room.gameStarted && newStarterId && newStarterId !== lastSeenStarterId) {
       console.log(`Nowa runda! Starter ID: ${newStarterId}. Ostatni: ${lastSeenStarterId}`);
       
-      lastSeenStarterId = newStarterId; // Zamknij zapadkę
-      lastSeenSummary = null; // Otwórz zapadkę końca rundy
+      lastSeenStarterId = newStarterId; 
+      lastSeenSummary = null; 
+      lastSeenRoundWinner = null; // Reset wygranej
       
       // audioStart.play(); // USUNIĘTE
       
@@ -1250,50 +1300,55 @@ function listenToRoom(roomCode) {
       const starterMsg = `Zaczyna mówić: <strong>${starterName}</strong>`;
       
       wordDisplay.innerHTML = ''; 
-      isAnimating = true; // Zablokuj pokazywanie słowa
+      isAnimating = true; 
       
-      // 1. Pokaż rolę
-      showRoleMessage(roleMsg); 
-      
-      // 2. Ustaw timer na schowanie roli
-      setTimeout(() => {
-        hideModal(roleMessageBox); // Schowaj z animacją fadeOut (300ms)
-      }, roleDuration); // Czas pokazywania pierwszej wiadomości
+      // NOWE: Najpierw odliczanie, potem rola
+      runCountdown(() => {
+           // 1. Pokaż rolę
+          showRoleMessage(roleMsg); 
+          
+          // 2. Ustaw timer na schowanie roli
+          setTimeout(() => {
+            hideModal(roleMessageBox); // Schowaj z animacją fadeOut (300ms)
+          }, roleDuration); // Czas pokazywania pierwszej wiadomości
 
-      // 3. Ustaw timer na pokazanie drugiego komunikatu (po schowaniu pierwszego)
-      setTimeout(() => {
-        // Użyj showMessage (białe okno) dla drugiego komunikatu, aby uniknąć konfliktu
-        showMessage(starterMsg, starterDuration); 
-      }, roleDuration + animationDelay); // 5000ms + 300ms 
+          // 3. Ustaw timer na pokazanie drugiego komunikatu (po schowaniu pierwszego)
+          setTimeout(() => {
+            // Użyj showMessage (białe okno) dla drugiego komunikatu, aby uniknąć konfliktu
+            showMessage(starterMsg, starterDuration); 
+          }, roleDuration + animationDelay); // 5000ms + 300ms 
 
-      // 4. Odblokuj pokazywanie słowa po CAŁEJ sekwencji
-      setTimeout(() => {
-        isAnimating = false;
-        if (room.gameStarted && room.currentWord && iAmInRoom) {
-          wordDisplay.innerHTML = amIImpostor
-            ? `Twoje słowo: <span class="word-impostor">OSZUST! ${myHint ? `<span class="impostor-hint-span">(Podpowiedź: ${myHint})</span>` : ''}</span>`
-            : `Twoje słowo: <span class="word-normal">${room.currentWord}</span>`;
-        }
-      }, roleDuration + animationDelay + starterDuration); // 5300ms + 4000ms
+          // 4. Odblokuj pokazywanie słowa po CAŁEJ sekwencji
+          setTimeout(() => {
+            isAnimating = false;
+            if (room.gameStarted && room.currentWord && iAmInRoom) {
+              wordDisplay.innerHTML = amIImpostor
+                ? `Twoje słowo: <span class="word-impostor">OSZUST! ${myHint ? `<span class="impostor-hint-span">(Podpowiedź: ${myHint})</span>` : ''}</span>`
+                : `Twoje słowo: <span class="word-normal">${room.currentWord}</span>`;
+            }
+          }, roleDuration + animationDelay + starterDuration); 
+      });
     }
     
-    // 2. ZAPADKA KOŃCA RUNDY
+    // 2. ZAPADKA KOŃCA RUNDY (LUB REMISU)
     const newSummary = room.lastRoundSummary;
-    if (!room.gameStarted && newSummary && newSummary !== lastSeenSummary) {
-      console.log("Koniec rundy! Nowe podsumowanie.");
+    if (newSummary && newSummary !== lastSeenSummary) {
+      console.log("Koniec rundy lub komunikat! Nowe podsumowanie.");
       
       lastSeenSummary = newSummary; // Zamknij zapadkę
-      lastSeenStarterId = null; // Otwórz zapadkę startu
+      if (!room.gameStarted) {
+          lastSeenStarterId = null; // Reset startu tylko jak koniec gry
+      }
       
       // audioEnd.play(); // USUNIĘTE
       
-      // MODYFIKACJA 4: Pokaż podsumowanie w dużym oknie
-      showRoleMessage(newSummary); // Pokaż
+      // Pokaż podsumowanie w dużym oknie
+      showRoleMessage(newSummary); 
         
-      // MODYFIKACJA: Dodaj timer, aby schować okno po 5 sekundach
+      // Dodaj timer, aby schować okno po 5 sekundach
       setTimeout(() => {
-          if (currentModal === roleMessageBox) { // Upewnij się, że to wciąż to okno
-              hideModal(roleMessageBox); // Schowaj z animacją fadeOut
+          if (currentModal === roleMessageBox) { 
+              hideModal(roleMessageBox); 
           }
       }, 5000);
     }
@@ -1399,6 +1454,7 @@ startGameBtn.addEventListener('click', () => {
     updates.starterId = starterId;
     updates.lastRoundSummary = null; 
     updates.roundEndMessage = null; 
+    updates.roundWinner = null; // NOWE
     updates.currentRound = (room.currentRound || 0) + 1;
     
     roomRef.update(updates).then(() => {
@@ -1463,6 +1519,7 @@ endRoundBtn.addEventListener('click', () => {
       impostorsKnow: null,
       lastRoundSummary: summary, 
       resetMessage: summary, 
+      roundWinner: null, 
     };
     Object.keys(players).forEach(id => {
       updates[`players/${id}/role`] = null;
