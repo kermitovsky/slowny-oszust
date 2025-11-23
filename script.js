@@ -33,6 +33,10 @@ const rulesBox = document.getElementById('rulesBox');
 const modalBackdrop = document.getElementById('modalBackdrop'); 
 const countdownDisplay = document.getElementById('countdownDisplay'); 
 
+// Nowe elementy karty 3D
+const roleCardInner = document.getElementById('roleCardInner');
+const roleContent = document.getElementById('roleContent');
+
 // MODYFIKACJA 1: Usunięcie audio
 // const audioStart = document.getElementById('audio-start');
 // const audioVote = document.getElementById('audio-vote');
@@ -1102,12 +1106,15 @@ function tallyVotes(room) {
   db.ref(`rooms/${currentRoomCode}`).update(updates);
 }
 
-// NOWE: Funkcja odliczania
+// NOWE: Funkcja odliczania z obsługą Karty 3D
 function runCountdown(callback) {
   if (modalBackdrop) {
     modalBackdrop.classList.add('is-visible');
     countdownDisplay.classList.add('active');
   }
+
+  // Upewnij się, że karta jest zakryta na starcie
+  roleCardInner.classList.remove('is-flipped');
 
   let count = 3;
   countdownDisplay.textContent = count;
@@ -1237,12 +1244,12 @@ function listenToRoom(roomCode) {
     endRoundBtn.style.display = 'none';
 
     // =================================================================
-    // MODYFIKACJA: LOGIKA "ZAPADKI" Z ODLICZANIEM
+    // MODYFIKACJA: LOGIKA "ZAPADKI" Z ODLICZANIEM I KARTĄ 3D
     // =================================================================
 
     const newStarterId = room.starterId;
-    const animationDelay = 300; // Czas trwania animacji fadeOut z CSS
-    const roleDuration = 5000;
+    const animationDelay = 300; 
+    const roleDuration = 6000; // Wydłużamy czas na przeczytanie karty
     const starterDuration = 4000;
 
     // 1. START RUNDY
@@ -1251,45 +1258,62 @@ function listenToRoom(roomCode) {
       
       lastSeenStarterId = newStarterId; 
       lastSeenSummary = null; 
-      lastSeenRoundWinner = null; // Reset wygranej
-      
-      // audioStart.play(); // USUNIĘTE
+      lastSeenRoundWinner = null; 
       
       const starterName = players[newStarterId]?.name || '...';
       const myWord = room.currentWord;
       const myHint = room.impostorHint;
       const amIImpostor = iAmInRoom.role === 'impostor';
       
-      let roleMsg;
+      let roleHTML;
       if (amIImpostor) {
-        roleMsg = 'Jesteś oszustem!';
+        roleHTML = '<div style="color: #e74c3c;">JESTEŚ<br>OSZUSTEM!</div>';
         if (myHint) { 
-            roleMsg += ` <span class="impostor-hint-span">(Podpowiedź: ${myHint})</span>`;
+            roleHTML += `<div class="impostor-hint-span" style="margin-top:1rem; font-size:1.5rem;">Podpowiedź:<br>${myHint}</div>`;
         }
       } else {
-        roleMsg = `Słowo: ${room.currentWord}`;
+        roleHTML = `<div style="font-size: 1.5rem; opacity: 0.8;">TWOJE SŁOWO:</div><div style="color: #2ecc71; font-size: 3.5rem; margin-top: 0.5rem;">${room.currentWord}</div>`;
       }
       
-      const starterMsg = `Zaczyna mówić: <strong>${starterName}</strong>`;
+      const starterMsg = `Zaczyna mówić:<br><strong>${starterName}</strong>`;
       
       wordDisplay.innerHTML = ''; 
       isAnimating = true; 
       
-      // NOWE: Najpierw odliczanie, potem rola
+      // NOWE: Najpierw odliczanie, potem KARTA
       runCountdown(() => {
-           // 1. Pokaż rolę
-          showRoleMessage(roleMsg); 
+           // 1. Przygotuj kartę
+          roleContent.innerHTML = roleHTML;
           
-          // 2. Ustaw timer na schowanie roli
+          // Pokaż modal (ale jeszcze nie odwrócony)
+          showModal(roleMessageBox); 
+          
+          // Dodaj nasłuch na kliknięcie w kartę
+          const handleCardClick = () => {
+             roleCardInner.classList.add('is-flipped');
+          };
+          
+          // Usuń stare listenery (klonowanie elementu to najszybszy trick)
+          const newCard = roleCardInner.cloneNode(true);
+          roleCardInner.parentNode.replaceChild(newCard, roleCardInner);
+          // Odśwież referencję (bo podmieniliśmy element w DOM)
+          const refreshedCard = document.getElementById('roleCardInner'); 
+          
+          refreshedCard.addEventListener('click', function flipHandler() {
+              this.classList.add('is-flipped');
+              // Opcjonalnie: po kliknięciu już nie można "odkliknąć" od razu
+          });
+          
+          
+          // 2. Ustaw timer na schowanie roli (dłuższy czas, bo interakcja)
           setTimeout(() => {
-            hideModal(roleMessageBox); // Schowaj z animacją fadeOut (300ms)
-          }, roleDuration); // Czas pokazywania pierwszej wiadomości
+            hideModal(roleMessageBox); 
+          }, roleDuration); 
 
-          // 3. Ustaw timer na pokazanie drugiego komunikatu (po schowaniu pierwszego)
+          // 3. Ustaw timer na pokazanie komunikatu STARTUJĄCEGO
           setTimeout(() => {
-            // Użyj showMessage (białe okno) dla drugiego komunikatu, aby uniknąć konfliktu
             showMessage(starterMsg, starterDuration); 
-          }, roleDuration + animationDelay); // 5000ms + 300ms 
+          }, roleDuration + animationDelay); 
 
           // 4. Odblokuj pokazywanie słowa po CAŁEJ sekwencji
           setTimeout(() => {
@@ -1313,17 +1337,17 @@ function listenToRoom(roomCode) {
           lastSeenStarterId = null; // Reset startu tylko jak koniec gry
       }
       
-      // audioEnd.play(); // USUNIĘTE
+      // Tu używamy zwykłego okna, więc resetujemy kartę jeśli była widoczna
+      // Ale `showRoleMessage` nadpisuje innerHTML modala, co zepsułoby kartę.
+      // Dlatego używamy messageBox (białego) dla wyników, albo przywracamy treść.
+      // W obecnej implementacji `roleMessageBox` ma strukturę karty.
+      // Musimy dynamicznie podmienić treść `roleMessageBox` na tekst LUB użyć `messageBox`.
       
-      // Pokaż podsumowanie w dużym oknie
-      showRoleMessage(newSummary); 
+      // Rozwiązanie: Użyjmy `messageBox` (tego białego) do wyników końcowych, jest czytelniejszy.
+      showMessage(newSummary, 5000);
         
       // Dodaj timer, aby schować okno po 5 sekundach
       setTimeout(() => {
-          if (currentModal === roleMessageBox) { 
-              hideModal(roleMessageBox); 
-          }
-          
           // NOWE: Konfetti ODPALANE TUTAJ, gdy okno się chowa i widać lobby
           if (room.roundWinner && room.roundWinner !== lastSeenRoundWinner) {
             lastSeenRoundWinner = room.roundWinner;
