@@ -506,7 +506,6 @@ function updatePlayersList(players, localIsHost, starterId = null) {
       li.classList.add('self');
     }
     
-    // MODYFIKACJA 2: Dodanie klasy dla startującego
     if (id === starterId) {
       li.classList.add('is-starter');
     }
