@@ -37,11 +37,6 @@ const countdownDisplay = document.getElementById('countdownDisplay');
 const roleCardInner = document.getElementById('roleCardInner');
 const roleContent = document.getElementById('roleContent');
 
-// MODYFIKACJA 1: Usunięcie audio
-// const audioStart = document.getElementById('audio-start');
-// const audioVote = document.getElementById('audio-vote');
-// const audioEnd = document.getElementById('audio-end');
-
 const closeRulesBtn = document.getElementById('closeRules');
 const closeRulesTopBtn = document.getElementById('closeRulesTop');
 
@@ -75,7 +70,7 @@ const confirmVoteBtn = document.getElementById('confirmVoteBtn');
 const voteResultDisplay = document.getElementById('voteResultDisplay');
 const lastRoundSummaryTitle = document.getElementById('lastRoundSummaryTitle'); 
 const lastRoundSummary = document.getElementById('lastRoundSummary'); 
-const lobbyCategories = document.getElementById('lobbyCategories'); // MODYFIKACJA 3
+const lobbyCategories = document.getElementById('lobbyCategories'); 
 
 // Elementy Własnych Kategorii 
 const closeCustomCategoryBtn = document.getElementById('closeCustomCategoryBtn');
@@ -178,7 +173,7 @@ function showModal(modalToShow) {
     if ((modalToShow === roleMessageBox && currentModal === messageBox) || 
         (modalToShow === messageBox && currentModal === roleMessageBox) ||
         (modalToShow === roleMessageBox && currentModal === roleMessageBox)) { 
-      hideModal(currentModal, true); // Force hide
+      hideModal(currentModal, true); 
     } else {
       hideModal(currentModal); 
     }
@@ -189,7 +184,6 @@ function showModal(modalToShow) {
   modalToShow.classList.remove('is-hiding');
   modalToShow.classList.add('is-visible');
   
-  // Pokaż tło przyciemniające
   if (modalBackdrop) {
     modalBackdrop.classList.add('is-visible');
   }
@@ -210,7 +204,6 @@ function hideModal(modalToHide, force = false) {
     modalToHide.classList.remove('is-visible', 'is-hiding');
     if (modalToHide === currentModal) {
         currentModal = null;
-        // Ukryj tło przyciemniające przy force
         if (modalBackdrop) modalBackdrop.classList.remove('is-visible');
     }
     return;
@@ -219,7 +212,6 @@ function hideModal(modalToHide, force = false) {
   modalToHide.classList.add('is-hiding');
   modalToHide.classList.remove('is-visible');
   
-  // Ukryj tło przyciemniające
   if (modalBackdrop) {
     modalBackdrop.classList.remove('is-visible');
   }
@@ -234,11 +226,10 @@ function hideModal(modalToHide, force = false) {
         themeToggle.classList.remove('hidden');
       }
     }
-  }, 300); // 300ms to czas trwania animacji fadeOut
+  }, 300); 
 }
 
 
-// --- Funkcja do pobierania z limitem czasu ---
 const fetchWithTimeout = async (url, timeout = 5000) => {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeout);
@@ -253,19 +244,16 @@ const fetchWithTimeout = async (url, timeout = 5000) => {
   }
 };
 
-// Funkcja "Zapamiętaj Mnie"
 function loadFromLocalStorage() {
   const savedNick = localStorage.getItem('slownyOszustNick');
   const savedEmoji = localStorage.getItem('slownyOszustEmoji');
   
   if (savedNick) {
     playerNameInput.value = savedNick;
-    console.log('Wczytano nick z localStorage:', savedNick);
   }
   
   if (savedEmoji) {
     selectedEmoji = savedEmoji;
-    console.log('Wczytano emoji z localStorage:', savedEmoji);
     document.querySelectorAll('.emoji-btn').forEach(btn => {
       if (btn.textContent === savedEmoji) {
         btn.classList.add('selected');
@@ -274,9 +262,7 @@ function loadFromLocalStorage() {
   }
 }
 
-// Inicjalizacja wyboru emotek
 function initializeEmojiSelection() {
-  console.log('Inicjalizacja wyboru emotek');
   emojiSelection.innerHTML = '';
   emojiList.forEach(emoji => {
     const btn = document.createElement('button');
@@ -286,7 +272,6 @@ function initializeEmojiSelection() {
       document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
       selectedEmoji = emoji;
-      console.log('Wybrano emotkę:', selectedEmoji);
     });
     emojiSelection.appendChild(btn);
   });
@@ -295,28 +280,22 @@ function initializeEmojiSelection() {
 }
 initializeEmojiSelection();
 
-// Wykrywanie zamknięcia przeglądarki lub odświeżenia
 window.addEventListener('beforeunload', () => {
   if (currentRoomCode && currentPlayerId) {
-    console.log('Wykryto zamknięcie/odświeżenie, usuwanie gracza:', currentPlayerId);
     db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).remove();
   }
 });
 
-// Funkcja zamykania zasad
 function closeRules() {
   hideModal(rulesBox);
 }
 
-// Funkcja przełączania trybu
 function toggleTheme() {
   const isDark = document.body.classList.toggle('dark-mode');
   themeToggle.textContent = isDark ? '☀️' : '🌙';
   localStorage.setItem('theme', isDark ? 'dark' : 'light');
-  console.log('Przełączono na tryb:', isDark ? 'ciemny' : 'jasny');
 }
 
-// Inicjalizacja trybu
 if (localStorage.getItem('theme') === 'dark') {
   document.body.classList.add('dark-mode');
   themeToggle.textContent = '☀️';
@@ -324,9 +303,7 @@ if (localStorage.getItem('theme') === 'dark') {
   themeToggle.textContent = '🌙';
 }
 
-// Inicjalizacja wyboru kategorii
 function initializeCategorySelection() {
-  console.log('Inicjalizacja wyboru kategorii');
   categoryGrid.querySelectorAll('.category-btn:not(.custom-new-btn)').forEach(btn => btn.remove());
   
   categories.forEach(category => {
@@ -362,7 +339,6 @@ function toggleCategory(category) {
   updateCategoryButtons();
   updateAllCategoriesCheckbox();
   updateConfirmCategoriesButton();
-  console.log('Wybrano kategorie:', selectedCategories.map(c => c.name));
 }
 
 function updateCategoryButtons() {
@@ -384,7 +360,6 @@ function updateConfirmCategoriesButton() {
   confirmCategories.disabled = selectedCategories.length === 0;
   confirmCategories.style.opacity = selectedCategories.length === 0 ? '0.5' : '1';
   confirmCategories.style.cursor = selectedCategories.length === 0 ? 'not-allowed' : 'pointer';
-  console.log('Zaktualizowano przycisk Dalej, disabled:', confirmCategories.disabled);
 }
 
 allCategoriesBtn.querySelector('.checkbox').addEventListener('click', () => {
@@ -396,16 +371,13 @@ allCategoriesBtn.querySelector('.checkbox').addEventListener('click', () => {
   updateCategoryButtons();
   updateAllCategoriesCheckbox();
   updateConfirmCategoriesButton();
-  console.log('Kliknięto Wszystkie, kategorie:', selectedCategories);
 });
 
 confirmCategories.addEventListener('click', () => {
   if (selectedCategories.length === 0) {
     showMessage('❌ Wybierz przynajmniej jedną kategorię!');
-    console.log('Brak wybranych kategorii');
     return;
   }
-  console.log('Potwierdzono kategorie:', selectedCategories.map(c => c.name));
   hideModal(categorySelectionBox);
   showModal(impostorSelectionBox);
   document.getElementById('loadingMessage').style.display = 'block';
@@ -418,12 +390,10 @@ confirmCategories.addEventListener('click', () => {
     impostorCountDisplaySelector.textContent = impostorCount;
     updateImpostorButtons();
     updateRecommendedPlayers();
-    console.log('Przełączono na wybór impostorów');
   }).catch(error => {
     document.getElementById('loadingMessage').style.display = 'none';
     confirmImpostors.disabled = false;
     showMessage('❌ Błąd ładowania kategorii! Używam domyślnych słów.');
-    console.error('Błąd w confirmCategories:', error);
   });
 });
 
@@ -449,10 +419,8 @@ async function loadWords(categoriesToLoad) {
           }));
           words = [...words, ...mappedWords];
           loadedAnyFile = true;
-          console.log(`Załadowano ${categoryWords.length} słów z ${category.name}`);
         })
         .catch(error => {
-          console.error(`Błąd ładowania pliku ${category.file}:`, error);
           if (category.file !== 'all') { 
              showMessage(`❌ Błąd ładowania kategorii ${category.name}! Pomijam.`);
           }
@@ -467,24 +435,17 @@ async function loadWords(categoriesToLoad) {
       }));
       words = [...words, ...mappedWords];
       loadedAnyFile = true;
-      console.log(`Załadowano ${mappedWords.length} słów z własnej kategorii: ${category.name}`);
     }
 
     if (!loadedAnyFile && localCategories.length === 0) { 
       throw new Error('Nie udało się załadować żadnego pliku kategorii.');
     }
-
-    console.log('Łącznie załadowano słów:', words.length);
   } catch (error) {
-    console.error('Błąd ładowania słów:', error);
     words = fallbackWords; 
-    console.log('Użyto wbudowanej listy słów:', words.length);
   }
 }
 
 words = fallbackWords;
-console.log('Załadowano domyślne słowa (fallback):', words.length);
-
 
 function generateRoomCode() {
   return Math.random().toString(36).substr(2, 4).toUpperCase();
@@ -494,31 +455,23 @@ function assignUniqueEmoji(players) {
   const usedEmojis = Object.values(players || {}).map(p => p.emoji).filter(e => e);
   const availableEmojis = emojiList.filter(e => !usedEmojis.includes(e));
   if (selectedEmoji && !usedEmojis.includes(selectedEmoji)) {
-    console.log('Użyto wybranej emotki:', selectedEmoji);
     return selectedEmoji;
   }
   if (availableEmojis.length === 0) {
-    console.warn('Brak dostępnych emoji, przypisuję losowe');
     return emojiList[Math.floor(Math.random() * emojiList.length)];
   }
-  const randomEmoji = availableEmojis[Math.floor(Math.random() * availableEmojis.length)];
-  console.log('Przypisano losową emotkę:', randomEmoji);
-  return randomEmoji;
+  return availableEmojis[Math.floor(Math.random() * availableEmojis.length)];
 }
 
 function assignUniqueColor(players) {
   const usedColors = Object.values(players || {}).map(p => p.avatarColor).filter(c => c);
   const availableColors = avatarColors.filter(c => !usedColors.includes(c));
   if (availableColors.length === 0) {
-    console.warn('Brak dostępnych kolorów, przypisuję losowy');
     return avatarColors[Math.floor(Math.random() * avatarColors.length)];
   }
-  const selectedColor = availableColors[Math.floor(Math.random() * availableColors.length)];
-  console.log('Przypisano kolor:', selectedColor);
-  return selectedColor;
+  return availableColors[Math.floor(Math.random() * availableColors.length)];
 }
 
-// MODYFIKACJA 2: Dodano `starterId` jako argument
 function updatePlayersList(players, localIsHost, starterId = null) {
   playersList.innerHTML = '';
   if (!players || !Object.keys(players).length) {
@@ -536,7 +489,6 @@ function updatePlayersList(players, localIsHost, starterId = null) {
     li.appendChild(avatar);
     li.appendChild(document.createTextNode(` ${player.name || 'Nieznany gracz'}`));
     
-    // ZMIANA: Usunięto tekst "(host)", dodano tylko klasę
     if (player.isHost) {
       li.classList.add('host');
     }
@@ -544,7 +496,6 @@ function updatePlayersList(players, localIsHost, starterId = null) {
       li.classList.add('self');
     }
     
-    // MODYFIKACJA 2: Dodanie klasy dla startującego
     if (id === starterId) {
       li.classList.add('is-starter');
     }
@@ -575,7 +526,6 @@ function showMessage(text, duration = 3500) {
     messageBox.classList.remove('copy-message');
   }
   
-  // Ustaw timer, aby schować *ten konkretny* modal
   setTimeout(() => {
     if (currentModal === messageBox) {
       hideModal(messageBox); 
@@ -584,11 +534,10 @@ function showMessage(text, duration = 3500) {
   }, duration);
 }
 
-// MODYFIKACJA: showRoleMessage teraz TYLKO pokazuje
 function showRoleMessage(text) {
   roleMessageBox.innerHTML = text; 
   roleMessageBox.classList.remove('is-fading-out'); 
-  showModal(roleMessageBox); // Po prostu pokazuje
+  showModal(roleMessageBox); 
 }
 
 function resetToLobby() {
@@ -605,7 +554,7 @@ function resetToLobby() {
   lastRoundSummary.innerHTML = ''; 
   lastRoundSummary.style.display = 'none'; 
   lastRoundSummaryTitle.style.display = 'none';
-  lobbyCategories.style.display = 'none'; // MODYFIKACJA 3
+  lobbyCategories.style.display = 'none'; 
   
   impostorCount = 1;
   impostorCountDisplaySelector.textContent = impostorCount;
@@ -617,7 +566,7 @@ function resetToLobby() {
   selectedPlayerId = null; 
   lastSeenStarterId = null; 
   lastSeenSummary = null;
-  lastSeenRoundWinner = null; // Reset flagi konfetti
+  lastSeenRoundWinner = null; 
   
   hintChance = 0;
   hintOnStart = false;
@@ -649,14 +598,12 @@ function updateImpostorButtons() {
   plusImpostor.disabled = impostorCount >= 5;
   minusImpostor.style.opacity = impostorCount <= 1 ? '0.5' : '1';
   plusImpostor.style.opacity = impostorCount >= 5 ? '0.5' : '1';
-  console.log('Zaktualizowano przyciski impostorów:', { impostorCount });
 }
 
 function updateRecommendedPlayers() {
   const minPlayers = impostorCount + 2;
   const maxPlayers = Math.min(impostorCount + 4, 10);
   recommendedPlayers.textContent = `Zalecana liczba graczy: ${minPlayers}–${maxPlayers}`;
-  console.log('Zaktualizowano zalecaną liczbę graczy:', recommendedPlayers.textContent);
 }
 
 closeRulesBtn.addEventListener('click', closeRules);
@@ -671,16 +618,13 @@ themeToggle.addEventListener('click', () => {
 });
 
 createRoomBtn.addEventListener('click', () => {
-  console.log('Kliknięto Stwórz pokój');
   const name = playerNameInput.value.trim();
   if (!name) {
     showMessage('❌ Wpisz nick!');
-    console.log('Brak nicku');
     return;
   }
   if (!selectedEmoji) {
     showMessage('❌ Wybierz awatar!');
-    console.log('Brak wybranej emotki');
     return;
   }
   
@@ -689,10 +633,8 @@ createRoomBtn.addEventListener('click', () => {
   
   currentPlayerName = name;
   isHost = true;
-  console.log('Ustawiono hosta, imię:', currentPlayerName);
   
   showModal(categorySelectionBox); 
-  
   initializeCategorySelection();
 });
 
@@ -702,7 +644,6 @@ minusImpostor.addEventListener('click', () => {
     impostorCountDisplaySelector.textContent = impostorCount;
     updateImpostorButtons();
     updateRecommendedPlayers();
-    console.log('Zmniejszono liczbę impostorów:', impostorCount);
   }
 });
 
@@ -712,19 +653,16 @@ plusImpostor.addEventListener('click', () => {
     impostorCountDisplaySelector.textContent = impostorCount;
     updateImpostorButtons();
     updateRecommendedPlayers();
-    console.log('Zwiększono liczbę impostorów:', impostorCount);
   }
 });
 
 confirmImpostors.addEventListener('click', () => {
-  console.log('Potwierdzono liczbę impostorów:', impostorCount);
   hideModal(impostorSelectionBox);
   showModal(impostorHintBox);
 });
 
 hintChanceSlider.addEventListener('input', (e) => {
   hintChance = parseInt(e.target.value, 10);
-  console.log('Szansa na podpowiedź:', hintChanceValues[hintChance]);
   
   const labels = document.querySelectorAll('.slider-labels .slider-label');
   labels.forEach((label, index) => {
@@ -748,11 +686,9 @@ hintChanceSlider.addEventListener('input', (e) => {
 
 hintOnStartCheckbox.addEventListener('change', (e) => {
   hintOnStart = e.target.checked;
-  console.log('Podpowiedź przy starcie impostora:', hintOnStart);
 });
 
 confirmHintSettingsBtn.addEventListener('click', () => {
-  console.log('Potwierdzono ustawienia podpowiedzi.');
   hideModal(impostorHintBox);
   
   if (impostorCount > 1) {
@@ -767,18 +703,15 @@ teamKnowsBtn.addEventListener('click', () => {
   impostorsKnowEachOther = true;
   teamKnowsBtn.classList.add('selected');
   teamNotKnowsBtn.classList.remove('selected');
-  console.log('Impostorzy będą wiedzieć');
 });
 
 teamNotKnowsBtn.addEventListener('click', () => {
   impostorsKnowEachOther = false;
   teamNotKnowsBtn.classList.add('selected');
   teamKnowsBtn.classList.remove('selected');
-  console.log('Impostorzy NIE będą wiedzieć');
 });
 
 confirmTeamSettingsBtn.addEventListener('click', () => {
-  console.log('Potwierdzono ustawienia drużyny, tworzenie pokoju...');
   createRoom(impostorCount, hintChance, hintOnStart, impostorsKnowEachOther);
 });
 
@@ -787,10 +720,6 @@ function createRoom(numImpostors, chanceIndex, onStart, knows) {
     .filter(c => c.isCustom)
     .map(c => ({ name: c.name, words: c.words })); 
 
-  console.log('Tworzenie pokoju z', numImpostors, 'impostorami, kategorie:', selectedCategories.map(c => c.name));
-  console.log('Ustawienia podpowiedzi:', hintChanceValues[chanceIndex], 'na starcie:', onStart);
-  console.log('Impostorzy wiedzą o sobie:', knows);
-  
   currentRoomCode = generateRoomCode();
   currentPlayerId = db.ref().push().key;
   const emoji = assignUniqueEmoji({});
@@ -811,7 +740,8 @@ function createRoom(numImpostors, chanceIndex, onStart, knows) {
     roundEndMessage: null, 
     resetMessage: null,
     starterId: null,
-    roundWinner: null, // NOWE
+    showStarter: false, // WAŻNE: Synchronizacja odkrycia kart
+    roundWinner: null, 
     numImpostors: numImpostors,
     categories: selectedCategories.map(c => c.name), 
     customCategories: customCategoriesToSave || [],
@@ -836,19 +766,16 @@ function createRoom(numImpostors, chanceIndex, onStart, knows) {
 }
 
 joinRoomBtn.addEventListener('click', () => {
-  console.log('Kliknięto Dołącz do pokoju');
   const name = playerNameInput.value.trim();
   const roomCode = roomCodeInput.value.trim().toUpperCase();
 
   if (!name || !roomCode) {
     showMessage('❌ Wpisz nick i kod pokoju!');
-    console.log('Brak nicku lub kodu pokoju');
     roomCodeInput.value = '';
     return;
   }
   if (!selectedEmoji) {
     showMessage('❌ Wybierz awatar!');
-    console.log('Brak wybranej emotki');
     return;
   }
 
@@ -858,13 +785,11 @@ joinRoomBtn.addEventListener('click', () => {
   currentPlayerName = name;
   currentRoomCode = roomCode;
   currentPlayerId = db.ref().push().key;
-  console.log('Dołączanie do pokoju:', roomCode, 'Nick:', name);
 
   const roomRef = db.ref(`rooms/${currentRoomCode}`);
   roomRef.once('value').then(snapshot => {
     if (!snapshot.exists()) {
       showMessage('❌ Pokój nie istnieje!');
-      console.log('Pokój nie istnieje:', roomCode);
       roomCodeInput.value = '';
       return;
     }
@@ -873,7 +798,6 @@ joinRoomBtn.addEventListener('click', () => {
 
     if (room.gameStarted) {
       showMessage('❌ Gra już się rozpoczęła! Poczekaj na koniec rundy.');
-      console.log('Próba dołączenia do trwającej gry:', roomCode);
       roomCodeInput.value = '';
       return;
     }
@@ -881,7 +805,6 @@ joinRoomBtn.addEventListener('click', () => {
     const players = room.players || {};
     if (Object.keys(players).length >= 10) {
       showMessage('❌ Pokój jest pełny! Maksymalnie 10 graczy.');
-      console.log('Pokój pełny:', roomCode);
       roomCodeInput.value = '';
       return;
     }
@@ -892,7 +815,6 @@ joinRoomBtn.addEventListener('click', () => {
     roomRef.child('players').update({
       [currentPlayerId]: playerData
     }).then(() => {
-      console.log('Dołączono do pokoju:', roomCode, 'Gracz:', playerData);
       showScreen(gameScreen); 
       
       const categoryNames = room.categories || ['Wszystkie'];
@@ -916,19 +838,16 @@ joinRoomBtn.addEventListener('click', () => {
       db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).onDisconnect().remove();
       listenToRoom(currentRoomCode);
     }).catch(error => {
-      console.error('Błąd dołączania do pokoju:', error);
       showMessage('❌ Błąd dołączania do pokoju!');
       roomCodeInput.value = '';
     });
   }).catch(error => {
-    console.error('Błąd sprawdzania pokoju:', error);
     showMessage('❌ Błąd sprawdzania pokoju!');
     roomCodeInput.value = '';
   });
 });
 
 copyRoomCodeBtn.addEventListener('click', () => {
-  console.log('Kliknięto Kopiuj kod');
   const roomCode = roomCodeDisplay.textContent;
   navigator.clipboard.writeText(roomCode).then(() => {
     showMessage('✅ Kod skopiowany!');
@@ -939,28 +858,22 @@ copyRoomCodeBtn.addEventListener('click', () => {
 
 function kickPlayer(playerId) {
   if (!isHost || playerId === currentPlayerId) return;
-  console.log('Wyrzucanie gracza:', playerId);
   db.ref(`rooms/${currentRoomCode}/players/${playerId}`).remove().then(() => {
-    console.log('Gracz wyrzucony:', playerId);
   }).catch(error => {
-    console.error('Błąd wyrzucania gracza:', error);
     showMessage('❌ Błąd wyrzucania gracza!');
   });
 }
 
 leaveRoomBtn.addEventListener('click', () => {
-  console.log('Kliknięto Opuść pokój');
   if (currentRoomCode && currentPlayerId) {
     const roomRef = db.ref(`rooms/${currentRoomCode}`);
     roomRef.child(`players/${currentPlayerId}`).remove().then(() => {
-      console.log('Gracz opuścił pokój:', currentPlayerId);
       resetToLobby();
       currentRoomCode = null;
       currentPlayerId = null;
       isHost = false;
       roomCodeInput.value = '';
     }).catch(error => {
-      console.error('Błąd opuszczania pokoju:', error);
       showMessage('❌ Błąd opuszczania pokoju!');
     });
   }
@@ -1017,9 +930,6 @@ function updatePlayersListForVoting(players) {
 }
 
 function voteForPlayer(targetId) {
-  console.log(`Głosuję na: ${targetId}`);
-  // MODYFIKACJA 1: Usunięcie audio
-  // audioVote.play();
   db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).update({
     votedFor: targetId
   });
@@ -1027,7 +937,6 @@ function voteForPlayer(targetId) {
 }
 
 function tallyVotes(room) {
-  console.log('Podliczanie głosów...');
   const players = room.players;
   const playerIds = Object.keys(players);
   const votes = {};
@@ -1042,7 +951,6 @@ function tallyVotes(room) {
   }
 
   if (totalVotes < playerIds.length) {
-    console.log('Jeszcze nie wszyscy zagłosowali.');
     return;
   }
 
@@ -1060,14 +968,9 @@ function tallyVotes(room) {
     }
   }
   
-  console.log('Wyniki głosowania:', votes, 'Wyrzucony:', ejectedPlayerId, 'Remis:', isTie);
-
   const updates = {
     votingActive: false,
     impostorHint: null, 
-    // currentCategory: null, // Nie czyścimy, bo może grać dalej
-    // lastRoundSummary: null, 
-    // roundEndMessage: null, 
     resetMessage: null,
   };
 
@@ -1076,9 +979,7 @@ function tallyVotes(room) {
   });
 
   if (isTie || !ejectedPlayerId) {
-    // NOWE: Logika remisu - nie czyścimy ról, gramy dalej
     updates.lastRoundSummary = `Remis! Kontynuujcie grę.<br>Nikt nie odpada.`;
-    // Nie ustawiamy gameStarted = false, więc gra toczy się dalej
   } else {
     const ejectedPlayer = players[ejectedPlayerId];
     
@@ -1086,9 +987,11 @@ function tallyVotes(room) {
     updates.currentWord = null;
     updates.starterId = null;
     updates.currentCategory = null;
+    updates.showStarter = false; // Reset stanu kart
     
     playerIds.forEach(id => {
       updates[`players/${id}/role`] = null;
+      updates[`players/${id}/seenRole`] = null; // Reset stanu kart
     });
 
     let summaryMessage = '';
@@ -1141,7 +1044,6 @@ function listenToRoom(roomCode) {
     const room = snapshot.val();
     if (!room) {
       if (!isAnimating) {
-        console.log('Pokój usunięty:', roomCode);
         showMessage('❌ Pokój został usunięty!');
         resetToLobby();
       }
@@ -1154,7 +1056,6 @@ function listenToRoom(roomCode) {
     const iAmInRoom = players[currentPlayerId];
     
     if (!iAmInRoom && !isAnimating) { 
-        console.log('Wyrzucono z pokoju lub błąd stanu.');
         showMessage('❌ Zostałeś rozłączony z pokojem.');
         resetToLobby();
         return;
@@ -1164,12 +1065,10 @@ function listenToRoom(roomCode) {
     const myVote = iAmInRoom ? iAmInRoom.votedFor : null;
 
     if (!hostExists && iAmInRoom && playerIds.length > 0) {
-      console.warn('Brak hosta! Wybieranie nowego...');
       const sortedPlayerIds = playerIds.sort();
       const newHostId = sortedPlayerIds[0];
       
       if (newHostId === currentPlayerId) {
-        console.log('To ja! Promuję się na nowego hosta. Czekam na odświeżenie...');
         db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).update({ isHost: true });
         return; 
       }
@@ -1177,7 +1076,6 @@ function listenToRoom(roomCode) {
 
     isHost = iAmInRoom ? iAmInRoom.isHost : false; 
 
-    // MODYFIKACJA 2: Przekaż starterId do updatePlayersList
     if (votingActive) {
       document.body.classList.add('voting-active');
       wordDisplay.innerHTML = "<strong>Czas na głosowanie! Kto jest oszustem?</strong>";
@@ -1185,7 +1083,7 @@ function listenToRoom(roomCode) {
     } else {
       document.body.classList.remove('voting-active');
       selectedPlayerId = null;
-      updatePlayersList(players, isHost, room.starterId); // Przekaż starterId
+      updatePlayersList(players, isHost, room.starterId);
     }
 
     document.querySelectorAll('.kickBtn').forEach(btn => {
@@ -1196,7 +1094,6 @@ function listenToRoom(roomCode) {
 
     playerCountDisplay.innerHTML = `Gracze: <span class="bold">${playerIds.length}</span>`;
     
-    // MODYFIKACJA 3: Zawsze pokazuj info o lobby
     const hintChanceText = hintChanceValues[room.hintChance || 0];
     const hintOnStartText = room.hintOnStart ? " (Start)" : "";
     impostorCountDisplay.innerHTML = `Impostorzy: <span class="bold">${room.numImpostors || 0}</span>`;
@@ -1229,8 +1126,7 @@ function listenToRoom(roomCode) {
       lastRoundSummary.style.display = 'block';
     } else {
       if (room.lastRoundSummary && room.gameStarted) {
-          // Pokaż jako "toast" na chwilę? Albo po prostu w bloku
-          // Tutaj zostawiamy logikę wyświetlania w modalu niżej
+          // Toast for draw
       } else {
           lastRoundSummaryTitle.style.display = 'none';
           lastRoundSummary.style.display = 'none';
@@ -1244,24 +1140,21 @@ function listenToRoom(roomCode) {
     endRoundBtn.style.display = 'none';
 
     // =================================================================
-    // MODYFIKACJA: LOGIKA "ZAPADKI" Z ODLICZANIEM I KARTĄ 3D
+    // MODYFIKACJA: LOGIKA "ZAPADKI" Z ODLICZANIEM I KARTĄ 3D (SYNCHRONIZACJA)
     // =================================================================
 
     const newStarterId = room.starterId;
-    const animationDelay = 300; 
-    const roleDuration = 6000; // Wydłużamy czas na przeczytanie karty
+    const roleDuration = 5000; 
     const starterDuration = 4000;
 
-    // 1. START RUNDY
+    // 1. START RUNDY (Pokazanie karty)
     if (room.gameStarted && newStarterId && newStarterId !== lastSeenStarterId) {
-      console.log(`Nowa runda! Starter ID: ${newStarterId}. Ostatni: ${lastSeenStarterId}`);
+      console.log(`Nowa runda! Starter ID: ${newStarterId}.`);
       
       lastSeenStarterId = newStarterId; 
       lastSeenSummary = null; 
       lastSeenRoundWinner = null; 
       
-      const starterName = players[newStarterId]?.name || '...';
-      const myWord = room.currentWord;
       const myHint = room.impostorHint;
       const amIImpostor = iAmInRoom.role === 'impostor';
       
@@ -1275,80 +1168,79 @@ function listenToRoom(roomCode) {
         roleHTML = `<div style="font-size: 1.5rem; opacity: 0.8;">TWOJE SŁOWO:</div><div style="color: #2ecc71; font-size: 3.5rem; margin-top: 0.5rem;">${room.currentWord}</div>`;
       }
       
-      const starterMsg = `Zaczyna mówić:<br><strong>${starterName}</strong>`;
-      
       wordDisplay.innerHTML = ''; 
       isAnimating = true; 
       
-      // NOWE: Najpierw odliczanie, potem KARTA
+      // Najpierw odliczanie, potem KARTA
       runCountdown(() => {
-           // 1. Przygotuj kartę
           roleContent.innerHTML = roleHTML;
-          
-          // Pokaż modal (ale jeszcze nie odwrócony)
           showModal(roleMessageBox); 
           
-          // Dodaj nasłuch na kliknięcie w kartę
-          const handleCardClick = () => {
-             roleCardInner.classList.add('is-flipped');
-          };
-          
-          // Usuń stare listenery (klonowanie elementu to najszybszy trick)
           const newCard = roleCardInner.cloneNode(true);
           roleCardInner.parentNode.replaceChild(newCard, roleCardInner);
-          // Odśwież referencję (bo podmieniliśmy element w DOM)
           const refreshedCard = document.getElementById('roleCardInner'); 
           
           refreshedCard.addEventListener('click', function flipHandler() {
-              this.classList.add('is-flipped');
-              // Opcjonalnie: po kliknięciu już nie można "odkliknąć" od razu
+              if (!this.classList.contains('is-flipped')) {
+                  this.classList.add('is-flipped');
+                  // Zapisz w Firebase, że ten gracz odkrył kartę
+                  db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).update({seenRole: true});
+              }
           });
-          
-          
-          // 2. Ustaw timer na schowanie roli (dłuższy czas, bo interakcja)
-          setTimeout(() => {
-            hideModal(roleMessageBox); 
-          }, roleDuration); 
-
-          // 3. Ustaw timer na pokazanie komunikatu STARTUJĄCEGO
-          setTimeout(() => {
-            showMessage(starterMsg, starterDuration); 
-          }, roleDuration + animationDelay); 
-
-          // 4. Odblokuj pokazywanie słowa po CAŁEJ sekwencji
-          setTimeout(() => {
+      });
+    }
+    
+    // LOGIKA HOSTA: Sprawdzanie czy wszyscy odkryli
+    if (isHost && room.gameStarted && !room.showStarter) {
+        const allSeen = Object.values(players).every(p => p.seenRole === true);
+        const totalPlayers = Object.keys(players).length;
+        if (totalPlayers > 0 && allSeen) {
+            // Wszyscy zobaczyli -> odczekaj chwilę i pokaż startera
+            if (!window.hostTimerRunning) { // Zabezpieczenie przed wielokrotnym timerem
+                window.hostTimerRunning = true;
+                setTimeout(() => {
+                    db.ref(`rooms/${currentRoomCode}`).update({showStarter: true});
+                    window.hostTimerRunning = false;
+                }, 5000); // 5 sekund czytania dla ostatniej osoby
+            }
+        }
+    }
+    
+    // 2. POKAZANIE STARTERA (Gdy Host zaktualizuje showStarter)
+    if (room.gameStarted && room.showStarter && isAnimating) {
+        const starterName = players[newStarterId]?.name || '...';
+        const starterMsg = `Zaczyna mówić:<br><strong>${starterName}</strong>`;
+        
+        hideModal(roleMessageBox);
+        showMessage(starterMsg, starterDuration);
+        
+        setTimeout(() => {
             isAnimating = false;
+            const myHint = room.impostorHint;
+            const amIImpostor = iAmInRoom.role === 'impostor';
             if (room.gameStarted && room.currentWord && iAmInRoom) {
               wordDisplay.innerHTML = amIImpostor
                 ? `Twoje słowo: <span class="word-impostor">OSZUST! ${myHint ? `<span class="impostor-hint-span">(Podpowiedź: ${myHint})</span>` : ''}</span>`
                 : `Twoje słowo: <span class="word-normal">${room.currentWord}</span>`;
             }
-          }, roleDuration + animationDelay + starterDuration); 
-      });
+        }, starterDuration);
     }
     
-    // 2. ZAPADKA KOŃCA RUNDY (LUB REMISU)
+    
+    // 3. ZAPADKA KOŃCA RUNDY (LUB REMISU)
     const newSummary = room.lastRoundSummary;
     if (newSummary && newSummary !== lastSeenSummary) {
       console.log("Koniec rundy lub komunikat! Nowe podsumowanie.");
       
-      lastSeenSummary = newSummary; // Zamknij zapadkę
+      lastSeenSummary = newSummary; 
       if (!room.gameStarted) {
-          lastSeenStarterId = null; // Reset startu tylko jak koniec gry
+          lastSeenStarterId = null; 
       }
       
-      // Tu używamy zwykłego okna, więc resetujemy kartę jeśli była widoczna
-      // Ale `showRoleMessage` nadpisuje innerHTML modala, co zepsułoby kartę.
-      // Dlatego używamy messageBox (białego) dla wyników, albo przywracamy treść.
-      // W obecnej implementacji `roleMessageBox` ma strukturę karty.
-      // Musimy dynamicznie podmienić treść `roleMessageBox` na tekst LUB użyć `messageBox`.
-      
-      // Rozwiązanie: Użyjmy `messageBox` (tego białego) do wyników końcowych, jest czytelniejszy.
       showMessage(newSummary, 5000);
         
-      // Dodaj timer, aby schować okno po 5 sekundach
       setTimeout(() => {
-          // NOWE: Konfetti ODPALANE TUTAJ, gdy okno się chowa i widać lobby
+          // Konfetti ODPALANE TUTAJ
           if (room.roundWinner && room.roundWinner !== lastSeenRoundWinner) {
             lastSeenRoundWinner = room.roundWinner;
             
@@ -1402,11 +1294,7 @@ function listenToRoom(roomCode) {
 
 startGameBtn.addEventListener('click', () => {
   if (isAnimating) return;
-  console.log('Kliknięto Start gry');
-  if (!isHost) {
-    console.log('Tylko host może rozpocząć grę');
-    return;
-  }
+  if (!isHost) return;
 
   const roomRef = db.ref(`rooms/${currentRoomCode}`);
   roomRef.once('value').then(snapshot => {
@@ -1417,20 +1305,17 @@ startGameBtn.addEventListener('click', () => {
 
     if (numPlayers < minPlayers) {
       showMessage(`❌ Za mało graczy! Minimum ${minPlayers}.`);
-      console.log('Za mało graczy:', numPlayers, 'Minimum:', minPlayers);
       return;
     }
 
     if (words.length === 0) {
-      showMessage('❌ Brak słów! Spróbuj ponownie utworzyć pokój i wybrać kategorie.');
-      console.log('Host próbował wystartować grę, ale "words" było puste.');
+      showMessage('❌ Brak słów! Spróbuj ponownie utworzyć pokój.');
       return;
     }
 
     const wordObject = words[Math.floor(Math.random() * words.length)];
     const word = wordObject.word;
     const category = wordObject.category;
-    console.log(`Wylosowano słowo: ${word} (Kategoria: ${category})`);
 
     const playerIds = Object.keys(players);
     const impostorIds = [];
@@ -1443,6 +1328,7 @@ startGameBtn.addEventListener('click', () => {
     playerIds.forEach(id => {
       updates[`players/${id}/role`] = impostorIds.includes(id) ? 'impostor' : 'normal';
       updates[`players/${id}/votedFor`] = null;
+      updates[`players/${id}/seenRole`] = false; // RESET DLA NOWEJ RUNDY
     });
 
     const nonImpostorIds = playerIds.filter(id => !impostorIds.includes(id));
@@ -1456,12 +1342,8 @@ startGameBtn.addEventListener('click', () => {
 
     if (room.hintOnStart && impostorStarted) {
       hint = category;
-      console.log('Przyznano podpowiedź (Impostor zaczyna)');
     } else if (Math.random() < hintChanceValue) {
       hint = category;
-      console.log('Przyznano podpowiedź (Rzut procentowy)');
-    } else {
-      console.log('Nie przyznano podpowiedzi');
     }
 
     updates.gameStarted = true;
@@ -1470,30 +1352,25 @@ startGameBtn.addEventListener('click', () => {
     updates.currentCategory = category; 
     updates.impostorHint = hint; 
     updates.starterId = starterId;
+    updates.showStarter = false; // RESET DLA NOWEJ RUNDY
     updates.lastRoundSummary = null; 
     updates.roundEndMessage = null; 
-    updates.roundWinner = null; // NOWE
+    updates.roundWinner = null;
     updates.currentRound = (room.currentRound || 0) + 1;
     
     roomRef.update(updates).then(() => {
-      console.log('Gra rozpoczęta:', { word, impostorIds, starterId, hint });
+      console.log('Gra rozpoczęta');
     }).catch(error => {
-      console.error('Błąd rozpoczynania gry:', error);
       showMessage('❌ Błąd rozpoczynania gry!');
     });
   }).catch(error => {
-    console.error('Błąd pobierania danych pokoju:', error);
     showMessage('❌ Błąd pobierania danych pokoju!');
   });
 });
 
 startVoteBtn.addEventListener('click', () => {
   if (isAnimating) return;
-  console.log('Kliknięto Rozpocznij głosowanie');
-  if (!isHost) {
-    console.log('Tylko host może rozpocząć głosowanie');
-    return;
-  }
+  if (!isHost) return;
   db.ref(`rooms/${currentRoomCode}`).update({ 
     votingActive: true 
   });
@@ -1508,14 +1385,9 @@ confirmVoteBtn.addEventListener('click', () => {
   voteForPlayer(selectedPlayerId);
 });
 
-// Przycisk "Zakończ rundę" (DEBUG)
 endRoundBtn.addEventListener('click', () => {
   if (isAnimating) return;
-  console.log('Kliknięto Zakończ rundę (PRZYCISK PANIKI)');
-  if (!isHost) {
-    console.log('Tylko host może zakończyć rundę');
-    return;
-  }
+  if (!isHost) return;
 
   const roomRef = db.ref(`rooms/${currentRoomCode}`);
   roomRef.once('value').then(snapshot => {
@@ -1537,37 +1409,25 @@ endRoundBtn.addEventListener('click', () => {
       impostorsKnow: null,
       lastRoundSummary: summary, 
       resetMessage: summary, 
-      roundWinner: null, 
+      roundWinner: null,
+      showStarter: false, 
     };
     Object.keys(players).forEach(id => {
       updates[`players/${id}/role`] = null;
       updates[`players/${id}/votedFor`] = null;
+      updates[`players/${id}/seenRole`] = null;
     });
 
-    roomRef.update(updates).then(() => {
-      console.log('Runda zakończona:', { word: currentWord, impostorIds });
-    }).catch(error => {
-      console.error('Błąd kończenia rundy:', error);
-      showMessage('❌ Błąd kończenia rundy!');
-    });
-  }).catch(error => {
-    console.error('Błąd pobierania danych pokoju:', error);
-    showMessage('❌ Błąd pobierania danych pokoju!');
+    roomRef.update(updates);
   });
 });
 
-// *** FUNKCJE WŁASNYCH KATEGORII ***
-
+// *** FUNKCJE WŁASNYCH KATEGORII (BEZ ZMIAN) ***
 function showCustomCategoryModal(editFileId = null) {
-  console.log('Otwieranie modala własnej kategorii...');
   editingCategoryFile = editFileId; 
-  
   if (editFileId) {
     const category = customCategories.find(c => c.file === editFileId);
-    if (!category) {
-      console.error('Nie znaleziono kategorii do edycji!');
-      return;
-    }
+    if (!category) return;
     customCategoryNameInput.value = category.name;
     tempCustomWords = [...category.words]; 
     saveCustomCategoryBtn.textContent = 'Zapisz zmiany';
@@ -1577,7 +1437,6 @@ function showCustomCategoryModal(editFileId = null) {
     customWordInput.value = '';
     saveCustomCategoryBtn.textContent = 'Zapisz i użyj';
   }
-  
   updateTempWordsList(); 
   hideModal(categorySelectionBox); 
   showModal(customCategoryBox); 
@@ -1596,15 +1455,13 @@ function addTempWord() {
     return;
   }
   tempCustomWords.push(word);
-  console.log('Dodano tymczasowe słowo:', word);
   customWordInput.value = ''; 
   customWordInput.focus(); 
   updateTempWordsList();
 }
 
 function deleteTempWord(index) {
-  const deletedWord = tempCustomWords.splice(index, 1);
-  console.log('Usunięto tymczasowe słowo:', deletedWord);
+  tempCustomWords.splice(index, 1);
   updateTempWordsList();
 }
 
@@ -1613,20 +1470,16 @@ function updateTempWordsList() {
   if (tempCustomWords.length === 0) {
     customWordsList.innerHTML = '<li>Dodaj przynajmniej 3 słowa...</li>';
   }
-  
   tempCustomWords.forEach((word, index) => {
     const li = document.createElement('li');
     li.textContent = word;
-    
     const deleteBtn = document.createElement('button');
     deleteBtn.textContent = '×';
     deleteBtn.classList.add('delete-word-btn');
     deleteBtn.dataset.index = index; 
-    
     li.appendChild(deleteBtn);
     customWordsList.appendChild(li);
   });
-  
   saveCustomCategoryBtn.disabled = tempCustomWords.length < 3;
 }
 
@@ -1636,9 +1489,7 @@ function saveCustomCategory() {
     showMessage('❌ Nazwa kategorii musi mieć przynajmniej 3 znaki!', 2500);
     return;
   }
-  
   if (editingCategoryFile) {
-    console.log('Zapisywanie zmian w kategorii:', categoryName);
     const categoryIndex = customCategories.findIndex(c => c.file === editingCategoryFile);
     if (categoryIndex > -1) {
       customCategories[categoryIndex].name = categoryName;
@@ -1653,28 +1504,22 @@ function saveCustomCategory() {
     if (btn) {
       const oldActions = btn.querySelector('.category-actions');
       if (oldActions) oldActions.remove();
-      
       btn.textContent = categoryName; 
       btn.dataset.categoryName = categoryName;
       addCategoryActions(btn, editingCategoryFile); 
     }
     editingCategoryFile = null; 
-    
   } else {
-    console.log('Zapisywanie nowej kategorii:', categoryName);
     const newCategory = {
       name: categoryName,
       file: `custom_${Date.now()}`, 
       words: [...tempCustomWords], 
       isCustom: true
     };
-    
     customCategories.push(newCategory); 
     selectedCategories.push(newCategory); 
-    
     addCustomCategoryToGrid(newCategory); 
   }
-
   hideCustomCategoryModal();
   updateCategoryButtons(); 
   updateConfirmCategoriesButton();
@@ -1686,60 +1531,44 @@ function addCustomCategoryToGrid(category) {
   btn.textContent = category.name;
   btn.dataset.file = category.file;
   btn.dataset.categoryName = category.name;
-  
   btn.addEventListener('click', (e) => {
-    if (e.target.closest('.category-actions')) {
-      return;
-    }
+    if (e.target.closest('.category-actions')) return;
     toggleCategory(category); 
   });
-  
   addCategoryActions(btn, category.file); 
-  
   categoryGrid.insertBefore(btn, createCustomCategoryBtn); 
 }
 
 function addCategoryActions(btn, fileId) {
   const actionsDiv = document.createElement('div');
   actionsDiv.classList.add('category-actions');
-  
   const editBtn = document.createElement('button');
   editBtn.textContent = '✏️';
   editBtn.classList.add('edit-btn');
   editBtn.dataset.file = fileId;
   editBtn.title = 'Edytuj';
-  
   const deleteBtn = document.createElement('button');
   deleteBtn.textContent = '🗑️';
   deleteBtn.classList.add('delete-btn');
   deleteBtn.dataset.file = fileId;
   deleteBtn.title = 'Usuń';
-  
   actionsDiv.appendChild(editBtn);
   actionsDiv.appendChild(deleteBtn);
   btn.appendChild(actionsDiv);
 }
 
 function deleteCustomCategory(fileId) {
-  console.log('Usuwanie kategorii:', fileId);
   customCategories = customCategories.filter(c => c.file !== fileId);
   selectedCategories = selectedCategories.filter(c => c.file !== fileId);
-  
   const btn = categoryGrid.querySelector(`.category-btn[data-file="${fileId}"]`);
-  if (btn) {
-    btn.remove();
-  }
-  
+  if (btn) btn.remove();
   updateCategoryButtons();
   updateConfirmCategoriesButton();
 }
 
 function editCustomCategory(fileId) {
-  console.log('Edycja kategorii:', fileId);
   const category = customCategories.find(c => c.file === fileId);
-  if (category) {
-    showCustomCategoryModal(fileId); 
-  }
+  if (category) showCustomCategoryModal(fileId); 
 }
 
 createCustomCategoryBtn.addEventListener('click', () => showCustomCategoryModal());
@@ -1750,7 +1579,6 @@ saveCustomCategoryBtn.addEventListener('click', saveCustomCategory);
 categoryGrid.addEventListener('click', (e) => {
   const target = e.target.closest('button'); 
   if (!target) return;
-
   if (target.classList.contains('delete-btn')) {
     e.stopPropagation(); 
     deleteCustomCategory(target.dataset.file);
