@@ -254,26 +254,31 @@ body.dark-mode .modal-box {
   border: 2px solid var(--c-glass-border);
 }
 
-/* --- KARTA 3D (NAPRAWIONA POZYCJA) --- */
+/* --- KARTA 3D (NAPRAWIONE CENTROWANIE) --- */
 .role-card-modal {
   background: transparent !important; 
   border: none !important;
   box-shadow: none !important;
   padding: 0 !important;
   
-  /* Responsywne wymiary karty */
+  /* NAPRAWA: Używamy 'inset: 0' i 'margin: auto' do centrowania. 
+     To zapobiega konfliktom transformacji 2D z 3D */
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  margin: auto !important;
+  transform: none !important; /* Resetujemy translate, który psuł obrót */
+  
   width: 300px;
   height: 450px;
-  max-width: 85vw; /* Nie szersza niż ekran */
-  max-height: 80vh; /* Nie wyższa niż ekran */
-  
-  /* Kluczowe centrowanie */
-  top: 50% !important;
-  left: 50% !important;
-  transform: translate(-50%, -50%) !important;
+  max-width: 85vw; 
+  max-height: 80vh; 
   
   perspective: 1000px; 
-  overflow: visible !important; /* Pozwól na efekt 3D poza obrys */
+  overflow: visible !important;
+  z-index: 1001;
 }
 
 .role-card-scene {
@@ -305,25 +310,39 @@ body.dark-mode .modal-box {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem; /* Mniejszy padding dla bezpieczeństwa */
+  padding: 2rem;
   box-sizing: border-box;
   box-shadow: 0 20px 50px rgba(0,0,0,0.6);
-  overflow: hidden; /* Zapobiegaj wylewaniu się treści */
+  overflow: hidden; /* Zabezpieczenie przed wystawaniem */
 }
 
-/* TYŁ KARTY */
+/* TYŁ KARTY (OKŁADKA) */
 .role-card-back {
   background-color: #111;
-  background-image: repeating-linear-gradient(45deg, #111 0px, #111 10px, #1a1a1a 10px, #1a1a1a 20px);
+  background-image: repeating-linear-gradient(
+    45deg,
+    #111 0px,
+    #111 10px,
+    #1a1a1a 10px,
+    #1a1a1a 20px
+  );
   border: 4px solid #d4af37;
   color: #f1c40f;
   transform: rotateY(0deg);
   position: relative;
 }
 
+.role-card-back::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0.4) 100%);
+  pointer-events: none;
+}
+
 .card-question-mark {
   font-family: 'Pacifico', cursive; 
-  font-size: 12rem; /* Zmniejszone z 18rem dla lepszego skalowania */
+  font-size: 12rem; 
   color: #d4af37; 
   line-height: 1;
   text-shadow: 2px 2px 0px #8a6e1c, 4px 4px 10px rgba(0,0,0,0.5);
@@ -336,7 +355,7 @@ body.dark-mode .modal-box {
   font-size: 3rem;
   color: #d4af37;
   position: absolute;
-  bottom: 20px;
+  bottom: 30px;
   animation: spin 4s linear infinite;
   text-shadow: 0 2px 5px rgba(0,0,0,0.5);
   z-index: 2;
@@ -347,7 +366,7 @@ body.dark-mode .modal-box {
   to { transform: rotate(360deg); }
 }
 
-/* PRZÓD KARTY */
+/* PRZÓD KARTY (TREŚĆ) */
 .role-card-front {
   background: radial-gradient(circle at center, #2c3e50 0%, #000 90%);
   color: white;
@@ -361,19 +380,19 @@ body.dark-mode .modal-box {
 #roleContent {
   font-size: 2.5rem;
   font-weight: bold;
-  line-height: 1.3;
+  line-height: 1.4;
   width: 100%;
   position: relative;
   z-index: 2;
   text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-  word-wrap: break-word; /* Zapobieganie wychodzeniu długich słów */
+  word-wrap: break-word;
 }
 
-/* Responsywność karty na małych ekranach */
+/* Responsywność karty */
 @media (max-width: 400px) {
   .role-card-modal {
     width: 85vw;
-    height: 60vh; /* Mniejsza wysokość na telefonach */
+    height: 60vh;
   }
   .card-question-mark {
     font-size: 8rem;
