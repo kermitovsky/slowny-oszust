@@ -120,7 +120,7 @@ input {
   border: 2px solid var(--c-primary);
   color: var(--c-text-dark);
   background: rgba(255, 255, 255, 0.9);
-  font-family: var(--font-heading); /* ZMIANA: Czcionka inputów */
+  font-family: var(--font-heading);
 }
 
 button {
@@ -128,7 +128,7 @@ button {
   color: var(--c-text-light);
   cursor: pointer;
   transition: box-shadow 0.3s ease, background 0.3s ease;
-  font-family: var(--font-heading); /* ZMIANA: Czcionka przycisków */
+  font-family: var(--font-heading);
   font-weight: 600;
 }
 
@@ -253,6 +253,98 @@ body.dark-mode .modal-box {
   background: linear-gradient(135deg, var(--c-bg-1), var(--c-primary));
   border: 2px solid var(--c-glass-border);
 }
+
+/* --- NOWE: STYLE DLA KARTY 3D (Zamiast zwykłego tekstu) --- */
+.role-card-modal {
+  background: transparent !important; /* Usuwamy tło modala, bo karta ma własne */
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  width: 300px;
+  height: 450px;
+  perspective: 1000px; /* Kluczowe dla 3D */
+}
+
+.role-card-scene {
+  width: 100%;
+  height: 100%;
+}
+
+.role-card {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Sprężysty obrót */
+  transform-style: preserve-3d;
+  cursor: pointer;
+}
+
+.role-card.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.role-card-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden; /* Safari */
+  backface-visibility: hidden;
+  border-radius: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  box-sizing: border-box;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+  border: 4px solid rgba(255,255,255,0.2);
+}
+
+/* TYŁ KARTY (Widoczny na starcie) */
+.role-card-back {
+  background: linear-gradient(135deg, #2c3e50, #000);
+  color: #f1c40f;
+  transform: rotateY(0deg);
+}
+.role-card-back .card-pattern {
+  position: absolute;
+  top: 10px; left: 10px; right: 10px; bottom: 10px;
+  border: 2px dashed rgba(241, 196, 15, 0.3);
+  border-radius: 1rem;
+  pointer-events: none;
+}
+.role-card-back p {
+  font-size: 4rem;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1;
+  opacity: 0.8;
+  transform: rotate(-15deg);
+  border: 4px solid #f1c40f;
+  padding: 1rem;
+  border-radius: 1rem;
+  mask-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1IiBoZWlnaHQ9IjUiPgo8cmVjdCB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBmaWxsPSJ3aGl0ZSIvPgo8Y2lyY2xlIGN4PSIyIiBjeT0iMiIgcj0iMiIgZmlsbD0iYmxhY2siLz4KPC9zdmc+');
+}
+.role-card-back span {
+  margin-top: 2rem;
+  font-size: 1.4rem;
+  color: #fff;
+  opacity: 0.6;
+  animation: pulse 2s infinite;
+}
+
+/* PRZÓD KARTY (Treść roli) */
+.role-card-front {
+  background: linear-gradient(135deg, var(--c-primary), var(--c-bg-3));
+  color: white;
+  transform: rotateY(180deg);
+}
+#roleContent {
+  font-size: 2.5rem;
+  font-weight: bold;
+  line-height: 1.4;
+}
+
 
 .custom-scrollbar {
   scrollbar-width: thin;
@@ -460,7 +552,6 @@ body.dark-mode #lastRoundSummary {
 }
 #playersList li {
   position: relative;
-  /* Zwiększony padding z lewej, żeby zmieścić duży awatar */
   padding: 1rem 4.5rem 1rem 6.5rem; 
   margin: 0.8rem 0;
   border-radius: 1.2rem;
@@ -471,7 +562,7 @@ body.dark-mode #lastRoundSummary {
   box-sizing: border-box;
   transition: background-color 0.2s ease, opacity 0.2s ease, border 0.2s ease;
   border: 4px solid transparent;
-  min-height: 6rem; /* Minimalna wysokość kafelka */
+  min-height: 6rem; 
 }
 body.dark-mode #playersList li {
   background-color: rgba(255, 255, 255, 0.1);
@@ -479,14 +570,13 @@ body.dark-mode #playersList li {
 }
 
 #playersList li .avatar {
-  /* Znacznie powiększone awatary */
   width: 4.5rem;
   height: 4.5rem;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2.8rem; /* Większa emotka */
+  font-size: 2.8rem; 
   margin-right: 0; 
   box-shadow: 0 4px 10px var(--c-shadow);
   position: absolute;
@@ -496,15 +586,16 @@ body.dark-mode #playersList li {
   transition: transform 0.2s ease;
 }
 
-/* Wielka korona dla Hosta */
+/* Korona dla Hosta */
 #playersList li.host .avatar::after {
   content: '👑';
   position: absolute;
-  top: -1.2rem;
-  right: -1.2rem;
-  font-size: 2rem; /* Ogromna korona */
+  top: -1.5rem;
+  right: -1.5rem;
+  font-size: 3rem; /* WIELKA KORONA */
   transform: rotate(15deg);
-  text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));
 }
 
 #playersList li .kickBtn {
@@ -562,7 +653,7 @@ body.voting-active #playersList li.is-starter::before {
 
 
 /* =================================================================== */
-/* 5.5. STYLE GŁOSOWANIA */
+/* 5.5. STYLE GŁOSOWANIA (PIECZĄTKI) */
 /* =================================================================== */
 
 body.voting-active #playersList li.vote-target {
@@ -583,36 +674,25 @@ body.voting-active #playersList li.disabled {
   cursor: not-allowed;
 }
 
-body.voting-active #playersList li.has-voted .avatar::after {
-  content: '✔';
+/* PIECZĄTKA GŁOSU */
+body.voting-active #playersList li.has-voted .avatar::before {
+  content: 'GŁOS';
   position: absolute;
-  bottom: -0.4rem;
-  right: -0.4rem;
-  font-size: 1.5rem; /* Większy znaczek */
-  background-color: var(--c-success);
-  color: white;
-  border-radius: 50%;
-  width: 2rem;
-  height: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  border: 2px solid #fff;
-}
-/* Nadpisanie korony ptaszkiem przy głosowaniu (dla hosta) - albo obok? 
-   Zróbmy obok, żeby korona nie znikała. */
-body.voting-active #playersList li.host.has-voted .avatar::after {
-  /* Tutaj jest kolizja korony i ptaszka. Przesuńmy ptaszka */
-  content: '✔';
-  top: auto; 
-  bottom: -0.5rem;
-  right: -0.5rem;
-  transform: none;
-  text-shadow: none;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-20deg);
+  color: rgba(192, 57, 43, 0.8);
+  border: 3px solid rgba(192, 57, 43, 0.8);
+  border-radius: 8px;
+  padding: 0.2rem 0.5rem;
+  font-weight: 800;
   font-size: 1.2rem;
+  z-index: 10;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  background: rgba(255,255,255,0.5);
+  mask-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1IiBoZWlnaHQ9IjUiPgo8cmVjdCB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBmaWxsPSJ3aGl0ZSIvPgo8Y2lyY2xlIGN4PSIyIiBjeT0iMiIgcj0iMiIgZmlsbD0iYmxhY2siLz4KPC9zdmc+');
 }
-
 
 /* =================================================================== */
 /* 5.6. STYLE EKRANU PODPOWIEDZI */
