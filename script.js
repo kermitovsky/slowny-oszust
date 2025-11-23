@@ -532,9 +532,9 @@ function updatePlayersList(players, localIsHost, starterId = null) {
     li.appendChild(avatar);
     li.appendChild(document.createTextNode(` ${player.name || 'Nieznany gracz'}`));
     
+    // ZMIANA: Usunięto tekst "(host)", dodano tylko klasę
     if (player.isHost) {
       li.classList.add('host');
-      li.appendChild(document.createTextNode(' (host)'));
     }
     if (id === currentPlayerId) {
       li.classList.add('self');
@@ -1317,32 +1317,33 @@ function listenToRoom(roomCode) {
       
       // Pokaż podsumowanie w dużym oknie
       showRoleMessage(newSummary); 
-      
-      // NOWE: Konfetti tutaj, razem z komunikatem
-      if (room.roundWinner && room.roundWinner !== lastSeenRoundWinner) {
-        lastSeenRoundWinner = room.roundWinner;
-        
-        if (room.roundWinner === 'innocent') {
-             confetti({
-                particleCount: 200,
-                spread: 100,
-                origin: { y: 0.6 }
-              });
-        } else if (room.roundWinner === 'impostor') {
-            confetti({
-                particleCount: 200,
-                spread: 100,
-                origin: { y: 0.6 },
-                colors: ['#e74c3c', '#2c3e50', '#c0392b']
-              });
-        }
-      }
         
       // Dodaj timer, aby schować okno po 5 sekundach
       setTimeout(() => {
           if (currentModal === roleMessageBox) { 
               hideModal(roleMessageBox); 
           }
+          
+          // NOWE: Konfetti ODPALANE TUTAJ, gdy okno się chowa i widać lobby
+          if (room.roundWinner && room.roundWinner !== lastSeenRoundWinner) {
+            lastSeenRoundWinner = room.roundWinner;
+            
+            if (room.roundWinner === 'innocent') {
+                 confetti({
+                    particleCount: 200,
+                    spread: 100,
+                    origin: { y: 0.6 }
+                  });
+            } else if (room.roundWinner === 'impostor') {
+                confetti({
+                    particleCount: 200,
+                    spread: 100,
+                    origin: { y: 0.6 },
+                    colors: ['#e74c3c', '#2c3e50', '#c0392b']
+                  });
+            }
+          }
+          
       }, 5000);
     }
     
