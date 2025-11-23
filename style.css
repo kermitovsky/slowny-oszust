@@ -254,7 +254,7 @@ body.dark-mode .modal-box {
   border: 2px solid var(--c-glass-border);
 }
 
-/* --- KARTA 3D --- */
+/* --- KARTA 3D (Zaktualizowana do wersji "Czarno-Złotej") --- */
 .role-card-modal {
   background: transparent !important; 
   border: none !important;
@@ -289,7 +289,7 @@ body.dark-mode .modal-box {
   height: 100%;
   -webkit-backface-visibility: hidden; 
   backface-visibility: hidden;
-  border-radius: 1.5rem;
+  border-radius: 30px; /* Mocno zaokrąglone rogi */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -297,52 +297,51 @@ body.dark-mode .modal-box {
   padding: 2rem;
   box-sizing: border-box;
   box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-  border: 4px solid rgba(255,255,255,0.2);
 }
 
-/* TYŁ KARTY */
+/* TYŁ KARTY (OKŁADKA) */
 .role-card-back {
-  background: linear-gradient(135deg, #2c3e50, #000);
+  background-color: #000; /* Czysta czerń */
   color: #f1c40f;
   transform: rotateY(0deg);
-}
-.role-card-back .card-pattern {
-  position: absolute;
-  top: 10px; left: 10px; right: 10px; bottom: 10px;
-  border: 2px dashed rgba(241, 196, 15, 0.3);
-  border-radius: 1rem;
-  pointer-events: none;
-}
-.role-card-back p {
-  font-size: 4rem;
-  font-weight: 800;
-  margin: 0;
-  line-height: 1;
-  opacity: 0.8;
-  transform: rotate(-15deg);
-  border: 4px solid #f1c40f;
-  padding: 1rem;
-  border-radius: 1rem;
-  mask-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1IiBoZWlnaHQ9IjUiPgo8cmVjdCB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBmaWxsPSJ3aGl0ZSIvPgo8Y2lyY2xlIGN4PSIyIiBjeT0iMiIgcj0iMiIgZmlsbD0iYmxhY2siLz4KPC9zdmc+');
-}
-.role-card-back span {
-  margin-top: 2rem;
-  font-size: 1.4rem;
-  color: #fff;
-  opacity: 0.6;
-  animation: pulse 2s infinite;
+  border: none;
 }
 
-/* PRZÓD KARTY */
+.card-question-mark {
+  font-family: 'Pacifico', cursive; /* "Malowany" styl */
+  font-size: 18rem; /* Ogromny */
+  color: #d4af37; /* Złoty */
+  line-height: 1;
+  text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+  transform: translateY(-20px);
+}
+
+.card-cycle-icon {
+  font-size: 3rem;
+  color: #d4af37;
+  position: absolute;
+  bottom: 30px;
+  animation: spin 4s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* PRZÓD KARTY (TREŚĆ) */
 .role-card-front {
-  background: linear-gradient(135deg, var(--c-primary), var(--c-bg-3));
+  background-color: #000; /* Również czarny */
   color: white;
   transform: rotateY(180deg);
+  border: 2px solid #333; /* Delikatna ramka */
 }
+
 #roleContent {
   font-size: 2.5rem;
   font-weight: bold;
   line-height: 1.4;
+  width: 100%;
 }
 
 
@@ -544,7 +543,7 @@ body.dark-mode #lastRoundSummary {
 }
 
 
-/* --- Lista Graczy (ZMODYFIKOWANA) --- */
+/* --- Lista Graczy --- */
 #playersList {
   list-style: none;
   padding: 0;
