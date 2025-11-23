@@ -33,8 +33,8 @@ const rulesBox = document.getElementById('rulesBox');
 const modalBackdrop = document.getElementById('modalBackdrop'); 
 const countdownDisplay = document.getElementById('countdownDisplay'); 
 
-// Nowe elementy karty 3D
-const roleCardInner = document.getElementById('roleCardInner');
+// Nowe elementy karty 3D (Zmienione na LET, aby odświeżać po klonowaniu)
+let roleCardInner = document.getElementById('roleCardInner');
 const roleContent = document.getElementById('roleContent');
 
 const closeRulesBtn = document.getElementById('closeRules');
@@ -184,6 +184,7 @@ function showModal(modalToShow) {
   modalToShow.classList.remove('is-hiding');
   modalToShow.classList.add('is-visible');
   
+  // Pokaż tło przyciemniające
   if (modalBackdrop) {
     modalBackdrop.classList.add('is-visible');
   }
@@ -204,6 +205,7 @@ function hideModal(modalToHide, force = false) {
     modalToHide.classList.remove('is-visible', 'is-hiding');
     if (modalToHide === currentModal) {
         currentModal = null;
+        // Ukryj tło przyciemniające przy force
         if (modalBackdrop) modalBackdrop.classList.remove('is-visible');
     }
     return;
@@ -212,6 +214,7 @@ function hideModal(modalToHide, force = false) {
   modalToHide.classList.add('is-hiding');
   modalToHide.classList.remove('is-visible');
   
+  // Ukryj tło przyciemniające
   if (modalBackdrop) {
     modalBackdrop.classList.remove('is-visible');
   }
@@ -230,6 +233,7 @@ function hideModal(modalToHide, force = false) {
 }
 
 
+// --- Funkcja do pobierania z limitem czasu ---
 const fetchWithTimeout = async (url, timeout = 5000) => {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeout);
@@ -244,6 +248,7 @@ const fetchWithTimeout = async (url, timeout = 5000) => {
   }
 };
 
+// Funkcja "Zapamiętaj Mnie"
 function loadFromLocalStorage() {
   const savedNick = localStorage.getItem('slownyOszustNick');
   const savedEmoji = localStorage.getItem('slownyOszustEmoji');
@@ -262,6 +267,7 @@ function loadFromLocalStorage() {
   }
 }
 
+// Inicjalizacja wyboru emotek
 function initializeEmojiSelection() {
   emojiSelection.innerHTML = '';
   emojiList.forEach(emoji => {
@@ -280,16 +286,19 @@ function initializeEmojiSelection() {
 }
 initializeEmojiSelection();
 
+// Wykrywanie zamknięcia przeglądarki lub odświeżenia
 window.addEventListener('beforeunload', () => {
   if (currentRoomCode && currentPlayerId) {
     db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).remove();
   }
 });
 
+// Funkcja zamykania zasad
 function closeRules() {
   hideModal(rulesBox);
 }
 
+// Funkcja przełączania trybu
 function toggleTheme() {
   const isDark = document.body.classList.toggle('dark-mode');
   themeToggle.textContent = isDark ? '☀️' : '🌙';
@@ -303,6 +312,7 @@ if (localStorage.getItem('theme') === 'dark') {
   themeToggle.textContent = '🌙';
 }
 
+// Inicjalizacja wyboru kategorii
 function initializeCategorySelection() {
   categoryGrid.querySelectorAll('.category-btn:not(.custom-new-btn)').forEach(btn => btn.remove());
   
@@ -589,6 +599,14 @@ function resetToLobby() {
   document.querySelectorAll('.emoji-btn').forEach(btn => btn.classList.remove('selected'));
   updateImpostorButtons();
   updateRecommendedPlayers();
+  
+  // WAŻNE: Reset karty 3D
+  if (roleCardInner) {
+    roleCardInner.classList.remove('is-flipped');
+  }
+  if (roleContent) {
+    roleContent.innerHTML = '';
+  }
   
   loadFromLocalStorage();
 }
@@ -1176,11 +1194,13 @@ function listenToRoom(roomCode) {
           roleContent.innerHTML = roleHTML;
           showModal(roleMessageBox); 
           
+          // Trik z klonowaniem, aby usunąć stare event listenery i zresetować stan klasy
           const newCard = roleCardInner.cloneNode(true);
+          newCard.classList.remove('is-flipped'); // WAŻNE: Reset stanu karty!
           roleCardInner.parentNode.replaceChild(newCard, roleCardInner);
-          const refreshedCard = document.getElementById('roleCardInner'); 
+          roleCardInner = newCard; // Aktualizacja referencji!
           
-          refreshedCard.addEventListener('click', function flipHandler() {
+          roleCardInner.addEventListener('click', function flipHandler() {
               if (!this.classList.contains('is-flipped')) {
                   this.classList.add('is-flipped');
                   // Zapisz w Firebase, że ten gracz odkrył kartę
