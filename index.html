@@ -7,7 +7,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=35" />
+  <link rel="stylesheet" href="style.css?v=36" />
 </head>
 <body>
   
@@ -64,7 +64,21 @@
   <button id="themeToggle" title="Przełącz tryb"></button>
   
   <div id="messageBox" class="modal-box" data-modal></div>
-  <div id="roleMessageBox" class="modal-box" data-modal></div>
+  
+  <div id="roleMessageBox" class="modal-box role-card-modal" data-modal>
+    <div class="role-card-scene">
+      <div class="role-card" id="roleCardInner">
+        <div class="role-card-face role-card-back">
+          <div class="card-pattern"></div>
+          <p>ŚCIŚLE<br>TAJNE</p>
+          <span>Kliknij, aby odkryć</span>
+        </div>
+        <div class="role-card-face role-card-front">
+          <div id="roleContent"></div>
+        </div>
+      </div>
+    </div>
+  </div>
   
   <div id="categorySelectionBox" class="modal-box custom-scrollbar" data-modal style="display:none;">
     <p>Wybierz kategorie:</p>
@@ -169,6 +183,6 @@
 
   <script src="config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <script src="script.js?v=35"></script> 
+  <script src="script.js?v=36"></script> 
 </body>
 </html>
