@@ -254,7 +254,7 @@ body.dark-mode .modal-box {
   border: 2px solid var(--c-glass-border);
 }
 
-/* --- KARTA 3D (Zaktualizowana do wersji "Czarno-Złotej") --- */
+/* --- KARTA 3D (Zaktualizowana TEKSTURA) --- */
 .role-card-modal {
   background: transparent !important; 
   border: none !important;
@@ -289,31 +289,56 @@ body.dark-mode .modal-box {
   height: 100%;
   -webkit-backface-visibility: hidden; 
   backface-visibility: hidden;
-  border-radius: 30px; /* Mocno zaokrąglone rogi */
+  border-radius: 30px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 2rem;
   box-sizing: border-box;
-  box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.6); /* Głębszy cień */
 }
 
-/* TYŁ KARTY (OKŁADKA) */
+/* TYŁ KARTY (OKŁADKA - Urozmaicona) */
 .role-card-back {
-  background-color: #000; /* Czysta czerń */
+  /* Ciemne tło z subtelnymi skośnymi paskami */
+  background-color: #111;
+  background-image: repeating-linear-gradient(
+    45deg,
+    #111 0px,
+    #111 10px,
+    #1a1a1a 10px,
+    #1a1a1a 20px
+  );
+  /* Złota ramka */
+  border: 4px solid #d4af37;
   color: #f1c40f;
   transform: rotateY(0deg);
-  border: none;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Dodajemy "blask" na karcie */
+.role-card-back::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0.4) 100%);
+  pointer-events: none;
 }
 
 .card-question-mark {
-  font-family: 'Pacifico', cursive; /* "Malowany" styl */
-  font-size: 18rem; /* Ogromny */
-  color: #d4af37; /* Złoty */
+  font-family: 'Pacifico', cursive; 
+  font-size: 18rem; 
+  color: #d4af37; 
   line-height: 1;
-  text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+  /* Efekt złota/wypukłości na tekście */
+  text-shadow: 
+    2px 2px 0px #8a6e1c,
+    4px 4px 10px rgba(0,0,0,0.5);
   transform: translateY(-20px);
+  position: relative;
+  z-index: 2;
 }
 
 .card-cycle-icon {
@@ -322,6 +347,8 @@ body.dark-mode .modal-box {
   position: absolute;
   bottom: 30px;
   animation: spin 4s linear infinite;
+  text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+  z-index: 2;
 }
 
 @keyframes spin {
@@ -329,12 +356,18 @@ body.dark-mode .modal-box {
   to { transform: rotate(360deg); }
 }
 
-/* PRZÓD KARTY (TREŚĆ) */
+/* PRZÓD KARTY (TREŚĆ - Urozmaicona) */
 .role-card-front {
-  background-color: #000; /* Również czarny */
+  /* Ciemny gradient promienisty (winieta) */
+  background: radial-gradient(circle at center, #2c3e50 0%, #000 90%);
   color: white;
   transform: rotateY(180deg);
-  border: 2px solid #333; /* Delikatna ramka */
+  /* Delikatna ramka wewnętrzna */
+  border: 2px solid #444;
+  /* Subtelny szum/ziarno */
+  background-image: 
+    radial-gradient(circle at center, #2c3e50 0%, #000 90%),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
 }
 
 #roleContent {
@@ -342,6 +375,9 @@ body.dark-mode .modal-box {
   font-weight: bold;
   line-height: 1.4;
   width: 100%;
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
 }
 
 
