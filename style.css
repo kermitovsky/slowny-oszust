@@ -120,6 +120,7 @@ input {
   border: 2px solid var(--c-primary);
   color: var(--c-text-dark);
   background: rgba(255, 255, 255, 0.9);
+  font-family: var(--font-heading); /* ZMIANA: Czcionka inputów */
 }
 
 button {
@@ -127,7 +128,7 @@ button {
   color: var(--c-text-light);
   cursor: pointer;
   transition: box-shadow 0.3s ease, background 0.3s ease;
-  font-family: var(--font-heading); /* ZMIANA: Czcionka jak w lobby */
+  font-family: var(--font-heading); /* ZMIANA: Czcionka przycisków */
   font-weight: 600;
 }
 
@@ -170,7 +171,7 @@ button:disabled {
   display: none;
 }
 
-/* Tło przyciemniające (Backdrop) */
+/* Tło przyciemniające */
 #modalBackdrop {
   position: fixed;
   top: 0;
@@ -451,7 +452,7 @@ body.dark-mode #lastRoundSummary {
 }
 
 
-/* --- Lista Graczy --- */
+/* --- Lista Graczy (ZMODYFIKOWANA) --- */
 #playersList {
   list-style: none;
   padding: 0;
@@ -459,16 +460,18 @@ body.dark-mode #lastRoundSummary {
 }
 #playersList li {
   position: relative;
-  padding: 0.8rem 4.5rem 0.8rem 3.5rem;
-  margin: 0.5rem 0;
-  border-radius: 1rem;
+  /* Zwiększony padding z lewej, żeby zmieścić duży awatar */
+  padding: 1rem 4.5rem 1rem 6.5rem; 
+  margin: 0.8rem 0;
+  border-radius: 1.2rem;
   background-color: rgba(255, 255, 255, 0.8);
   color: var(--c-text-dark);
   display: flex;
   align-items: center;
   box-sizing: border-box;
   transition: background-color 0.2s ease, opacity 0.2s ease, border 0.2s ease;
-  border: 4px solid transparent; 
+  border: 4px solid transparent;
+  min-height: 6rem; /* Minimalna wysokość kafelka */
 }
 body.dark-mode #playersList li {
   background-color: rgba(255, 255, 255, 0.1);
@@ -476,25 +479,32 @@ body.dark-mode #playersList li {
 }
 
 #playersList li .avatar {
-  width: 2.2rem;
-  height: 2.2rem;
+  /* Znacznie powiększone awatary */
+  width: 4.5rem;
+  height: 4.5rem;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
-  margin-right: 0.8rem;
-  box-shadow: 0 2px 5px var(--c-shadow);
+  font-size: 2.8rem; /* Większa emotka */
+  margin-right: 0; 
+  box-shadow: 0 4px 10px var(--c-shadow);
   position: absolute;
-  left: 0.8rem;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
   transition: transform 0.2s ease;
 }
+
+/* Wielka korona dla Hosta */
 #playersList li.host .avatar::after {
   content: '👑';
   position: absolute;
-  top: -0.4rem;
-  right: -0.4rem;
-  font-size: 0.9rem;
+  top: -1.2rem;
+  right: -1.2rem;
+  font-size: 2rem; /* Ogromna korona */
+  transform: rotate(15deg);
+  text-shadow: 0 2px 5px rgba(0,0,0,0.3);
 }
 
 #playersList li .kickBtn {
@@ -578,20 +588,31 @@ body.voting-active #playersList li.has-voted .avatar::after {
   position: absolute;
   bottom: -0.4rem;
   right: -0.4rem;
-  font-size: 0.9rem;
+  font-size: 1.5rem; /* Większy znaczek */
   background-color: var(--c-success);
   color: white;
   border-radius: 50%;
-  width: 1rem;
-  height: 1rem;
+  width: 2rem;
+  height: 2rem;
   display: flex;
   align-items: center;
   justify-content: center;
   line-height: 1;
+  border: 2px solid #fff;
 }
+/* Nadpisanie korony ptaszkiem przy głosowaniu (dla hosta) - albo obok? 
+   Zróbmy obok, żeby korona nie znikała. */
 body.voting-active #playersList li.host.has-voted .avatar::after {
-  right: 1.2rem;
+  /* Tutaj jest kolizja korony i ptaszka. Przesuńmy ptaszka */
+  content: '✔';
+  top: auto; 
+  bottom: -0.5rem;
+  right: -0.5rem;
+  transform: none;
+  text-shadow: none;
+  font-size: 1.2rem;
 }
+
 
 /* =================================================================== */
 /* 5.6. STYLE EKRANU PODPOWIEDZI */
@@ -1364,10 +1385,18 @@ body.dark-mode #messageBox:not(.copy-message) {
   #lobbyCategories {
     font-size: 1.4rem; /* Mniejsze kategorie w lobby */
   }
+  
   #playersList li {
-    padding: 0.6rem 4rem 0.6rem 3.5rem; /* Mniejszy padding listy */
+    padding: 0.8rem 3rem 0.8rem 5rem; /* Dopasowany padding do mniejszego ekranu ale wciąż dużego awatara */
     font-size: 1.6rem;
+    min-height: 5rem;
   }
+  #playersList li .avatar {
+    width: 3.5rem; /* Trochę mniejszy na mobile, ale wciąż duży */
+    height: 3.5rem;
+    font-size: 2.2rem;
+  }
+  
   
   /* === EKRAN LOGOWANIA (EMOTKI) === */
   .emoji-btn {
