@@ -33,9 +33,8 @@ const rulesBox = document.getElementById('rulesBox');
 const modalBackdrop = document.getElementById('modalBackdrop'); 
 const countdownDisplay = document.getElementById('countdownDisplay'); 
 
-// Nowe elementy karty 3D (Zmienione na LET, aby odświeżać po klonowaniu)
+// Nowe elementy karty 3D (Tylko wrapper jako zmienna globalna)
 let roleCardInner = document.getElementById('roleCardInner');
-const roleContent = document.getElementById('roleContent');
 
 const closeRulesBtn = document.getElementById('closeRules');
 const closeRulesTopBtn = document.getElementById('closeRulesTop');
@@ -499,6 +498,7 @@ function updatePlayersList(players, localIsHost, starterId = null) {
     li.appendChild(avatar);
     li.appendChild(document.createTextNode(` ${player.name || 'Nieznany gracz'}`));
     
+    // ZMIANA: Usunięto tekst "(host)", dodano tylko klasę
     if (player.isHost) {
       li.classList.add('host');
     }
@@ -506,6 +506,7 @@ function updatePlayersList(players, localIsHost, starterId = null) {
       li.classList.add('self');
     }
     
+    // MODYFIKACJA 2: Dodanie klasy dla startującego
     if (id === starterId) {
       li.classList.add('is-starter');
     }
@@ -600,12 +601,11 @@ function resetToLobby() {
   updateImpostorButtons();
   updateRecommendedPlayers();
   
-  // WAŻNE: Reset karty 3D
+  // WAŻNE: Reset karty 3D - poprawny
   if (roleCardInner) {
     roleCardInner.classList.remove('is-flipped');
-  }
-  if (roleContent) {
-    roleContent.innerHTML = '';
+    const content = roleCardInner.querySelector('#roleContent');
+    if (content) content.innerHTML = '';
   }
   
   loadFromLocalStorage();
@@ -1035,7 +1035,9 @@ function runCountdown(callback) {
   }
 
   // Upewnij się, że karta jest zakryta na starcie
-  roleCardInner.classList.remove('is-flipped');
+  if (roleCardInner) {
+    roleCardInner.classList.remove('is-flipped');
+  }
 
   let count = 3;
   countdownDisplay.textContent = count;
@@ -1191,14 +1193,19 @@ function listenToRoom(roomCode) {
       
       // Najpierw odliczanie, potem KARTA
       runCountdown(() => {
-          roleContent.innerHTML = roleHTML;
-          showModal(roleMessageBox); 
-          
-          // Trik z klonowaniem, aby usunąć stare event listenery i zresetować stan klasy
+          // 1. Klonowanie elementu, aby usunąć stare listenery i zresetować stan
           const newCard = roleCardInner.cloneNode(true);
-          newCard.classList.remove('is-flipped'); // WAŻNE: Reset stanu karty!
+          newCard.classList.remove('is-flipped'); // RESET STANU
+          
+          // 2. Zamiana elementu w DOM
           roleCardInner.parentNode.replaceChild(newCard, roleCardInner);
-          roleCardInner = newCard; // Aktualizacja referencji!
+          roleCardInner = newCard; // Aktualizacja referencji
+          
+          // 3. Wpisanie nowej treści do nowej karty
+          const content = roleCardInner.querySelector('#roleContent');
+          if (content) content.innerHTML = roleHTML;
+          
+          showModal(roleMessageBox); 
           
           roleCardInner.addEventListener('click', function flipHandler() {
               if (!this.classList.contains('is-flipped')) {
