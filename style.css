@@ -254,38 +254,43 @@ body.dark-mode .modal-box {
   border: 2px solid var(--c-glass-border);
 }
 
-/* --- KARTA 3D (NAPRAWIONE CENTROWANIE) --- */
+/* --- KARTA 3D (NAPRAWIONA FIZYKA) --- */
+
+/* Krok 1: Kontener modala jako pełnoekranowy Flexbox */
 .role-card-modal {
-  background: transparent !important; 
-  border: none !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-  
-  /* NAPRAWA: Używamy 'inset: 0' i 'margin: auto' do centrowania. 
-     To zapobiega konfliktom transformacji 2D z 3D */
   position: fixed !important;
   top: 0 !important;
   left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  margin: auto !important;
-  transform: none !important; /* Resetujemy translate, który psuł obrót */
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  transform: none !important; /* Usuwamy stare centrowanie translate, które psuło obrót */
   
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  padding: 0 !important;
+  
+  /* To jest klucz do sukcesu: */
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  
+  z-index: 1001;
+  pointer-events: none; /* Kliknięcia obok karty nie zamykają */
+}
+
+/* Krok 2: Scena o sztywnych wymiarach wewnątrz flexboxa */
+.role-card-scene {
   width: 300px;
   height: 450px;
   max-width: 85vw; 
-  max-height: 80vh; 
-  
+  max-height: 80vh;
   perspective: 1000px; 
-  overflow: visible !important;
-  z-index: 1001;
+  pointer-events: auto; /* Ale karta musi być klikalna */
 }
 
-.role-card-scene {
-  width: 100%;
-  height: 100%;
-}
-
+/* Krok 3: Sama karta */
 .role-card {
   width: 100%;
   height: 100%;
@@ -310,10 +315,10 @@ body.dark-mode .modal-box {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  padding: 1.5rem;
   box-sizing: border-box;
   box-shadow: 0 20px 50px rgba(0,0,0,0.6);
-  overflow: hidden; /* Zabezpieczenie przed wystawaniem */
+  overflow: hidden; 
 }
 
 /* TYŁ KARTY (OKŁADKA) */
@@ -355,7 +360,7 @@ body.dark-mode .modal-box {
   font-size: 3rem;
   color: #d4af37;
   position: absolute;
-  bottom: 30px;
+  bottom: 20px;
   animation: spin 4s linear infinite;
   text-shadow: 0 2px 5px rgba(0,0,0,0.5);
   z-index: 2;
@@ -380,7 +385,7 @@ body.dark-mode .modal-box {
 #roleContent {
   font-size: 2.5rem;
   font-weight: bold;
-  line-height: 1.4;
+  line-height: 1.3;
   width: 100%;
   position: relative;
   z-index: 2;
@@ -391,6 +396,10 @@ body.dark-mode .modal-box {
 /* Responsywność karty */
 @media (max-width: 400px) {
   .role-card-modal {
+    /* Wymuszenie pozycji wewnątrz flexboxa */
+    position: fixed !important; 
+  }
+  .role-card-scene {
     width: 85vw;
     height: 60vh;
   }
