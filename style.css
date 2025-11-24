@@ -254,9 +254,8 @@ body.dark-mode .modal-box {
   border: 2px solid var(--c-glass-border);
 }
 
-/* --- KARTA 3D (NAPRAWIONA FIZYKA) --- */
+/* --- KARTA 3D (NAPRAWIONA WIDOCZNOŚĆ I FIZYKA) --- */
 
-/* Krok 1: Kontener modala jako pełnoekranowy Flexbox */
 .role-card-modal {
   position: fixed !important;
   top: 0 !important;
@@ -264,33 +263,36 @@ body.dark-mode .modal-box {
   width: 100% !important;
   height: 100% !important;
   margin: 0 !important;
-  transform: none !important; /* Usuwamy stare centrowanie translate, które psuło obrót */
+  transform: none !important;
   
   background: transparent !important;
   box-shadow: none !important;
   border: none !important;
   padding: 0 !important;
   
-  /* To jest klucz do sukcesu: */
-  display: flex !important;
+  /* WAŻNE: Domyślnie ukryte! */
+  display: none !important; 
+  
   align-items: center;
   justify-content: center;
-  
   z-index: 1001;
-  pointer-events: none; /* Kliknięcia obok karty nie zamykają */
+  pointer-events: none; 
 }
 
-/* Krok 2: Scena o sztywnych wymiarach wewnątrz flexboxa */
+/* Dopiero gdy JS doda klasę .is-visible, pokazujemy jako flex */
+.role-card-modal.is-visible {
+  display: flex !important;
+}
+
 .role-card-scene {
   width: 300px;
   height: 450px;
   max-width: 85vw; 
   max-height: 80vh;
   perspective: 1000px; 
-  pointer-events: auto; /* Ale karta musi być klikalna */
+  pointer-events: auto; 
 }
 
-/* Krok 3: Sama karta */
 .role-card {
   width: 100%;
   height: 100%;
@@ -395,10 +397,6 @@ body.dark-mode .modal-box {
 
 /* Responsywność karty */
 @media (max-width: 400px) {
-  .role-card-modal {
-    /* Wymuszenie pozycji wewnątrz flexboxa */
-    position: fixed !important; 
-  }
   .role-card-scene {
     width: 85vw;
     height: 60vh;
