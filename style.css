@@ -218,6 +218,7 @@ button:disabled {
   100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
 }
 
+
 /* --- MODALE OGÓLNE --- */
 .modal-box {
   position: fixed;
@@ -237,7 +238,7 @@ button:disabled {
   font-family: var(--font-heading);
   box-sizing: border-box;
   will-change: transform, opacity;
-  /* Domyślna animacja dla zwykłych okienek */
+  /* Domyślna animacja dla zwykłych okienek - powoduje konflikt z 3D */
   animation-duration: 0.3s;
   animation-fill-mode: forwards;
 }
@@ -253,40 +254,50 @@ body.dark-mode .modal-box {
   border: 2px solid var(--c-glass-border);
 }
 
-/* --- NAPRAWIONA KARTA 3D (v49) --- */
+/* --- NAPRAWIONA KARTA 3D (v50 - Pancerna Wersja) --- */
 
-/* 1. Kontener jako pełnoekranowy Flexbox (resetuje pozycjonowanie z .modal-box) */
-.role-card-modal {
+/* Używamy ID, aby nadpisać style .modal-box i uniknąć konfliktu animacji */
+#roleMessageBox.role-card-modal {
   position: fixed !important;
   top: 0 !important;
   left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
   width: 100% !important;
   height: 100% !important;
   margin: 0 !important;
   
-  /* KLUCZ DO NAPRAWY: Reset transformacji, która powodowała "spadanie" */
-  transform: none !important; 
+  /* RESET TRANSFORMACJI - To naprawia spadanie! */
+  transform: none !important;
   
   background: transparent !important;
   box-shadow: none !important;
   border: none !important;
   padding: 0 !important;
   
-  display: none !important; /* Domyślnie ukryty */
+  /* Domyślnie ukryta */
+  display: none !important;
   
-  /* Centrowanie za pomocą Flexboxa - najbezpieczniejsza opcja dla 3D */
-  align-items: center;
-  justify-content: center;
+  /* Centrowanie Gridem */
+  place-items: center;
   
   z-index: 1001;
-  pointer-events: none; /* Kliknięcia przechodzą obok */
+  pointer-events: none; 
+  
+  /* Wyłączamy dziedziczoną animację slideInUp */
+  animation: none !important;
+  transition: none !important;
+  opacity: 0;
+  visibility: hidden;
 }
 
-/* 2. Gdy karta ma być widoczna */
-.role-card-modal.is-visible {
-  display: flex !important;
-  /* Wyłączamy slideInUp, bo koliduje z 3D. Używamy prostego fade-in */
-  animation: fadeInSimple 0.3s forwards !important; 
+/* Gdy karta ma być widoczna */
+#roleMessageBox.role-card-modal.is-visible {
+  display: grid !important; /* Grid do centrowania */
+  opacity: 1;
+  visibility: visible;
+  /* Proste pojawienie się (opacity), bez przesuwania */
+  animation: fadeInSimple 0.3s forwards !important;
 }
 
 @keyframes fadeInSimple {
@@ -294,14 +305,14 @@ body.dark-mode .modal-box {
   to { opacity: 1; }
 }
 
-/* 3. Scena 3D wewnątrz flexboxa */
+/* Scena 3D */
 .role-card-scene {
   width: 300px;
   height: 450px;
   max-width: 85vw; 
   max-height: 80vh;
   perspective: 1000px; 
-  pointer-events: auto; /* Karta musi być klikalna */
+  pointer-events: auto; /* Karta klikalna */
 }
 
 .role-card {
@@ -334,10 +345,10 @@ body.dark-mode .modal-box {
   overflow: hidden; 
 }
 
-/* TYŁ KARTY (OKŁADKA - CZARNY Z DUŻYM ZNAKIEM ZAPYTANIA) */
+/* TYŁ KARTY (OKŁADKA - CZYSTA CZERN) */
 .role-card-back {
-  background-color: #000; /* Czysta czerń */
-  border: 4px solid #d4af37; /* Złota ramka */
+  background-color: #000; 
+  border: 4px solid #d4af37; 
   color: #f1c40f;
   transform: rotateY(0deg);
   position: relative;
@@ -353,7 +364,7 @@ body.dark-mode .modal-box {
 
 .card-question-mark {
   font-family: 'Pacifico', cursive; 
-  font-size: 16rem; /* Bardzo duży */
+  font-size: 16rem; /* WIELKI ZNAK ZAPYTANIA */
   color: #d4af37; 
   line-height: 1;
   text-shadow: 
@@ -379,13 +390,12 @@ body.dark-mode .modal-box {
   to { transform: rotate(360deg); }
 }
 
-/* PRZÓD KARTY (TREŚĆ - ŁADNE CIEMNE TŁO) */
+/* PRZÓD KARTY (TREŚĆ - CIEMNA) */
 .role-card-front {
-  /* Głęboki, elegancki ciemny gradient */
   background: radial-gradient(circle at center, #2b2b2b 0%, #000000 100%);
   color: white;
   transform: rotateY(180deg);
-  border: 4px solid #d4af37; /* Złota ramka dla spójności */
+  border: 4px solid #d4af37;
 }
 
 #roleContent {
@@ -612,7 +622,7 @@ body.dark-mode #lastRoundSummary {
 }
 
 
-/* --- Lista Graczy (ZMODYFIKOWANA) --- */
+/* --- Lista Graczy --- */
 #playersList {
   list-style: none;
   padding: 0;
