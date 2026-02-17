@@ -1508,7 +1508,7 @@ body.dark-mode .team-selector button:nth-of-type(2).selected { /* NIE */
 }
 
 /* =================================================================== */
-/* 8. KINOWE NAKŁADKI (VOTING I STARTER OVERLAY) */
+/* 8. KINOWE NAKŁADKI (OVERLAYS) */
 /* =================================================================== */
 .cinematic-overlay {
   position: fixed;
@@ -1567,20 +1567,39 @@ body.dark-mode .team-selector button:nth-of-type(2).selected { /* NIE */
   text-shadow: 0 0 30px rgba(231, 76, 60, 0.8);
 }
 
-/* Wersja dla Zaczynającego (Niebiesko/Złota) */
+/* Wersja dla Zaczynającego (Niebiesko-Złota) */
 .starter-style .cinematic-title {
   color: #3498db;
   text-shadow: 0 0 30px rgba(52, 152, 219, 0.8);
 }
 .starter-style .cinematic-subtitle {
-  color: #f1c40f; /* Złoty nick gracza */
+  color: #f1c40f;
   font-weight: 800;
   font-size: 3rem;
   text-shadow: 0 0 15px rgba(241, 196, 15, 0.6);
+}
+
+/* NOWE: Wersja dla Podsumowania Rundy */
+.summary-style .cinematic-subtitle {
+  font-size: 3rem;
+  line-height: 1.5;
+}
+.summary-style.innocent-win .cinematic-title {
+  color: #2ecc71;
+  text-shadow: 0 0 30px rgba(46, 204, 113, 0.8);
+}
+.summary-style.impostor-win .cinematic-title {
+  color: #e74c3c;
+  text-shadow: 0 0 30px rgba(231, 76, 60, 0.8);
+}
+.summary-style.draw-win .cinematic-title {
+  color: #f1c40f;
+  text-shadow: 0 0 30px rgba(241, 196, 15, 0.8);
 }
 
 @media (max-width: 600px) {
   .cinematic-title { font-size: 4rem; }
   .cinematic-subtitle { font-size: 2rem; }
   .starter-style .cinematic-subtitle { font-size: 2.5rem; }
+  .summary-style .cinematic-subtitle { font-size: 2.2rem; }
 }
