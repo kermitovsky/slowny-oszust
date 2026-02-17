@@ -119,6 +119,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; transform
 #countdownDisplay { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 15rem; font-family: var(--font-heading); color: #fff; font-weight: 800; z-index: 1002; text-shadow: 0 0 30px var(--c-primary); pointer-events: none; display: none; }
 #countdownDisplay.active { display: block; animation: countdownPulse 0.9s ease-in-out infinite; }
 @keyframes countdownPulse { 0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; } 50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 0; } }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
 /* Modale */
 .modal-box {
@@ -138,7 +139,7 @@ body.dark-mode .modal-box { background: linear-gradient(135deg, var(--c-bg-1), v
 .close-btn-bottom { width: auto; padding: 0.8rem 2.5rem; background: rgba(0,0,0,0.3); border-radius: 50px; color: white; font-size: 1.8rem; border: none; margin: 1.5rem auto 0; display: block; box-shadow: none; }
 .close-btn-bottom:hover { background: rgba(0,0,0,0.5); transform: translateY(-2px); }
 
-/* --- KARTA ROLI --- */
+/* --- KARTA ROLI (NAPRAWIONA POZYCJA) --- */
 #roleMessageBox.role-card-modal { 
   position: fixed !important; 
   top: 0 !important; 
@@ -293,7 +294,7 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.1); }
 .team-selector button:nth-of-type(1).selected { background: var(--c-success); box-shadow: 0 4px 10px rgba(46, 204, 113, 0.4); border-color: transparent; }
 .team-selector button:nth-of-type(2).selected { background: var(--c-danger); box-shadow: 0 4px 10px rgba(231, 76, 60, 0.4); border-color: transparent; }
 
-/* --- NOWE KAFELKI KATEGORII (SZKLANE I SKALOWALNE) --- */
+/* --- KAFELKI KATEGORII --- */
 #categorySelectionBox p { margin: 0 0 1.5rem 0; font-size: 2.2rem; font-weight: 600; text-shadow: 1px 2px 4px var(--c-shadow-heavy); }
 #categorySelectionBox .category-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; margin-right: 15px; max-height: 300px; overflow-y: auto; overflow-x: hidden; padding-right: 5px; }
 
