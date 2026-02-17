@@ -1535,3 +1535,26 @@ customWordsList.addEventListener('click', (e) => {
 customWordInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') { e.preventDefault(); addTempWord(); }
 });
+
+// ===================================================================
+// DARMOWY BOT SPRZĄTAJĄCY (Automatyczne usuwanie pustych pokojów)
+// ===================================================================
+function cleanupEmptyRooms() {
+  db.ref('rooms').once('value').then(snapshot => {
+    const rooms = snapshot.val();
+    if (!rooms) return;
+    
+    // Przeszukujemy wszystkie pokoje
+    for (const [roomCode, roomData] of Object.entries(rooms)) {
+      // Jeśli pokój nie ma graczy (wszyscy wyszli lub rozłączyło ich)
+      if (!roomData.players || Object.keys(roomData.players).length === 0) {
+        db.ref(`rooms/${roomCode}`).remove().then(() => {
+          console.log(`🧹 Usunięto stary/pusty pokój: ${roomCode}`);
+        }).catch(err => console.error("Błąd usuwania pokoju:", err));
+      }
+    }
+  });
+}
+
+// Wywołaj sprzątanie po cichu 2 sekundy po wejściu na stronę główną
+setTimeout(cleanupEmptyRooms, 2000);
