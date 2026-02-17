@@ -139,8 +139,38 @@ body.dark-mode .modal-box { background: linear-gradient(135deg, var(--c-bg-1), v
 .close-btn-bottom:hover { background: rgba(0,0,0,0.5); transform: translateY(-2px); }
 
 /* --- KARTA ROLI --- */
-#roleMessageBox.role-card-modal { position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; width: 100% !important; height: 100% !important; margin: 0 !important; transform: none !important; background: transparent !important; box-shadow: none !important; border: none !important; padding: 0 !important; display: none !important; place-items: center; z-index: 1001; pointer-events: none; animation: none !important; transition: none !important; opacity: 0; visibility: hidden; overflow: visible; }
-#roleMessageBox.role-card-modal.is-visible { display: grid !important; opacity: 1; visibility: visible; animation: fadeInSimple 0.3s forwards !important; }
+#roleMessageBox.role-card-modal { 
+  position: fixed !important; 
+  top: 0 !important; 
+  left: 0 !important; 
+  width: 100% !important; 
+  max-width: 100% !important;
+  height: 100% !important; 
+  max-height: 100% !important;
+  margin: 0 !important; 
+  transform: none !important; 
+  background: transparent !important; 
+  box-shadow: none !important; 
+  border: none !important; 
+  padding: 0 !important; 
+  display: none !important; 
+  align-items: center; 
+  justify-content: center; 
+  z-index: 1001; 
+  pointer-events: none; 
+  animation: none !important; 
+  transition: none !important; 
+  opacity: 0; 
+  visibility: hidden; 
+  overflow: visible; 
+}
+
+#roleMessageBox.role-card-modal.is-visible { 
+  display: flex !important; 
+  opacity: 1; 
+  visibility: visible; 
+  animation: fadeInSimple 0.3s forwards !important; 
+}
 @keyframes fadeInSimple { from { opacity: 0; } to { opacity: 1; } }
 
 .role-card-scene { width: 300px; height: 450px; max-width: 85vw; max-height: 80vh; perspective: 1200px; pointer-events: auto; }
@@ -185,7 +215,7 @@ body.dark-mode .modal-box { background: linear-gradient(135deg, var(--c-bg-1), v
   line-height: 4.5rem; text-align: center;
   display: inline-block;
   border-radius: 50%;
-  flex-shrink: 0; /* ZAPOBIEGA ZGNIATANIU W OWAL */
+  flex-shrink: 0; 
   box-shadow: 0 4px 10px var(--c-shadow);
   transition: all 0.3s ease;
   border: 1px solid rgba(255,255,255,0.3);
@@ -272,13 +302,10 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.1); }
   border: 2px solid rgba(255,255,255,0.05);
   border-radius: 12px;
   padding: 1rem 0.5rem;
-  
-  /* Auto-skalowanie czcionki dla długich wyrazów */
   font-size: clamp(1.1rem, 3.5vw, 1.5rem); 
   line-height: 1.2;
   display: flex; align-items: center; justify-content: center; text-align: center;
-  word-break: break-word; /* Pozwala łamać trudne wyrazy */
-  
+  word-break: break-word; 
   font-weight: 500;
   color: var(--c-text-light);
   cursor: pointer;
@@ -286,7 +313,6 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.1); }
   transition: all 0.3s ease;
   box-shadow: none; margin: 0; width: 100%;
 }
-/* Przezroczysty fiolet dla wybranej opcji */
 #categorySelectionBox .category-btn.selected { 
   background: rgba(142, 68, 173, 0.5); 
   opacity: 1; 
