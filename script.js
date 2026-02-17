@@ -32,6 +32,7 @@ const customCategoryBox = document.getElementById('customCategoryBox');
 const rulesBox = document.getElementById('rulesBox');
 const modalBackdrop = document.getElementById('modalBackdrop'); 
 const countdownDisplay = document.getElementById('countdownDisplay'); 
+const votingOverlay = document.getElementById('votingOverlay'); // NOWE: Ekran głosowania
 
 // Nowe elementy karty 3D (Tylko wrapper jako zmienna globalna)
 let roleCardInner = document.getElementById('roleCardInner');
@@ -602,6 +603,11 @@ function resetToLobby() {
   updateImpostorButtons();
   updateRecommendedPlayers();
   
+  // Zabezpieczenie przed zablokowanym ekranem głosowania
+  if (votingOverlay) {
+    votingOverlay.classList.remove('is-active');
+  }
+  
   // WAŻNE: Reset karty 3D - poprawny
   if (roleCardInner) {
     roleCardInner.classList.remove('is-flipped');
@@ -1097,9 +1103,12 @@ function listenToRoom(roomCode) {
 
     isHost = iAmInRoom ? iAmInRoom.isHost : false; 
 
-    // --- NOWE: Komunikat o głosowaniu ---
+    // --- NOWE: Estetyczny komunikat o głosowaniu ---
     if (votingActive && !lastSeenVotingState) {
-      showMessage('<div style="font-size: 3.5rem; color: #e74c3c; font-weight: 800; text-transform: uppercase; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">Głosowanie!</div><div style="font-size: 2rem; margin-top: 1rem;">Wyeliminuj impostora</div>', 4000);
+      votingOverlay.classList.add('is-active');
+      setTimeout(() => {
+        votingOverlay.classList.remove('is-active');
+      }, 3500); // znika po 3.5 sekundy
     }
     lastSeenVotingState = votingActive;
     // ------------------------------------
