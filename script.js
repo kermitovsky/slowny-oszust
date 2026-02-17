@@ -1,17 +1,17 @@
 // ===================================================================
 // 1. KONFIGURACJA FIREBASE (Wklej tutaj swoje stare dane połączenia z bazą)
 // ===================================================================
-// const firebaseConfig = {
-//   apiKey: "...",
-//   authDomain: "...",
-//   databaseURL: "...",
-//   projectId: "...",
-//   storageBucket: "...",
-//   messagingSenderId: "...",
-//   appId: "..."
-// };
-// firebase.initializeApp(firebaseConfig);
-// const db = firebase.database();
+const firebaseConfig = {
+  apiKey: "AIzaSyCyj5pbNgUHaV-_g__sTQmsUtYOhegYoSI",
+  authDomain: "slowny-oszust.firebaseapp.com",
+  databaseURL: "https://slowny-oszust-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "slowny-oszust",
+  storageBucket: "slowny-oszust.firebasestorage.app",
+  messagingSenderId: "679726628348",
+  appId: "1:679726628348:web:83f9c43fee9cf514784679"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 // ===================================================================
 
 // Elementy DOM
@@ -1437,3 +1437,4 @@ function cleanupEmptyRooms() {
 }
 
 setTimeout(cleanupEmptyRooms, 2000);
+
