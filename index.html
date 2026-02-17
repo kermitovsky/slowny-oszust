@@ -1,247 +1,261 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Słowny Impostor</title>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=42" />
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
-  
-  <div id="modalBackdrop"></div>
-  
+
   <div id="votingOverlay" class="cinematic-overlay voting-style">
-    <h2 class="cinematic-title">GŁOSOWANIE!</h2>
-    <p class="cinematic-subtitle">Wyeliminuj impostora</p>
+    <h1 class="cinematic-title">GŁOSOWANIE!</h1>
+    <div class="cinematic-subtitle">Kto jest oszustem?</div>
   </div>
-
   <div id="starterOverlay" class="cinematic-overlay starter-style">
-    <h2 class="cinematic-title">ZACZYNA:</h2>
-    <p class="cinematic-subtitle" id="starterOverlayName"></p>
+    <h1 class="cinematic-title">ZACZYNA</h1>
+    <div class="cinematic-subtitle" id="starterOverlayName">...</div>
   </div>
-
   <div id="summaryOverlay" class="cinematic-overlay summary-style">
-    <h2 class="cinematic-title" id="summaryOverlayTitle">KONIEC RUNDY</h2>
-    <p class="cinematic-subtitle" id="summaryOverlaySubtitle"></p>
-  </div>
-  
-  <div id="countdownDisplay"></div>
-  
-  <div class="container" id="loginScreen" data-screen>
-    <h1 class="fancy-title">Słowny Impostor</h1>
-    <input type="text" id="playerName" placeholder="Podaj swój nick" />
-    <h3>Wybierz awatar</h3>
-    <div id="emojiSelection"></div>
-    <hr class="section-divider" />
-    <button id="createRoom">Stwórz pokój</button>
-    <hr class="section-divider" />
-    <input type="text" id="roomCodeInput" placeholder="Kod pokoju" maxlength="4" />
-    <button id="joinRoom">Dołącz do pokoju</button>
-    <p id="statusMessage"></p>
+    <h1 class="cinematic-title" id="summaryOverlayTitle">KONIEC RUNDY</h1>
+    <div class="cinematic-subtitle" id="summaryOverlaySubtitle">...</div>
   </div>
 
-  <div class="container" id="gameScreen" data-screen style="display:none;">
+  <div id="modalBackdrop"></div>
+  <div id="countdownDisplay"></div>
+
+  <button id="themeToggle" class="hidden">🌙</button>
+  <button id="rulesBtn" class="hidden">?</button>
+
+  <div id="loginScreen" class="container" data-screen>
+    <h1>Słowny Impostor</h1>
+    <input type="text" id="playerName" placeholder="Twój Nick" maxlength="15">
+    <div id="emojiSelection"></div>
+    <button id="createRoom">Stwórz Pokój</button>
+    <input type="text" id="roomCodeInput" placeholder="Kod pokoju (np. ABCD)" maxlength="4" style="text-transform: uppercase;">
+    <button id="joinRoom">Dołącz do Pokoju</button>
+  </div>
+
+  <div id="gameScreen" class="container" data-screen>
+    <h1>Słowny Impostor</h1>
+    
     <div id="roomCodeContainer">
-      <p>Kod pokoju: <span id="roomCodeDisplay"></span></p>
-      <button id="copyRoomCode" title="Kopiuj kod">📋</button>
-      <button id="roomSettingsBtn" title="Ustawienia pokoju" style="display: none;">⚙️</button>
+      <span style="font-size: 1.8rem; margin-right: 1rem;">Kod:</span>
+      <span id="roomCodeDisplay"></span>
+      <button id="copyRoomCode" title="Skopiuj kod">📋</button>
+      <button id="roomSettingsBtn" title="Ustawienia Pokoju" style="display: none;">⚙️</button>
     </div>
-    <p id="roundCounter"></p>
-    <p id="wordDisplay"></p>
+
     <div id="countsContainer">
       <p id="playerCountDisplay"></p>
       <p id="impostorCountDisplay"></p>
-      <p id="hintChanceInfoDisplay"></p> 
+      <p id="hintChanceInfoDisplay"></p>
     </div>
+
+    <div id="lobbyCategories"></div>
     
-    <p id="lobbyCategories" style="display:none;"></p>
+    <div id="lastRoundSummaryTitle">Wynik ostatniej rundy:</div>
+    <div id="lastRoundSummary"></div>
     
-    <p id="voteResultDisplay" style="display:none;"></p>
-    
+    <div id="roundCounter"></div>
+    <div id="wordDisplay"></div>
+    <div id="voteResultDisplay"></div>
+
     <ul id="playersList"></ul>
-    
-    <p id="lastRoundSummaryTitle" style="display: none;">Ostatnia runda:</p>
-    <p id="lastRoundSummary"></p>
-    
-    <button id="startGame" style="display:none;">Start gry</button>
-    
-    <button id="startVoteBtn" style="display:none; margin-top: 0.8rem; background-color: #2ecc71;">Rozpocznij głosowanie</button>
-    <button id="confirmVoteBtn" style="display:none; margin-top: 0.8rem;">Zagłosuj</button>
-    
-    <button id="endRound" style="display:none; margin-top: 0.8rem; background-color: #c0392b;">Zakończ rundę (DEBUG)</button>
-    
-    <button id="leaveRoom" style="margin-top: 0.8rem;">Opuść pokój</button>
+
+    <button id="startGame" style="display: none;">Rozpocznij Grę</button>
+    <button id="startVoteBtn" style="display: none;">Rozpocznij Głosowanie</button>
+    <button id="confirmVoteBtn" style="display: none;">Zatwierdź Głos</button>
+    <button id="endRound" style="display: none;">Zakończ Rundy Wcześnie</button>
+    <button id="leaveRoom">Opuść Pokój</button>
   </div>
 
-  <button id="rulesBtn" title="Zasady gry">i</button>
-  <button id="themeToggle" title="Przełącz tryb"></button>
-  
-  <div id="messageBox" class="modal-box" data-modal></div>
-  
-  <div id="roleMessageBox" class="modal-box role-card-modal" data-modal>
+  <div id="roleMessageBox" class="modal-box role-card-modal">
     <div class="role-card-scene">
       <div class="role-card" id="roleCardInner">
         <div class="role-card-face role-card-back">
           <div class="card-question-mark">?</div>
-          <div class="card-cycle-icon">↻</div>
+          <div class="card-cycle-icon">🔄</div>
         </div>
-        <div class="role-card-face role-card-front" id="roleCardFrontFace">
+        <div class="role-card-face role-card-front">
           <div id="roleContent"></div>
         </div>
       </div>
     </div>
   </div>
-  
-  <div id="roomSettingsBox" class="modal-box custom-scrollbar" data-modal style="display:none;">
-    <button id="closeRoomSettingsBtn" class="close-btn" title="Zamknij">X</button>
-    <h2>Ustawienia Pokoju</h2>
-    <div class="settings-group">
-      <p>Liczba impostorów</p>
-      <div class="impostor-selector">
-        <button id="setMinusImpostor">-</button>
-        <span id="setImpostorCount">1</span>
-        <button id="setPlusImpostor">+</button>
-      </div>
+
+  <div id="messageBox" class="modal-box"></div>
+
+  <div id="categorySelectionBox" class="modal-box">
+    <button class="close-btn" id="closeCategories">×</button>
+    <p>Wybierz kategorie słów</p>
+    <div class="category-grid custom-scrollbar">
+      <button class="category-btn custom-new-btn" id="createCustomCategoryBtn">+ Stwórz własną</button>
     </div>
+    <div class="checkbox-container" id="allCategoriesBtn">
+      <input type="checkbox" id="allCategoriesCheckbox">
+      <label for="allCategoriesCheckbox"><div class="checkbox"></div>Zaznacz wszystkie standardowe</label>
+    </div>
+    <button id="confirmCategories">Dalej ➔</button>
+  </div>
+
+  <div id="customCategoryBox" class="modal-box">
+    <button class="close-btn" id="closeCustomCategoryBtn">×</button>
+    <h2>Własna Kategoria</h2>
+    <input type="text" id="customCategoryNameInput" placeholder="Nazwa (np. Hasła z naszej pracy)" maxlength="20">
+    <div class="custom-word-adder">
+      <input type="text" id="customWordInput" placeholder="Dodaj słowo..." maxlength="30">
+      <button id="addCustomWordBtn">+</button>
+    </div>
+    <ul id="customWordsList" class="custom-scrollbar"></ul>
+    <button id="saveCustomCategoryBtn" disabled>Zapisz i użyj</button>
+  </div>
+
+  <div id="impostorSelectionBox" class="modal-box">
+    <p>Ilu oszustów?</p>
+    <div class="impostor-selector">
+      <button id="minusImpostor" disabled>-</button>
+      <span id="impostorCount" style="font-size: 3.5rem; font-weight: bold; margin: 0 1.5rem;">1</span>
+      <button id="plusImpostor">+</button>
+    </div>
+    <div id="loadingMessage" style="display:none; color: var(--c-accent);">Ładowanie słów...</div>
+    <div id="recommendedPlayers">Zalecana liczba graczy: 3-5</div>
+    <button id="confirmImpostors">Dalej ➔</button>
+  </div>
+
+  <div id="impostorHintBox" class="modal-box">
+    <p>Podpowiedź dla oszusta</p>
     
-    <div class="settings-group">
-      <p>Szansa na podpowiedź</p>
+    <div class="checkbox-container" id="customHintToggleContainer" style="margin-bottom: 2rem; border: 2px solid var(--c-primary); padding: 1rem; border-radius: 1rem; background: rgba(142,68,173,0.1);">
+      <input type="checkbox" id="customHintCheckbox">
+      <label for="customHintCheckbox">
+        <div class="checkbox"></div>
+        <div style="text-align: left; line-height: 1.2;">
+          <span style="font-weight: bold; color: var(--c-primary-light);">Własne podpowiedzi graczy</span><br>
+          <span style="font-size: 1.2rem; opacity: 0.8;">Oszust dostanie jedno słowo od niewinnego</span>
+        </div>
+      </label>
+    </div>
+
+    <div id="autoHintSettingsWrapper">
       <div class="slider-container">
-        <input type="range" min="0" max="4" value="0" step="1" id="setHintChanceSlider" />
-        <div class="slider-labels" id="setSliderLabels">
-          <span class="slider-label">0%</span>
+        <input type="range" id="hintChanceSlider" min="0" max="4" value="0">
+        <div class="slider-labels">
+          <span class="slider-label label-active">0%</span>
           <span class="slider-label">25%</span>
           <span class="slider-label">50%</span>
           <span class="slider-label">75%</span>
           <span class="slider-label">100%</span>
         </div>
       </div>
-      <div class="checkbox-container" id="setHintCheckboxContainer">
-        <input type="checkbox" id="setHintOnStartCheckbox" />
-        <label for="setHintOnStartCheckbox">
-          <span class="checkbox"></span>
-          Gdy zaczyna mówić
-        </label>
-      </div>
-    </div>
-
-    <div class="settings-group">
-      <p>Czy impostorzy wiedzą o sobie?</p>
-      <div class="team-selector">
-        <button id="setTeamKnowsBtn">Tak</button>
-        <button id="setTeamNotKnowsBtn">Nie</button>
-      </div>
-    </div>
-
-    <button id="saveRoomSettingsBtn">Zapisz Zmiany</button>
-  </div>
-  
-  <div id="categorySelectionBox" class="modal-box custom-scrollbar" data-modal style="display:none;">
-    <p>Wybierz kategorie:</p>
-    <span id="allCategoriesBtn"><span class="checkbox"></span> Wszystkie</span>
-    <div class="category-grid">
-      <button id="createCustomCategoryBtn" class="category-btn custom-new-btn">+ Stwórz własną</button>
-    </div>
-    <button id="confirmCategories">Dalej</button>
-  </div>
-  
-  <div id="impostorSelectionBox" class="modal-box" data-modal style="display:none;">
-    <p>Wybierz liczbę impostorów</p>
-    <p id="loadingMessage" style="display: none;">Ładowanie kategorii...</p>
-    <div class="impostor-selector">
-      <button id="minusImpostor" title="Zmniejsz">-</button>
-      <span id="impostorCount">1</span>
-      <button id="plusImpostor" title="Zwiększ">+</button>
-    </div>
-    <button id="confirmImpostors" disabled>Dalej</button> <p id="recommendedPlayers"></p>
-  </div>
-
-  <div id="impostorHintBox" class="modal-box" data-modal style="display:none;">
-    <p>Szansa podpowiedzi dla impostora</p>
-    
-    <div class="slider-container">
-      <input type="range" min="0" max="4" value="0" step="1" id="hintChanceSlider" />
-      <div class="slider-labels">
-        <span class="slider-label label-active">0%</span>
-        <span class="slider-label">25%</span>
-        <span class="slider-label">50%</span>
-        <span class="slider-label">75%</span>
-        <span class="slider-label">100%</span>
+      <div class="checkbox-container">
+        <input type="checkbox" id="hintOnStartCheckbox">
+        <label for="hintOnStartCheckbox"><div class="checkbox"></div>Zawsze, gdy oszust zaczyna</label>
       </div>
     </div>
     
-    <div class="checkbox-container">
-      <input type="checkbox" id="hintOnStartCheckbox" />
-      <label for="hintOnStartCheckbox">
-        <span class="checkbox"></span>
-        Gdy zaczyna mówić
-      </label>
-    </div>
-    
-    <button id="confirmHintSettingsBtn">Dalej</button>
+    <button id="confirmHintSettingsBtn">Dalej ➔</button>
   </div>
-  
-  <div id="impostorTeamBox" class="modal-box" data-modal style="display:none;">
-    <p>Czy impostorzy wiedzą o sobie?</p>
-    
+
+  <div id="impostorTeamBox" class="modal-box">
+    <p>Czy oszuści się znają?</p>
     <div class="team-selector">
       <button id="teamKnowsBtn">Tak</button>
       <button id="teamNotKnowsBtn" class="selected">Nie</button>
     </div>
-    
-    <button id="confirmTeamSettingsBtn">Stwórz pokój</button>
+    <button id="confirmTeamSettingsBtn">Stwórz Pokój ✔</button>
   </div>
-  
-  <div id="customCategoryBox" class="modal-box custom-scrollbar" data-modal style="display:none;">
-    <button id="closeCustomCategoryBtn" class="close-btn" title="Zamknij">X</button>
-    <h2>Stwórz Własną Kategorię</h2>
-    
-    <input type="text" id="customCategoryNameInput" placeholder="Nazwa kategorii (np. Nasza Paczka)">
-    
-    <div class="custom-word-adder">
-      <input type="text" id="customWordInput" placeholder="Wpisz słowo (min. 3)">
-      <button id="addCustomWordBtn">Dodaj</button>
+
+  <div id="roomSettingsBox" class="modal-box">
+    <button class="close-btn" id="closeRoomSettingsBtn">×</button>
+    <h2 style="font-size: 2.5rem; margin-bottom: 2rem;">Ustawienia Pokoju</h2>
+    <div class="custom-scrollbar" style="max-height: 50vh; overflow-y: auto; padding-right: 1rem;">
+      
+      <div class="settings-group">
+        <p>Ilu oszustów?</p>
+        <div class="impostor-selector">
+          <button id="setMinusImpostor">-</button>
+          <span id="setImpostorCount" style="font-size: 2.5rem; font-weight: bold; margin: 0 1.5rem;">1</span>
+          <button id="setPlusImpostor">+</button>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <p>System Podpowiedzi</p>
+        <div class="checkbox-container" id="setCustomHintToggleContainer" style="margin: 1rem auto; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.2);">
+          <input type="checkbox" id="setCustomHintCheckbox">
+          <label for="setCustomHintCheckbox">
+            <div class="checkbox"></div>
+            <div style="text-align: left; line-height: 1.2;">
+              <span style="font-weight: bold; color: var(--c-primary-light);">Własne podpowiedzi graczy</span><br>
+              <span style="font-size: 1.1rem; opacity: 0.8;">Wszyscy piszą słowo przed rundą</span>
+            </div>
+          </label>
+        </div>
+
+        <div id="setAutoHintSettingsWrapper">
+          <div class="slider-container" style="margin: 2rem auto 3rem auto;">
+            <input type="range" id="setHintChanceSlider" min="0" max="4" value="0">
+            <div class="slider-labels" id="setSliderLabels">
+              <span class="slider-label label-active">0%</span>
+              <span class="slider-label">25%</span>
+              <span class="slider-label">50%</span>
+              <span class="slider-label">75%</span>
+              <span class="slider-label">100%</span>
+            </div>
+          </div>
+          <div class="checkbox-container" id="setHintCheckboxContainer" style="margin: 0 auto;">
+            <input type="checkbox" id="setHintOnStartCheckbox">
+            <label for="setHintOnStartCheckbox"><div class="checkbox"></div>Gdy oszust zaczyna</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-group" id="setTeamGroup">
+        <p>Czy oszuści się znają?</p>
+        <div class="team-selector">
+          <button id="setTeamKnowsBtn">Tak</button>
+          <button id="setTeamNotKnowsBtn" class="selected">Nie</button>
+        </div>
+      </div>
     </div>
-    
-    <ul id="customWordsList">
+    <button id="saveRoomSettingsBtn">Zapisz Zmiany</button>
+  </div>
+
+  <div id="hintInputBox" class="modal-box">
+    <h2 id="hintInputTitle" style="font-size: 3rem; margin-bottom: 1rem;">Czas na podpowiedź!</h2>
+    <p id="hintInputDesc" style="font-size: 1.6rem; margin-bottom: 2rem; line-height: 1.4;"></p>
+    <input type="text" id="customHintInput" placeholder="Wpisz jedno słowo..." maxlength="20" autocomplete="off">
+    <button id="submitCustomHintBtn" style="background: var(--c-success);">Gotowe</button>
+    <div id="hintWaitingMessage" style="display:none; font-size: 1.8rem; margin-top: 1.5rem; color: var(--c-accent); font-weight: bold; animation: pulse 1.5s infinite;">Oczekiwanie na resztę graczy...</div>
+  </div>
+
+  <div id="rulesBox" class="modal-box">
+    <button class="close-btn" id="closeRulesTop">×</button>
+    <h2>Jak Grać?</h2>
+    <div class="custom-scrollbar" style="max-height: 60vh; overflow-y: auto; padding-right: 10px;">
+      <p>👥 <b>Gracze:</b> Minimum 3 (Zalecane 4+).</p>
+      <h3>Zasady:</h3>
+      <ul>
+        <li>Oszust (Impostor) <b>nie zna hasła</b>. Reszta graczy je zna.</li>
+        <li>Gra losuje, kto zaczyna (🎤). Zaczynająca osoba mówi <b>jedno słowo</b> kojarzące się z hasłem.</li>
+        <li>Kolejni gracze (zgodnie z ruchem wskazówek zegara) też podają po jednym słowie.</li>
+        <li><b>Cel Niewinnych:</b> Udowodnić, że znają hasło, ale podać słowo na tyle trudne, by oszust się nie domyślił.</li>
+        <li><b>Cel Oszusta:</b> Udawać, że wie o co chodzi i nie dać się złapać!</li>
       </ul>
-    
-    <button id="saveCustomCategoryBtn" disabled>Zapisz i użyj</button>
+      <h3>Głosowanie:</h3>
+      <ul>
+        <li>Po ustalonym czasie (lub liczbie okrążeń) rozpoczyna się głosowanie.</li>
+        <li>Jeśli większość wskaże oszusta - <b>Niewinni wygrywają</b>.</li>
+        <li>Jeśli oszust przetrwa (remis lub wskazano niewinnego) - <b>Oszust wygrywa</b>.</li>
+      </ul>
+    </div>
+    <button class="close-btn-bottom" id="closeRules">Zrozumiałem</button>
   </div>
 
-  <div id="rulesBox" class="modal-box custom-scrollbar" data-modal style="display:none;">
-    <button id="closeRulesTop" class="close-btn" title="Zamknij">X</button> 
-    <h2>Zasady gry Słowny Impostor</h2>
-    <h3>Cel gry</h3>
-    <p>Wciel się w detektywa słów! Twoim zadaniem jest opisanie tajemniczego słowa, nie zdradzając go, lub blefowanie jako impostor, który słowa nie zna. Celem jest zidentyfikowanie impostora przed końcem rundy!</p>
-    <h3>Przebieg gry</h3>
-    <ul>
-      <li><strong>Tworzenie pokoju:</strong> Host tworzy pokój, wybierając kategorie słów i liczbę impostorów (1–5). Gracze dołączają, wpisując kod pokoju.</li>
-      <li><strong>Start gry:</strong> Host uruchamia grę, gdy w pokoju jest odpowiednia liczba graczy (min. 3 dla 1 impostora, 4 dla 2, itd., maks. 10).</li>
-      <li><strong>Losowanie słowa:</strong> Gra losuje jedno słowo z wybranych kategorii. Normalni gracze znają słowo, impostorzy muszą blefować.</li>
-      <li><strong>Opisywanie:</strong> Gracze po kolei opisują słowo w kreatywny sposób, unikając jego bezpośredniego użycia. Losowy gracz zaczyna, z mniejszą szansą na impostora.</li>
-      <li><strong>Zakończenie rundy:</strong> Host może zakończyć rundę, gdy podejrzewa impostora. Omówcie, kto był impostorem, i zacznijcie nową rundę!</li>
-    </ul>
-    <h3>Role w grze</h3>
-    <ul>
-      <li><strong>Normalny gracz:</strong> Zna słowo i opisuje je, aby pomóc innym graczom, jednocześnie obserwując, kto może blefować.</li>
-      <li><strong>Impostor:</strong> Nie zna słowa i musi sprytnie udawać, że je zna, aby nie zostać zdemaskowanym.</li>
-      <li><strong>Host:</strong> Tworzy pokój, wybiera kategorie i liczbę impostorów, rozpoczyna i kończy rundy. Może też wyrzucać graczy z pokoju.</li>
-    </ul>
-    <h3>Porady</h3>
-    <ul>
-      <li>Bądź kreatywny w opisach, ale uważaj, by nie zdradzić słowa!</li>
-      <li>Obserwuj, czy opisy innych graczy są spójne – impostorzy mogą się zdradzić!</li>
-      <li>Graj w grupie do 10 osób dla najlepszej zabawy.</li>
-    </ul>
-    <button id="closeRules" title="Zamknij" class="close-btn-bottom">X</button> 
-  </div>
-
-  <script src="config.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <script src="script.js?v=42"></script> 
+  <script src="script.js"></script>
 </body>
 </html>
