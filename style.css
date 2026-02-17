@@ -253,7 +253,50 @@ body.dark-mode .modal-box {
   border: 2px solid var(--c-glass-border);
 }
 
-/* --- NAPRAWIONA KARTA 3D (v50 - Pancerna Wersja) --- */
+/* Przyciski zamykania w modalach */
+.close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 35px;
+  height: 35px;
+  background: rgba(0, 0, 0, 0.2);
+  border: none;
+  border-radius: 8px;
+  color: var(--c-text-light);
+  font-size: 2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  padding: 0;
+  line-height: 35px;
+  text-align: center;
+}
+.close-btn:hover {
+  transform: scale(1.1);
+  background: rgba(0, 0, 0, 0.4);
+}
+.close-btn-bottom {
+  width: 40px;
+  height: 40px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 8px;
+  color: white;
+  font-size: 2rem;
+  font-weight: bold;
+  border: none;
+  margin: 1rem auto 0;
+  display: block;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.close-btn-bottom:hover {
+  transform: scale(1.1);
+  background: rgba(0,0,0,0.4);
+}
+
+
+/* --- ULEPSZONA KARTA 3D --- */
 
 #roleMessageBox.role-card-modal {
   position: fixed !important;
@@ -326,14 +369,14 @@ body.dark-mode .modal-box {
   justify-content: center;
   padding: 2rem;
   box-sizing: border-box;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.6);
   overflow: hidden; 
 }
 
-/* TYŁ KARTY (OKŁADKA - CZYSTA CZERN) */
+/* TYŁ KARTY (OKŁADKA) Z POŚWIATĄ */
 .role-card-back {
-  background-color: #000; 
+  background-color: #111; 
   border: 4px solid #d4af37; 
+  box-shadow: 0 0 30px rgba(212, 175, 55, 0.4), inset 0 0 20px rgba(0,0,0,0.8);
   color: #f1c40f;
   transform: rotateY(0deg);
 }
@@ -342,7 +385,7 @@ body.dark-mode .modal-box {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0.4) 100%);
+  background: radial-gradient(circle at 50% 50%, rgba(212,175,55,0.1) 0%, rgba(0,0,0,0.8) 100%);
   pointer-events: none;
 }
 
@@ -352,8 +395,8 @@ body.dark-mode .modal-box {
   color: #d4af37; 
   line-height: 1;
   text-shadow: 
-    2px 2px 0px #8a6e1c,
-    4px 4px 10px rgba(0,0,0,0.5);
+    0 0 20px rgba(212, 175, 55, 0.6),
+    4px 4px 10px rgba(0,0,0,0.8);
   transform: translateY(-20px);
   position: relative;
   z-index: 2;
@@ -365,7 +408,7 @@ body.dark-mode .modal-box {
   position: absolute;
   bottom: 30px;
   animation: spin 4s linear infinite;
-  text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+  text-shadow: 0 0 10px rgba(212, 175, 55, 0.6);
   z-index: 2;
 }
 
@@ -376,11 +419,28 @@ body.dark-mode .modal-box {
 
 /* PRZÓD KARTY (TREŚĆ - CIEMNA) */
 .role-card-front {
-  background: radial-gradient(circle at center, #2b2b2b 0%, #000000 100%);
+  background: #111;
   color: white;
   transform: rotateY(180deg);
-  border: 4px solid #d4af37;
+  border: 4px solid #7f8c8d; /* Zwykła szara ramka dopóki skrypt nie nałoży koloru */
+  box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+  transition: border-color 0.5s ease, box-shadow 0.5s ease;
 }
+
+/* Rola Niewinny (Zielone podświetlenie) */
+.role-card-front.is-innocent {
+  border-color: #2ecc71;
+  box-shadow: 0 0 40px rgba(46, 204, 113, 0.5), inset 0 0 30px rgba(46, 204, 113, 0.1);
+  background: radial-gradient(circle at center, #1b2620 0%, #000000 100%);
+}
+
+/* Rola Impostor (Czerwone podświetlenie) */
+.role-card-front.is-impostor {
+  border-color: #e74c3c;
+  box-shadow: 0 0 40px rgba(231, 76, 60, 0.5), inset 0 0 30px rgba(231, 76, 60, 0.1);
+  background: radial-gradient(circle at center, #261b1b 0%, #000000 100%);
+}
+
 
 #roleContent {
   font-size: 2.5rem;
@@ -506,6 +566,22 @@ body.dark-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
 }
 #copyRoomCode:hover {
   background: linear-gradient(45deg, var(--c-primary-light), var(--c-primary));
+}
+
+#roomSettingsBtn {
+  background: linear-gradient(45deg, var(--c-neutral), var(--c-neutral-light));
+  width: 2.8rem;
+  height: 2.8rem;
+  font-size: 2rem;
+  padding: 0;
+  margin: 0 0.5rem;
+  line-height: 2.8rem;
+  text-align: center;
+  display: inline-block;
+}
+#roomSettingsBtn:hover {
+  background: linear-gradient(45deg, var(--c-neutral-light), var(--c-neutral));
+  transform: rotate(45deg); /* Fajny mały bajer przy najechaniu */
 }
 
 #roomCodeContainer {
@@ -757,9 +833,22 @@ body.voting-active #playersList li.has-voted .avatar::before {
 }
 
 /* =================================================================== */
-/* 5.6. STYLE EKRANU PODPOWIEDZI */
+/* 5.6. WSPÓLNE STYLE DLA USTAWIEŃ I SUWAKÓW */
 /* =================================================================== */
-#impostorHintBox p {
+.settings-group {
+  margin-bottom: 2rem;
+  background: rgba(0,0,0,0.1);
+  padding: 1rem;
+  border-radius: 1rem;
+}
+.settings-group p {
+  margin: 0 0 1rem 0;
+  font-size: 2.2rem;
+  color: var(--c-text-light-alt);
+  font-weight: 600;
+  text-shadow: 1px 1px 2px var(--c-shadow);
+}
+#impostorSelectionBox p, #impostorHintBox p, #impostorTeamBox p {
   margin: 0 0 1.5rem 0;
   font-size: 3rem;
   color: var(--c-text-light-alt);
@@ -808,11 +897,7 @@ body.voting-active #playersList li.has-voted .avatar::before {
   color: #fff;
 }
 
-.slider-value-display {
-  display: none;
-}
-
-#hintChanceSlider {
+input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
   height: 8px; 
@@ -831,9 +916,10 @@ body.voting-active #playersList li.has-voted .avatar::before {
   background-size: 4px 4px;
   background-repeat: no-repeat;
   background-position: 0% 50%, 25% 50%, 50% 50%, 75% 50%, 100% 50%;
+  border: none;
 }
 
-#hintChanceSlider::-webkit-slider-thumb {
+input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 28px; 
@@ -846,7 +932,7 @@ body.voting-active #playersList li.has-voted .avatar::before {
   box-shadow: 0 2px 5px var(--c-shadow-heavy);
 }
 
-#hintChanceSlider::-moz-range-thumb {
+input[type="range"]::-moz-range-thumb {
   width: 28px; 
   height: 28px; 
   border-radius: 50%;
@@ -856,15 +942,14 @@ body.voting-active #playersList li.has-voted .avatar::before {
   box-shadow: 0 2px 5px var(--c-shadow-heavy);
 }
 
-body.dark-mode #hintChanceSlider::-webkit-slider-thumb {
+body.dark-mode input[type="range"]::-webkit-slider-thumb {
   background: var(--c-primary);
   border-color: var(--c-text-light-alt);
 }
-body.dark-mode #hintChanceSlider::-moz-range-thumb {
+body.dark-mode input[type="range"]::-moz-range-thumb {
   background: var(--c-primary);
   border-color: var(--c-text-light-alt);
 }
-
 
 /* Checkbox */
 .checkbox-container {
@@ -1000,28 +1085,6 @@ body.dark-mode #hintChanceSlider::-moz-range-thumb {
   text-align: center;
   text-shadow: 1px 1px 3px var(--c-shadow);
 }
-#customCategoryBox #closeCustomCategoryBtn {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  width: 35px;
-  height: 35px;
-  background: rgba(0, 0, 0, 0.2);
-  border: none;
-  border-radius: 8px;
-  color: var(--c-text-light);
-  font-size: 2rem;
-  font-weight: bold;
-  cursor: pointer;
-  transition: transform 0.2s ease, background-color 0.2s ease;
-  padding: 0;
-  line-height: 35px;
-  text-align: center;
-}
-#customCategoryBox #closeCustomCategoryBtn:hover {
-  transform: scale(1.1);
-  background: rgba(0, 0, 0, 0.4);
-}
 
 .custom-word-adder {
   display: flex;
@@ -1090,17 +1153,10 @@ body.dark-mode #hintChanceSlider::-moz-range-thumb {
   margin-top: 1rem;
 }
 
+
 /* =================================================================== */
-/* 5.8. STYLE EKRANU DRUŻYNY */
+/* 5.8. WSPÓLNE PRZYCISKI (TAK/NIE, +/-) */
 /* =================================================================== */
-#impostorTeamBox p {
-  margin: 0 0 1.5rem 0;
-  font-size: 3rem;
-  color: var(--c-text-light-alt);
-  font-weight: 600;
-  text-shadow: 2px 2px 4px var(--c-shadow-heavy);
-  white-space: nowrap;
-}
 
 .team-selector {
   display: flex;
@@ -1108,7 +1164,7 @@ body.dark-mode #hintChanceSlider::-moz-range-thumb {
   gap: 1rem;
   width: 100%;
   max-width: 350px;
-  margin: 2rem auto;
+  margin: 1rem auto;
 }
 .team-selector button {
   width: 100%;
@@ -1144,106 +1200,14 @@ body.dark-mode .team-selector button:nth-of-type(2).selected { /* NIE */
   border-color: var(--c-text-light-alt);
 }
 
-#confirmTeamSettingsBtn {
-  margin-top: 1.5rem;
-}
-
-
-/* --- Przyciski Pływające (Zasady, Tryb) --- */
-#rulesBtn, #themeToggle {
-  position: fixed;
-  bottom: 1.5rem;
-  border-radius: 50%;
-  background: rgba(52, 152, 219, 0.3);
-  color: var(--c-text-light);
-  font-size: 2rem;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 2px 10px var(--c-shadow);
-  z-index: 1000;
-  animation: float 2s ease-in-out infinite;
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-  width: 3.5rem;
-  height: 3.5rem;
-}
-#rulesBtn {
-  right: 1.5rem;
-}
-#themeToggle {
-  right: 6rem;
-}
-#rulesBtn:hover, #themeToggle:hover {
-  background: var(--c-accent-light);
-  box-shadow: 0 4px 15px var(--c-shadow-heavy);
-}
-#rulesBtn.hidden, #themeToggle.hidden {
-  display: none;
-}
-
-/* --- Okienka Modalne --- */
-
-#messageBox {
-  background: rgba(255, 255, 255, 0.8);
-  color: var(--c-text-dark);
-  padding: 1.2rem;
-  font-size: 1.8rem;
-  font-weight: 600;
-  box-shadow: 0 5px 15px var(--c-shadow-heavy);
-}
-#messageBox:not(.copy-message) {
-  font-size: 2.8rem;
-  background: linear-gradient(135deg, var(--c-primary), var(--c-bg-3));
-  color: var(--c-text-light);
-  padding: 2rem;
-  border: 2px solid var(--c-glass-border);
-  text-shadow: 1px 1px 3px var(--c-shadow);
-}
-body.dark-mode #messageBox:not(.copy-message) {
-  background: linear-gradient(135deg, var(--c-bg-1), var(--c-primary));
-}
-
-#roleMessageBox {
-  font-size: 3.5rem;
-  font-weight: bold;
-  font-family: 'Segoe UI Black', var(--font-body);
-}
-#roleMessageBox.is-fading-out {
-  opacity: 0;
-}
-
-#impostorSelectionBox p {
-  margin: 0 0 1.5rem 0;
-  font-size: 3rem;
-  color: var(--c-text-light-alt);
-  font-weight: 600;
-  text-shadow: 2px 2px 4px var(--c-shadow-heavy);
-  white-space: nowrap;
-}
-#impostorSelectionBox #loadingMessage {
-  font-size: 1.8rem;
-  font-weight: 500;
-  margin: 0.5rem 0;
-  text-shadow: 1px 1px 2px var(--c-shadow);
-}
-#impostorSelectionBox #recommendedPlayers {
-  font-size: 1.4rem;
-  font-weight: 400;
-  opacity: 0.8;
-  margin-top: 1rem;
-}
-#impostorSelectionBox .impostor-selector {
+.impostor-selector {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 1.5rem;
   margin-bottom: 1.5rem;
 }
-#impostorSelectionBox #minusImpostor,
-#impostorSelectionBox #plusImpostor {
+.impostor-selector button {
   width: 50px;
   height: 50px;
   border-radius: 50%;
@@ -1257,11 +1221,26 @@ body.dark-mode #messageBox:not(.copy-message) {
   justify-content: center;
   padding: 0;
   line-height: 1; 
+  margin: 0;
 }
-#impostorSelectionBox #minusImpostor:hover:not(:disabled),
-#impostorSelectionBox #plusImpostor:hover:not(:disabled) {
+.impostor-selector button:hover:not(:disabled) {
   background: var(--c-glass-highlight-hover);
   box-shadow: 0 4px 10px var(--c-shadow-heavy);
+  animation: none;
+}
+
+
+#impostorSelectionBox #loadingMessage {
+  font-size: 1.8rem;
+  font-weight: 500;
+  margin: 0.5rem 0;
+  text-shadow: 1px 1px 2px var(--c-shadow);
+}
+#impostorSelectionBox #recommendedPlayers {
+  font-size: 1.4rem;
+  font-weight: 400;
+  opacity: 0.8;
+  margin-top: 1rem;
 }
 #impostorSelectionBox #confirmImpostors {
   width: 150px;
@@ -1346,11 +1325,6 @@ body.dark-mode #messageBox:not(.copy-message) {
 #categorySelectionBox #allCategoriesBtn .checkbox::before {
   content: '';
 }
-.checkbox-container input[type="checkbox"]:checked + label .checkbox::before,
-#categorySelectionBox .checkbox-container input[type="checkbox"]:checked + label .checkbox::before {
-  content: '✔';
-}
-
 
 #categorySelectionBox #confirmCategories {
   width: 150px;
@@ -1363,6 +1337,42 @@ body.dark-mode #messageBox:not(.copy-message) {
 #categorySelectionBox #confirmCategories:hover:not(:disabled) {
   background: var(--c-glass-highlight-hover);
   box-shadow: 0 6px 15px var(--c-shadow-heavy);
+}
+
+
+/* --- Przyciski Pływające (Zasady, Tryb) --- */
+#rulesBtn, #themeToggle {
+  position: fixed;
+  bottom: 1.5rem;
+  border-radius: 50%;
+  background: rgba(52, 152, 219, 0.3);
+  color: var(--c-text-light);
+  font-size: 2rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 10px var(--c-shadow);
+  z-index: 1000;
+  animation: float 2s ease-in-out infinite;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  width: 3.5rem;
+  height: 3.5rem;
+}
+#rulesBtn {
+  right: 1.5rem;
+}
+#themeToggle {
+  right: 6rem;
+}
+#rulesBtn:hover, #themeToggle:hover {
+  background: var(--c-accent-light);
+  box-shadow: 0 4px 15px var(--c-shadow-heavy);
+}
+#rulesBtn.hidden, #themeToggle.hidden {
+  display: none;
 }
 
 /* --- Wybór Emoji --- */
@@ -1433,33 +1443,6 @@ body.dark-mode #messageBox:not(.copy-message) {
   margin: 0.5rem 0;
 }
 
-#rulesBox #closeRules, #rulesBox #closeRulesTop, #customCategoryBox #closeCustomCategoryBtn {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  width: 35px; 
-  height: 35px; 
-  background: rgba(0, 0, 0, 0.2);
-  border: none;
-  border-radius: 8px;
-  color: var(--c-text-light);
-  font-size: 2rem;
-  font-weight: bold;
-  cursor: pointer;
-  transition: transform 0.2s ease, background-color 0.2s ease;
-  padding: 0; 
-  line-height: 35px; 
-  text-align: center; 
-}
-#rulesBox #closeRules:hover, #rulesBox #closeRulesTop:hover, #customCategoryBox #closeCustomCategoryBtn:hover {
-  transform: scale(1.1);
-  background: rgba(0, 0, 0, 0.4);
-}
-#rulesBox #closeRulesTop {
-  top: 1rem; 
-  right: 1rem;
-}
-
 
 /* =================================================================== */
 /* 6. ANIMACJE */
@@ -1497,177 +1480,73 @@ body.dark-mode #messageBox:not(.copy-message) {
 /* 7. MEDIA QUERIES (Responsywność) */
 /* =================================================================== */
 @media (max-width: 600px) {
-  /* === GŁÓWNE ROZMIARY === */
-  body {
-    padding: 0.5rem; /* Mniej paddingu na body */
-    font-size: 1.6rem; /* Zmniejszenie bazowej czcionki z 2rem */
-  }
-  .container {
-    padding: 0.8rem;
-    margin: 0.5rem;
-  }
-  input, button {
-    font-size: 1.6rem; /* Zmniejszenie domyślnej czcionki przycisków/inputów */
-    padding: 0.7rem;
-  }
-  h1.fancy-title {
-    font-size: 2.5rem; /* Zmniejszenie głównego tytułu */
-  }
-
-  /* === EKRAN GRY === */
-  #roundCounter, #wordDisplay {
-    font-size: 1.8rem; /* Zmniejszenie tekstu słowa */
-  }
-  #countsContainer {
-    gap: 1rem 1.5rem; /* Mniejsze odstępy */
-  }
-  #playerCountDisplay, #impostorCountDisplay, #hintChanceInfoDisplay {
-    font-size: 1.5rem; /* Mniejszy tekst licznika */
-  }
-  #lobbyCategories {
-    font-size: 1.4rem; /* Mniejsze kategorie w lobby */
-  }
-  
-  #playersList li {
-    padding: 0.8rem 3rem 0.8rem 5rem; /* Dopasowany padding do mniejszego ekranu ale wciąż dużego awatara */
-    font-size: 1.6rem;
-    min-height: 5rem;
-  }
-  #playersList li .avatar {
-    width: 3.5rem; /* Trochę mniejszy na mobile, ale wciąż duży */
-    height: 3.5rem;
-    font-size: 2.2rem;
-  }
-  
-  
-  /* === EKRAN LOGOWANIA (EMOTKI) === */
-  .emoji-btn {
-    width: 50px;
-    height: 50px;
-    min-width: 50px;
-    font-size: 2.2rem;
-  }
-  #emojiSelection {
-    gap: 10px;
-    max-width: 320px; /* Dopasuj do mniejszego ekranu */
-  }
-  
-  /* === PRZYCISKI PŁYWAJĄCE === */
-  #rulesBtn, #themeToggle {
-    width: 3rem;
-    height: 3rem;
-    font-size: 1.8rem;
-    bottom: 1rem;
-  }
-  #rulesBtn {
-    right: 1rem;
-  }
-  #themeToggle {
-    right: 5rem;
-  }
-
-  /* === MODALE === */
-  .modal-box {
-    padding: 1.5rem 1rem; /* Mniej paddingu po bokach */
-    max-height: 85vh;
-    font-size: 1.4rem;
-    width: 90vw;
-    max-width: 90vw;
-    box-sizing: border-box; /* Upewnij się, że padding jest wliczony */
-  }
-  #rulesBox h2 {
-    font-size: 2rem;
-  }
-  #rulesBox h3 {
-    font-size: 1.8rem;
-  }
-  #rulesBox p, #rulesBox li {
-    font-size: 1.4rem;
-  }
-  
-  #impostorSelectionBox p, 
-  #categorySelectionBox p,
-  #impostorHintBox p, 
-  #customCategoryBox h2, 
-  #impostorTeamBox p {
-    font-size: 2.2rem;
-    white-space: normal; /* POZWÓL NA ZAWIJANIE TEKSTU */
-  }
-  
-  #roleMessageBox {
-    font-size: 2.4rem; /* Zmniejszenie z 3.5rem */
-  }
-  
-  .slider-container {
-    padding-bottom: 25px;
-    margin-bottom: 2.5rem;
-    margin-top: 2rem; 
-  }
-  .slider-labels {
-    margin-top: 5px; 
-  }
-  
-  #wordDisplay .impostor-hint-span {
-    font-size: 1.4rem;
-    display: block;
-  }
-  
-  .modal-box .impostor-selector,
-  .modal-box .slider-container,
-  .modal-box .team-selector,
-  .modal-box .category-grid,
-  .modal-box button {
-    max-width: 100%; /* Usuwa ograniczenie 350px wewnątrz modali */
-  }
-  
-  #hintChanceSlider {
-    width: calc(100% - 28px);
-    margin: 0 14px;
-  }
+  body { padding: 0.5rem; font-size: 1.6rem; }
+  .container { padding: 0.8rem; margin: 0.5rem; }
+  input, button { font-size: 1.6rem; padding: 0.7rem; }
+  h1.fancy-title { font-size: 2.5rem; }
+  #roundCounter, #wordDisplay { font-size: 1.8rem; }
+  #countsContainer { gap: 1rem 1.5rem; }
+  #playerCountDisplay, #impostorCountDisplay, #hintChanceInfoDisplay { font-size: 1.5rem; }
+  #lobbyCategories { font-size: 1.4rem; }
+  #playersList li { padding: 0.8rem 3rem 0.8rem 5rem; font-size: 1.6rem; min-height: 5rem; }
+  #playersList li .avatar { width: 3.5rem; height: 3.5rem; font-size: 2.2rem; }
+  .emoji-btn { width: 50px; height: 50px; min-width: 50px; font-size: 2.2rem; }
+  #emojiSelection { gap: 10px; max-width: 320px; }
+  #rulesBtn, #themeToggle { width: 3rem; height: 3rem; font-size: 1.8rem; bottom: 1rem; }
+  #rulesBtn { right: 1rem; }
+  #themeToggle { right: 5rem; }
+  .modal-box { padding: 1.5rem 1rem; max-height: 85vh; font-size: 1.4rem; width: 90vw; max-width: 90vw; box-sizing: border-box; }
+  #rulesBox h2 { font-size: 2rem; }
+  #rulesBox h3 { font-size: 1.8rem; }
+  #rulesBox p, #rulesBox li { font-size: 1.4rem; }
+  #impostorSelectionBox p, #categorySelectionBox p, #impostorHintBox p, #customCategoryBox h2, #impostorTeamBox p, .settings-group p { font-size: 2.2rem; white-space: normal; }
+  #roleMessageBox { font-size: 2.4rem; }
+  .slider-container { padding-bottom: 25px; margin-bottom: 2.5rem; margin-top: 2rem; }
+  .slider-labels { margin-top: 5px; }
+  #wordDisplay .impostor-hint-span { font-size: 1.4rem; display: block; }
+  .modal-box .impostor-selector, .modal-box .slider-container, .modal-box .team-selector, .modal-box .category-grid, .modal-box button { max-width: 100%; }
 }
 
 /* =================================================================== */
-/* 8. NAKŁADKA GŁOSOWANIA (VOTING OVERLAY) */
+/* 8. KINOWE NAKŁADKI (VOTING I STARTER OVERLAY) */
 /* =================================================================== */
-.voting-overlay {
+.cinematic-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.85); /* Mocne zaciemnienie tła */
+  background: rgba(0, 0, 0, 0.85); 
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  z-index: 2000; /* Półka wyżej niż wszystko inne */
+  z-index: 2000; 
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.4s ease;
 }
 
-.voting-overlay.is-active {
+.cinematic-overlay.is-active {
   opacity: 1;
   pointer-events: auto;
 }
 
-.voting-title {
+.cinematic-title {
   font-family: 'Segoe UI Black', var(--font-heading);
   font-size: 6rem;
-  color: #e74c3c;
   text-transform: uppercase;
-  text-shadow: 0 0 30px rgba(231, 76, 60, 0.8);
   margin: 0;
   transform: scale(0.5);
   transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   text-align: center;
 }
 
-.voting-overlay.is-active .voting-title {
+.cinematic-overlay.is-active .cinematic-title {
   transform: scale(1);
 }
 
-.voting-subtitle {
+.cinematic-subtitle {
   font-size: 2.5rem;
   color: white;
   margin-top: 1rem;
@@ -1677,12 +1556,31 @@ body.dark-mode #messageBox:not(.copy-message) {
   text-align: center;
 }
 
-.voting-overlay.is-active .voting-subtitle {
+.cinematic-overlay.is-active .cinematic-subtitle {
   opacity: 1;
   transform: translateY(0);
 }
 
+/* Wersja dla Głosowania (Czerwona) */
+.voting-style .cinematic-title {
+  color: #e74c3c;
+  text-shadow: 0 0 30px rgba(231, 76, 60, 0.8);
+}
+
+/* Wersja dla Zaczynającego (Niebiesko/Złota) */
+.starter-style .cinematic-title {
+  color: #3498db;
+  text-shadow: 0 0 30px rgba(52, 152, 219, 0.8);
+}
+.starter-style .cinematic-subtitle {
+  color: #f1c40f; /* Złoty nick gracza */
+  font-weight: 800;
+  font-size: 3rem;
+  text-shadow: 0 0 15px rgba(241, 196, 15, 0.6);
+}
+
 @media (max-width: 600px) {
-  .voting-title { font-size: 4rem; }
-  .voting-subtitle { font-size: 2rem; }
+  .cinematic-title { font-size: 4rem; }
+  .cinematic-subtitle { font-size: 2rem; }
+  .starter-style .cinematic-subtitle { font-size: 2.5rem; }
 }
