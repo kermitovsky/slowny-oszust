@@ -139,7 +139,7 @@ body.dark-mode .modal-box { background: linear-gradient(135deg, var(--c-bg-1), v
 .close-btn-bottom { width: auto; padding: 0.8rem 2.5rem; background: rgba(0,0,0,0.3); border-radius: 50px; color: white; font-size: 1.8rem; border: none; margin: 1.5rem auto 0; display: block; box-shadow: none; }
 .close-btn-bottom:hover { background: rgba(0,0,0,0.5); transform: translateY(-2px); }
 
-/* --- KARTA ROLI (NAPRAWIONA POZYCJA) --- */
+/* --- KARTA ROLI --- */
 #roleMessageBox.role-card-modal { 
   position: fixed !important; top: 0 !important; left: 0 !important; 
   width: 100% !important; max-width: 100% !important; height: 100% !important; max-height: 100% !important;
@@ -244,13 +244,13 @@ input[type="range"] { -webkit-appearance: none; appearance: none; height: 10px; 
 input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 30px; height: 30px; border-radius: 50%; background: var(--c-primary); border: 4px solid #fff; cursor: pointer; margin-top: -10px; box-shadow: 0 3px 8px rgba(0,0,0,0.4); transition: transform 0.2s; }
 input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.1); }
 
-/* --- CHECKBOXY (NAPRAWIONE: flex-shrink) --- */
+/* --- CHECKBOXY --- */
 .checkbox-container { display: flex; align-items: center; justify-content: center; gap: 1rem; margin: 2rem auto; font-size: 1.6rem; font-weight: 500; color: var(--c-text-light); cursor: pointer; transition: opacity 0.3s ease; }
 .checkbox-container input[type="checkbox"] { display: none; }
 .checkbox-container label { display: flex; align-items: center; cursor: pointer; }
 .checkbox-container .checkbox { 
   width: 24px; height: 24px; 
-  flex-shrink: 0; /* To sprawia, że zawsze są kwadratowe! */
+  flex-shrink: 0; /* Gwarancja idealnego kwadratu */
   border: 2px solid rgba(255,255,255,0.6); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-right: 1rem; background: rgba(0,0,0,0.2); transition: all 0.3s ease; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); 
 }
 .checkbox-container label:hover .checkbox { background: rgba(255,255,255,0.1); border-color: #fff; }
@@ -268,7 +268,7 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.1); }
 .team-selector button:nth-of-type(1).selected { background: var(--c-success); box-shadow: 0 4px 10px rgba(46, 204, 113, 0.4); border-color: transparent; }
 .team-selector button:nth-of-type(2).selected { background: var(--c-danger); box-shadow: 0 4px 10px rgba(231, 76, 60, 0.4); border-color: transparent; }
 
-/* --- KAFELKI KATEGORII I ZMIEJSZONE PRZYCISKI AKCJI --- */
+/* --- KAFELKI KATEGORII I PRZYCISKI AKCJI --- */
 #categorySelectionBox p { margin: 0 0 1.5rem 0; font-size: 2.2rem; font-weight: 600; text-shadow: 1px 2px 4px var(--c-shadow-heavy); }
 #categorySelectionBox .category-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; margin-right: 15px; max-height: 300px; overflow-y: auto; overflow-x: hidden; padding-right: 5px; }
 
