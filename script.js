@@ -63,7 +63,7 @@ const closeRulesTopBtn = document.getElementById('closeRulesTop');
 const closeRoomSettingsBtn = document.getElementById('closeRoomSettingsBtn'); 
 
 // Elementy Wyboru Kategorii
-const allCategoriesBtn = document.getElementById('allCategoriesBtn');
+const allCategoriesCheckbox = document.getElementById('allCategoriesCheckbox');
 const categoryGrid = document.querySelector('#categorySelectionBox .category-grid');
 const confirmCategories = document.getElementById('confirmCategories');
 const createCustomCategoryBtn = document.getElementById('createCustomCategoryBtn'); 
@@ -319,7 +319,7 @@ function updateCategoryButtons() {
 
 function updateAllCategoriesCheckbox() {
   const allSelected = categories.every(c => selectedCategories.some(sc => sc.file === c.file)) || selectedCategories.some(c => c.file === 'all');
-  allCategoriesBtn.querySelector('.checkbox').textContent = allSelected ? '✔' : '';
+  allCategoriesCheckbox.checked = allSelected;
 }
 
 function updateConfirmCategoriesButton() {
@@ -328,10 +328,10 @@ function updateConfirmCategoriesButton() {
   confirmCategories.style.cursor = selectedCategories.length === 0 ? 'not-allowed' : 'pointer';
 }
 
-allCategoriesBtn.querySelector('.checkbox').addEventListener('click', () => {
-  if (selectedCategories.some(c => c.file === 'all')) selectedCategories = [];
-  else selectedCategories = [{ name: 'Wszystkie', file: 'all' }];
-  updateCategoryButtons(); updateAllCategoriesCheckbox(); updateConfirmCategoriesButton();
+allCategoriesCheckbox.addEventListener('change', (e) => {
+  if (e.target.checked) selectedCategories = [{ name: 'Wszystkie', file: 'all' }];
+  else selectedCategories = [];
+  updateCategoryButtons(); updateConfirmCategoriesButton();
 });
 
 confirmCategories.addEventListener('click', () => {
@@ -592,24 +592,36 @@ teamNotKnowsBtn.addEventListener('click', () => { impostorsKnowEachOther = false
 confirmTeamSettingsBtn.addEventListener('click', () => { createRoom(impostorCount, customHintsEnabled, hintChance, hintOnStart, impostorsKnowEachOther); });
 
 function createRoom(numImpostors, customHints, chanceIndex, onStart, knows) {
+  // Zabezpieczenie przed pustą tablicą dla Firebase
   const customCategoriesToSave = customCategories.filter(c => c.isCustom).map(c => ({ name: c.name, words: c.words })); 
+  
   currentRoomCode = generateRoomCode(); currentPlayerId = db.ref().push().key;
   const emoji = assignUniqueEmoji({}); const avatarColor = assignUniqueColor({});
   
-  db.ref(`rooms/${currentRoomCode}`).set({
-    players: { [currentPlayerId]: { name: currentPlayerName, isHost: true, role: null, emoji: emoji, avatarColor: avatarColor } },
-    gameStarted: false, votingActive: false, currentWord: null, currentCategory: null, impostorHint: null, 
-    lastRoundSummary: null, roundEndMessage: null, resetMessage: null, starterId: null, showStarter: false, 
-    roundWinner: null, numImpostors: numImpostors, categories: selectedCategories.map(c => c.name), 
-    customCategories: customCategoriesToSave || [], customHintsEnabled: customHints, hintChance: chanceIndex, 
+  const roomData = {
+    players: { [currentPlayerId]: { name: currentPlayerName, isHost: true, emoji: emoji, avatarColor: avatarColor } },
+    gameStarted: false, votingActive: false, showStarter: false, 
+    numImpostors: numImpostors, 
+    categories: selectedCategories.length > 0 ? selectedCategories.map(c => c.name) : ['Wszystkie'], 
+    customHintsEnabled: customHints, hintChance: chanceIndex, 
     hintOnStart: onStart, impostorsKnow: knows, currentRound: 0, hintPhase: false
-  }).then(() => {
+  };
+
+  // Dodajemy własne kategorie tylko, jeśli jakieś są, by nie wysłać błędu "[]" do Firebase
+  if (customCategoriesToSave && customCategoriesToSave.length > 0) {
+    roomData.customCategories = customCategoriesToSave;
+  }
+  
+  db.ref(`rooms/${currentRoomCode}`).set(roomData).then(() => {
     showScreen(gameScreen); 
     hideModal(impostorTeamBox, true); hideModal(impostorSelectionBox, true); hideModal(categorySelectionBox, true);
     roomCodeDisplay.textContent = currentRoomCode;
     db.ref(`rooms/${currentRoomCode}/players/${currentPlayerId}`).onDisconnect().remove();
     listenToRoom(currentRoomCode);
-  }).catch(() => { showMessage('❌ Błąd tworzenia pokoju!'); showScreen(loginScreen); });
+  }).catch((error) => { 
+    console.error("Błąd zapisu bazy:", error);
+    showMessage('❌ Błąd tworzenia pokoju! (Firebase error)'); showScreen(loginScreen); 
+  });
 }
 
 joinRoomBtn.addEventListener('click', () => {
@@ -626,7 +638,7 @@ joinRoomBtn.addEventListener('click', () => {
     if (room.gameStarted) { showMessage('❌ Gra już trwa!'); return; }
     if (Object.keys(room.players || {}).length >= 10) { showMessage('❌ Pokój pełny!'); return; }
 
-    roomRef.child('players').update({ [currentPlayerId]: { name: currentPlayerName, isHost: false, role: null, emoji: assignUniqueEmoji(room.players), avatarColor: assignUniqueColor(room.players) } }).then(() => {
+    roomRef.child('players').update({ [currentPlayerId]: { name: currentPlayerName, isHost: false, emoji: assignUniqueEmoji(room.players), avatarColor: assignUniqueColor(room.players) } }).then(() => {
       showScreen(gameScreen); 
       const cats = room.categories || ['Wszystkie'];
       let standard = cats.includes('Wszystkie') ? [{ name: 'Wszystkie', file: 'all' }] : categories.filter(c => cats.includes(c.name));
@@ -744,7 +756,7 @@ function listenToRoom(roomCode) {
     isHost = iAmInRoom ? iAmInRoom.isHost : false; 
     roomSettingsBtn.style.display = isHost && !room.gameStarted ? 'inline-block' : 'none';
 
-    // FAZA PODPOWIEDZI (Nowość)
+    // FAZA PODPOWIEDZI
     if (room.hintPhase) {
       if (!isAnimating && !document.getElementById('hintInputBox').classList.contains('is-visible') && !(room.submittedHints && room.submittedHints[currentPlayerId])) {
         customHintInput.value = ''; customHintInput.style.display = 'block'; submitCustomHintBtn.style.display = 'block'; hintWaitingMessage.style.display = 'none';
@@ -791,7 +803,7 @@ function listenToRoom(roomCode) {
     impostorCountDisplay.innerHTML = `Oszuści: <span class="bold">${room.numImpostors || 0}</span>`;
     hintChanceInfoDisplay.innerHTML = `Podpowiedź: <span class="bold">${hintText}</span>`;
     
-    if (!room.gameStarted && !votingActive) { lobbyCategories.style.display = 'block'; lobbyCategories.textContent = 'Kategorie: ' + (room.categories.join(', ') || 'Brak'); } 
+    if (!room.gameStarted && !votingActive) { lobbyCategories.style.display = 'block'; lobbyCategories.textContent = 'Kategorie: ' + ((room.categories && room.categories.join(', ')) || 'Brak'); } 
     else lobbyCategories.style.display = 'none';
 
     if (!votingActive && room.gameStarted && room.currentWord && !isAnimating && !room.hintPhase) { 
@@ -809,7 +821,7 @@ function listenToRoom(roomCode) {
     confirmVoteBtn.style.display = votingActive && !(iAmInRoom && iAmInRoom.votedFor) ? 'block' : 'none';
     endRoundBtn.style.display = 'none';
 
-    // 1. START RUNDY I KARTA ROLI (Gdy nie ma fazy podpowiedzi)
+    // 1. START RUNDY
     const newStarterId = room.starterId;
     if (room.gameStarted && !room.hintPhase && newStarterId && newStarterId !== lastSeenStarterId) {
       lastSeenStarterId = newStarterId; lastSeenSummary = null; lastSeenRoundWinner = null; 
