@@ -94,6 +94,7 @@ let isAnimating = false;
 let lastSeenStarterId = null; 
 let lastSeenSummary = null; 
 let lastSeenRoundWinner = null; 
+let lastSeenVotingState = false; // Zapamiętuje stan głosowania
 
 let hintChance = 0; 
 let hintOnStart = false; 
@@ -577,6 +578,7 @@ function resetToLobby() {
   lastSeenStarterId = null; 
   lastSeenSummary = null;
   lastSeenRoundWinner = null; 
+  lastSeenVotingState = false; 
   
   hintChance = 0;
   hintOnStart = false;
@@ -1094,6 +1096,13 @@ function listenToRoom(roomCode) {
     }
 
     isHost = iAmInRoom ? iAmInRoom.isHost : false; 
+
+    // --- NOWE: Komunikat o głosowaniu ---
+    if (votingActive && !lastSeenVotingState) {
+      showMessage('<div style="font-size: 3.5rem; color: #e74c3c; font-weight: 800; text-transform: uppercase; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">Głosowanie!</div><div style="font-size: 2rem; margin-top: 1rem;">Wyeliminuj impostora</div>', 4000);
+    }
+    lastSeenVotingState = votingActive;
+    // ------------------------------------
 
     if (votingActive) {
       document.body.classList.add('voting-active');
