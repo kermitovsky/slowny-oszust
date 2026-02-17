@@ -238,7 +238,6 @@ button:disabled {
   font-family: var(--font-heading);
   box-sizing: border-box;
   will-change: transform, opacity;
-  /* Domyślna animacja dla zwykłych okienek - powoduje konflikt z 3D */
   animation-duration: 0.3s;
   animation-fill-mode: forwards;
 }
@@ -256,7 +255,6 @@ body.dark-mode .modal-box {
 
 /* --- NAPRAWIONA KARTA 3D (v50 - Pancerna Wersja) --- */
 
-/* Używamy ID, aby nadpisać style .modal-box i uniknąć konfliktu animacji */
 #roleMessageBox.role-card-modal {
   position: fixed !important;
   top: 0 !important;
@@ -266,37 +264,25 @@ body.dark-mode .modal-box {
   width: 100% !important;
   height: 100% !important;
   margin: 0 !important;
-  
-  /* RESET TRANSFORMACJI - To naprawia spadanie! */
   transform: none !important;
-  
   background: transparent !important;
   box-shadow: none !important;
   border: none !important;
   padding: 0 !important;
-  
-  /* Domyślnie ukryta */
   display: none !important;
-  
-  /* Centrowanie Gridem */
   place-items: center;
-  
   z-index: 1001;
   pointer-events: none; 
-  
-  /* Wyłączamy dziedziczoną animację slideInUp */
   animation: none !important;
   transition: none !important;
   opacity: 0;
   visibility: hidden;
 }
 
-/* Gdy karta ma być widoczna */
 #roleMessageBox.role-card-modal.is-visible {
-  display: grid !important; /* Grid do centrowania */
+  display: grid !important; 
   opacity: 1;
   visibility: visible;
-  /* Proste pojawienie się (opacity), bez przesuwania */
   animation: fadeInSimple 0.3s forwards !important;
 }
 
@@ -305,14 +291,13 @@ body.dark-mode .modal-box {
   to { opacity: 1; }
 }
 
-/* Scena 3D */
 .role-card-scene {
   width: 300px;
   height: 450px;
   max-width: 85vw; 
   max-height: 80vh;
   perspective: 1000px; 
-  pointer-events: auto; /* Karta klikalna */
+  pointer-events: auto; 
 }
 
 .role-card {
@@ -351,7 +336,7 @@ body.dark-mode .modal-box {
   border: 4px solid #d4af37; 
   color: #f1c40f;
   transform: rotateY(0deg);
-  position: relative;
+  /* position: relative;  <-- TO PSUŁO UKŁAD, USUNĄŁEM TO */
 }
 
 .role-card-back::before {
@@ -364,7 +349,7 @@ body.dark-mode .modal-box {
 
 .card-question-mark {
   font-family: 'Pacifico', cursive; 
-  font-size: 16rem; /* WIELKI ZNAK ZAPYTANIA */
+  font-size: 16rem; 
   color: #d4af37; 
   line-height: 1;
   text-shadow: 
@@ -670,7 +655,7 @@ body.dark-mode #playersList li {
   position: absolute;
   top: -1.5rem;
   right: -1.5rem;
-  font-size: 3rem; /* WIELKA KORONA */
+  font-size: 3rem; 
   transform: rotate(15deg);
   text-shadow: 0 4px 10px rgba(0,0,0,0.5);
   filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));
