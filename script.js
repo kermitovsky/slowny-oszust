@@ -39,12 +39,12 @@ const countdownDisplay = document.getElementById('countdownDisplay');
 const votingOverlay = document.getElementById('votingOverlay'); 
 const starterOverlay = document.getElementById('starterOverlay'); 
 const starterOverlayName = document.getElementById('starterOverlayName');
-// NOWE: Elementy nakładki podsumowania
+// Ekran podsumowania
 const summaryOverlay = document.getElementById('summaryOverlay');
 const summaryOverlayTitle = document.getElementById('summaryOverlayTitle');
 const summaryOverlaySubtitle = document.getElementById('summaryOverlaySubtitle');
 
-// Nowe elementy karty 3D (Zmienna globalna dla podmiany w locie)
+// Nowe elementy karty 3D 
 let roleCardInner = document.getElementById('roleCardInner');
 
 const closeRulesBtn = document.getElementById('closeRules');
@@ -533,10 +533,13 @@ function resetToLobby() {
   hintChance = 0;
   hintOnStart = false;
   hintChanceSlider.value = 0;
-  document.querySelectorAll('.slider-labels .slider-label').forEach((label, index) => {
+  
+  // POPRAWKA: Resetujemy tylko etykiety przy tworzeniu pokoju
+  document.querySelectorAll('#impostorHintBox .slider-label').forEach((label, index) => {
     if (index === 0) label.classList.add('label-active');
     else label.classList.remove('label-active');
   });
+  
   hintOnStartCheckbox.checked = false;
   hintCheckboxContainer.classList.remove('disabled');
   hintOnStartCheckbox.disabled = false;
@@ -718,7 +721,9 @@ confirmImpostors.addEventListener('click', () => {
 
 hintChanceSlider.addEventListener('input', (e) => {
   hintChance = parseInt(e.target.value, 10);
-  const labels = document.querySelectorAll('.slider-labels .slider-label');
+  
+  // POPRAWKA: Celujemy tylko w etykiety w tym konkretnym oknie
+  const labels = document.querySelectorAll('#impostorHintBox .slider-label');
   labels.forEach((label, index) => {
     if (index === hintChance) label.classList.add('label-active');
     else label.classList.remove('label-active');
@@ -967,7 +972,6 @@ function tallyVotes(room) {
       updates[`players/${id}/seenRole`] = null; 
     });
 
-    // NOWE CZYSTE TEKSTY DLA NAKŁADKI
     let summaryMessage = '';
     if (ejectedPlayer.role === 'impostor') {
       summaryMessage = `Oszustem był(a) <strong>${ejectedPlayer.name}</strong>!<br>Słowo: <strong>${room.currentWord}</strong>`;
@@ -1207,13 +1211,9 @@ function listenToRoom(roomCode) {
       lastSeenSummary = newSummary; 
       if (!room.gameStarted) { lastSeenStarterId = null; }
       
-      // Podmiana tekstu
       summaryOverlaySubtitle.innerHTML = newSummary;
-      
-      // Reset klas
       summaryOverlay.classList.remove('innocent-win', 'impostor-win', 'draw-win');
       
-      // Nadawanie barw
       if (room.roundWinner === 'innocent') {
         summaryOverlayTitle.textContent = "WYGRYWAJĄ NIEWINNI!";
         summaryOverlay.classList.add('innocent-win');
@@ -1236,11 +1236,11 @@ function listenToRoom(roomCode) {
                 confetti({ particleCount: 400, spread: 120, scalar: 1.8, origin: { y: 0.6 }, zIndex: 3000, colors: ['#e74c3c', '#c0392b', '#000000', '#ffffff'] });
             }
           }
-      }, 400); // 0.4 sekundy opóźnienia, żeby napis zdążył wyjechać na środek
+      }, 400); 
       
       setTimeout(() => {
           summaryOverlay.classList.remove('is-active');
-      }, 6000); // Znika samoistnie po 6 sekundach
+      }, 6000); 
     }
     
     if (!room.gameStarted) { lastSeenStarterId = null; }
@@ -1544,9 +1544,7 @@ function cleanupEmptyRooms() {
     const rooms = snapshot.val();
     if (!rooms) return;
     
-    // Przeszukujemy wszystkie pokoje
     for (const [roomCode, roomData] of Object.entries(rooms)) {
-      // Jeśli pokój nie ma graczy (wszyscy wyszli lub rozłączyło ich)
       if (!roomData.players || Object.keys(roomData.players).length === 0) {
         db.ref(`rooms/${roomCode}`).remove().then(() => {
           console.log(`🧹 Usunięto stary/pusty pokój: ${roomCode}`);
