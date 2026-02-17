@@ -8,7 +8,7 @@ const emojiSelection = document.getElementById('emojiSelection');
 const playersList = document.getElementById('playersList');
 const roomCodeDisplay = document.getElementById('roomCodeDisplay');
 const copyRoomCodeBtn = document.getElementById('copyRoomCode');
-const roomSettingsBtn = document.getElementById('roomSettingsBtn'); // NOWE: Przycisk Ustawień
+const roomSettingsBtn = document.getElementById('roomSettingsBtn'); 
 const impostorCountDisplay = document.getElementById('impostorCountDisplay');
 const playerCountDisplay = document.getElementById('playerCountDisplay');
 const roundCounter = document.getElementById('roundCounter');
@@ -30,22 +30,26 @@ const impostorSelectionBox = document.getElementById('impostorSelectionBox');
 const impostorHintBox = document.getElementById('impostorHintBox'); 
 const impostorTeamBox = document.getElementById('impostorTeamBox'); 
 const customCategoryBox = document.getElementById('customCategoryBox'); 
-const roomSettingsBox = document.getElementById('roomSettingsBox'); // NOWE: Modal ustawień
+const roomSettingsBox = document.getElementById('roomSettingsBox'); 
 const rulesBox = document.getElementById('rulesBox');
 const modalBackdrop = document.getElementById('modalBackdrop'); 
 const countdownDisplay = document.getElementById('countdownDisplay'); 
 
 // Kinowe Nakładki
 const votingOverlay = document.getElementById('votingOverlay'); 
-const starterOverlay = document.getElementById('starterOverlay'); // NOWE: Nakładka startera
+const starterOverlay = document.getElementById('starterOverlay'); 
 const starterOverlayName = document.getElementById('starterOverlayName');
+// NOWE: Elementy nakładki podsumowania
+const summaryOverlay = document.getElementById('summaryOverlay');
+const summaryOverlayTitle = document.getElementById('summaryOverlayTitle');
+const summaryOverlaySubtitle = document.getElementById('summaryOverlaySubtitle');
 
 // Nowe elementy karty 3D (Zmienna globalna dla podmiany w locie)
 let roleCardInner = document.getElementById('roleCardInner');
 
 const closeRulesBtn = document.getElementById('closeRules');
 const closeRulesTopBtn = document.getElementById('closeRulesTop');
-const closeRoomSettingsBtn = document.getElementById('closeRoomSettingsBtn'); // NOWE: Zamykanie ustawień
+const closeRoomSettingsBtn = document.getElementById('closeRoomSettingsBtn'); 
 
 // Elementy Wyboru Kategorii
 const allCategoriesBtn = document.getElementById('allCategoriesBtn');
@@ -103,7 +107,7 @@ let currentRoomCode = null;
 let currentPlayerId = null;
 let currentPlayerName = null;
 let isHost = false; 
-let currentRoomData = null; // Trzyma dane pokoju żeby łatwiej je edytować
+let currentRoomData = null; 
 
 let words = []; 
 let impostorCount = 1;
@@ -547,6 +551,7 @@ function resetToLobby() {
   
   if (votingOverlay) votingOverlay.classList.remove('is-active');
   if (starterOverlay) starterOverlay.classList.remove('is-active');
+  if (summaryOverlay) summaryOverlay.classList.remove('is-active');
   
   if (roleCardInner) {
     roleCardInner.classList.remove('is-flipped');
@@ -567,7 +572,6 @@ function resetToLobby() {
 // -------------------------------------------------------------
 roomSettingsBtn.addEventListener('click', () => {
   if (!currentRoomData) return;
-  // Kopiowanie aktualnych wartości do zmiennych tymczasowych
   tempSetImpostors = currentRoomData.numImpostors || 1;
   tempSetHintChance = currentRoomData.hintChance || 0;
   tempSetHintOnStart = currentRoomData.hintOnStart || false;
@@ -595,7 +599,7 @@ function updateSettingsModalUI() {
     else label.classList.remove('label-active');
   });
 
-  if (tempSetHintChance === 4) { // 100%
+  if (tempSetHintChance === 4) { 
     setHintOnStartCheckbox.disabled = true;
     setHintOnStartCheckbox.checked = false;
     tempSetHintOnStart = false;
@@ -948,7 +952,8 @@ function tallyVotes(room) {
   playerIds.forEach(id => { updates[`players/${id}/votedFor`] = null; });
 
   if (isTie || !ejectedPlayerId) {
-    updates.lastRoundSummary = `Remis! Kontynuujcie grę.<br>Nikt nie odpada.`;
+    updates.lastRoundSummary = `Brak ostatecznej decyzji!<br>Impostor przetrwał.`;
+    updates.roundWinner = 'draw';
   } else {
     const ejectedPlayer = players[ejectedPlayerId];
     updates.gameStarted = false;
@@ -962,12 +967,13 @@ function tallyVotes(room) {
       updates[`players/${id}/seenRole`] = null; 
     });
 
+    // NOWE CZYSTE TEKSTY DLA NAKŁADKI
     let summaryMessage = '';
     if (ejectedPlayer.role === 'impostor') {
-      summaryMessage = `Impostor został wykryty!<br>(Oszust: <strong>${ejectedPlayer.name}</strong>)<br>Słowo: <strong>${room.currentWord}</strong>`;
+      summaryMessage = `Oszustem był(a) <strong>${ejectedPlayer.name}</strong>!<br>Słowo: <strong>${room.currentWord}</strong>`;
       updates.roundWinner = 'innocent';
     } else {
-      summaryMessage = `Impostor wygrał rundę!<br>(Wygłosowano <strong>${ejectedPlayer.name}</strong>)<br>Słowo: <strong>${room.currentWord}</strong>`;
+      summaryMessage = `Wygłosowano niewinną osobę (<strong>${ejectedPlayer.name}</strong>).<br>Słowo: <strong>${room.currentWord}</strong>`;
       updates.roundWinner = 'impostor';
     }
     updates.lastRoundSummary = summaryMessage; 
@@ -1010,7 +1016,7 @@ function listenToRoom(roomCode) {
       return;
     }
 
-    currentRoomData = room; // Zapisz aktualne dane pokoju!
+    currentRoomData = room; 
     
     const players = room.players || {};
     const playerIds = Object.keys(players);
@@ -1036,7 +1042,7 @@ function listenToRoom(roomCode) {
     }
 
     isHost = iAmInRoom ? iAmInRoom.isHost : false; 
-    roomSettingsBtn.style.display = isHost && !room.gameStarted ? 'inline-block' : 'none'; // Pokazuj ustawienia tylko hostowi jak gra nie trwa
+    roomSettingsBtn.style.display = isHost && !room.gameStarted ? 'inline-block' : 'none';
 
     if (votingActive && !lastSeenVotingState) {
       votingOverlay.classList.add('is-active');
@@ -1105,7 +1111,7 @@ function listenToRoom(roomCode) {
     const newStarterId = room.starterId;
     const starterDuration = 4000;
 
-    // 1. START RUNDY (Pokazanie karty)
+    // 1. START RUNDY 
     if (room.gameStarted && newStarterId && newStarterId !== lastSeenStarterId) {
       lastSeenStarterId = newStarterId; 
       lastSeenSummary = null; 
@@ -1131,7 +1137,6 @@ function listenToRoom(roomCode) {
           const newCard = roleCardInner.cloneNode(true);
           newCard.classList.remove('is-flipped'); 
           
-          // Magia świetlistej karty - nadawanie klas z kolorami!
           const frontFace = newCard.querySelector('.role-card-front');
           if (amIImpostor) {
              frontFace.classList.add('is-impostor');
@@ -1173,13 +1178,12 @@ function listenToRoom(roomCode) {
         }
     }
     
-    // 2. NOWY KINOWY STARTER 
+    // 2. KINOWY STARTER 
     if (room.gameStarted && room.showStarter && isAnimating) {
         const starterName = players[newStarterId]?.name || '...';
         
         hideModal(roleMessageBox);
         
-        // Aktywacja ładnej, niebieskiej planszy informującej
         starterOverlayName.textContent = starterName;
         starterOverlay.classList.add('is-active');
         
@@ -1187,7 +1191,6 @@ function listenToRoom(roomCode) {
             starterOverlay.classList.remove('is-active');
             isAnimating = false;
             
-            // Wypisanie tekstu po zakończeniu animacji
             const myHint = room.impostorHint;
             const amIImpostor = iAmInRoom.role === 'impostor';
             if (room.gameStarted && room.currentWord && iAmInRoom) {
@@ -1198,24 +1201,46 @@ function listenToRoom(roomCode) {
         }, starterDuration);
     }
     
-    // 3. ZAPADKA KOŃCA RUNDY 
+    // 3. NOWA NAKŁADKA KOŃCA RUNDY Z KONFETTI
     const newSummary = room.lastRoundSummary;
     if (newSummary && newSummary !== lastSeenSummary) {
       lastSeenSummary = newSummary; 
       if (!room.gameStarted) { lastSeenStarterId = null; }
       
-      showMessage(newSummary, 5000);
+      // Podmiana tekstu
+      summaryOverlaySubtitle.innerHTML = newSummary;
+      
+      // Reset klas
+      summaryOverlay.classList.remove('innocent-win', 'impostor-win', 'draw-win');
+      
+      // Nadawanie barw
+      if (room.roundWinner === 'innocent') {
+        summaryOverlayTitle.textContent = "WYGRYWAJĄ NIEWINNI!";
+        summaryOverlay.classList.add('innocent-win');
+      } else if (room.roundWinner === 'impostor') {
+        summaryOverlayTitle.textContent = "WYGRYWA OSZUST!";
+        summaryOverlay.classList.add('impostor-win');
+      } else {
+        summaryOverlayTitle.textContent = "REMIS!";
+        summaryOverlay.classList.add('draw-win');
+      }
+
+      summaryOverlay.classList.add('is-active');
         
       setTimeout(() => {
           if (room.roundWinner && room.roundWinner !== lastSeenRoundWinner) {
             lastSeenRoundWinner = room.roundWinner;
             if (room.roundWinner === 'innocent') {
-                 confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
+                 confetti({ particleCount: 400, spread: 120, scalar: 1.8, origin: { y: 0.6 }, zIndex: 3000, colors: ['#2ecc71', '#27ae60', '#f1c40f', '#ffffff'] });
             } else if (room.roundWinner === 'impostor') {
-                confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 }, colors: ['#e74c3c', '#2c3e50', '#c0392b'] });
+                confetti({ particleCount: 400, spread: 120, scalar: 1.8, origin: { y: 0.6 }, zIndex: 3000, colors: ['#e74c3c', '#c0392b', '#000000', '#ffffff'] });
             }
           }
-      }, 5000);
+      }, 400); // 0.4 sekundy opóźnienia, żeby napis zdążył wyjechać na środek
+      
+      setTimeout(() => {
+          summaryOverlay.classList.remove('is-active');
+      }, 6000); // Znika samoistnie po 6 sekundach
     }
     
     if (!room.gameStarted) { lastSeenStarterId = null; }
@@ -1330,7 +1355,7 @@ endRoundBtn.addEventListener('click', () => {
     const impostorIds = Object.keys(players).filter(id => players[id].role === 'impostor');
     const impostorNames = impostorIds.map(id => players[id].name).join(', ');
     
-    const summary = `Runda zakończona! Słowo: <strong>${currentWord}</strong><br>Impostorzy: <strong>${impostorNames || 'Brak'}</strong>`;
+    const summary = `Zakończono rundę.<br>Słowo: <strong>${currentWord}</strong><br>Oszuści: <strong>${impostorNames || 'Brak'}</strong>`;
 
     const updates = {
       gameStarted: false,
@@ -1342,7 +1367,7 @@ endRoundBtn.addEventListener('click', () => {
       impostorsKnow: null,
       lastRoundSummary: summary, 
       resetMessage: summary, 
-      roundWinner: null,
+      roundWinner: 'draw',
       showStarter: false, 
     };
     Object.keys(players).forEach(id => {
