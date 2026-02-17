@@ -2,13 +2,13 @@
 // 1. KONFIGURACJA FIREBASE (PODMIEŃ NA SWOJE DANE!)
 // ===================================================================
 const firebaseConfig = {
-  apiKey: "TUTAJ_WKLEJ_SWOJ_KLUCZ",
-  authDomain: "TUTAJ_WKLEJ_SWOJA_DOMENE",
-  databaseURL: "TUTAJ_WKLEJ_SWOJ_URL_BAZY",
-  projectId: "TUTAJ_WKLEJ_ID_PROJEKTU",
-  storageBucket: "TUTAJ_WKLEJ_BUCKET",
-  messagingSenderId: "TUTAJ_WKLEJ_SENDER_ID",
-  appId: "TUTAJ_WKLEJ_APP_ID"
+  apiKey: "AIzaSyCyj5pbNgUHaV-_g__sTQmsUtYOhegYoSI", // PAMIĘTAJ O ZABEZPIECZENIU TEGO!
+  authDomain: "slowny-oszust.firebaseapp.com",
+  databaseURL: "https://slowny-oszust-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "slowny-oszust",
+  storageBucket: "slowny-oszust.appspot.com",
+  messagingSenderId: "679726628348",
+  appId: "1:679726628348:web:83f9c43fee9cf514784679"
 };
 
 // Inicjalizacja Firebase
@@ -1495,3 +1495,4 @@ setTimeout(() => {
     }
   });
 }, 2000);
+
