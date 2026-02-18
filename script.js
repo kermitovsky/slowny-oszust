@@ -1187,7 +1187,18 @@ function listenToRoom(roomCode) {
             roleHTML += `<div class="impostor-hint-span" style="margin-top:1rem; font-size:1.5rem;">Podpowiedź:<br>${myHint}</div>`;
         }
       } else {
-        roleHTML = `<div style="font-size: 1.5rem; opacity: 0.8;">TWOJE SŁOWO:</div><div style="color: #2ecc71; font-size: 3.5rem; margin-top: 0.5rem;">${room.currentWord}</div>`;
+        // DYNAMICZNA CZCIONKA DLA SŁOWA NA KARCIE
+        let wordSize = '3.5rem';
+        const wordLength = room.currentWord.length;
+        if (!room.currentWord.includes(' ')) {
+            if (wordLength > 12) wordSize = '2rem';
+            else if (wordLength > 9) wordSize = '2.5rem';
+            else if (wordLength > 7) wordSize = '3rem';
+        } else {
+            wordSize = '2.8rem'; 
+        }
+
+        roleHTML = `<div style="font-size: 1.5rem; opacity: 0.8;">TWOJE SŁOWO:</div><div style="color: #2ecc71; font-size: ${wordSize}; margin-top: 0.5rem; line-height: 1.1;">${room.currentWord}</div>`;
       }
       
       wordDisplay.innerHTML = ''; 
@@ -1513,7 +1524,7 @@ endRoundBtn.addEventListener('click', () => {
   });
 });
 
-// *** FUNKCJE WŁASNYCH KATEGORII (BEZ ZMIAN) ***
+// *** FUNKCJE WŁASNYCH KATEGORII ***
 function showCustomCategoryModal(editFileId = null) {
   editingCategoryFile = editFileId; 
   if (editFileId) {
@@ -1584,7 +1595,16 @@ function saveCustomCategory() {
     if (btn) {
       const oldActions = btn.querySelector('.category-actions');
       if (oldActions) oldActions.remove();
-      btn.textContent = categoryName; 
+      
+      let textSpan = btn.querySelector('.category-name-text');
+      if (!textSpan) {
+          btn.textContent = '';
+          textSpan = document.createElement('span');
+          textSpan.classList.add('category-name-text');
+          btn.appendChild(textSpan);
+      }
+      textSpan.textContent = categoryName;
+      
       btn.dataset.categoryName = categoryName;
       addCategoryActions(btn, editingCategoryFile); 
     }
@@ -1603,9 +1623,14 @@ function saveCustomCategory() {
 function addCustomCategoryToGrid(category) {
   const btn = document.createElement('button');
   btn.classList.add('category-btn', 'custom-category-btn'); 
-  btn.textContent = category.name;
   btn.dataset.file = category.file;
   btn.dataset.categoryName = category.name;
+  
+  const textSpan = document.createElement('span');
+  textSpan.classList.add('category-name-text');
+  textSpan.textContent = category.name;
+  btn.appendChild(textSpan);
+
   btn.addEventListener('click', (e) => {
     if (e.target.closest('.category-actions')) return;
     toggleCategory(category); 
