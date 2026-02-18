@@ -119,7 +119,6 @@ button:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; transform
 #countdownDisplay { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 15rem; font-family: var(--font-heading); color: #fff; font-weight: 800; z-index: 1002; text-shadow: 0 0 30px var(--c-primary); pointer-events: none; display: none; }
 #countdownDisplay.active { display: block; animation: countdownPulse 0.9s ease-in-out infinite; }
 @keyframes countdownPulse { 0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; } 50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 0; } }
-@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
 /* Modale */
 .modal-box {
@@ -141,13 +140,37 @@ body.dark-mode .modal-box { background: linear-gradient(135deg, var(--c-bg-1), v
 
 /* --- KARTA ROLI --- */
 #roleMessageBox.role-card-modal { 
-  position: fixed !important; top: 0 !important; left: 0 !important; 
-  width: 100% !important; max-width: 100% !important; height: 100% !important; max-height: 100% !important;
-  margin: 0 !important; transform: none !important; background: transparent !important; box-shadow: none !important; 
-  border: none !important; padding: 0 !important; display: none !important; align-items: center; justify-content: center; 
-  z-index: 1001; pointer-events: none; animation: none !important; transition: none !important; opacity: 0; visibility: hidden; overflow: visible; 
+  position: fixed !important; 
+  top: 0 !important; 
+  left: 0 !important; 
+  width: 100% !important; 
+  max-width: 100% !important;
+  height: 100% !important; 
+  max-height: 100% !important;
+  margin: 0 !important; 
+  transform: none !important; 
+  background: transparent !important; 
+  box-shadow: none !important; 
+  border: none !important; 
+  padding: 0 !important; 
+  display: none !important; 
+  align-items: center; 
+  justify-content: center; 
+  z-index: 1001; 
+  pointer-events: none; 
+  animation: none !important; 
+  transition: none !important; 
+  opacity: 0; 
+  visibility: hidden; 
+  overflow: visible; 
 }
-#roleMessageBox.role-card-modal.is-visible { display: flex !important; opacity: 1; visibility: visible; animation: fadeInSimple 0.3s forwards !important; }
+
+#roleMessageBox.role-card-modal.is-visible { 
+  display: flex !important; 
+  opacity: 1; 
+  visibility: visible; 
+  animation: fadeInSimple 0.3s forwards !important; 
+}
 @keyframes fadeInSimple { from { opacity: 0; } to { opacity: 1; } }
 
 .role-card-scene { width: 300px; height: 450px; max-width: 85vw; max-height: 80vh; perspective: 1200px; pointer-events: auto; }
@@ -184,11 +207,18 @@ body.dark-mode .modal-box { background: linear-gradient(135deg, var(--c-bg-1), v
 #endRound { background: linear-gradient(135deg, var(--c-danger), var(--c-danger-dark)); }
 #startVoteBtn { background: linear-gradient(135deg, var(--c-success), #27ae60); }
 
+/* --- MAŁE PRZYCISKI (Z TARCZĄ ANTY-OWALNĄ: flex-shrink) --- */
 #copyRoomCode, #roomSettingsBtn {
   background: rgba(255, 255, 255, 0.2);
-  width: 4.5rem; height: 4.5rem; font-size: 2.2rem; padding: 0; margin: 0 0.5rem;
-  line-height: 4.5rem; text-align: center; display: inline-block; border-radius: 50%;
-  flex-shrink: 0; box-shadow: 0 4px 10px var(--c-shadow); transition: all 0.3s ease; border: 1px solid rgba(255,255,255,0.3);
+  width: 4.5rem; height: 4.5rem;
+  font-size: 2.2rem; padding: 0; margin: 0 0.5rem;
+  line-height: 4.5rem; text-align: center;
+  display: inline-block;
+  border-radius: 50%;
+  flex-shrink: 0; 
+  box-shadow: 0 4px 10px var(--c-shadow);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255,255,255,0.3);
 }
 body.dark-mode #copyRoomCode, body.dark-mode #roomSettingsBtn { background: rgba(0, 0, 0, 0.3); border-color: rgba(255,255,255,0.1); }
 #copyRoomCode:hover, #roomSettingsBtn:hover { transform: translateY(-3px) scale(1.05); background: var(--c-primary); border-color: transparent; }
@@ -234,7 +264,7 @@ body.voting-active #playersList li.has-voted .avatar::before { content: 'GŁOS';
 .settings-group p { margin: 0 0 1.2rem 0; font-size: 1.8rem; color: var(--c-text-light); font-weight: 600; text-shadow: 1px 1px 2px var(--c-shadow); }
 #impostorSelectionBox p, #impostorHintBox p, #impostorTeamBox p { margin: 0 0 1.5rem 0; font-size: 2.2rem; color: var(--c-text-light); font-weight: 600; text-shadow: 1px 3px 5px var(--c-shadow-heavy); }
 
-.slider-container { position: relative; width: 100%; max-width: 350px; margin: 2rem auto 3rem auto; padding: 0; box-sizing: border-box; }
+.slider-container { position: relative; width: 100%; max-width: 350px; margin: 2rem auto 3rem auto; padding: 0; box-sizing: border-box; transition: all 0.3s ease; }
 .slider-labels { position: relative; width: 100%; height: 25px; margin-top: 15px; }
 .slider-labels .slider-label { font-size: 1.2rem; color: var(--c-text-light-alt); opacity: 0.6; white-space: nowrap; position: absolute; top: 0; transform: translateX(-50%); transition: all 0.3s ease; }
 .slider-labels .slider-label:nth-child(1) { left: 0%; } .slider-labels .slider-label:nth-child(2) { left: 25%; } .slider-labels .slider-label:nth-child(3) { left: 50%; } .slider-labels .slider-label:nth-child(4) { left: 75%; } .slider-labels .slider-label:nth-child(5) { left: 100%; }
@@ -244,15 +274,10 @@ input[type="range"] { -webkit-appearance: none; appearance: none; height: 10px; 
 input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 30px; height: 30px; border-radius: 50%; background: var(--c-primary); border: 4px solid #fff; cursor: pointer; margin-top: -10px; box-shadow: 0 3px 8px rgba(0,0,0,0.4); transition: transform 0.2s; }
 input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.1); }
 
-/* --- CHECKBOXY --- */
 .checkbox-container { display: flex; align-items: center; justify-content: center; gap: 1rem; margin: 2rem auto; font-size: 1.6rem; font-weight: 500; color: var(--c-text-light); cursor: pointer; transition: opacity 0.3s ease; }
 .checkbox-container input[type="checkbox"] { display: none; }
 .checkbox-container label { display: flex; align-items: center; cursor: pointer; }
-.checkbox-container .checkbox { 
-  width: 24px; height: 24px; 
-  flex-shrink: 0; /* Gwarancja idealnego kwadratu */
-  border: 2px solid rgba(255,255,255,0.6); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-right: 1rem; background: rgba(0,0,0,0.2); transition: all 0.3s ease; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); 
-}
+.checkbox-container .checkbox { width: 24px; height: 24px; border: 2px solid rgba(255,255,255,0.6); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-right: 1rem; background: rgba(0,0,0,0.2); transition: all 0.3s ease; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
 .checkbox-container label:hover .checkbox { background: rgba(255,255,255,0.1); border-color: #fff; }
 .checkbox-container input[type="checkbox"]:checked + label .checkbox { background: var(--c-primary); border-color: var(--c-primary-light); color: #fff; box-shadow: 0 2px 8px rgba(142, 68, 173, 0.4); }
 .checkbox-container input[type="checkbox"]:checked + label .checkbox::before { content: '✔'; }
@@ -268,32 +293,47 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.1); }
 .team-selector button:nth-of-type(1).selected { background: var(--c-success); box-shadow: 0 4px 10px rgba(46, 204, 113, 0.4); border-color: transparent; }
 .team-selector button:nth-of-type(2).selected { background: var(--c-danger); box-shadow: 0 4px 10px rgba(231, 76, 60, 0.4); border-color: transparent; }
 
-/* --- KAFELKI KATEGORII I PRZYCISKI AKCJI --- */
+/* --- NOWE KAFELKI KATEGORII (SZKLANE I SKALOWALNE) --- */
 #categorySelectionBox p { margin: 0 0 1.5rem 0; font-size: 2.2rem; font-weight: 600; text-shadow: 1px 2px 4px var(--c-shadow-heavy); }
 #categorySelectionBox .category-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; margin-right: 15px; max-height: 300px; overflow-y: auto; overflow-x: hidden; padding-right: 5px; }
 
 #categorySelectionBox .category-btn {
-  background: rgba(0,0,0,0.25); border: 2px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 1rem 0.5rem;
-  font-size: clamp(1.1rem, 3.5vw, 1.5rem); line-height: 1.2; display: flex; align-items: center; justify-content: center; text-align: center;
-  word-break: break-word; font-weight: 500; color: var(--c-text-light); cursor: pointer; opacity: 0.6; transition: all 0.3s ease; box-shadow: none; margin: 0; width: 100%;
+  background: rgba(0,0,0,0.25);
+  border: 2px solid rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 1rem 0.5rem;
+  font-size: clamp(1.1rem, 3.5vw, 1.5rem); 
+  line-height: 1.2;
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  word-break: break-word; 
+  font-weight: 500;
+  color: var(--c-text-light);
+  cursor: pointer;
+  opacity: 0.6;
+  transition: all 0.3s ease;
+  box-shadow: none; margin: 0; width: 100%;
 }
-#categorySelectionBox .category-btn.selected { background: rgba(142, 68, 173, 0.5); opacity: 1; box-shadow: 0 4px 15px rgba(142, 68, 173, 0.4); border: 2px solid var(--c-primary-light); transform: translateY(-2px); font-weight: 600; }
+#categorySelectionBox .category-btn.selected { 
+  background: rgba(142, 68, 173, 0.5); 
+  opacity: 1; 
+  box-shadow: 0 4px 15px rgba(142, 68, 173, 0.4); 
+  border: 2px solid var(--c-primary-light); 
+  transform: translateY(-2px); 
+  font-weight: 600; 
+}
 
 .category-btn.custom-new-btn { background: rgba(46, 204, 113, 0.15); border: 2px dashed rgba(46, 204, 113, 0.5); color: #2ecc71; opacity: 0.8; }
 .category-btn.custom-new-btn:hover { background: rgba(46, 204, 113, 0.25); transform: translateY(-2px); opacity: 1; border-style: solid; }
-.category-btn.custom-category-btn { background: rgba(46, 204, 113, 0.3); border: 1px solid rgba(46, 204, 113, 0.5); color: #fff; opacity: 0.8; position: relative; padding-right: 70px; justify-content: flex-start; padding-left: 1rem; text-align: left; }
+.category-btn.custom-category-btn { background: rgba(46, 204, 113, 0.3); border: 1px solid rgba(46, 204, 113, 0.5); color: #fff; opacity: 0.8; position: relative; padding-right: 55px; justify-content: flex-start; padding-left: 1rem; text-align: left; }
 .category-btn.custom-category-btn.selected { background: rgba(46, 204, 113, 0.7); box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3); border: 2px solid #2ecc71; }
-
 .category-actions { position: absolute; right: 5px; top: 50%; transform: translateY(-50%); display: flex; gap: 4px; }
-.category-actions button { 
-  width: 26px; height: 26px; font-size: 1.1rem; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); 
-  margin: 0; padding: 0; background: rgba(0,0,0,0.4); color: white; border: 1px solid rgba(255,255,255,0.2); transition: all 0.2s;
-}
-.category-actions .edit-btn:hover { background: var(--c-accent); border-color: transparent; }
-.category-actions .delete-btn:hover { background: var(--c-danger); border-color: transparent; }
+.category-actions button { width: 28px; height: 28px; font-size: 1.2rem; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); margin: 0; padding: 0; }
+.category-actions .edit-btn { background: var(--c-accent); }
+.category-actions .delete-btn { background: var(--c-danger); }
 
 /* Inne elementy */
 #allCategoriesBtn { display: flex; align-items: center; justify-content: center; gap: 0.8rem; margin: 1rem auto; font-size: 1.6rem; font-weight: 500; color: var(--c-text-light); }
+#allCategoriesBtn .checkbox { width: 24px; height: 24px; border: 2px solid rgba(255,255,255,0.6); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; cursor: pointer; background: rgba(0,0,0,0.2); transition: all 0.3s ease; }
 #rulesBtn, #themeToggle { position: fixed; bottom: 1.5rem; border-radius: 50%; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: var(--c-text-light); font-size: 2rem; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 1000; transition: all 0.3s ease; backdrop-filter: blur(8px); width: 4rem; height: 4rem; }
 #rulesBtn { right: 1.5rem; } #themeToggle { right: 6.5rem; }
 #rulesBtn:hover, #themeToggle:hover { background: rgba(255,255,255,0.25); transform: translateY(-3px); }
