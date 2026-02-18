@@ -322,17 +322,71 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.1); }
   font-weight: 600; 
 }
 
-/* NOWE ZMIANY - Dodana klasa skracająca długie nazwy z trzykropkiem */
 .category-name-text { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; pointer-events: none; }
 
 .category-btn.custom-new-btn { background: rgba(46, 204, 113, 0.15); border: 2px dashed rgba(46, 204, 113, 0.5); color: #2ecc71; opacity: 0.8; }
 .category-btn.custom-new-btn:hover { background: rgba(46, 204, 113, 0.25); transform: translateY(-2px); opacity: 1; border-style: solid; }
-.category-btn.custom-category-btn { background: rgba(46, 204, 113, 0.3); border: 1px solid rgba(46, 204, 113, 0.5); color: #fff; opacity: 0.8; position: relative; padding-right: 65px; justify-content: flex-start; padding-left: 1rem; text-align: left; }
-.category-btn.custom-category-btn.selected { background: rgba(46, 204, 113, 0.7); box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3); border: 2px solid #2ecc71; }
-.category-actions { position: absolute; right: 5px; top: 50%; transform: translateY(-50%); display: flex; gap: 4px; z-index: 2; }
-.category-actions button { width: 28px; height: 28px; font-size: 1.2rem; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); margin: 0; padding: 0; }
-.category-actions .edit-btn { background: var(--c-accent); }
-.category-actions .delete-btn { background: var(--c-danger); }
+
+/* --- NOWY STYL PRZYCISKÓW KATEGORII WŁASNYCH --- */
+.category-btn.custom-category-btn { 
+  background: rgba(46, 204, 113, 0.3); 
+  border: 1px solid rgba(46, 204, 113, 0.5); 
+  color: #fff; 
+  opacity: 0.8; 
+  position: relative; 
+  padding-right: 85px; /* Więcej miejsca, aby tekst nie właził na guziki */
+  justify-content: flex-start; 
+  padding-left: 1rem; 
+  text-align: left; 
+}
+
+.category-btn.custom-category-btn.selected { 
+  background: rgba(46, 204, 113, 0.7); 
+  box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3); 
+  border: 2px solid #2ecc71; 
+}
+
+.category-actions { 
+  position: absolute; 
+  right: 8px; 
+  top: 50%; 
+  transform: translateY(-50%); 
+  display: flex; 
+  gap: 6px; 
+  z-index: 2; 
+}
+
+.category-actions button { 
+  width: 34px; 
+  height: 34px; 
+  font-size: 1.4rem; 
+  border-radius: 50%; /* Okrągłe przyciski */
+  background: rgba(255, 255, 255, 0.15); /* Półprzezroczyste szkło */
+  border: 1px solid rgba(255, 255, 255, 0.3); 
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15); 
+  margin: 0; 
+  padding: 0; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); 
+  backdrop-filter: blur(5px); 
+  -webkit-backdrop-filter: blur(5px); 
+}
+
+.category-actions .edit-btn:hover { 
+  background: var(--c-accent); 
+  border-color: transparent; 
+  transform: scale(1.15) translateY(-2px); 
+  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.5); 
+}
+
+.category-actions .delete-btn:hover { 
+  background: var(--c-danger); 
+  border-color: transparent; 
+  transform: scale(1.15) translateY(-2px); 
+  box-shadow: 0 5px 15px rgba(231, 76, 60, 0.5); 
+}
 
 /* Inne elementy */
 #allCategoriesBtn { display: flex; align-items: center; justify-content: center; gap: 0.8rem; margin: 1rem auto; font-size: 1.6rem; font-weight: 500; color: var(--c-text-light); }
@@ -416,7 +470,7 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.1); }
   .starter-style .cinematic-subtitle { font-size: 2.2rem; }
 
   /* Zmiany dla własnych kategorii na telefonach */
-  .category-btn.custom-category-btn { padding-right: 55px; }
-  .category-actions { right: 4px; gap: 3px; }
-  .category-actions button { width: 25px; height: 25px; font-size: 1.1rem; }
+  .category-btn.custom-category-btn { padding-right: 75px; }
+  .category-actions { right: 6px; gap: 5px; }
+  .category-actions button { width: 30px; height: 30px; font-size: 1.2rem; }
 }
